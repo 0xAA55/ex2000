@@ -1,2 +1,4 @@
 out/
 ex2000.exe
+.vs
+*.sln
