@@ -1,7 +1,13 @@
+; %define Frame_UseEBP
+
 %macro FrameBegin 2
 	%assign Frame_NumVariables %1
 	%assign Frame_NumReservedParams %2
 	%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
+	%ifdef Frame_UseEBP
+		push ebp
+		mov ebp, esp
+	%endif
 	%if Frame_NumLocals != 0
 		sub esp, Frame_NumLocals * 4
 	%endif
@@ -11,14 +17,23 @@
 	%if Frame_NumLocals != 0
 		add esp, Frame_NumLocals * 4
 	%endif
+	%ifdef Frame_UseEBP
+		pop ebp
+	%endif
 	%undef Frame_NumVariables
 	%undef Frame_NumReservedParams
 	%undef Frame_NumLocals
 %endmacro
 
-%define Param(x) [esp + (Frame_NumLocals + x + 1) * 4]
-%define Variable(x) [esp + (Frame_NumReservedParams + x) * 4]
-%define CallParam(x) [esp + x * 4]
+%ifdef Frame_UseEBP
+	%define Param(x) [ebp + (x + 2) * 4]
+	%define Variable(x) [ebp - x * 4]
+	%define CallParam(x) [ebp - (Frame_NumVariables + x) * 4]
+%else
+	%define Param(x) [esp + (Frame_NumLocals + x + 1) * 4]
+	%define Variable(x) [esp + (Frame_NumReservedParams + x) * 4]
+	%define CallParam(x) [esp + x * 4]
+%endif
 
 %macro LoadParam 2
 	mov %1, Param(%2)
