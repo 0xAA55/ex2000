@@ -2,6 +2,7 @@
 %include "loaddll.inc"
 
 extern _InitLoadLibrary
+extern _InitGL33
 
 segment .rdata
 _test_text db "test", 0
@@ -14,6 +15,7 @@ _start:
 	load_dll User32
 	load_dll_func User32, MessageBoxA
 
+	call _InitGL33
 
 	push dword 0
 	push _test_text
