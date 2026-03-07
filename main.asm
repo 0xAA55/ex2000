@@ -1,12 +1,13 @@
 %include "frame.inc"
 %include "loaddll.inc"
 
-global _start
 extern _InitLoadLibrary
+
 segment .rdata
 _test_text db "test", 0
 
 segment .text
+global _start
 _start:
 	call _InitLoadLibrary
 
