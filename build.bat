@@ -1,5 +1,6 @@
 @echo off
 
+tools\nasm stub.asm -o out\stub.bin
 tools\nasm -f win32 main.asm -o out\main.obj
 tools\nasm -f win32 strcmp.asm -o out\strcmp.obj
 tools\nasm -f win32 stricmp.asm -o out\stricmp.obj
