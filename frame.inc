@@ -20,9 +20,6 @@
 	%ifdef Frame_UseEBP
 		pop ebp
 	%endif
-	%undef Frame_NumVariables
-	%undef Frame_NumReservedParams
-	%undef Frame_NumLocals
 %endmacro
 
 %ifdef Frame_UseEBP
