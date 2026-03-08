@@ -57,6 +57,9 @@ _start:
 	call _InitLoadLibrary
 
 	def_dll_func_and_load Kernel32, ExitProcess
+	def_dll_func_and_load_alias Kernel32, strcpy, "lstrcpyA"
+	def_dll_func_and_load_alias Kernel32, memset, "RtlFillMemory"
+	def_dll_func_and_load_alias Kernel32, memcpy, "RtlMoveMemory"
 
 	def_dll_and_load User32, "user32.dll"
 	def_dll_func_and_load User32, LoadIconA
