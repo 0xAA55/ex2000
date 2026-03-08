@@ -243,6 +243,10 @@ _DecodeTable:
 	dw _DecodeTableStrings.code_7E - _DecodeTableStrings
 	dw _DecodeTableStrings.code_7F - _DecodeTableStrings
 
+global _OpenGL_ES_String
+_OpenGL_ES_String db "OpenGL ES "
+.size equ $ - _OpenGL_ES_String
+
 segment .bss
 ; The buffer to store the decoded function name
 global _FuncNameBuf
