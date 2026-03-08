@@ -3,6 +3,9 @@ extern _addr_of_GetProcAddress
 extern _addr_of_LoadLibraryA
 extern _hInstance
 
+segment .namelist progbits alloc noexec nowrite align=4
+segment .text
+
 %macro def_dll 2
 	segment .bss
 	global _addr_of_ %+ %1
