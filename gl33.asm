@@ -467,6 +467,7 @@ segment .bss
 	_LastGL32Func:
 
 segment .text
+_StartDecodeGL32Functions:
 	mov ecx, (_LastGL32Func - _FirstGL32Func) / 4
 	mov esi, _FirstNameOfGL32Func
 	mov edi, _FirstGL32Func
@@ -946,6 +947,7 @@ segment .text
 	_LastGLFunc:
 
 	segment .text
+_StartDecodeGLFunctions:
 	mov ecx, (_LastGLFunc - _FirstGLFunc) / 4
 	mov esi, _FirstNameOfGLFunc
 	mov edi, _FirstGLFunc
@@ -958,7 +960,9 @@ segment .text
 	LoadVariable ecx, 2
 	loop .loop_init_gl
 
-.exit:
+	mov eax, 1
+
+_InitGL33_exit:
 	LoadVariable esi, 0
 	LoadVariable edi, 1
 	FrameEnd
