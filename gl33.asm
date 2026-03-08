@@ -10,10 +10,6 @@ import_dll_func MessageBoxA
 extern _hWnd
 extern _hDC
 
-segment .bss
-global _hGLRC
-_hGLRC resd 1
-
 struc PIXELFORMATDESCRIPTOR
 	.nSize: resw 1
 	.nVersion: resw 1
@@ -43,6 +39,27 @@ struc PIXELFORMATDESCRIPTOR
 	.dwDamageMask: resd 1
 	.size equ $ - .nSize
 endstruc
+
+segment .bss
+global _hGLRC
+_hGLRC resd 1
+
+global _OpenGL_Vendor
+global _OpenGL_Renderer
+global _OpenGL_Version
+global _OpenGL_Is_ES
+global _OpenGL_Ver_Major
+global _OpenGL_Ver_Minor
+global _OpenGL_Ver_Release
+global _FailReason
+_OpenGL_Vendor resd 1
+_OpenGL_Renderer resd 1
+_OpenGL_Version resd 1
+_OpenGL_Is_ES resd 1
+_OpenGL_Ver_Major resd 1
+_OpenGL_Ver_Minor resd 1
+_OpenGL_Ver_Release resd 1
+_FailReason resd 1
 
 %define PFD_DRAW_TO_WINDOW 0x00000004
 %define PFD_SUPPORT_OPENGL 0x00000020
@@ -445,11 +462,11 @@ _InitGL33:
 	def_opengl32_func DepthRange, 0x1D, 0x0D
 	def_opengl32_func Viewport, "Viewport"
 
-	segment .bss
+segment .bss
 	global _LastGL32Func
 	_LastGL32Func:
 
-	segment .text
+segment .text
 	mov ecx, (_LastGL32Func - _FirstGL32Func) / 4
 	mov esi, _FirstNameOfGL32Func
 	mov edi, _FirstGL32Func
@@ -461,16 +478,6 @@ _InitGL33:
 	call _NextString
 	LoadVariable ecx, 2
 	loop .loop_init_gl32
-
-	segment .bss
-	global _OpenGL_Vendor
-	global _OpenGL_Renderer
-	global _OpenGL_Version
-	_OpenGL_Vendor resd 1
-	_OpenGL_Renderer resd 1
-	_OpenGL_Version resd 1
-
-	segment .text
 
 	push _PFD
 	push [_hDC]
