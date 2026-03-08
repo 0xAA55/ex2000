@@ -62,6 +62,7 @@ _start:
 	def_dll_func_and_load_alias Kernel32, memcpy, "RtlMoveMemory"
 
 	def_dll_and_load User32, "user32.dll"
+	def_dll_func_and_load User32, MessageBoxA
 	def_dll_func_and_load User32, LoadIconA
 	def_dll_func_and_load User32, LoadCursorA
 	def_dll_func_and_load User32, RegisterClassExA
