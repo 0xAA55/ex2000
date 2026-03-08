@@ -160,8 +160,13 @@ _WndProc@16:
 	mov [_hDC], eax
 
 	call _InitGL33
+	test eax, eax
+	jz .fail
 
 	xor eax, eax
+	jmp .end
+.fail:
+	dec eax
 	jmp .end
 .other_than_WM_CREATE:
 	cmp dword Param(1), WM_DESTROY
