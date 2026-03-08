@@ -426,10 +426,6 @@ _InitGL33:
 	global _LastGL32Func
 	_LastGL32Func:
 
-	segment .namelist
-	global _LastNameOfGL32Func
-	_LastNameOfGL32Func:
-
 	segment .text
 	mov ecx, (_LastGL32Func - _FirstGL32Func) / 4
 	mov esi, _FirstNameOfGL32Func
@@ -918,10 +914,6 @@ _InitGL33:
 	segment .bss
 	global _LastGLFunc
 	_LastGLFunc:
-
-	segment .namelist
-	global _LastNameOfGLFunc
-	_LastNameOfGLFunc:
 
 	segment .text
 	mov ecx, (_LastGLFunc - _FirstGLFunc) / 4
