@@ -353,21 +353,24 @@ _InitGL33:
 	global _FirstGL32Func
 	_FirstGL32Func:
 
-	segment .namelist
+	segment .rdata
 	global _FirstNameOfGL32Func
 	_FirstNameOfGL32Func:
 
-	%macro def_opengl32_func 1
+	%macro def_opengl32_func 2-*
 		segment .bss
 		global _addr_of_gl %+ %1
 		_addr_of_gl %+ %1 resd 1
 
 		segment .rdata
 		global _name_of_gl %+ %1
-		_name_of_gl %+ %1 db %str(%1), 0
+		_name_of_gl %+ %1:
 
-		segment .namelist
-		dd _name_of_gl %+ %1
+		%rep %0 - 1
+			%rotate 1
+			db %1
+		%endrep
+		db 0
 	%endmacro
 
 	def_opengl32_func CullFace
@@ -433,9 +436,10 @@ _InitGL33:
 	mov edi, _FirstGL32Func
 .loop_init_gl32:
 	StoreVariable 2, ecx
-	lodsd
+	mov eax, esi
 	call _GetGL32ProcAddress
 	stosd
+	call _NextString
 	LoadVariable ecx, 2
 	loop .loop_init_gl32
 
@@ -480,21 +484,23 @@ _InitGL33:
 	global _FirstGLFunc
 	_FirstGLFunc:
 
-	segment .namelist
+	segment .rdata
 	global _FirstNameOfGLFunc
 	_FirstNameOfGLFunc:
 
-	%macro def_opengl_func 1
+	%macro def_opengl_func 2-*
 		segment .bss
 		global _addr_of_gl %+ %1
 		_addr_of_gl %+ %1 resd 1
 
 		segment .rdata
 		global _name_of_gl %+ %1
-		_name_of_gl %+ %1 db %str(%1), 0
-
-		segment .namelist
-		dd _name_of_gl %+ %1
+		_name_of_gl %+ %1:
+		%rep %0 - 1
+			%rotate 1
+			db %1
+		%endrep
+		db 0
 	%endmacro
 
 	def_opengl_func DrawArrays
@@ -923,9 +929,10 @@ _InitGL33:
 	mov edi, _FirstGLFunc
 .loop_init_gl:
 	StoreVariable 2, ecx
-	lodsd
+	mov eax, esi
 	call _GetGLProcAddress
 	stosd
+	call _NextString
 	LoadVariable ecx, 2
 	loop .loop_init_gl
 
