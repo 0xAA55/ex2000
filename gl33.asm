@@ -67,6 +67,8 @@ istruc PIXELFORMATDESCRIPTOR
 	at .iLayerType, db PFD_MAIN_PLANE
 iend
 
+; The code table to decode the function names
+; The order of the strings represents the code
 global _DecodeTableStrings
 _DecodeTableStrings:
 .code_01 db "WindowPos", 0
@@ -147,6 +149,7 @@ _DecodeTableStrings:
 .code_7E db "Program", 0
 .code_7F db "Stencil", 0
 
+; Offsets of the strings
 global _DecodeTable
 _DecodeTable:
 .code_01_40:
@@ -231,6 +234,7 @@ _DecodeTable:
 	dw _DecodeTableStrings.code_7F - _DecodeTableStrings
 
 segment .bss
+; The buffer to store the decoded function name
 global _FuncNameBuf
 _FuncNameBuf resb 64
 
@@ -242,7 +246,7 @@ _DecodeProcName:
 	StoreVariable 0, esi
 	StoreVariable 1, edi
 
-	mov word[_FuncNameBuf], 'gl'
+	mov word[_FuncNameBuf], 'gl' ; Add prefix
 
 	mov esi, eax
 	mov edi, _FuncNameBuf + 2
@@ -250,25 +254,25 @@ _DecodeProcName:
 .decode_loop:
 	xor eax, eax
 	lodsb
-	test al, al
+	test al, al ; Check NUL
 	jz .end
 	cmp al, 0x40
 	jbe .code_01_40
 	cmp al, 0x5B
-	jb .movechar
+	jb .movechar ; ABCDEFG...
 	cmp al, 0x60
 	jbe .code_5B_60
 	cmp al, 0x7B
-	jb .movechar
+	jb .movechar ; abcdefg...
 	cmp al, 0x7F
 	jbe .code_7B_7F
 
 .movechar:
-	stosb
+	stosb ; No need to decode
 	jmp .decode_loop
 .code_01_40:
 	StoreVariable 2, esi
-	dec al
+	dec al ; Start from 1
 	movzx esi, word[_DecodeTable.code_01_40 + eax * 2]
 	jmp .decode
 .code_5B_60:
@@ -281,7 +285,7 @@ _DecodeProcName:
 	sub al, 0x7B
 	movzx esi, word[_DecodeTable.code_7B_7F + eax * 2]
 .decode:
-	add esi, _DecodeTableStrings
+	add esi, _DecodeTableStrings ; Add up offset
 .copy_loop:
 	lodsb
 	test al, al
@@ -304,11 +308,11 @@ _DecodeProcName:
 global _NextString
 _NextString:
 	lodsb
-	test al, al
+	test al, al ; Find NUL
 	jnz _NextString
 	ret
 
-global _GetGL32ProcAddress
+global _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
 _GetGL32ProcAddress:
 	FrameBegin 0, 0
 
@@ -321,7 +325,7 @@ _GetGL32ProcAddress:
 	FrameEnd
 	ret
 
-global _GetGLProcAddress
+global _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 _GetGLProcAddress:
 	FrameBegin 0, 0
 
@@ -350,11 +354,11 @@ _InitGL33:
 	def_dll_func_and_load OpenGL32, wglMakeCurrent
 	def_dll_func_and_load OpenGL32, wglSwapBuffers
 
-	segment .bss
+	segment .bss ; Store the function pointer list
 	global _FirstGL32Func
 	_FirstGL32Func:
 
-	segment .rdata
+	segment .rdata ; Store the function name list
 	global _FirstNameOfGL32Func
 	_FirstNameOfGL32Func:
 
@@ -477,11 +481,11 @@ _InitGL33:
 	invoke_dll_func glGetString
 	mov [_OpenGL_Version], eax
 
-	segment .bss
+	segment .bss  ; Store the function pointer list
 	global _FirstGLFunc
 	_FirstGLFunc:
 
-	segment .rdata
+	segment .rdata ; Store the function name list
 	global _FirstNameOfGLFunc
 	_FirstNameOfGLFunc:
 
