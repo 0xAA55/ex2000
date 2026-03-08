@@ -292,30 +292,30 @@ _DecodeProcName:
 	test al, al ; Check NUL
 	jz .end
 	cmp al, 0x40
-	jbe .code_01_40
+	jbe .code_01_40 ; Part 1
 	cmp al, 0x5B
 	jb .movechar ; ABCDEFG...
 	cmp al, 0x60
-	jbe .code_5B_60
+	jbe .code_5B_60 ; Part 2
 	cmp al, 0x7B
 	jb .movechar ; abcdefg...
 	cmp al, 0x7F
-	jbe .code_7B_7F
+	jbe .code_7B_7F ; Part 3
 
 .movechar:
 	stosb ; No need to decode
 	jmp .decode_loop
-.code_01_40:
+.code_01_40: ; Part 1
 	StoreVariable 2, esi
 	dec al ; Start from 1
 	movzx esi, word[_DecodeTable.code_01_40 + eax * 2]
 	jmp .decode
-.code_5B_60:
+.code_5B_60: ; Part 2
 	StoreVariable 2, esi
 	sub al, 0x5B
 	movzx esi, word[_DecodeTable.code_5B_60 + eax * 2]
 	jmp .decode
-.code_7B_7F:
+.code_7B_7F: ; Part 3
 	StoreVariable 2, esi
 	sub al, 0x7B
 	movzx esi, word[_DecodeTable.code_7B_7F + eax * 2]
