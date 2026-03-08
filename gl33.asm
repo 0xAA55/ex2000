@@ -68,6 +68,15 @@ istruc PIXELFORMATDESCRIPTOR
 	at .iLayerType, db PFD_MAIN_PLANE
 iend
 
+global _ParseFailText
+_ParseFailText db "Unable to parse OpenGL version:", 0xd, 0xa, 0
+global _ParseFailBecauseNondigit
+global _ParseFailBecauseDotExpected
+global _ParseFailBecauseUnknown
+_ParseFailBecauseNondigit db 0xd, 0xa, "Unexpected non-digit", 0
+_ParseFailBecauseDotExpected db 0xd, 0xa, "Dot '.' expected", 0
+_ParseFailBecauseUnknown db 0xd, 0xa, "Unknown error", 0
+
 ; The code table to decode the function names
 ; The order of the strings represents the code
 global _DecodeTableStrings
@@ -238,6 +247,10 @@ segment .bss
 ; The buffer to store the decoded function name
 global _FuncNameBuf
 _FuncNameBuf resb 64
+
+; The buffer to store parse fail info string
+global _FailInfoBuffer
+_FailInfoBuffer resb 256
 
 segment .text
 global _DecodeProcName
