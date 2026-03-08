@@ -310,11 +310,8 @@ _NextString:
 global _GetGL32ProcAddress
 _GetGL32ProcAddress:
 	FrameBegin 0, 0
-	mov word[_FuncNameBuf], 'gl'
 
-	push eax
-	push _FuncNameBuf + 2
-	invoke_dll_func strcpy
+	call _DecodeProcName
 
 	push _FuncNameBuf
 	push [_addr_of_OpenGL32]
@@ -326,11 +323,8 @@ _GetGL32ProcAddress:
 global _GetGLProcAddress
 _GetGLProcAddress:
 	FrameBegin 0, 0
-	mov word[_FuncNameBuf], 'gl'
 
-	push eax
-	push _FuncNameBuf + 2
-	invoke_dll_func strcpy
+	call _DecodeProcName
 
 	push _FuncNameBuf
 	invoke_dll_func wglGetProcAddress
