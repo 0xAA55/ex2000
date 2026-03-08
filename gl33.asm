@@ -507,6 +507,69 @@ _StartDecodeGL32Functions:
 	invoke_dll_func glGetString
 	mov [_OpenGL_Version], eax
 
+	mov esi, [_OpenGL_Version]
+	mov edi, _OpenGL_ES_String
+	mov ecx, _OpenGL_ES_String.size
+	repz cmpsb
+	jz .is_es
+	jmp .parse_version_non_es
+.is_es:
+	mov dword [_OpenGL_Is_ES], 1
+	jmp .parse_version
+.isdigit:
+	mov dword [_FailReason], _ParseFailBecauseNondigit
+	cmp al, '0'
+	jb .parse_fail
+	cmp al, '9'
+	ja .parse_fail
+	sub al, '0'
+	ret
+.parse_fail:
+	push _ParseFailText
+	push _FailInfoBuffer
+	invoke_dll_func strcpy
+
+	push [_OpenGL_Version]
+	push _FailInfoBuffer
+	invoke_dll_func strcat
+
+	push [_FailReason]
+	push _FailInfoBuffer
+	invoke_dll_func strcat
+
+	push 0
+	push 0
+	push _FailInfoBuffer
+	push [_hWnd]
+	invoke_dll_func MessageBoxA
+
+	xor eax, eax
+	jmp _InitGL33_exit
+.parse_version_non_es:
+	mov esi, [_OpenGL_Version]
+	xor eax, eax
+.parse_version:
+	lodsb
+	call .isdigit
+	mov [_OpenGL_Ver_Major], eax
+	mov dword [_FailReason], _ParseFailBecauseDotExpected
+	lodsb
+	cmp al, '.'
+	jnz .parse_fail
+	lodsb
+	call .isdigit
+	mov [_OpenGL_Ver_Minor], eax
+	lodsb
+	cmp al, ' '
+	jz .version_parsed
+	mov dword [_FailReason], _ParseFailBecauseDotExpected
+	cmp al, '.'
+	jnz .parse_fail
+	lodsb
+	call .isdigit
+	mov [_OpenGL_Ver_Release], eax
+
+.version_parsed:
 	segment .bss  ; Store the function pointer list
 	global _FirstGLFunc
 	_FirstGLFunc:
