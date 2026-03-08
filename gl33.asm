@@ -66,6 +66,169 @@ istruc PIXELFORMATDESCRIPTOR
 	at .iLayerType, db PFD_MAIN_PLANE
 iend
 
+global _DecodeTableStrings
+_DecodeTableStrings:
+.code_01 db "WindowPos", 0
+.code_02 db "Compressed", 0
+.code_03 db "Multisample", 0
+.code_04 db "FragData", 0
+.code_05 db "Location", 0
+.code_06 db "Clear", 0
+.code_07 db "Renderbuffer", 0
+.code_08 db "Enable", 0
+.code_09 db "Disable", 0
+.code_0A db "Begin", 0
+.code_0B db "End", 0
+.code_0C db "Instanced", 0
+.code_0D db "Range", 0
+.code_0E db "Base", 0
+.code_0F db "Mask", 0
+.code_10 db "Func", 0
+.code_11 db "Blend", 0
+.code_12 db "Separate", 0
+.code_13 db "Data", 0
+.code_14 db "Sub", 0
+.code_15 db "Copy", 0
+.code_16 db "Op", 0
+.code_17 db "Object", 0
+.code_18 db "Is", 0
+.code_19 db "Attach", 0
+.code_1A db "TransformFeedback", 0
+.code_1B db "Map", 0
+.code_1C db "ConditionalRender", 0
+.code_1D db "Depth", 0
+.code_1E db "Pixel", 0
+.code_1F db "Block", 0
+.code_20 db "Sync", 0
+.code_21 db "Bind", 0
+.code_22 db "iv", 0
+.code_23 db "Matrix", 0
+.code_24 db "Image", 0
+.code_25 db "Transpose", 0
+.code_26 db "Texture", 0
+.code_27 db "fv", 0
+.code_28 db "Secondary", 0
+.code_29 db "Active", 0
+.code_2A db "Vertex", 0
+.code_2B db "Tex", 0
+.code_2C db "TexCoord", 0
+.code_2D db "ing", 0
+.code_2E db "Point", 0
+.code_2F db "Delete", 0
+.code_30 db "Queries", 0
+.code_31 db "1", 0
+.code_32 db "2", 0
+.code_33 db "3", 0
+.code_34 db "4", 0
+.code_35 db "Color", 0
+.code_36 db "6", 0
+.code_37 db "Framebuffer", 0
+.code_38 db "Gen", 0
+.code_39 db "Coord", 0
+.code_3A db "Sampler", 0
+.code_3B db "ui", 0
+.code_3C db "Get", 0
+.code_3D db "Uniform", 0
+.code_3E db "Query", 0
+.code_3F db "Parameter", 0
+.code_40 db "Attrib", 0
+
+.code_5B db "Buffer", 0
+.code_5C db "Flush", 0
+.code_5D db "Element", 0
+.code_5E db "Multi", 0
+.code_5F db "Shader", 0
+.code_60 db "Pointer", 0
+
+.code_7B db "Array", 0
+.code_7C db "Varying", 0
+.code_7D db "Draw", 0
+.code_7E db "Program", 0
+.code_7F db "Stencil", 0
+
+global _DecodeTable
+_DecodeTable:
+.code_01_40:
+	dw _DecodeTableStrings.code_01 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_02 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_03 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_04 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_05 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_06 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_07 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_08 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_09 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_0A - _DecodeTableStrings
+	dw _DecodeTableStrings.code_0B - _DecodeTableStrings
+	dw _DecodeTableStrings.code_0C - _DecodeTableStrings
+	dw _DecodeTableStrings.code_0D - _DecodeTableStrings
+	dw _DecodeTableStrings.code_0E - _DecodeTableStrings
+	dw _DecodeTableStrings.code_0F - _DecodeTableStrings
+	dw _DecodeTableStrings.code_10 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_11 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_12 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_13 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_14 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_15 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_16 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_17 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_18 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_19 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_1A - _DecodeTableStrings
+	dw _DecodeTableStrings.code_1B - _DecodeTableStrings
+	dw _DecodeTableStrings.code_1C - _DecodeTableStrings
+	dw _DecodeTableStrings.code_1D - _DecodeTableStrings
+	dw _DecodeTableStrings.code_1E - _DecodeTableStrings
+	dw _DecodeTableStrings.code_1F - _DecodeTableStrings
+	dw _DecodeTableStrings.code_20 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_21 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_22 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_23 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_24 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_25 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_26 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_27 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_28 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_29 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_2A - _DecodeTableStrings
+	dw _DecodeTableStrings.code_2B - _DecodeTableStrings
+	dw _DecodeTableStrings.code_2C - _DecodeTableStrings
+	dw _DecodeTableStrings.code_2D - _DecodeTableStrings
+	dw _DecodeTableStrings.code_2E - _DecodeTableStrings
+	dw _DecodeTableStrings.code_2F - _DecodeTableStrings
+	dw _DecodeTableStrings.code_30 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_31 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_32 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_33 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_34 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_35 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_36 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_37 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_38 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_39 - _DecodeTableStrings
+	dw _DecodeTableStrings.code_3A - _DecodeTableStrings
+	dw _DecodeTableStrings.code_3B - _DecodeTableStrings
+	dw _DecodeTableStrings.code_3C - _DecodeTableStrings
+	dw _DecodeTableStrings.code_3D - _DecodeTableStrings
+	dw _DecodeTableStrings.code_3E - _DecodeTableStrings
+	dw _DecodeTableStrings.code_3F - _DecodeTableStrings
+	dw _DecodeTableStrings.code_40 - _DecodeTableStrings
+
+.code_5B_60:
+	dw _DecodeTableStrings.code_5B - _DecodeTableStrings
+	dw _DecodeTableStrings.code_5C - _DecodeTableStrings
+	dw _DecodeTableStrings.code_5D - _DecodeTableStrings
+	dw _DecodeTableStrings.code_5E - _DecodeTableStrings
+	dw _DecodeTableStrings.code_5F - _DecodeTableStrings
+	dw _DecodeTableStrings.code_60 - _DecodeTableStrings
+
+.code_7B_7F:
+	dw _DecodeTableStrings.code_7B - _DecodeTableStrings
+	dw _DecodeTableStrings.code_7C - _DecodeTableStrings
+	dw _DecodeTableStrings.code_7D - _DecodeTableStrings
+	dw _DecodeTableStrings.code_7E - _DecodeTableStrings
+	dw _DecodeTableStrings.code_7F - _DecodeTableStrings
+
 segment .bss
 global _FuncNameBuf
 _FuncNameBuf resb 64
