@@ -234,6 +234,79 @@ global _FuncNameBuf
 _FuncNameBuf resb 64
 
 segment .text
+global _DecodeProcName
+_DecodeProcName:
+	FrameBegin 3, 0
+
+	StoreVariable 0, esi
+	StoreVariable 1, edi
+
+	mov word[_FuncNameBuf], 'gl'
+
+	mov esi, eax
+	mov edi, _FuncNameBuf + 2
+
+.decode_loop:
+	xor eax, eax
+	lodsb
+	test al, al
+	jz .end
+	cmp al, 0x40
+	jbe .code_01_40
+	cmp al, 0x5B
+	jb .movechar
+	cmp al, 0x60
+	jbe .code_5B_60
+	cmp al, 0x7B
+	jb .movechar
+	cmp al, 0x7F
+	jbe .code_7B_7F
+
+.movechar:
+	stosb
+	jmp .decode_loop
+.code_01_40:
+	StoreVariable 2, esi
+	dec al
+	movzx esi, word[_DecodeTable.code_01_40 + eax * 2]
+	jmp .decode
+.code_5B_60:
+	StoreVariable 2, esi
+	sub al, 0x5B
+	movzx esi, word[_DecodeTable.code_5B_60 + eax * 2]
+	jmp .decode
+.code_7B_7F:
+	StoreVariable 2, esi
+	sub al, 0x7B
+	movzx esi, word[_DecodeTable.code_7B_7F + eax * 2]
+.decode:
+	add esi, _DecodeTableStrings
+.copy_loop:
+	lodsb
+	test al, al
+	jz .decode_end
+	stosb
+	jmp .copy_loop
+.decode_end:
+	LoadVariable esi, 2
+	jmp .decode_loop
+
+.end:
+	stosb ; Trail 0
+
+	LoadVariable esi, 0
+	LoadVariable edi, 1
+
+	FrameEnd
+	ret
+
+global _NextString
+_NextString:
+	lodsb
+	test al, al
+	jnz _NextString
+	ret
+
 global _GetGL32ProcAddress
 _GetGL32ProcAddress:
 	FrameBegin 0, 0
