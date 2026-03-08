@@ -373,54 +373,54 @@ _InitGL33:
 		db 0
 	%endmacro
 
-	def_opengl32_func CullFace
-	def_opengl32_func FrontFace
-	def_opengl32_func Hint
-	def_opengl32_func LineWidth
-	def_opengl32_func PointSize
-	def_opengl32_func PolygonMode
-	def_opengl32_func Scissor
-	def_opengl32_func TexParameterf
-	def_opengl32_func TexParameterfv
-	def_opengl32_func TexParameteri
-	def_opengl32_func TexParameteriv
-	def_opengl32_func TexImage1D
-	def_opengl32_func TexImage2D
-	def_opengl32_func DrawBuffer
-	def_opengl32_func Clear
-	def_opengl32_func ClearColor
-	def_opengl32_func ClearStencil
-	def_opengl32_func ClearDepth
-	def_opengl32_func StencilMask
-	def_opengl32_func ColorMask
-	def_opengl32_func DepthMask
-	def_opengl32_func Disable
-	def_opengl32_func Enable
-	def_opengl32_func Finish
-	def_opengl32_func Flush
-	def_opengl32_func BlendFunc
-	def_opengl32_func LogicOp
-	def_opengl32_func StencilFunc
-	def_opengl32_func StencilOp
-	def_opengl32_func DepthFunc
-	def_opengl32_func PixelStoref
-	def_opengl32_func PixelStorei
-	def_opengl32_func ReadBuffer
-	def_opengl32_func ReadPixels
-	def_opengl32_func GetBooleanv
-	def_opengl32_func GetDoublev
-	def_opengl32_func GetError
-	def_opengl32_func GetFloatv
-	def_opengl32_func GetIntegerv
-	def_opengl32_func GetString
-	def_opengl32_func GetTexImage
-	def_opengl32_func GetTexParameterfv
-	def_opengl32_func GetTexParameteriv
-	def_opengl32_func GetTexLevelParameterfv
-	def_opengl32_func GetTexLevelParameteriv
-	def_opengl32_func IsEnabled
-	def_opengl32_func DepthRange
-	def_opengl32_func Viewport
+	def_opengl32_func CullFace, "CullFace"
+	def_opengl32_func FrontFace, "FrontFace"
+	def_opengl32_func Hint, "Hint"
+	def_opengl32_func LineWidth, "LineWidth"
+	def_opengl32_func PointSize, ".Size"
+	def_opengl32_func PolygonMode, "PolygonMode"
+	def_opengl32_func Scissor, "Scissor"
+	def_opengl32_func TexParameterf, "+?f"
+	def_opengl32_func TexParameterfv, "+?", 0x27
+	def_opengl32_func TexParameteri, "+?i"
+	def_opengl32_func TexParameteriv, "+?", 0x22
+	def_opengl32_func TexImage1D, "+$1D"
+	def_opengl32_func TexImage2D, "+$2D"
+	def_opengl32_func DrawBuffer, "}["
+	def_opengl32_func Clear, 0x06
+	def_opengl32_func ClearColor, 0x06, "5"
+	def_opengl32_func ClearStencil, 0x06, 0x7F
+	def_opengl32_func ClearDepth, 0x06, 0x1D
+	def_opengl32_func StencilMask, 0x7F, 0x0F
+	def_opengl32_func ColorMask, "5", 0x0F
+	def_opengl32_func DepthMask, 0x1D, 0x0F
+	def_opengl32_func Disable, 0x09
+	def_opengl32_func Enable, 0x08
+	def_opengl32_func Finish, "Finish"
+	def_opengl32_func Flush, 0x5C
+	def_opengl32_func BlendFunc, 0x11, 0x10
+	def_opengl32_func LogicOp, "Logic", 0x16
+	def_opengl32_func StencilFunc, 0x7F, 0x10
+	def_opengl32_func StencilOp, 0x7F, 0x16
+	def_opengl32_func DepthFunc, 0x1D, 0x10
+	def_opengl32_func PixelStoref, 0x1E, "Storef"
+	def_opengl32_func PixelStorei, 0x1E, "Storei"
+	def_opengl32_func ReadBuffer, "Read["
+	def_opengl32_func ReadPixels, "Read", 0x1E, "s"
+	def_opengl32_func GetBooleanv, "<Booleanv"
+	def_opengl32_func GetDoublev, "<Doublev"
+	def_opengl32_func GetError, "<Error"
+	def_opengl32_func GetFloatv, "<Floatv"
+	def_opengl32_func GetIntegerv, "<Integerv"
+	def_opengl32_func GetString, "<Str-"
+	def_opengl32_func GetTexImage, "<+$"
+	def_opengl32_func GetTexParameterfv, "<+?", 0x27
+	def_opengl32_func GetTexParameteriv, "<+?", 0x22
+	def_opengl32_func GetTexLevelParameterfv, "<+Level?", 0x27
+	def_opengl32_func GetTexLevelParameteriv, "<+Level?", 0x22
+	def_opengl32_func IsEnabled, 0x18, 0x08, "d"
+	def_opengl32_func DepthRange, 0x1D, 0x0D
+	def_opengl32_func Viewport, "Viewport"
 
 	segment .bss
 	global _LastGL32Func
@@ -503,417 +503,417 @@ _InitGL33:
 		db 0
 	%endmacro
 
-	def_opengl_func DrawArrays
-	def_opengl_func DrawElements
-	def_opengl_func GetPointerv
-	def_opengl_func PolygonOffset
-	def_opengl_func CopyTexImage1D
-	def_opengl_func CopyTexImage2D
-	def_opengl_func CopyTexSubImage1D
-	def_opengl_func CopyTexSubImage2D
-	def_opengl_func TexSubImage1D
-	def_opengl_func TexSubImage2D
-	def_opengl_func BindTexture
-	def_opengl_func DeleteTextures
-	def_opengl_func GenTextures
+	def_opengl_func DrawArrays, "}{s"
+	def_opengl_func DrawElements, "}]s"
+	def_opengl_func GetPointerv, "<`v"
+	def_opengl_func PolygonOffset, "PolygonOffset"
+	def_opengl_func CopyTexImage1D, 0x15, "+$1D"
+	def_opengl_func CopyTexImage2D, 0x15, "+$2D"
+	def_opengl_func CopyTexSubImage1D, 0x15, "+", 0x14, "$1D"
+	def_opengl_func CopyTexSubImage2D, 0x15, "+", 0x14, "$2D"
+	def_opengl_func TexSubImage1D, "+", 0x14, "$1D"
+	def_opengl_func TexSubImage2D, "+", 0x14, "$2D"
+	def_opengl_func BindTexture, "!&"
+	def_opengl_func DeleteTextures, "/&s"
+	def_opengl_func GenTextures, "8&s"
 
-	def_opengl_func DrawRangeElements
-	def_opengl_func TexImage3D
-	def_opengl_func TexSubImage3D
-	def_opengl_func CopyTexSubImage3D
+	def_opengl_func DrawRangeElements, "}", 0x0D, "]s"
+	def_opengl_func TexImage3D, "+$3D"
+	def_opengl_func TexSubImage3D, "+", 0x14, "$3D"
+	def_opengl_func CopyTexSubImage3D, 0x15, "+", 0x14, "$3D"
 
-	def_opengl_func ActiveTexture
-	def_opengl_func SampleCoverage
-	def_opengl_func CompressedTexImage3D
-	def_opengl_func CompressedTexImage2D
-	def_opengl_func CompressedTexImage1D
-	def_opengl_func CompressedTexSubImage3D
-	def_opengl_func CompressedTexSubImage2D
-	def_opengl_func CompressedTexSubImage1D
-	def_opengl_func GetCompressedTexImage
-	def_opengl_func ClientActiveTexture
-	def_opengl_func MultiTexCoord1d
-	def_opengl_func MultiTexCoord1dv
-	def_opengl_func MultiTexCoord1f
-	def_opengl_func MultiTexCoord1fv
-	def_opengl_func MultiTexCoord1i
-	def_opengl_func MultiTexCoord1iv
-	def_opengl_func MultiTexCoord1s
-	def_opengl_func MultiTexCoord1sv
-	def_opengl_func MultiTexCoord2d
-	def_opengl_func MultiTexCoord2dv
-	def_opengl_func MultiTexCoord2f
-	def_opengl_func MultiTexCoord2fv
-	def_opengl_func MultiTexCoord2i
-	def_opengl_func MultiTexCoord2iv
-	def_opengl_func MultiTexCoord2s
-	def_opengl_func MultiTexCoord2sv
-	def_opengl_func MultiTexCoord3d
-	def_opengl_func MultiTexCoord3dv
-	def_opengl_func MultiTexCoord3f
-	def_opengl_func MultiTexCoord3fv
-	def_opengl_func MultiTexCoord3i
-	def_opengl_func MultiTexCoord3iv
-	def_opengl_func MultiTexCoord3s
-	def_opengl_func MultiTexCoord3sv
-	def_opengl_func MultiTexCoord4d
-	def_opengl_func MultiTexCoord4dv
-	def_opengl_func MultiTexCoord4f
-	def_opengl_func MultiTexCoord4fv
-	def_opengl_func MultiTexCoord4i
-	def_opengl_func MultiTexCoord4iv
-	def_opengl_func MultiTexCoord4s
-	def_opengl_func MultiTexCoord4sv
-	def_opengl_func LoadTransposeMatrixf
-	def_opengl_func LoadTransposeMatrixd
-	def_opengl_func MultTransposeMatrixf
-	def_opengl_func MultTransposeMatrixd
+	def_opengl_func ActiveTexture, ")&"
+	def_opengl_func SampleCoverage, "SampleCoverage"
+	def_opengl_func CompressedTexImage3D, 0x02, "+$3D"
+	def_opengl_func CompressedTexImage2D, 0x02, "+$2D"
+	def_opengl_func CompressedTexImage1D, 0x02, "+$1D"
+	def_opengl_func CompressedTexSubImage3D, 0x02, "+", 0x14, "$3D"
+	def_opengl_func CompressedTexSubImage2D, 0x02, "+", 0x14, "$2D"
+	def_opengl_func CompressedTexSubImage1D, 0x02, "+", 0x14, "$1D"
+	def_opengl_func GetCompressedTexImage, "<", 0x02, "+$"
+	def_opengl_func ClientActiveTexture, "Client)&"
+	def_opengl_func MultiTexCoord1d, "^,1d"
+	def_opengl_func MultiTexCoord1dv, "^,1dv"
+	def_opengl_func MultiTexCoord1f, "^,1f"
+	def_opengl_func MultiTexCoord1fv, "^,1", 0x27
+	def_opengl_func MultiTexCoord1i, "^,1i"
+	def_opengl_func MultiTexCoord1iv, "^,1", 0x22
+	def_opengl_func MultiTexCoord1s, "^,1s"
+	def_opengl_func MultiTexCoord1sv, "^,1sv"
+	def_opengl_func MultiTexCoord2d, "^,2d"
+	def_opengl_func MultiTexCoord2dv, "^,2dv"
+	def_opengl_func MultiTexCoord2f, "^,2f"
+	def_opengl_func MultiTexCoord2fv, "^,2", 0x27
+	def_opengl_func MultiTexCoord2i, "^,2i"
+	def_opengl_func MultiTexCoord2iv, "^,2", 0x22
+	def_opengl_func MultiTexCoord2s, "^,2s"
+	def_opengl_func MultiTexCoord2sv, "^,2sv"
+	def_opengl_func MultiTexCoord3d, "^,3d"
+	def_opengl_func MultiTexCoord3dv, "^,3dv"
+	def_opengl_func MultiTexCoord3f, "^,3f"
+	def_opengl_func MultiTexCoord3fv, "^,3", 0x27
+	def_opengl_func MultiTexCoord3i, "^,3i"
+	def_opengl_func MultiTexCoord3iv, "^,3", 0x22
+	def_opengl_func MultiTexCoord3s, "^,3s"
+	def_opengl_func MultiTexCoord3sv, "^,3sv"
+	def_opengl_func MultiTexCoord4d, "^,4d"
+	def_opengl_func MultiTexCoord4dv, "^,4dv"
+	def_opengl_func MultiTexCoord4f, "^,4f"
+	def_opengl_func MultiTexCoord4fv, "^,4", 0x27
+	def_opengl_func MultiTexCoord4i, "^,4i"
+	def_opengl_func MultiTexCoord4iv, "^,4", 0x22
+	def_opengl_func MultiTexCoord4s, "^,4s"
+	def_opengl_func MultiTexCoord4sv, "^,4sv"
+	def_opengl_func LoadTransposeMatrixf, "Load%#f"
+	def_opengl_func LoadTransposeMatrixd, "Load%#d"
+	def_opengl_func MultTransposeMatrixf, "Mult%#f"
+	def_opengl_func MultTransposeMatrixd, "Mult%#d"
 
-	def_opengl_func BlendFuncSeparate
-	def_opengl_func MultiDrawArrays
-	def_opengl_func MultiDrawElements
-	def_opengl_func PointParameterf
-	def_opengl_func PointParameterfv
-	def_opengl_func PointParameteri
-	def_opengl_func PointParameteriv
-	def_opengl_func FogCoordf
-	def_opengl_func FogCoordfv
-	def_opengl_func FogCoordd
-	def_opengl_func FogCoorddv
-	def_opengl_func FogCoordPointer
-	def_opengl_func SecondaryColor3b
-	def_opengl_func SecondaryColor3bv
-	def_opengl_func SecondaryColor3d
-	def_opengl_func SecondaryColor3dv
-	def_opengl_func SecondaryColor3f
-	def_opengl_func SecondaryColor3fv
-	def_opengl_func SecondaryColor3i
-	def_opengl_func SecondaryColor3iv
-	def_opengl_func SecondaryColor3s
-	def_opengl_func SecondaryColor3sv
-	def_opengl_func SecondaryColor3ub
-	def_opengl_func SecondaryColor3ubv
-	def_opengl_func SecondaryColor3ui
-	def_opengl_func SecondaryColor3uiv
-	def_opengl_func SecondaryColor3us
-	def_opengl_func SecondaryColor3usv
-	def_opengl_func SecondaryColorPointer
-	def_opengl_func WindowPos2d
-	def_opengl_func WindowPos2dv
-	def_opengl_func WindowPos2f
-	def_opengl_func WindowPos2fv
-	def_opengl_func WindowPos2i
-	def_opengl_func WindowPos2iv
-	def_opengl_func WindowPos2s
-	def_opengl_func WindowPos2sv
-	def_opengl_func WindowPos3d
-	def_opengl_func WindowPos3dv
-	def_opengl_func WindowPos3f
-	def_opengl_func WindowPos3fv
-	def_opengl_func WindowPos3i
-	def_opengl_func WindowPos3iv
-	def_opengl_func WindowPos3s
-	def_opengl_func WindowPos3sv
-	def_opengl_func BlendColor
-	def_opengl_func BlendEquation
+	def_opengl_func BlendFuncSeparate, 0x11, 0x10, 0x12
+	def_opengl_func MultiDrawArrays, "^}{s"
+	def_opengl_func MultiDrawElements, "^}]s"
+	def_opengl_func PointParameterf, ".?f"
+	def_opengl_func PointParameterfv, ".?", 0x27
+	def_opengl_func PointParameteri, ".?i"
+	def_opengl_func PointParameteriv, ".?", 0x22
+	def_opengl_func FogCoordf, "Fog9f"
+	def_opengl_func FogCoordfv, "Fog9", 0x27
+	def_opengl_func FogCoordd, "Fog9d"
+	def_opengl_func FogCoorddv, "Fog9dv"
+	def_opengl_func FogCoordPointer, "Fog9`"
+	def_opengl_func SecondaryColor3b, "(53b"
+	def_opengl_func SecondaryColor3bv, "(53bv"
+	def_opengl_func SecondaryColor3d, "(53d"
+	def_opengl_func SecondaryColor3dv, "(53dv"
+	def_opengl_func SecondaryColor3f, "(53f"
+	def_opengl_func SecondaryColor3fv, "(53", 0x27
+	def_opengl_func SecondaryColor3i, "(53i"
+	def_opengl_func SecondaryColor3iv, "(53", 0x22
+	def_opengl_func SecondaryColor3s, "(53s"
+	def_opengl_func SecondaryColor3sv, "(53sv"
+	def_opengl_func SecondaryColor3ub, "(53ub"
+	def_opengl_func SecondaryColor3ubv, "(53ubv"
+	def_opengl_func SecondaryColor3ui, "(53;"
+	def_opengl_func SecondaryColor3uiv, "(53u", 0x22
+	def_opengl_func SecondaryColor3us, "(53us"
+	def_opengl_func SecondaryColor3usv, "(53usv"
+	def_opengl_func SecondaryColorPointer, "(5`"
+	def_opengl_func WindowPos2d, 0x01, "2d"
+	def_opengl_func WindowPos2dv, 0x01, "2dv"
+	def_opengl_func WindowPos2f, 0x01, "2f"
+	def_opengl_func WindowPos2fv, 0x01, "2", 0x27
+	def_opengl_func WindowPos2i, 0x01, "2i"
+	def_opengl_func WindowPos2iv, 0x01, "2", 0x22
+	def_opengl_func WindowPos2s, 0x01, "2s"
+	def_opengl_func WindowPos2sv, 0x01, "2sv"
+	def_opengl_func WindowPos3d, 0x01, "3d"
+	def_opengl_func WindowPos3dv, 0x01, "3dv"
+	def_opengl_func WindowPos3f, 0x01, "3f"
+	def_opengl_func WindowPos3fv, 0x01, "3", 0x27
+	def_opengl_func WindowPos3i, 0x01, "3i"
+	def_opengl_func WindowPos3iv, 0x01, "3", 0x22
+	def_opengl_func WindowPos3s, 0x01, "3s"
+	def_opengl_func WindowPos3sv, 0x01, "3sv"
+	def_opengl_func BlendColor, 0x11, "5"
+	def_opengl_func BlendEquation, 0x11, "Equation"
 
-	def_opengl_func GenQueries
-	def_opengl_func DeleteQueries
-	def_opengl_func IsQuery
-	def_opengl_func BeginQuery
-	def_opengl_func EndQuery
-	def_opengl_func GetQueryiv
-	def_opengl_func GetQueryObjectiv
-	def_opengl_func GetQueryObjectuiv
-	def_opengl_func BindBuffer
-	def_opengl_func DeleteBuffers
-	def_opengl_func GenBuffers
-	def_opengl_func IsBuffer
-	def_opengl_func BufferData
-	def_opengl_func BufferSubData
-	def_opengl_func GetBufferSubData
-	def_opengl_func MapBuffer
-	def_opengl_func UnmapBuffer
-	def_opengl_func GetBufferParameteriv
-	def_opengl_func GetBufferPointerv
+	def_opengl_func GenQueries, "80"
+	def_opengl_func DeleteQueries, "/0"
+	def_opengl_func IsQuery, 0x18, ">"
+	def_opengl_func BeginQuery, 0x0A, ">"
+	def_opengl_func EndQuery, 0x0B, ">"
+	def_opengl_func GetQueryiv, "<>", 0x22
+	def_opengl_func GetQueryObjectiv, "<>", 0x17, 0x22
+	def_opengl_func GetQueryObjectuiv, "<>", 0x17, "u", 0x22
+	def_opengl_func BindBuffer, "!["
+	def_opengl_func DeleteBuffers, "/[s"
+	def_opengl_func GenBuffers, "8[s"
+	def_opengl_func IsBuffer, 0x18, "["
+	def_opengl_func BufferData, "[", 0x13
+	def_opengl_func BufferSubData, "[", 0x14, 0x13
+	def_opengl_func GetBufferSubData, "<[", 0x14, 0x13
+	def_opengl_func MapBuffer, 0x1B, "["
+	def_opengl_func UnmapBuffer, "Unmap["
+	def_opengl_func GetBufferParameteriv, "<[?", 0x22
+	def_opengl_func GetBufferPointerv, "<[`v"
 
-	def_opengl_func BlendEquationSeparate
-	def_opengl_func DrawBuffers
-	def_opengl_func StencilOpSeparate
-	def_opengl_func StencilFuncSeparate
-	def_opengl_func StencilMaskSeparate
-	def_opengl_func AttachShader
-	def_opengl_func BindAttribLocation
-	def_opengl_func CompileShader
-	def_opengl_func CreateProgram
-	def_opengl_func CreateShader
-	def_opengl_func DeleteProgram
-	def_opengl_func DeleteShader
-	def_opengl_func DetachShader
-	def_opengl_func DisableVertexAttribArray
-	def_opengl_func EnableVertexAttribArray
-	def_opengl_func GetActiveAttrib
-	def_opengl_func GetActiveUniform
-	def_opengl_func GetAttachedShaders
-	def_opengl_func GetAttribLocation
-	def_opengl_func GetProgramiv
-	def_opengl_func GetProgramInfoLog
-	def_opengl_func GetShaderiv
-	def_opengl_func GetShaderInfoLog
-	def_opengl_func GetShaderSource
-	def_opengl_func GetUniformLocation
-	def_opengl_func GetUniformfv
-	def_opengl_func GetUniformiv
-	def_opengl_func GetVertexAttribdv
-	def_opengl_func GetVertexAttribfv
-	def_opengl_func GetVertexAttribiv
-	def_opengl_func GetVertexAttribPointerv
-	def_opengl_func IsProgram
-	def_opengl_func IsShader
-	def_opengl_func LinkProgram
-	def_opengl_func ShaderSource
-	def_opengl_func UseProgram
-	def_opengl_func Uniform1f
-	def_opengl_func Uniform2f
-	def_opengl_func Uniform3f
-	def_opengl_func Uniform4f
-	def_opengl_func Uniform1i
-	def_opengl_func Uniform2i
-	def_opengl_func Uniform3i
-	def_opengl_func Uniform4i
-	def_opengl_func Uniform1fv
-	def_opengl_func Uniform2fv
-	def_opengl_func Uniform3fv
-	def_opengl_func Uniform4fv
-	def_opengl_func Uniform1iv
-	def_opengl_func Uniform2iv
-	def_opengl_func Uniform3iv
-	def_opengl_func Uniform4iv
-	def_opengl_func UniformMatrix2fv
-	def_opengl_func UniformMatrix3fv
-	def_opengl_func UniformMatrix4fv
-	def_opengl_func ValidateProgram
-	def_opengl_func VertexAttrib1d
-	def_opengl_func VertexAttrib1dv
-	def_opengl_func VertexAttrib1f
-	def_opengl_func VertexAttrib1fv
-	def_opengl_func VertexAttrib1s
-	def_opengl_func VertexAttrib1sv
-	def_opengl_func VertexAttrib2d
-	def_opengl_func VertexAttrib2dv
-	def_opengl_func VertexAttrib2f
-	def_opengl_func VertexAttrib2fv
-	def_opengl_func VertexAttrib2s
-	def_opengl_func VertexAttrib2sv
-	def_opengl_func VertexAttrib3d
-	def_opengl_func VertexAttrib3dv
-	def_opengl_func VertexAttrib3f
-	def_opengl_func VertexAttrib3fv
-	def_opengl_func VertexAttrib3s
-	def_opengl_func VertexAttrib3sv
-	def_opengl_func VertexAttrib4Nbv
-	def_opengl_func VertexAttrib4Niv
-	def_opengl_func VertexAttrib4Nsv
-	def_opengl_func VertexAttrib4Nub
-	def_opengl_func VertexAttrib4Nubv
-	def_opengl_func VertexAttrib4Nuiv
-	def_opengl_func VertexAttrib4Nusv
-	def_opengl_func VertexAttrib4bv
-	def_opengl_func VertexAttrib4d
-	def_opengl_func VertexAttrib4dv
-	def_opengl_func VertexAttrib4f
-	def_opengl_func VertexAttrib4fv
-	def_opengl_func VertexAttrib4iv
-	def_opengl_func VertexAttrib4s
-	def_opengl_func VertexAttrib4sv
-	def_opengl_func VertexAttrib4ubv
-	def_opengl_func VertexAttrib4uiv
-	def_opengl_func VertexAttrib4usv
-	def_opengl_func VertexAttribPointer
+	def_opengl_func BlendEquationSeparate, 0x11, "Equation", 0x12
+	def_opengl_func DrawBuffers, "}[s"
+	def_opengl_func StencilOpSeparate, 0x7F, 0x16, 0x12
+	def_opengl_func StencilFuncSeparate, 0x7F, 0x10, 0x12
+	def_opengl_func StencilMaskSeparate, 0x7F, 0x0F, 0x12
+	def_opengl_func AttachShader, 0x19, "_"
+	def_opengl_func BindAttribLocation, "!@Location"
+	def_opengl_func CompileShader, "Compile_"
+	def_opengl_func CreateProgram, "Create~"
+	def_opengl_func CreateShader, "Create_"
+	def_opengl_func DeleteProgram, "/~"
+	def_opengl_func DeleteShader, "/_"
+	def_opengl_func DetachShader, "Detach_"
+	def_opengl_func DisableVertexAttribArray, 0x09, "*@{"
+	def_opengl_func EnableVertexAttribArray, 0x08, "*@{"
+	def_opengl_func GetActiveAttrib, "<)@"
+	def_opengl_func GetActiveUniform, "<)="
+	def_opengl_func GetAttachedShaders, "<", 0x19, "ed_s"
+	def_opengl_func GetAttribLocation, "<@Location"
+	def_opengl_func GetProgramiv, "<~", 0x22
+	def_opengl_func GetProgramInfoLog, "<~InfoLog"
+	def_opengl_func GetShaderiv, "<_", 0x22
+	def_opengl_func GetShaderInfoLog, "<_InfoLog"
+	def_opengl_func GetShaderSource, "<_Source"
+	def_opengl_func GetUniformLocation, "<=Location"
+	def_opengl_func GetUniformfv, "<=", 0x27
+	def_opengl_func GetUniformiv, "<=", 0x22
+	def_opengl_func GetVertexAttribdv, "<*@dv"
+	def_opengl_func GetVertexAttribfv, "<*@", 0x27
+	def_opengl_func GetVertexAttribiv, "<*@", 0x22
+	def_opengl_func GetVertexAttribPointerv, "<*@`v"
+	def_opengl_func IsProgram, 0x18, "~"
+	def_opengl_func IsShader, 0x18, "_"
+	def_opengl_func LinkProgram, "Link~"
+	def_opengl_func ShaderSource, "_Source"
+	def_opengl_func UseProgram, "Use~"
+	def_opengl_func Uniform1f, "=1f"
+	def_opengl_func Uniform2f, "=2f"
+	def_opengl_func Uniform3f, "=3f"
+	def_opengl_func Uniform4f, "=4f"
+	def_opengl_func Uniform1i, "=1i"
+	def_opengl_func Uniform2i, "=2i"
+	def_opengl_func Uniform3i, "=3i"
+	def_opengl_func Uniform4i, "=4i"
+	def_opengl_func Uniform1fv, "=1", 0x27
+	def_opengl_func Uniform2fv, "=2", 0x27
+	def_opengl_func Uniform3fv, "=3", 0x27
+	def_opengl_func Uniform4fv, "=4", 0x27
+	def_opengl_func Uniform1iv, "=1", 0x22
+	def_opengl_func Uniform2iv, "=2", 0x22
+	def_opengl_func Uniform3iv, "=3", 0x22
+	def_opengl_func Uniform4iv, "=4", 0x22
+	def_opengl_func UniformMatrix2fv, "=#2", 0x27
+	def_opengl_func UniformMatrix3fv, "=#3", 0x27
+	def_opengl_func UniformMatrix4fv, "=#4", 0x27
+	def_opengl_func ValidateProgram, "Validate~"
+	def_opengl_func VertexAttrib1d, "*@1d"
+	def_opengl_func VertexAttrib1dv, "*@1dv"
+	def_opengl_func VertexAttrib1f, "*@1f"
+	def_opengl_func VertexAttrib1fv, "*@1", 0x27
+	def_opengl_func VertexAttrib1s, "*@1s"
+	def_opengl_func VertexAttrib1sv, "*@1sv"
+	def_opengl_func VertexAttrib2d, "*@2d"
+	def_opengl_func VertexAttrib2dv, "*@2dv"
+	def_opengl_func VertexAttrib2f, "*@2f"
+	def_opengl_func VertexAttrib2fv, "*@2", 0x27
+	def_opengl_func VertexAttrib2s, "*@2s"
+	def_opengl_func VertexAttrib2sv, "*@2sv"
+	def_opengl_func VertexAttrib3d, "*@3d"
+	def_opengl_func VertexAttrib3dv, "*@3dv"
+	def_opengl_func VertexAttrib3f, "*@3f"
+	def_opengl_func VertexAttrib3fv, "*@3", 0x27
+	def_opengl_func VertexAttrib3s, "*@3s"
+	def_opengl_func VertexAttrib3sv, "*@3sv"
+	def_opengl_func VertexAttrib4Nbv, "*@4Nbv"
+	def_opengl_func VertexAttrib4Niv, "*@4N", 0x22
+	def_opengl_func VertexAttrib4Nsv, "*@4Nsv"
+	def_opengl_func VertexAttrib4Nub, "*@4Nub"
+	def_opengl_func VertexAttrib4Nubv, "*@4Nubv"
+	def_opengl_func VertexAttrib4Nuiv, "*@4Nu", 0x22
+	def_opengl_func VertexAttrib4Nusv, "*@4Nusv"
+	def_opengl_func VertexAttrib4bv, "*@4bv"
+	def_opengl_func VertexAttrib4d, "*@4d"
+	def_opengl_func VertexAttrib4dv, "*@4dv"
+	def_opengl_func VertexAttrib4f, "*@4f"
+	def_opengl_func VertexAttrib4fv, "*@4", 0x27
+	def_opengl_func VertexAttrib4iv, "*@4", 0x22
+	def_opengl_func VertexAttrib4s, "*@4s"
+	def_opengl_func VertexAttrib4sv, "*@4sv"
+	def_opengl_func VertexAttrib4ubv, "*@4ubv"
+	def_opengl_func VertexAttrib4uiv, "*@4u", 0x22
+	def_opengl_func VertexAttrib4usv, "*@4usv"
+	def_opengl_func VertexAttribPointer, "*@`"
 
-	def_opengl_func UniformMatrix2x3fv
-	def_opengl_func UniformMatrix3x2fv
-	def_opengl_func UniformMatrix2x4fv
-	def_opengl_func UniformMatrix4x2fv
-	def_opengl_func UniformMatrix3x4fv
-	def_opengl_func UniformMatrix4x3fv
+	def_opengl_func UniformMatrix2x3fv, "=#2x3", 0x27
+	def_opengl_func UniformMatrix3x2fv, "=#3x2", 0x27
+	def_opengl_func UniformMatrix2x4fv, "=#2x4", 0x27
+	def_opengl_func UniformMatrix4x2fv, "=#4x2", 0x27
+	def_opengl_func UniformMatrix3x4fv, "=#3x4", 0x27
+	def_opengl_func UniformMatrix4x3fv, "=#4x3", 0x27
 
-	def_opengl_func ColorMaski
-	def_opengl_func GetBooleani_v
-	def_opengl_func GetIntegeri_v
-	def_opengl_func Enablei
-	def_opengl_func Disablei
-	def_opengl_func IsEnabledi
-	def_opengl_func BeginTransformFeedback
-	def_opengl_func EndTransformFeedback
-	def_opengl_func BindBufferRange
-	def_opengl_func BindBufferBase
-	def_opengl_func TransformFeedbackVaryings
-	def_opengl_func GetTransformFeedbackVarying
-	def_opengl_func ClampColor
-	def_opengl_func BeginConditionalRender
-	def_opengl_func EndConditionalRender
-	def_opengl_func VertexAttribIPointer
-	def_opengl_func GetVertexAttribIiv
-	def_opengl_func GetVertexAttribIuiv
-	def_opengl_func VertexAttribI1i
-	def_opengl_func VertexAttribI2i
-	def_opengl_func VertexAttribI3i
-	def_opengl_func VertexAttribI4i
-	def_opengl_func VertexAttribI1ui
-	def_opengl_func VertexAttribI2ui
-	def_opengl_func VertexAttribI3ui
-	def_opengl_func VertexAttribI4ui
-	def_opengl_func VertexAttribI1iv
-	def_opengl_func VertexAttribI2iv
-	def_opengl_func VertexAttribI3iv
-	def_opengl_func VertexAttribI4iv
-	def_opengl_func VertexAttribI1uiv
-	def_opengl_func VertexAttribI2uiv
-	def_opengl_func VertexAttribI3uiv
-	def_opengl_func VertexAttribI4uiv
-	def_opengl_func VertexAttribI4bv
-	def_opengl_func VertexAttribI4sv
-	def_opengl_func VertexAttribI4ubv
-	def_opengl_func VertexAttribI4usv
-	def_opengl_func GetUniformuiv
-	def_opengl_func BindFragDataLocation
-	def_opengl_func GetFragDataLocation
-	def_opengl_func Uniform1ui
-	def_opengl_func Uniform2ui
-	def_opengl_func Uniform3ui
-	def_opengl_func Uniform4ui
-	def_opengl_func Uniform1uiv
-	def_opengl_func Uniform2uiv
-	def_opengl_func Uniform3uiv
-	def_opengl_func Uniform4uiv
-	def_opengl_func TexParameterIiv
-	def_opengl_func TexParameterIuiv
-	def_opengl_func GetTexParameterIiv
-	def_opengl_func GetTexParameterIuiv
-	def_opengl_func ClearBufferiv
-	def_opengl_func ClearBufferuiv
-	def_opengl_func ClearBufferfv
-	def_opengl_func ClearBufferfi
-	def_opengl_func GetStringi
-	def_opengl_func IsRenderbuffer
-	def_opengl_func BindRenderbuffer
-	def_opengl_func DeleteRenderbuffers
-	def_opengl_func GenRenderbuffers
-	def_opengl_func RenderbufferStorage
-	def_opengl_func GetRenderbufferParameteriv
-	def_opengl_func IsFramebuffer
-	def_opengl_func BindFramebuffer
-	def_opengl_func DeleteFramebuffers
-	def_opengl_func GenFramebuffers
-	def_opengl_func CheckFramebufferStatus
-	def_opengl_func FramebufferTexture1D
-	def_opengl_func FramebufferTexture2D
-	def_opengl_func FramebufferTexture3D
-	def_opengl_func FramebufferRenderbuffer
-	def_opengl_func GetFramebufferAttachmentParameteriv
-	def_opengl_func GenerateMipmap
-	def_opengl_func BlitFramebuffer
-	def_opengl_func RenderbufferStorageMultisample
-	def_opengl_func FramebufferTextureLayer
-	def_opengl_func MapBufferRange
-	def_opengl_func FlushMappedBufferRange
-	def_opengl_func BindVertexArray
-	def_opengl_func DeleteVertexArrays
-	def_opengl_func GenVertexArrays
-	def_opengl_func IsVertexArray
+	def_opengl_func ColorMaski, "5", 0x0F, "i"
+	def_opengl_func GetBooleani_v, "<Booleani_v"
+	def_opengl_func GetIntegeri_v, "<Integeri_v"
+	def_opengl_func Enablei, 0x08, "i"
+	def_opengl_func Disablei, 0x09, "i"
+	def_opengl_func IsEnabledi, 0x18, 0x08, "di"
+	def_opengl_func BeginTransformFeedback, 0x0A, 0x1A
+	def_opengl_func EndTransformFeedback, 0x0B, 0x1A
+	def_opengl_func BindBufferRange, "![", 0x0D
+	def_opengl_func BindBufferBase, "![", 0x0E
+	def_opengl_func TransformFeedbackVaryings, 0x1A, "|s"
+	def_opengl_func GetTransformFeedbackVarying, "<", 0x1A, "|"
+	def_opengl_func ClampColor, "Clamp5"
+	def_opengl_func BeginConditionalRender, 0x0A, 0x1C
+	def_opengl_func EndConditionalRender, 0x0B, 0x1C
+	def_opengl_func VertexAttribIPointer, "*@I`"
+	def_opengl_func GetVertexAttribIiv, "<*@I", 0x22
+	def_opengl_func GetVertexAttribIuiv, "<*@Iu", 0x22
+	def_opengl_func VertexAttribI1i, "*@I1i"
+	def_opengl_func VertexAttribI2i, "*@I2i"
+	def_opengl_func VertexAttribI3i, "*@I3i"
+	def_opengl_func VertexAttribI4i, "*@I4i"
+	def_opengl_func VertexAttribI1ui, "*@I1;"
+	def_opengl_func VertexAttribI2ui, "*@I2;"
+	def_opengl_func VertexAttribI3ui, "*@I3;"
+	def_opengl_func VertexAttribI4ui, "*@I4;"
+	def_opengl_func VertexAttribI1iv, "*@I1", 0x22
+	def_opengl_func VertexAttribI2iv, "*@I2", 0x22
+	def_opengl_func VertexAttribI3iv, "*@I3", 0x22
+	def_opengl_func VertexAttribI4iv, "*@I4", 0x22
+	def_opengl_func VertexAttribI1uiv, "*@I1u", 0x22
+	def_opengl_func VertexAttribI2uiv, "*@I2u", 0x22
+	def_opengl_func VertexAttribI3uiv, "*@I3u", 0x22
+	def_opengl_func VertexAttribI4uiv, "*@I4u", 0x22
+	def_opengl_func VertexAttribI4bv, "*@I4bv"
+	def_opengl_func VertexAttribI4sv, "*@I4sv"
+	def_opengl_func VertexAttribI4ubv, "*@I4ubv"
+	def_opengl_func VertexAttribI4usv, "*@I4usv"
+	def_opengl_func GetUniformuiv, "<=u", 0x22
+	def_opengl_func BindFragDataLocation, "!", 0x04, "Location"
+	def_opengl_func GetFragDataLocation, "<", 0x04, "Location"
+	def_opengl_func Uniform1ui, "=1;"
+	def_opengl_func Uniform2ui, "=2;"
+	def_opengl_func Uniform3ui, "=3;"
+	def_opengl_func Uniform4ui, "=4;"
+	def_opengl_func Uniform1uiv, "=1u", 0x22
+	def_opengl_func Uniform2uiv, "=2u", 0x22
+	def_opengl_func Uniform3uiv, "=3u", 0x22
+	def_opengl_func Uniform4uiv, "=4u", 0x22
+	def_opengl_func TexParameterIiv, "+?I", 0x22
+	def_opengl_func TexParameterIuiv, "+?Iu", 0x22
+	def_opengl_func GetTexParameterIiv, "<+?I", 0x22
+	def_opengl_func GetTexParameterIuiv, "<+?Iu", 0x22
+	def_opengl_func ClearBufferiv, 0x06, "[", 0x22
+	def_opengl_func ClearBufferuiv, 0x06, "[u", 0x22
+	def_opengl_func ClearBufferfv, 0x06, "[", 0x27
+	def_opengl_func ClearBufferfi, 0x06, "[fi"
+	def_opengl_func GetStringi, "<Str-i"
+	def_opengl_func IsRenderbuffer, 0x18, 0x07
+	def_opengl_func BindRenderbuffer, "!", 0x07
+	def_opengl_func DeleteRenderbuffers, "/", 0x07, "s"
+	def_opengl_func GenRenderbuffers, "8", 0x07, "s"
+	def_opengl_func RenderbufferStorage, 0x07, "Storage"
+	def_opengl_func GetRenderbufferParameteriv, "<", 0x07, "?", 0x22
+	def_opengl_func IsFramebuffer, 0x18, "7"
+	def_opengl_func BindFramebuffer, "!7"
+	def_opengl_func DeleteFramebuffers, "/7s"
+	def_opengl_func GenFramebuffers, "87s"
+	def_opengl_func CheckFramebufferStatus, "Check7Status"
+	def_opengl_func FramebufferTexture1D, "7&1D"
+	def_opengl_func FramebufferTexture2D, "7&2D"
+	def_opengl_func FramebufferTexture3D, "7&3D"
+	def_opengl_func FramebufferRenderbuffer, "7", 0x07
+	def_opengl_func GetFramebufferAttachmentParameteriv, "<7", 0x19, "ment?", 0x22
+	def_opengl_func GenerateMipmap, "8erateMipmap"
+	def_opengl_func BlitFramebuffer, "Blit7"
+	def_opengl_func RenderbufferStorageMultisample, 0x07, "Storage", 0x03
+	def_opengl_func FramebufferTextureLayer, "7&Layer"
+	def_opengl_func MapBufferRange, 0x1B, "[", 0x0D
+	def_opengl_func FlushMappedBufferRange, 0x5C, 0x1B, "ped[", 0x0D
+	def_opengl_func BindVertexArray, "!*{"
+	def_opengl_func DeleteVertexArrays, "/*{s"
+	def_opengl_func GenVertexArrays, "8*{s"
+	def_opengl_func IsVertexArray, 0x18, "*{"
 
-	def_opengl_func DrawArraysInstanced
-	def_opengl_func DrawElementsInstanced
-	def_opengl_func TexBuffer
-	def_opengl_func PrimitiveRestartIndex
-	def_opengl_func CopyBufferSubData
-	def_opengl_func GetUniformIndices
-	def_opengl_func GetActiveUniformsiv
-	def_opengl_func GetActiveUniformName
-	def_opengl_func GetUniformBlockIndex
-	def_opengl_func GetActiveUniformBlockiv
-	def_opengl_func GetActiveUniformBlockName
-	def_opengl_func UniformBlockBinding
+	def_opengl_func DrawArraysInstanced, "}{s", 0x0C
+	def_opengl_func DrawElementsInstanced, "}]s", 0x0C
+	def_opengl_func TexBuffer, "+["
+	def_opengl_func PrimitiveRestartIndex, "Primit", 0x22, "eRestartIndex"
+	def_opengl_func CopyBufferSubData, 0x15, "[", 0x14, 0x13
+	def_opengl_func GetUniformIndices, "<=Indices"
+	def_opengl_func GetActiveUniformsiv, "<)=s", 0x22
+	def_opengl_func GetActiveUniformName, "<)=Name"
+	def_opengl_func GetUniformBlockIndex, "<=", 0x1F, "Index"
+	def_opengl_func GetActiveUniformBlockiv, "<)=", 0x1F, 0x22
+	def_opengl_func GetActiveUniformBlockName, "<)=", 0x1F, "Name"
+	def_opengl_func UniformBlockBinding, "=", 0x1F, "!-"
 
-	def_opengl_func DrawElementsBaseVertex
-	def_opengl_func DrawRangeElementsBaseVertex
-	def_opengl_func DrawElementsInstancedBaseVertex
-	def_opengl_func MultiDrawElementsBaseVertex
-	def_opengl_func ProvokingVertex
-	def_opengl_func FenceSync
-	def_opengl_func IsSync
-	def_opengl_func DeleteSync
-	def_opengl_func ClientWaitSync
-	def_opengl_func WaitSync
-	def_opengl_func GetInteger64v
-	def_opengl_func GetSynciv
-	def_opengl_func GetInteger64i_v
-	def_opengl_func GetBufferParameteri64v
-	def_opengl_func FramebufferTexture
-	def_opengl_func TexImage2DMultisample
-	def_opengl_func TexImage3DMultisample
-	def_opengl_func GetMultisamplefv
-	def_opengl_func SampleMaski
+	def_opengl_func DrawElementsBaseVertex, "}]s", 0x0E, "*"
+	def_opengl_func DrawRangeElementsBaseVertex, "}", 0x0D, "]s", 0x0E, "*"
+	def_opengl_func DrawElementsInstancedBaseVertex, "}]s", 0x0C, 0x0E, "*"
+	def_opengl_func MultiDrawElementsBaseVertex, "^}]s", 0x0E, "*"
+	def_opengl_func ProvokingVertex, "Provok-*"
+	def_opengl_func FenceSync, "Fence", 0x20
+	def_opengl_func IsSync, 0x18, 0x20
+	def_opengl_func DeleteSync, "/", 0x20
+	def_opengl_func ClientWaitSync, "ClientWait", 0x20
+	def_opengl_func WaitSync, "Wait", 0x20
+	def_opengl_func GetInteger64v, "<Integer64v"
+	def_opengl_func GetSynciv, "<", 0x20, 0x22
+	def_opengl_func GetInteger64i_v, "<Integer64i_v"
+	def_opengl_func GetBufferParameteri64v, "<[?i64v"
+	def_opengl_func FramebufferTexture, "7&"
+	def_opengl_func TexImage2DMultisample, "+$2D", 0x03
+	def_opengl_func TexImage3DMultisample, "+$3D", 0x03
+	def_opengl_func GetMultisamplefv, "<", 0x03, 0x27
+	def_opengl_func SampleMaski, "Sample", 0x0F, "i"
 
-	def_opengl_func BindFragDataLocationIndexed
-	def_opengl_func GetFragDataIndex
-	def_opengl_func GenSamplers
-	def_opengl_func DeleteSamplers
-	def_opengl_func IsSampler
-	def_opengl_func BindSampler
-	def_opengl_func SamplerParameteri
-	def_opengl_func SamplerParameteriv
-	def_opengl_func SamplerParameterf
-	def_opengl_func SamplerParameterfv
-	def_opengl_func SamplerParameterIiv
-	def_opengl_func SamplerParameterIuiv
-	def_opengl_func GetSamplerParameteriv
-	def_opengl_func GetSamplerParameterIiv
-	def_opengl_func GetSamplerParameterfv
-	def_opengl_func GetSamplerParameterIuiv
-	def_opengl_func QueryCounter
-	def_opengl_func GetQueryObjecti64v
-	def_opengl_func GetQueryObjectui64v
-	def_opengl_func VertexAttribDivisor
-	def_opengl_func VertexAttribP1ui
-	def_opengl_func VertexAttribP1uiv
-	def_opengl_func VertexAttribP2ui
-	def_opengl_func VertexAttribP2uiv
-	def_opengl_func VertexAttribP3ui
-	def_opengl_func VertexAttribP3uiv
-	def_opengl_func VertexAttribP4ui
-	def_opengl_func VertexAttribP4uiv
-	def_opengl_func VertexP2ui
-	def_opengl_func VertexP2uiv
-	def_opengl_func VertexP3ui
-	def_opengl_func VertexP3uiv
-	def_opengl_func VertexP4ui
-	def_opengl_func VertexP4uiv
-	def_opengl_func TexCoordP1ui
-	def_opengl_func TexCoordP1uiv
-	def_opengl_func TexCoordP2ui
-	def_opengl_func TexCoordP2uiv
-	def_opengl_func TexCoordP3ui
-	def_opengl_func TexCoordP3uiv
-	def_opengl_func TexCoordP4ui
-	def_opengl_func TexCoordP4uiv
-	def_opengl_func MultiTexCoordP1ui
-	def_opengl_func MultiTexCoordP1uiv
-	def_opengl_func MultiTexCoordP2ui
-	def_opengl_func MultiTexCoordP2uiv
-	def_opengl_func MultiTexCoordP3ui
-	def_opengl_func MultiTexCoordP3uiv
-	def_opengl_func MultiTexCoordP4ui
-	def_opengl_func MultiTexCoordP4uiv
-	def_opengl_func NormalP3ui
-	def_opengl_func NormalP3uiv
-	def_opengl_func ColorP3ui
-	def_opengl_func ColorP3uiv
-	def_opengl_func ColorP4ui
-	def_opengl_func ColorP4uiv
-	def_opengl_func SecondaryColorP3ui
-	def_opengl_func SecondaryColorP3uiv
+	def_opengl_func BindFragDataLocationIndexed, "!", 0x04, "LocationIndexed"
+	def_opengl_func GetFragDataIndex, "<", 0x04, "Index"
+	def_opengl_func GenSamplers, "8:s"
+	def_opengl_func DeleteSamplers, "/:s"
+	def_opengl_func IsSampler, 0x18, ":"
+	def_opengl_func BindSampler, "!:"
+	def_opengl_func SamplerParameteri, ":?i"
+	def_opengl_func SamplerParameteriv, ":?", 0x22
+	def_opengl_func SamplerParameterf, ":?f"
+	def_opengl_func SamplerParameterfv, ":?", 0x27
+	def_opengl_func SamplerParameterIiv, ":?I", 0x22
+	def_opengl_func SamplerParameterIuiv, ":?Iu", 0x22
+	def_opengl_func GetSamplerParameteriv, "<:?", 0x22
+	def_opengl_func GetSamplerParameterIiv, "<:?I", 0x22
+	def_opengl_func GetSamplerParameterfv, "<:?", 0x27
+	def_opengl_func GetSamplerParameterIuiv, "<:?Iu", 0x22
+	def_opengl_func QueryCounter, ">Counter"
+	def_opengl_func GetQueryObjecti64v, "<>", 0x17, "i64v"
+	def_opengl_func GetQueryObjectui64v, "<>", 0x17, ";64v"
+	def_opengl_func VertexAttribDivisor, "*@D", 0x22, "isor"
+	def_opengl_func VertexAttribP1ui, "*@P1;"
+	def_opengl_func VertexAttribP1uiv, "*@P1u", 0x22
+	def_opengl_func VertexAttribP2ui, "*@P2;"
+	def_opengl_func VertexAttribP2uiv, "*@P2u", 0x22
+	def_opengl_func VertexAttribP3ui, "*@P3;"
+	def_opengl_func VertexAttribP3uiv, "*@P3u", 0x22
+	def_opengl_func VertexAttribP4ui, "*@P4;"
+	def_opengl_func VertexAttribP4uiv, "*@P4u", 0x22
+	def_opengl_func VertexP2ui, "*P2;"
+	def_opengl_func VertexP2uiv, "*P2u", 0x22
+	def_opengl_func VertexP3ui, "*P3;"
+	def_opengl_func VertexP3uiv, "*P3u", 0x22
+	def_opengl_func VertexP4ui, "*P4;"
+	def_opengl_func VertexP4uiv, "*P4u", 0x22
+	def_opengl_func TexCoordP1ui, ",P1;"
+	def_opengl_func TexCoordP1uiv, ",P1u", 0x22
+	def_opengl_func TexCoordP2ui, ",P2;"
+	def_opengl_func TexCoordP2uiv, ",P2u", 0x22
+	def_opengl_func TexCoordP3ui, ",P3;"
+	def_opengl_func TexCoordP3uiv, ",P3u", 0x22
+	def_opengl_func TexCoordP4ui, ",P4;"
+	def_opengl_func TexCoordP4uiv, ",P4u", 0x22
+	def_opengl_func MultiTexCoordP1ui, "^,P1;"
+	def_opengl_func MultiTexCoordP1uiv, "^,P1u", 0x22
+	def_opengl_func MultiTexCoordP2ui, "^,P2;"
+	def_opengl_func MultiTexCoordP2uiv, "^,P2u", 0x22
+	def_opengl_func MultiTexCoordP3ui, "^,P3;"
+	def_opengl_func MultiTexCoordP3uiv, "^,P3u", 0x22
+	def_opengl_func MultiTexCoordP4ui, "^,P4;"
+	def_opengl_func MultiTexCoordP4uiv, "^,P4u", 0x22
+	def_opengl_func NormalP3ui, "NormalP3;"
+	def_opengl_func NormalP3uiv, "NormalP3u", 0x22
+	def_opengl_func ColorP3ui, "5P3;"
+	def_opengl_func ColorP3uiv, "5P3u", 0x22
+	def_opengl_func ColorP4ui, "5P4;"
+	def_opengl_func ColorP4uiv, "5P4u", 0x22
+	def_opengl_func SecondaryColorP3ui, "(5P3;"
+	def_opengl_func SecondaryColorP3uiv, "(5P3u", 0x22
 
 	segment .bss
 	global _LastGLFunc
