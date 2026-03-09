@@ -226,6 +226,8 @@ _FailedToGet db "Failed to fetch OpenGL function pointers:"
 _NewLine db 0xd, 0xa, 0
 _TheseFunc db "These functions are unavailable.", 0
 
+def_dll_func_alias wglSwapInterval, "wglSwapIntervalEXT"
+
 segment .bss
 ; The buffer to store the decoded function name
 global _FuncNameBuf
@@ -485,6 +487,14 @@ _StartDecodeGL32Functions:
 	call _NextString
 	LoadVariable ecx, 2
 	loop .loop_init_gl32
+
+	push _name_of_wglSwapInterval
+	push _FuncNameBuf
+	invoke_dll_func strcpy
+
+	push _FuncNameBuf
+	invoke_dll_func wglGetProcAddress
+	mov [_addr_of_wglSwapInterval], eax
 
 	push _PFD
 	push [_hDC]
