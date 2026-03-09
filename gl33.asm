@@ -191,82 +191,27 @@ _DecodeTableStrings:
 global _DecodeTable
 _DecodeTable:
 .code_01_40:
-	dw _DecodeTableStrings.code_01 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_02 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_03 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_04 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_05 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_06 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_07 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_08 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_09 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_0a - _DecodeTableStrings
-	dw _DecodeTableStrings.code_0b - _DecodeTableStrings
-	dw _DecodeTableStrings.code_0c - _DecodeTableStrings
-	dw _DecodeTableStrings.code_0d - _DecodeTableStrings
-	dw _DecodeTableStrings.code_0e - _DecodeTableStrings
-	dw _DecodeTableStrings.code_0f - _DecodeTableStrings
-	dw _DecodeTableStrings.code_10 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_11 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_12 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_13 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_14 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_15 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_16 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_17 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_18 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_19 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_1a - _DecodeTableStrings
-	dw _DecodeTableStrings.code_1b - _DecodeTableStrings
-	dw _DecodeTableStrings.code_1c - _DecodeTableStrings
-	dw _DecodeTableStrings.code_1d - _DecodeTableStrings
-	dw _DecodeTableStrings.code_1e - _DecodeTableStrings
-	dw _DecodeTableStrings.code_1f - _DecodeTableStrings
-	dw _DecodeTableStrings.code_20 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_21 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_22 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_23 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_24 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_25 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_26 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_27 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_28 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_29 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_2a - _DecodeTableStrings
-	dw _DecodeTableStrings.code_2b - _DecodeTableStrings
-	dw _DecodeTableStrings.code_2c - _DecodeTableStrings
-	dw _DecodeTableStrings.code_2d - _DecodeTableStrings
-	dw _DecodeTableStrings.code_2e - _DecodeTableStrings
-	dw _DecodeTableStrings.code_2f - _DecodeTableStrings
-	dw _DecodeTableStrings.code_30 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_31 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_32 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_33 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_34 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_35 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_36 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_37 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_38 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_39 - _DecodeTableStrings
-	dw _DecodeTableStrings.code_3a - _DecodeTableStrings
-	dw _DecodeTableStrings.code_3b - _DecodeTableStrings
-	dw _DecodeTableStrings.code_3c - _DecodeTableStrings
-	dw _DecodeTableStrings.code_3d - _DecodeTableStrings
-	dw _DecodeTableStrings.code_3e - _DecodeTableStrings
-	dw _DecodeTableStrings.code_3f - _DecodeTableStrings
-	dw _DecodeTableStrings.code_40 - _DecodeTableStrings
+	%assign CurCode 0x01
+	%rep 0x10 - CurCode
+		dw _DecodeTableStrings.code_ %+ 0 %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
+		%assign CurCode CurCode + 1
+	%endrep
+	%assign CurCode 0x10
+	%rep (0x40) + 1 - CurCode
+		dw _DecodeTableStrings.code_ %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
+		%assign CurCode CurCode + 1
+	%endrep
 
 .code_5b_60:
-	dw _DecodeTableStrings.code_5b - _DecodeTableStrings
-	dw _DecodeTableStrings.code_5c - _DecodeTableStrings
-	dw _DecodeTableStrings.code_5d - _DecodeTableStrings
-	dw _DecodeTableStrings.code_5e - _DecodeTableStrings
-	dw _DecodeTableStrings.code_5f - _DecodeTableStrings
-	dw _DecodeTableStrings.code_60 - _DecodeTableStrings
+	%assign CurCode 0x5b
+	%rep (0x60) + 1 - CurCode
+		dw _DecodeTableStrings.code_ %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
+		%assign CurCode CurCode + 1
+	%endrep
 
 .code_7b_ %+ LAST_CODE:
 	%assign CurCode 0x7B
-	%rep (0x %+ LAST_CODE) + 1 - 0x7B
+	%rep (0x %+ LAST_CODE) + 1 - CurCode
 		dw _DecodeTableStrings.code_ %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
 		%assign CurCode CurCode + 1
 	%endrep
