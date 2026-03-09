@@ -61,6 +61,8 @@ _OpenGL_Ver_Major resd 1
 _OpenGL_Ver_Minor resd 1
 _OpenGL_Ver_Release resd 1
 _FailReason resd 1
+global _OpenGLNullFunctions
+_OpenGLNullFunctions resb 4096
 
 %define PFD_DRAW_TO_WINDOW 0x00000004
 %define PFD_SUPPORT_OPENGL 0x00000020
