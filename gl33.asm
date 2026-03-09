@@ -267,6 +267,10 @@ global _OpenGL_ES_String
 _OpenGL_ES_String db "OpenGL ES "
 .size equ $ - _OpenGL_ES_String
 
+_FailedToGet db "Failed to fetch OpenGL function pointers:"
+_NewLine db 0xd, 0xa, 0
+_TheseFunc db "These functions are unavailable.", 0
+
 segment .bss
 ; The buffer to store the decoded function name
 global _FuncNameBuf
