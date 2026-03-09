@@ -170,7 +170,7 @@ _DecodeTableStrings:
 .code_5C db "Flush", 0
 .code_5D db "Element", 0
 .code_5E db "Multi", 0
-.code_5F db "Shader", 0
+.code_5F db "_", 0
 .code_60 db "Pointer", 0
 
 .code_7B db "Array", 0
@@ -178,6 +178,7 @@ _DecodeTableStrings:
 .code_7D db "Draw", 0
 .code_7E db "Program", 0
 .code_7F db "Stencil", 0
+.code_80 db "Shader", 0
 
 ; Offsets of the strings
 global _DecodeTable
@@ -256,12 +257,13 @@ _DecodeTable:
 	dw _DecodeTableStrings.code_5F - _DecodeTableStrings
 	dw _DecodeTableStrings.code_60 - _DecodeTableStrings
 
-.code_7B_7F:
+.code_7B_80:
 	dw _DecodeTableStrings.code_7B - _DecodeTableStrings
 	dw _DecodeTableStrings.code_7C - _DecodeTableStrings
 	dw _DecodeTableStrings.code_7D - _DecodeTableStrings
 	dw _DecodeTableStrings.code_7E - _DecodeTableStrings
 	dw _DecodeTableStrings.code_7F - _DecodeTableStrings
+	dw _DecodeTableStrings.code_80 - _DecodeTableStrings
 
 global _OpenGL_ES_String
 _OpenGL_ES_String db "OpenGL ES "
@@ -306,8 +308,8 @@ _DecodeProcName:
 	jbe .code_5B_60 ; Part 2
 	cmp al, 0x7B
 	jb .movechar ; abcdefg...
-	cmp al, 0x7F
-	jbe .code_7B_7F ; Part 3
+	cmp al, 0x80
+	jbe .code_7B_80 ; Part 3
 
 .movechar:
 	stosb ; No need to decode
@@ -322,10 +324,10 @@ _DecodeProcName:
 	sub al, 0x5B
 	movzx esi, word[_DecodeTable.code_5B_60 + eax * 2]
 	jmp .decode
-.code_7B_7F: ; Part 3
+.code_7B_80: ; Part 3
 	StoreVariable 2, esi
 	sub al, 0x7B
-	movzx esi, word[_DecodeTable.code_7B_7F + eax * 2]
+	movzx esi, word[_DecodeTable.code_7B_80 + eax * 2]
 .decode:
 	add esi, _DecodeTableStrings ; Add up offset
 .copy_loop:
@@ -770,25 +772,25 @@ _StartDecodeGL32Functions:
 	def_opengl_func StencilOpSeparate, 0x7F, 0x16, 0x12
 	def_opengl_func StencilFuncSeparate, 0x7F, 0x10, 0x12
 	def_opengl_func StencilMaskSeparate, 0x7F, 0x0F, 0x12
-	def_opengl_func AttachShader, 0x19, "_"
+	def_opengl_func AttachShader, 0x19, 0x80
 	def_opengl_func BindAttribLocation, "!@Location"
-	def_opengl_func CompileShader, "Compile_"
+	def_opengl_func CompileShader, "Compile", 0x80
 	def_opengl_func CreateProgram, "Create~"
-	def_opengl_func CreateShader, "Create_"
+	def_opengl_func CreateShader, "Create", 0x80
 	def_opengl_func DeleteProgram, "/~"
-	def_opengl_func DeleteShader, "/_"
-	def_opengl_func DetachShader, "Detach_"
+	def_opengl_func DeleteShader, "/", 0x80
+	def_opengl_func DetachShader, "Detach", 0x80
 	def_opengl_func DisableVertexAttribArray, 0x09, "*@{"
 	def_opengl_func EnableVertexAttribArray, 0x08, "*@{"
 	def_opengl_func GetActiveAttrib, "<)@"
 	def_opengl_func GetActiveUniform, "<)="
-	def_opengl_func GetAttachedShaders, "<", 0x19, "ed_s"
+	def_opengl_func GetAttachedShaders, "<", 0x19, "ed", 0x80, "s"
 	def_opengl_func GetAttribLocation, "<@Location"
 	def_opengl_func GetProgramiv, "<~", 0x22
 	def_opengl_func GetProgramInfoLog, "<~InfoLog"
-	def_opengl_func GetShaderiv, "<_", 0x22
-	def_opengl_func GetShaderInfoLog, "<_InfoLog"
-	def_opengl_func GetShaderSource, "<_Source"
+	def_opengl_func GetShaderiv, "<", 0x80, 0x22
+	def_opengl_func GetShaderInfoLog, "<", 0x80, "InfoLog"
+	def_opengl_func GetShaderSource, "<", 0x80, "Source"
 	def_opengl_func GetUniformLocation, "<=Location"
 	def_opengl_func GetUniformfv, "<=", 0x27
 	def_opengl_func GetUniformiv, "<=", 0x22
@@ -797,9 +799,9 @@ _StartDecodeGL32Functions:
 	def_opengl_func GetVertexAttribiv, "<*@", 0x22
 	def_opengl_func GetVertexAttribPointerv, "<*@`v"
 	def_opengl_func IsProgram, 0x18, "~"
-	def_opengl_func IsShader, 0x18, "_"
+	def_opengl_func IsShader, 0x18, 0x80
 	def_opengl_func LinkProgram, "Link~"
-	def_opengl_func ShaderSource, "_Source"
+	def_opengl_func ShaderSource, 0x80, "Source"
 	def_opengl_func UseProgram, "Use~"
 	def_opengl_func Uniform1f, "=1f"
 	def_opengl_func Uniform2f, "=2f"
