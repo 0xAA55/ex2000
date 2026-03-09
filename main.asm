@@ -64,6 +64,7 @@ _start:
 	def_dll_func_and_load_alias Kernel32, memcpy, "RtlMoveMemory"
 	def_dll_func_and_load Kernel32, QueryPerformanceFrequency
 	def_dll_func_and_load Kernel32, QueryPerformanceCounter
+	def_dll_func_and_load Kernel32, Sleep
 
 	def_dll_and_load User32, "user32.dll"
 	def_dll_func_and_load User32, MessageBoxA
