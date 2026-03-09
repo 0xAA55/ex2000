@@ -4,6 +4,8 @@
 extern _InitLoadLibrary
 extern _InitGL33
 extern _DeInitGL33
+extern _Scene
+extern _SceneInit
 
 %define WM_CREATE 0x0001
 %define WM_DESTROY 0x0002
@@ -129,6 +131,8 @@ _start:
 	push [_hWnd]
 	invoke_dll_func UpdateWindow
 
+	call _SceneInit
+
 .msgloop:
 	push 1
 	push 0
@@ -136,6 +140,12 @@ _start:
 	push 0
 	push _MSG
 	invoke_dll_func PeekMessageA
+	test eax, eax
+	jnz .proc_message
+
+	call _Scene
+	jmp .msgloop
+.proc_message:
 
 	cmp dword [_MSG + MSG.message], WM_QUIT
 	je .exit
