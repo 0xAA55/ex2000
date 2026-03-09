@@ -354,6 +354,33 @@ _NextString:
 	jnz _NextString
 	ret
 
+global _CheckOpenGLProcAddress
+_CheckOpenGLProcAddress:
+	test eax, eax
+	jnz .success
+
+	push _OpenGLNullFunctions
+	invoke_dll_func strlen
+	test eax, eax
+	jnz .strcat_fn_name
+
+	push _FailedToGet
+	push _OpenGLNullFunctions
+	invoke_dll_func strcat
+
+.strcat_fn_name:
+	push _FuncNameBuf
+	push _OpenGLNullFunctions
+	invoke_dll_func strcat
+
+	push _NewLine
+	push _OpenGLNullFunctions
+	invoke_dll_func strcat
+
+	xor eax, eax
+.success:
+	ret
+
 global _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
 _GetGL32ProcAddress:
 	FrameBegin 0, 0
@@ -363,6 +390,8 @@ _GetGL32ProcAddress:
 	push _FuncNameBuf
 	push [_addr_of_OpenGL32]
 	call [_addr_of_GetProcAddress]
+
+	call _CheckOpenGLProcAddress
 
 	FrameEnd
 	ret
@@ -375,6 +404,8 @@ _GetGLProcAddress:
 
 	push _FuncNameBuf
 	invoke_dll_func wglGetProcAddress
+
+	call _CheckOpenGLProcAddress
 
 	FrameEnd
 	ret
@@ -1030,6 +1061,22 @@ _StartDecodeGLFunctions:
 	LoadVariable ecx, 2
 	loop .loop_init_gl
 
+	push _OpenGLNullFunctions
+	invoke_dll_func strlen
+	test eax, eax
+	jz .end
+
+	push _TheseFunc
+	push _OpenGLNullFunctions
+	invoke_dll_func strcat
+
+	push 0
+	push 0
+	push _OpenGLNullFunctions
+	push [_hWnd]
+	invoke_dll_func MessageBoxA
+
+.end:
 	mov eax, 1
 
 _InitGL33_exit:
