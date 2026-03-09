@@ -498,7 +498,7 @@ _InitGL33:
 	def_opengl32_func GetDoublev, "<Doublev"
 	def_opengl32_func GetError, "<Error"
 	def_opengl32_func GetFloatv, "<Floatv"
-	def_opengl32_func GetIntegerv, "<Integerv"
+	def_opengl32_func GetIntegerv, "<", 0x82, "v"
 	def_opengl32_func GetString, "<Str-"
 	def_opengl32_func GetTexImage, "<+$"
 	def_opengl32_func GetTexParameterfv, "<+?", 0x27
@@ -713,11 +713,11 @@ _StartDecodeGL32Functions:
 	def_opengl_func PointParameterfv, ".?", 0x27
 	def_opengl_func PointParameteri, ".?i"
 	def_opengl_func PointParameteriv, ".?", 0x22
-	def_opengl_func FogCoordf, "Fog9f"
-	def_opengl_func FogCoordfv, "Fog9", 0x27
-	def_opengl_func FogCoordd, "Fog9d"
-	def_opengl_func FogCoorddv, "Fog9dv"
-	def_opengl_func FogCoordPointer, "Fog9`"
+	def_opengl_func FogCoordf, 0x85, "9f"
+	def_opengl_func FogCoordfv, 0x85, "9", 0x27
+	def_opengl_func FogCoordd, 0x85, "9d"
+	def_opengl_func FogCoorddv, 0x85, "9dv"
+	def_opengl_func FogCoordPointer, 0x85, "9`"
 	def_opengl_func SecondaryColor3b, "(53b"
 	def_opengl_func SecondaryColor3bv, "(53bv"
 	def_opengl_func SecondaryColor3d, "(53d"
@@ -752,7 +752,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func WindowPos3s, 0x01, "3s"
 	def_opengl_func WindowPos3sv, 0x01, "3sv"
 	def_opengl_func BlendColor, 0x11, "5"
-	def_opengl_func BlendEquation, 0x11, "Equation"
+	def_opengl_func BlendEquation, 0x11, 0x83
 
 	def_opengl_func GenQueries, "80"
 	def_opengl_func DeleteQueries, "/0"
@@ -774,7 +774,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func GetBufferParameteriv, "<[?", 0x22
 	def_opengl_func GetBufferPointerv, "<[`v"
 
-	def_opengl_func BlendEquationSeparate, 0x11, "Equation", 0x12
+	def_opengl_func BlendEquationSeparate, 0x11, 0x83, 0x12
 	def_opengl_func DrawBuffers, "}[s"
 	def_opengl_func StencilOpSeparate, 0x7F, 0x16, 0x12
 	def_opengl_func StencilFuncSeparate, 0x7F, 0x10, 0x12
@@ -877,7 +877,7 @@ _StartDecodeGL32Functions:
 
 	def_opengl_func ColorMaski, "5", 0x0F, "i"
 	def_opengl_func GetBooleani_v, "<Booleani_v"
-	def_opengl_func GetIntegeri_v, "<Integeri_v"
+	def_opengl_func GetIntegeri_v, "<", 0x82, "i_v"
 	def_opengl_func Enablei, 0x08, "i"
 	def_opengl_func Disablei, 0x09, "i"
 	def_opengl_func IsEnabledi, 0x18, 0x08, "di"
@@ -983,9 +983,9 @@ _StartDecodeGL32Functions:
 	def_opengl_func DeleteSync, "/", 0x20
 	def_opengl_func ClientWaitSync, "ClientWait", 0x20
 	def_opengl_func WaitSync, "Wait", 0x20
-	def_opengl_func GetInteger64v, "<Integer64v"
+	def_opengl_func GetInteger64v, "<", 0x82, "64v"
 	def_opengl_func GetSynciv, "<", 0x20, 0x22
-	def_opengl_func GetInteger64i_v, "<Integer64i_v"
+	def_opengl_func GetInteger64i_v, "<", 0x82, "64i_v"
 	def_opengl_func GetBufferParameteri64v, "<[?i64v"
 	def_opengl_func FramebufferTexture, "7&"
 	def_opengl_func TexImage2DMultisample, "+$2D", 0x03
@@ -1043,8 +1043,8 @@ _StartDecodeGL32Functions:
 	def_opengl_func MultiTexCoordP3uiv, "^,P3u", 0x22
 	def_opengl_func MultiTexCoordP4ui, "^,P4;"
 	def_opengl_func MultiTexCoordP4uiv, "^,P4u", 0x22
-	def_opengl_func NormalP3ui, "NormalP3;"
-	def_opengl_func NormalP3uiv, "NormalP3u", 0x22
+	def_opengl_func NormalP3ui, 0x84, "P3;"
+	def_opengl_func NormalP3uiv, 0x84, "P3u", 0x22
 	def_opengl_func ColorP3ui, "5P3;"
 	def_opengl_func ColorP3uiv, "5P3u", 0x22
 	def_opengl_func ColorP4ui, "5P4;"
