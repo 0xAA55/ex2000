@@ -59,6 +59,7 @@ _start:
 	def_dll_func_and_load Kernel32, ExitProcess
 	def_dll_func_and_load_alias Kernel32, strcpy, "lstrcpyA"
 	def_dll_func_and_load_alias Kernel32, strcat, "lstrcatA"
+	def_dll_func_and_load_alias Kernel32, strlen, "lstrlenA"
 	def_dll_func_and_load_alias Kernel32, memset, "RtlFillMemory"
 	def_dll_func_and_load_alias Kernel32, memcpy, "RtlMoveMemory"
 

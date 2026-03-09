@@ -5,6 +5,7 @@
 import_dll GDI32
 import_dll_func strcpy
 import_dll_func strcat
+import_dll_func strlen
 import_dll_func MessageBoxA
 
 extern _hWnd
