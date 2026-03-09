@@ -53,9 +53,7 @@ _SwapBuffers:
 	test eax, eax
 	jnz .swap_buffers
 
-	; invoke_dll_func DwmFlush
-	push 1
-	invoke_dll_func Sleep
+	invoke_dll_func DwmFlush
 
 .swap_buffers:
 	push [_hDC]
