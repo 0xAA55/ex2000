@@ -302,6 +302,19 @@ _DecodeProcName:
 	FrameEnd
 	ret
 
+global _isdigit
+_isdigit:
+	mov dword [_FailReason], _ParseFailBecauseNondigit
+	cmp al, '0'
+	jb .parse_fail
+	cmp al, '9'
+	ja .parse_fail
+	jmp .end
+.parse_fail:
+	xor eax, eax
+.end:
+	ret
+
 global _NextString
 _NextString:
 	lodsb
@@ -504,19 +517,9 @@ _StartDecodeGL32Functions:
 	mov edi, _OpenGL_ES_String
 	mov ecx, _OpenGL_ES_String.size
 	repz cmpsb
-	jz .is_es
-	jmp .parse_version_non_es
-.is_es:
+	jnz .parse_version_non_es
 	mov dword [_OpenGL_Is_ES], 1
 	jmp .parse_version
-.isdigit:
-	mov dword [_FailReason], _ParseFailBecauseNondigit
-	cmp al, '0'
-	jb .parse_fail
-	cmp al, '9'
-	ja .parse_fail
-	sub al, '0'
-	ret
 .parse_fail:
 	push _ParseFailText
 	push _FailInfoBuffer
@@ -543,14 +546,20 @@ _StartDecodeGL32Functions:
 	xor eax, eax
 .parse_version:
 	lodsb
-	call .isdigit
+	call _isdigit
+	test eax, eax
+	jz .parse_fail
+	sub al, '0'
 	mov [_OpenGL_Ver_Major], eax
 	mov dword [_FailReason], _ParseFailBecauseDotExpected
 	lodsb
 	cmp al, '.'
 	jnz .parse_fail
 	lodsb
-	call .isdigit
+	call _isdigit
+	test eax, eax
+	jz .parse_fail
+	sub al, '0'
 	mov [_OpenGL_Ver_Minor], eax
 	lodsb
 	cmp al, ' '
@@ -559,7 +568,10 @@ _StartDecodeGL32Functions:
 	cmp al, '.'
 	jnz .parse_fail
 	lodsb
-	call .isdigit
+	call _isdigit
+	test eax, eax
+	jz .parse_fail
+	sub al, '0'
 	mov [_OpenGL_Ver_Release], eax
 
 .version_parsed:
