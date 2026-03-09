@@ -25,7 +25,7 @@
 %ifdef Frame_UseEBP
 	%define Param(x) [ebp + (x + 2) * 4]
 	%define Variable(x) [ebp - x * 4]
-	%define CallParam(x) [ebp - (Frame_NumVariables + x) * 4]
+	%define CallParam(x) [ebp - (Frame_NumVariables + Frame_NumReservedParams - 1 - x) * 4]
 %else
 	%define Param(x) [esp + (Frame_NumLocals + x + 1) * 4]
 	%define Variable(x) [esp + (Frame_NumReservedParams + x) * 4]
