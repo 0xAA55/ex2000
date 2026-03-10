@@ -51,6 +51,7 @@ _WCEx resb WNDCLASSEX.size
 _ClassAtom resd 1
 _hWnd resd 1
 _hDC resd 1
+_hHeap resd 1
 _MSG resb MSG.size
 
 dll_func_group_start KFunc
@@ -63,6 +64,12 @@ def_dll_func ExitProcess
 def_dll_func QueryPerformanceFrequency
 def_dll_func QueryPerformanceCounter
 def_dll_func Sleep
+def_dll_func GetProcessHeap
+def_dll_func HeapAlloc
+def_dll_func HeapReAlloc
+def_dll_func HeapFree
+def_dll_func HeapLock
+def_dll_func HeapUnlock
 global _addr_of_memmove
 _addr_of_memmove equ _addr_of_memcpy
 dll_func_group_end KFunc
@@ -97,6 +104,9 @@ _start:
 
 	dll_func_group_load Kernel32, KFunc
 	dll_func_group_load User32, UFunc
+
+	invoke_dll_func GetProcessHeap
+	mov [_hHeap], eax
 
 	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx + WNDCLASSEX.lpfnWndProc], _WndProc@16
@@ -216,6 +226,61 @@ _WndProc@16:
 .end:
 	FrameEnd
 	ret 16
+
+global _malloc
+_malloc:
+	FrameBegin 0, 0
+
+	push Param(0)
+	push 0
+	push [_hHeap]
+	invoke_dll_func HeapAlloc
+
+	FrameEnd
+	ret
+
+global _calloc
+_calloc:
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	mul dword Param(1)
+	push eax
+	push 8
+	push [_hHeap]
+	invoke_dll_func HeapAlloc
+
+	FrameEnd
+	ret
+
+global _realloc
+_realloc:
+	FrameBegin 0, 0
+
+	LoadParam eax, 0
+	LoadParam ecx, 1
+
+	push ecx
+	push eax
+	push 0
+	push [_hHeap]
+	invoke_dll_func HeapReAlloc
+
+	FrameEnd
+	ret
+
+global _free
+_free:
+	FrameBegin 0, 0
+
+	push Param(0)
+	push 0
+	push [_hHeap]
+	invoke_dll_func HeapFree
+
+	FrameEnd
+	ret
+
 global _NextString
 _NextString:
 	lodsb
