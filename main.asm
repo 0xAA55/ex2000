@@ -246,7 +246,7 @@ _calloc:
 	mov eax, Param(0)
 	mul dword Param(1)
 	push eax
-	push 8
+	push 8|4
 	push [_hHeap]
 	invoke_dll_func HeapAlloc
 
@@ -262,7 +262,7 @@ _realloc:
 
 	push ecx
 	push eax
-	push 0
+	push 4
 	push [_hHeap]
 	invoke_dll_func HeapReAlloc
 
@@ -274,7 +274,7 @@ _free:
 	FrameBegin 0, 0
 
 	push Param(0)
-	push 0
+	push 4
 	push [_hHeap]
 	invoke_dll_func HeapFree
 
