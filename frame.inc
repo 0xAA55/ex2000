@@ -4,6 +4,7 @@
 	%assign Frame_NumVariables %1
 	%assign Frame_NumReservedParams %2
 	%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
+	%assign ESP_BIAS 0
 	%ifdef Frame_UseEBP
 		push ebp
 		mov ebp, esp
@@ -27,9 +28,9 @@
 	%define Variable(x) [ebp - x * 4]
 	%define CallParam(x) [ebp - (Frame_NumVariables + Frame_NumReservedParams - 1 - x) * 4]
 %else
-	%define Param(x) [esp + (Frame_NumLocals + x + 1) * 4]
-	%define Variable(x) [esp + (Frame_NumReservedParams + x) * 4]
-	%define CallParam(x) [esp + x * 4]
+	%define Param(x) [esp + ESP_BIAS + (Frame_NumLocals + x + 1) * 4]
+	%define Variable(x) [esp + ESP_BIAS + (Frame_NumReservedParams + x) * 4]
+	%define CallParam(x) [esp + ESP_BIAS + x * 4]
 %endif
 
 %macro LoadParam 2
@@ -62,4 +63,8 @@
 	%else
 		%error Bad param index
 	%endif
+%endmacro
+
+%macro FrameBias 1
+	%assign ESP_BIAS ESP_BIAS + %1
 %endmacro
