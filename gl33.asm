@@ -14,6 +14,10 @@ extern _NextString
 extern _hWnd
 extern _hDC
 
+extern _malloc
+extern _realloc
+extern _free
+
 struc PIXELFORMATDESCRIPTOR
 	.nSize: resw 1
 	.nVersion: resw 1
@@ -56,6 +60,7 @@ global _OpenGL_Ver_Major
 global _OpenGL_Ver_Minor
 global _OpenGL_Ver_Release
 global _FailReason
+global _OpenGLNullFunctions
 _OpenGL_Vendor resd 1
 _OpenGL_Renderer resd 1
 _OpenGL_Version resd 1
@@ -64,8 +69,7 @@ _OpenGL_Ver_Major resd 1
 _OpenGL_Ver_Minor resd 1
 _OpenGL_Ver_Release resd 1
 _FailReason resd 1
-global _OpenGLNullFunctions
-_OpenGLNullFunctions resb 4096
+_OpenGLNullFunctions resd 1
 
 %define PFD_DRAW_TO_WINDOW 0x00000004
 %define PFD_SUPPORT_OPENGL 0x00000020
@@ -335,22 +339,22 @@ _CheckOpenGLProcAddress:
 	test eax, eax
 	jnz .success
 
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	invoke_dll_func strlen
 	test eax, eax
 	jnz .strcat_fn_name
 
 	push _FailedToGet
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	invoke_dll_func strcat
 
 .strcat_fn_name:
 	push _FuncNameBuf
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	invoke_dll_func strcat
 
 	push _NewLine
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	invoke_dll_func strcat
 
 	xor eax, eax
@@ -388,7 +392,7 @@ _GetGLProcAddress:
 
 global _InitGL33
 _InitGL33:
-	FrameBegin 3, 0
+	FrameBegin 3, 1
 	StoreVariable 0, esi
 	StoreVariable 1, edi
 
@@ -399,6 +403,10 @@ _InitGL33:
 
 	dll_func_group_load OpenGL32, WGLFunc
 
+	PrepParam 0, 4096
+	call _malloc
+	mov [_OpenGLNullFunctions], eax
+	mov [eax], 0
 
 	segment .bss ; Store the function pointer list
 	global _FirstGL32Func
@@ -1041,18 +1049,18 @@ _StartDecodeGLFunctions:
 	LoadVariable ecx, 2
 	loop .loop_init_gl
 
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	invoke_dll_func strlen
 	test eax, eax
 	jz .end
 
 	push _TheseFunc
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	invoke_dll_func strcat
 
 	push 0
 	push 0
-	push _OpenGLNullFunctions
+	push [_OpenGLNullFunctions]
 	push [_hWnd]
 	invoke_dll_func MessageBoxA
 
@@ -1060,8 +1068,15 @@ _StartDecodeGLFunctions:
 	mov eax, 1
 
 _InitGL33_exit:
+	StoreVariable 2, eax
+	mov eax, [_OpenGLNullFunctions]
+	PrepParam 0, eax
+	call _free
+	xor eax, eax
+	mov [_OpenGLNullFunctions], eax
 	LoadVariable esi, 0
 	LoadVariable edi, 1
+	LoadVariable eax, 2
 	FrameEnd
 	ret
 
