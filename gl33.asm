@@ -61,6 +61,8 @@ global _OpenGL_Ver_Minor
 global _OpenGL_Ver_Release
 global _FailReason
 global _OpenGLNullFunctions
+global _FailInfoBuffer
+global _FuncNameBuf
 _OpenGL_Vendor resd 1
 _OpenGL_Renderer resd 1
 _OpenGL_Version resd 1
@@ -70,6 +72,8 @@ _OpenGL_Ver_Minor resd 1
 _OpenGL_Ver_Release resd 1
 _FailReason resd 1
 _OpenGLNullFunctions resd 1
+_FailInfoBuffer resd 1
+_FuncNameBuf resd 1 ; The buffer to store the decoded function name
 
 %define PFD_DRAW_TO_WINDOW 0x00000004
 %define PFD_SUPPORT_OPENGL 0x00000020
@@ -237,15 +241,6 @@ _TheseFunc db "These functions are unavailable.", 0
 
 def_dll_func_alias wglSwapInterval, "wglSwapIntervalEXT"
 
-segment .bss
-; The buffer to store the decoded function name
-global _FuncNameBuf
-_FuncNameBuf resb 64
-
-; The buffer to store parse fail info string
-global _FailInfoBuffer
-_FailInfoBuffer resb 256
-
 dll_func_group_start WGLFunc
 def_dll_func wglGetProcAddress
 def_dll_func wglCreateContext
@@ -262,10 +257,11 @@ _DecodeProcName:
 	StoreVariable 0, esi
 	StoreVariable 1, edi
 
-	mov word[_FuncNameBuf], 'gl' ; Add prefix
+	mov edx, [_FuncNameBuf]
+	mov word[edx], 'gl' ; Add prefix
 
 	mov esi, eax
-	mov edi, _FuncNameBuf + 2
+	lea edi, [edx + 2]
 
 .decode_loop:
 	xor eax, eax
@@ -349,7 +345,7 @@ _CheckOpenGLProcAddress:
 	invoke_dll_func strcat
 
 .strcat_fn_name:
-	push _FuncNameBuf
+	push [_FuncNameBuf]
 	push [_OpenGLNullFunctions]
 	invoke_dll_func strcat
 
@@ -367,7 +363,7 @@ _GetGL32ProcAddress:
 
 	call _DecodeProcName
 
-	push _FuncNameBuf
+	push [_FuncNameBuf]
 	push [_addr_of_OpenGL32]
 	call [_addr_of_GetProcAddress]
 
@@ -382,7 +378,7 @@ _GetGLProcAddress:
 
 	call _DecodeProcName
 
-	push _FuncNameBuf
+	push [_FuncNameBuf]
 	invoke_dll_func wglGetProcAddress
 
 	call _CheckOpenGLProcAddress
@@ -406,6 +402,16 @@ _InitGL33:
 	PrepParam 0, 4096
 	call _malloc
 	mov [_OpenGLNullFunctions], eax
+	mov [eax], 0
+
+	PrepParam 0, 256
+	call _malloc
+	mov [_FailInfoBuffer], eax
+	mov [eax], 0
+
+	PrepParam 0, 256
+	call _malloc
+	mov [_FuncNameBuf], eax
 	mov [eax], 0
 
 	segment .bss ; Store the function pointer list
@@ -500,10 +506,6 @@ _StartDecodeGL32Functions:
 	loop .loop_init_gl32
 
 	push _name_of_wglSwapInterval
-	push _FuncNameBuf
-	invoke_dll_func strcpy
-
-	push _FuncNameBuf
 	invoke_dll_func wglGetProcAddress
 	mov [_addr_of_wglSwapInterval], eax
 
@@ -543,20 +545,20 @@ _StartDecodeGL32Functions:
 	jmp .parse_version
 .parse_fail:
 	push _ParseFailText
-	push _FailInfoBuffer
+	push [_FailInfoBuffer]
 	invoke_dll_func strcpy
 
 	push [_OpenGL_Version]
-	push _FailInfoBuffer
+	push [_FailInfoBuffer]
 	invoke_dll_func strcat
 
 	push [_FailReason]
-	push _FailInfoBuffer
+	push [_FailInfoBuffer]
 	invoke_dll_func strcat
 
 	push 0
 	push 0
-	push _FailInfoBuffer
+	push [_FailInfoBuffer]
 	push [_hWnd]
 	invoke_dll_func MessageBoxA
 
@@ -1070,6 +1072,12 @@ _StartDecodeGLFunctions:
 _InitGL33_exit:
 	StoreVariable 2, eax
 	mov eax, [_OpenGLNullFunctions]
+	PrepParam 0, eax
+	call _free
+	mov eax, [_FailInfoBuffer]
+	PrepParam 0, eax
+	call _free
+	mov eax, [_FuncNameBuf]
 	PrepParam 0, eax
 	call _free
 	xor eax, eax
