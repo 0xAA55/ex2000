@@ -187,8 +187,11 @@ _DecodeTableStrings:
 .code_83 db "Equation", 0
 .code_84 db "Normal", 0
 .code_85 db "Fog", 0
+.code_86 db "InfoLog", 0
+.code_87 db "dv", 0
+.code_88 db "Index", 0
 
-%define LAST_CODE 85
+%define LAST_CODE 88
 
 ; Offsets of the strings
 global _DecodeTable
@@ -638,7 +641,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func GetCompressedTexImage, "<", 0x02, "+$"
 	def_opengl_func ClientActiveTexture, "Client)&"
 	def_opengl_func MultiTexCoord1d, "^,1d"
-	def_opengl_func MultiTexCoord1dv, "^,1dv"
+	def_opengl_func MultiTexCoord1dv, "^,1", 0x87
 	def_opengl_func MultiTexCoord1f, "^,1f"
 	def_opengl_func MultiTexCoord1fv, "^,1", 0x27
 	def_opengl_func MultiTexCoord1i, "^,1i"
@@ -646,7 +649,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func MultiTexCoord1s, "^,1s"
 	def_opengl_func MultiTexCoord1sv, "^,1sv"
 	def_opengl_func MultiTexCoord2d, "^,2d"
-	def_opengl_func MultiTexCoord2dv, "^,2dv"
+	def_opengl_func MultiTexCoord2dv, "^,2", 0x87
 	def_opengl_func MultiTexCoord2f, "^,2f"
 	def_opengl_func MultiTexCoord2fv, "^,2", 0x27
 	def_opengl_func MultiTexCoord2i, "^,2i"
@@ -654,7 +657,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func MultiTexCoord2s, "^,2s"
 	def_opengl_func MultiTexCoord2sv, "^,2sv"
 	def_opengl_func MultiTexCoord3d, "^,3d"
-	def_opengl_func MultiTexCoord3dv, "^,3dv"
+	def_opengl_func MultiTexCoord3dv, "^,3", 0x87
 	def_opengl_func MultiTexCoord3f, "^,3f"
 	def_opengl_func MultiTexCoord3fv, "^,3", 0x27
 	def_opengl_func MultiTexCoord3i, "^,3i"
@@ -662,7 +665,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func MultiTexCoord3s, "^,3s"
 	def_opengl_func MultiTexCoord3sv, "^,3sv"
 	def_opengl_func MultiTexCoord4d, "^,4d"
-	def_opengl_func MultiTexCoord4dv, "^,4dv"
+	def_opengl_func MultiTexCoord4dv, "^,4", 0x87
 	def_opengl_func MultiTexCoord4f, "^,4f"
 	def_opengl_func MultiTexCoord4fv, "^,4", 0x27
 	def_opengl_func MultiTexCoord4i, "^,4i"
@@ -684,12 +687,12 @@ _StartDecodeGL32Functions:
 	def_opengl_func FogCoordf, 0x85, "9f"
 	def_opengl_func FogCoordfv, 0x85, "9", 0x27
 	def_opengl_func FogCoordd, 0x85, "9d"
-	def_opengl_func FogCoorddv, 0x85, "9dv"
+	def_opengl_func FogCoorddv, 0x85, "9", 0x87
 	def_opengl_func FogCoordPointer, 0x85, "9`"
 	def_opengl_func SecondaryColor3b, "(53b"
 	def_opengl_func SecondaryColor3bv, "(53bv"
 	def_opengl_func SecondaryColor3d, "(53d"
-	def_opengl_func SecondaryColor3dv, "(53dv"
+	def_opengl_func SecondaryColor3dv, "(53", 0x87
 	def_opengl_func SecondaryColor3f, "(53f"
 	def_opengl_func SecondaryColor3fv, "(53", 0x27
 	def_opengl_func SecondaryColor3i, "(53i"
@@ -704,7 +707,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func SecondaryColor3usv, "(53usv"
 	def_opengl_func SecondaryColorPointer, "(5`"
 	def_opengl_func WindowPos2d, 0x01, "2d"
-	def_opengl_func WindowPos2dv, 0x01, "2dv"
+	def_opengl_func WindowPos2dv, 0x01, "2", 0x87
 	def_opengl_func WindowPos2f, 0x01, "2f"
 	def_opengl_func WindowPos2fv, 0x01, "2", 0x27
 	def_opengl_func WindowPos2i, 0x01, "2i"
@@ -712,7 +715,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func WindowPos2s, 0x01, "2s"
 	def_opengl_func WindowPos2sv, 0x01, "2sv"
 	def_opengl_func WindowPos3d, 0x01, "3d"
-	def_opengl_func WindowPos3dv, 0x01, "3dv"
+	def_opengl_func WindowPos3dv, 0x01, "3", 0x87
 	def_opengl_func WindowPos3f, 0x01, "3f"
 	def_opengl_func WindowPos3fv, 0x01, "3", 0x27
 	def_opengl_func WindowPos3i, 0x01, "3i"
@@ -762,14 +765,14 @@ _StartDecodeGL32Functions:
 	def_opengl_func GetAttachedShaders, "<", 0x19, "ed", 0x80, "s"
 	def_opengl_func GetAttribLocation, "<@", 0x81
 	def_opengl_func GetProgramiv, "<~", 0x22
-	def_opengl_func GetProgramInfoLog, "<~InfoLog"
+	def_opengl_func GetProgramInfoLog, "<~", 0x86
 	def_opengl_func GetShaderiv, "<", 0x80, 0x22
-	def_opengl_func GetShaderInfoLog, "<", 0x80, "InfoLog"
+	def_opengl_func GetShaderInfoLog, "<", 0x80, 0x86
 	def_opengl_func GetShaderSource, "<", 0x80, "Source"
 	def_opengl_func GetUniformLocation, "<=", 0x81
 	def_opengl_func GetUniformfv, "<=", 0x27
 	def_opengl_func GetUniformiv, "<=", 0x22
-	def_opengl_func GetVertexAttribdv, "<*@dv"
+	def_opengl_func GetVertexAttribdv, "<*@", 0x87
 	def_opengl_func GetVertexAttribfv, "<*@", 0x27
 	def_opengl_func GetVertexAttribiv, "<*@", 0x22
 	def_opengl_func GetVertexAttribPointerv, "<*@`v"
@@ -799,19 +802,19 @@ _StartDecodeGL32Functions:
 	def_opengl_func UniformMatrix4fv, "=#4", 0x27
 	def_opengl_func ValidateProgram, "Validate~"
 	def_opengl_func VertexAttrib1d, "*@1d"
-	def_opengl_func VertexAttrib1dv, "*@1dv"
+	def_opengl_func VertexAttrib1dv, "*@1", 0x87
 	def_opengl_func VertexAttrib1f, "*@1f"
 	def_opengl_func VertexAttrib1fv, "*@1", 0x27
 	def_opengl_func VertexAttrib1s, "*@1s"
 	def_opengl_func VertexAttrib1sv, "*@1sv"
 	def_opengl_func VertexAttrib2d, "*@2d"
-	def_opengl_func VertexAttrib2dv, "*@2dv"
+	def_opengl_func VertexAttrib2dv, "*@2", 0x87
 	def_opengl_func VertexAttrib2f, "*@2f"
 	def_opengl_func VertexAttrib2fv, "*@2", 0x27
 	def_opengl_func VertexAttrib2s, "*@2s"
 	def_opengl_func VertexAttrib2sv, "*@2sv"
 	def_opengl_func VertexAttrib3d, "*@3d"
-	def_opengl_func VertexAttrib3dv, "*@3dv"
+	def_opengl_func VertexAttrib3dv, "*@3", 0x87
 	def_opengl_func VertexAttrib3f, "*@3f"
 	def_opengl_func VertexAttrib3fv, "*@3", 0x27
 	def_opengl_func VertexAttrib3s, "*@3s"
@@ -825,7 +828,7 @@ _StartDecodeGL32Functions:
 	def_opengl_func VertexAttrib4Nusv, "*@4Nusv"
 	def_opengl_func VertexAttrib4bv, "*@4bv"
 	def_opengl_func VertexAttrib4d, "*@4d"
-	def_opengl_func VertexAttrib4dv, "*@4dv"
+	def_opengl_func VertexAttrib4dv, "*@4", 0x87
 	def_opengl_func VertexAttrib4f, "*@4f"
 	def_opengl_func VertexAttrib4fv, "*@4", 0x27
 	def_opengl_func VertexAttrib4iv, "*@4", 0x22
@@ -931,12 +934,12 @@ _StartDecodeGL32Functions:
 	def_opengl_func DrawArraysInstanced, "}{s", 0x0C
 	def_opengl_func DrawElementsInstanced, "}]s", 0x0C
 	def_opengl_func TexBuffer, "+["
-	def_opengl_func PrimitiveRestartIndex, "Primit", 0x22, "eRestartIndex"
+	def_opengl_func PrimitiveRestartIndex, "Primit", 0x22, "eRestart", 0x88
 	def_opengl_func CopyBufferSubData, 0x15, "[", 0x14, 0x13
 	def_opengl_func GetUniformIndices, "<=Indices"
 	def_opengl_func GetActiveUniformsiv, "<)=s", 0x22
 	def_opengl_func GetActiveUniformName, "<)=Name"
-	def_opengl_func GetUniformBlockIndex, "<=", 0x1F, "Index"
+	def_opengl_func GetUniformBlockIndex, "<=", 0x1F, 0x88
 	def_opengl_func GetActiveUniformBlockiv, "<)=", 0x1F, 0x22
 	def_opengl_func GetActiveUniformBlockName, "<)=", 0x1F, "Name"
 	def_opengl_func UniformBlockBinding, "=", 0x1F, "!-"
@@ -961,8 +964,8 @@ _StartDecodeGL32Functions:
 	def_opengl_func GetMultisamplefv, "<", 0x03, 0x27
 	def_opengl_func SampleMaski, "Sample", 0x0F, "i"
 
-	def_opengl_func BindFragDataLocationIndexed, "!", 0x04, 0x81, "Indexed"
-	def_opengl_func GetFragDataIndex, "<", 0x04, "Index"
+	def_opengl_func BindFragDataLocationIndexed, "!", 0x04, 0x81, 0x88, "ed"
+	def_opengl_func GetFragDataIndex, "<", 0x04, 0x88
 	def_opengl_func GenSamplers, "8:s"
 	def_opengl_func DeleteSamplers, "/:s"
 	def_opengl_func IsSampler, 0x18, ":"
