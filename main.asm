@@ -1,4 +1,5 @@
 %include "frame.inc"
+%define HAVE_LOADFUNCGROUP 1
 %include "loaddll.inc"
 
 extern _InitLoadLibrary
@@ -52,39 +53,50 @@ _hWnd resd 1
 _hDC resd 1
 _MSG resb MSG.size
 
+dll_func_group_start KFunc
+def_dll_func_alias strcpy, "lstrcpyA"
+def_dll_func_alias strcat, "lstrcatA"
+def_dll_func_alias strlen, "lstrlenA"
+def_dll_func_alias memset, "RtlFillMemory"
+def_dll_func_alias memcpy, "RtlMoveMemory"
+def_dll_func ExitProcess
+def_dll_func QueryPerformanceFrequency
+def_dll_func QueryPerformanceCounter
+def_dll_func Sleep
+global _addr_of_memmove
+_addr_of_memmove equ _addr_of_memcpy
+dll_func_group_end KFunc
+
+dll_func_group_start UFunc
+def_dll_func MessageBoxA
+def_dll_func LoadIconA
+def_dll_func LoadCursorA
+def_dll_func RegisterClassExA
+def_dll_func CreateWindowExA
+def_dll_func ShowWindow
+def_dll_func UpdateWindow
+def_dll_func PeekMessageA
+def_dll_func TranslateMessage
+def_dll_func DispatchMessageA
+def_dll_func PostQuitMessage
+def_dll_func DefWindowProcA
+def_dll_func GetDC
+def_dll_func ReleaseDC
+dll_func_group_end UFunc
+
+segment .bss
+_LastUFunc:
+
 segment .text
 global _start
 _start:
 	FrameBegin 0, 0
 	call _InitLoadLibrary
-
-	def_dll_func_and_load Kernel32, ExitProcess
-	def_dll_func_and_load_alias Kernel32, strcpy, "lstrcpyA"
-	def_dll_func_and_load_alias Kernel32, strcat, "lstrcatA"
-	def_dll_func_and_load_alias Kernel32, strlen, "lstrlenA"
-	def_dll_func_and_load_alias Kernel32, memset, "RtlFillMemory"
-	def_dll_func_and_load_alias Kernel32, memcpy, "RtlMoveMemory"
-	def_dll_func_and_load Kernel32, QueryPerformanceFrequency
-	def_dll_func_and_load Kernel32, QueryPerformanceCounter
-	def_dll_func_and_load Kernel32, Sleep
-
 	def_dll_and_load User32, "user32.dll"
-	def_dll_func_and_load User32, MessageBoxA
-	def_dll_func_and_load User32, LoadIconA
-	def_dll_func_and_load User32, LoadCursorA
-	def_dll_func_and_load User32, RegisterClassExA
-	def_dll_func_and_load User32, CreateWindowExA
-	def_dll_func_and_load User32, ShowWindow
-	def_dll_func_and_load User32, UpdateWindow
-	def_dll_func_and_load User32, PeekMessageA
-	def_dll_func_and_load User32, TranslateMessage
-	def_dll_func_and_load User32, DispatchMessageA
-	def_dll_func_and_load User32, PostQuitMessage
-	def_dll_func_and_load User32, DefWindowProcA
-	def_dll_func_and_load User32, GetDC
-	def_dll_func_and_load User32, ReleaseDC
-
 	def_dll_and_load GDI32, "gdi32.dll"
+
+	dll_func_group_load Kernel32, KFunc
+	dll_func_group_load User32, UFunc
 
 	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx + WNDCLASSEX.lpfnWndProc], _WndProc@16
@@ -204,3 +216,21 @@ _WndProc@16:
 .end:
 	FrameEnd
 	ret 16
+global _NextString
+_NextString:
+	lodsb
+	test al, al ; Find NUL
+	jnz _NextString
+	ret
+
+global _LoadFuncGroup
+_LoadFuncGroup:
+	push ecx
+	push esi
+	push ebx
+	invoke_dll_func GetProcAddress
+	stosd
+	call _NextString
+	pop ecx
+	loop _LoadFuncGroup
+	ret

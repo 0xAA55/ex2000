@@ -9,6 +9,8 @@ import_dll_func strcat
 import_dll_func strlen
 import_dll_func MessageBoxA
 
+extern _NextString
+
 extern _hWnd
 extern _hDC
 
@@ -237,6 +239,14 @@ _FuncNameBuf resb 64
 global _FailInfoBuffer
 _FailInfoBuffer resb 256
 
+dll_func_group_start WGLFunc
+def_dll_func wglGetProcAddress
+def_dll_func wglCreateContext
+def_dll_func wglDeleteContext
+def_dll_func wglMakeCurrent
+def_dll_func wglSwapBuffers
+dll_func_group_end WGLFunc
+
 segment .text
 global _DecodeProcName
 _DecodeProcName:
@@ -317,13 +327,6 @@ _isdigit:
 .end:
 	ret
 
-global _NextString
-_NextString:
-	lodsb
-	test al, al ; Find NUL
-	jnz _NextString
-	ret
-
 global _CheckOpenGLProcAddress
 _CheckOpenGLProcAddress:
 	test eax, eax
@@ -391,11 +394,8 @@ _InitGL33:
 
 	def_dll_and_load OpenGL32, "opengl32.dll"
 
-	def_dll_func_and_load OpenGL32, wglGetProcAddress
-	def_dll_func_and_load OpenGL32, wglCreateContext
-	def_dll_func_and_load OpenGL32, wglDeleteContext
-	def_dll_func_and_load OpenGL32, wglMakeCurrent
-	def_dll_func_and_load OpenGL32, wglSwapBuffers
+	dll_func_group_load OpenGL32, WGLFunc
+
 
 	segment .bss ; Store the function pointer list
 	global _FirstGL32Func

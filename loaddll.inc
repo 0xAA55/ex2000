@@ -2,6 +2,10 @@ extern _addr_of_Kernel32
 extern _addr_of_GetProcAddress
 extern _addr_of_LoadLibraryA
 extern _hInstance
+%ifndef HAVE_LOADFUNCGROUP
+extern _LoadFuncGroup
+%define HAVE_LOADFUNCGROUP 1
+%endif
 
 %macro def_dll 2
 	segment .bss
@@ -74,4 +78,27 @@ extern _hInstance
 
 %macro import_dll_func 1
 	extern _addr_of_ %+ %1
+%endmacro
+
+%macro dll_func_group_start 1
+	segment .bss
+	global _First %+ %1 %+ Addr
+	_First %+ %1 %+ Addr:
+
+	segment .rdata
+	global _First %+ %1 %+ Name
+	_First %+ %1 %+ Name:
+%endmacro
+
+%macro dll_func_group_end 1
+	segment .bss
+	_Last %+ %1 %+ Addr:
+%endmacro
+
+%macro dll_func_group_load 2
+	mov esi, _First %+ %2 %+ Name
+	mov edi, _First %+ %2 %+ Addr
+	mov ecx, (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
+	mov ebx, [_addr_of_ %+ %1]
+	call _LoadFuncGroup
 %endmacro
