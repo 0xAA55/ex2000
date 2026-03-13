@@ -66,3 +66,22 @@ _InitLoadLibrary:
 	call edx	; GetProcAddress
 	mov [_addr_of_LoadLibraryA], eax
 	ret
+
+global _LoadFuncGroup
+_LoadFuncGroup:
+	push ecx
+	push esi
+	push ebx
+	call [_addr_of_GetProcAddress]
+	stosd
+	call _NextString
+	pop ecx
+	loop _LoadFuncGroup
+	ret
+
+global _NextString
+_NextString:
+	lodsb
+	test al, al ; Find NUL
+	jnz _NextString
+	ret

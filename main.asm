@@ -1,5 +1,4 @@
 %include "frame.inc"
-%define HAVE_LOADFUNCGROUP 1
 %include "loaddll.inc"
 
 extern _InitLoadLibrary
@@ -279,23 +278,4 @@ _free:
 	invoke_dll_func HeapFree
 
 	FrameEnd
-	ret
-
-global _NextString
-_NextString:
-	lodsb
-	test al, al ; Find NUL
-	jnz _NextString
-	ret
-
-global _LoadFuncGroup
-_LoadFuncGroup:
-	push ecx
-	push esi
-	push ebx
-	invoke_dll_func GetProcAddress
-	stosd
-	call _NextString
-	pop ecx
-	loop _LoadFuncGroup
 	ret

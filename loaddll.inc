@@ -2,10 +2,7 @@ extern _addr_of_Kernel32
 extern _addr_of_GetProcAddress
 extern _addr_of_LoadLibraryA
 extern _hInstance
-%ifndef HAVE_LOADFUNCGROUP
 extern _LoadFuncGroup
-%define HAVE_LOADFUNCGROUP 1
-%endif
 
 %macro def_dll 2
 	segment .bss
