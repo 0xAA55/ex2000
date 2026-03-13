@@ -33,6 +33,32 @@
 	%define CallParam(x) [esp + ESP_BIAS + x * 4]
 %endif
 
+%macro FramePush 1-*
+	%rep %0
+		push %1
+		%assign ESP_BIAS ESP_BIAS + 4
+		%rotate 1
+	%endrep
+%endmacro
+
+%macro FramePop 1-*
+	%rep %0
+		%rotate -1
+		pop %1
+		%assign ESP_BIAS ESP_BIAS - 4
+	%endrep
+%endmacro
+
+%macro FramePushA 0
+	pushad
+	%assign ESP_BIAS ESP_BIAS + 4 * 8
+%endmacro
+
+%macro FramePopA 0
+	popad
+	%assign ESP_BIAS ESP_BIAS - 4 * 8
+%endmacro
+
 %macro LoadParam 2
 	mov %1, Param(%2)
 %endmacro
