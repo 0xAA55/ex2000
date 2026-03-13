@@ -91,6 +91,15 @@
 	%endif
 %endmacro
 
-%macro FrameBias 1
-	%assign ESP_BIAS ESP_BIAS + %1
+%macro PrepStdCallParam 1-*
+	%assign PrevBias ESP_BIAS
+	%rep %0
+		push %1
+		%assign ESP_BIAS ESP_BIAS + 4
+		%rotate 1
+	%endrep
+%endmacro
+
+%macro AfterStdCall 0
+	%assign ESP_BIAS PrevBias
 %endmacro
