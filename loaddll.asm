@@ -1,12 +1,10 @@
 %include "frame.inc"
 
-global _InitLoadLibrary
+segment .bss
 global _addr_of_Kernel32
 global _addr_of_GetProcAddress
 global _addr_of_LoadLibraryA
 global _hInstance
-
-segment .bss
 _addr_of_LoadLibraryA resd 1
 _addr_of_Kernel32 resd 1
 _addr_of_GetProcAddress resd 1
@@ -16,6 +14,7 @@ segment .rdata
 _name_of_LoadLibraryA db "LoadLibraryA", 0
 
 segment .text
+global _InitLoadLibrary
 _InitLoadLibrary:
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
