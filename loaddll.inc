@@ -1,3 +1,6 @@
+%ifndef _LOADDLL_INC_
+%define _LOADDLL_INC_ 1
+
 extern _addr_of_Kernel32
 extern _addr_of_GetProcAddress
 extern _addr_of_LoadLibraryA
@@ -99,3 +102,5 @@ extern _LoadFuncGroup
 	mov ebx, [_addr_of_ %+ %1]
 	call _LoadFuncGroup
 %endmacro
+
+%endif

@@ -1,3 +1,6 @@
+%ifndef _GL33_INC_
+%define _GL33_INC_ 1
+
 %define GL_DEPTH_BUFFER_BIT               0x00000100
 %define GL_STENCIL_BUFFER_BIT             0x00000400
 %define GL_COLOR_BUFFER_BIT               0x00004000
@@ -1400,4 +1403,6 @@
 	import_dll_func glColorP4uiv
 	import_dll_func glSecondaryColorP3ui
 	import_dll_func glSecondaryColorP3uiv
+%endif
+
 %endif
