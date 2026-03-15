@@ -6,12 +6,6 @@
 extern _hWnd
 extern _hDC
 
-extern _InitTimer
-extern _UpdateTimer
-extern _TimerVal
-extern _IsPaused
-extern _PauseTimer
-
 def_dll Dwmapi, "dwmapi.dll"
 def_dll_func DwmFlush
 

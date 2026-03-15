@@ -1,7 +1,9 @@
 %include "loaddll.inc"
 %include "frame.inc"
-%include "timer.inc"
 %include "gl33.inc"
+
+%define TIMER_ASM
+%include "timer.inc"
 
 import_dll_func QueryPerformanceFrequency
 import_dll_func QueryPerformanceCounter
@@ -63,6 +65,14 @@ _UpdateTimer:
 
 .end:
 	LoadVariable esi, 0
+	FrameEnd
+	ret
+
+global _IsTimerPaused
+_IsTimerPaused:
+	FrameBegin 0, 0
+	LoadParam eax, 0
+	mov eax, [eax + Timer.IsPaused]
 	FrameEnd
 	ret
 
