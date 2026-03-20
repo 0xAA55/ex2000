@@ -1,3 +1,6 @@
+%ifndef _FRAME_INC_
+%define _FRAME_INC_ 1
+
 ; %define Frame_UseEBP
 
 %macro FrameBegin 2
@@ -103,3 +106,5 @@
 %macro AfterStdCall 0
 	%assign ESP_BIAS PrevBias
 %endmacro
+
+%endif
