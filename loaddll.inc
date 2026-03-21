@@ -1,6 +1,8 @@
 %ifndef _LOADDLL_INC_
 %define _LOADDLL_INC_ 1
 
+%include "frame.inc"
+
 extern _addr_of_Kernel32
 extern _addr_of_GetProcAddress
 extern _addr_of_LoadLibraryA
@@ -101,6 +103,26 @@ extern _LoadFuncGroup
 	mov ecx, (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
 	mov ebx, [_addr_of_ %+ %1]
 	call _LoadFuncGroup
+%endmacro
+
+%macro invoke_stdcall 1-2+
+	%if %0 == 1
+		call %1
+	%else
+		PrepStdCallParam %2
+		call %1
+		AfterStdCall
+	%endif
+%endmacro
+
+%macro invoke_dll_stdcall 1-2+
+	%if %0 == 1
+		invoke_dll_func %1
+	%else
+		PrepStdCallParam %2
+		invoke_dll_func %1
+		AfterStdCall
+	%endif
 %endmacro
 
 %endif
