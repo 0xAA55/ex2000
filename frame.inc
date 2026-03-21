@@ -97,9 +97,9 @@
 %macro PrepStdCallParam 1-*
 	%assign PrevBias ESP_BIAS
 	%rep %0
+		%rotate -1
 		push %1
 		%assign ESP_BIAS ESP_BIAS + 4
-		%rotate 1
 	%endrep
 %endmacro
 
