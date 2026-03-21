@@ -89,6 +89,15 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	LoadVariable esi, VAR_ESI_HOME
 	LoadVariable edi, VAR_EDI_HOME
 	FrameEnd
+	%undef PRM_INST
+	%undef PRM_BUF_TYPE
+	%undef PRM_BUF_USAGE
+	%undef PRM_ITEM_SIZE
+	%undef PRM_NUM_ITEMS
+	%undef VAR_GLOBJ
+	%undef VAR_CBSIZE
+	%undef VAR_ESI_HOME
+	%undef VAR_EDI_HOME
 	ret
 
 global _DeInitBuffer
