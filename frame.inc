@@ -73,6 +73,14 @@
 	mov dword Param(%1), %2
 %endmacro
 
+%macro StoreParamW 2
+	mov word Param(%1), %2
+%endmacro
+
+%macro StoreParamB 2
+	mov byte Param(%1), %2
+%endmacro
+
 %macro LoadVariable 2
 	%if %2 < Frame_NumVariables
 		mov %1, Variable(%2)
@@ -84,6 +92,22 @@
 %macro StoreVariable 2
 	%if %1 < Frame_NumVariables
 		mov dword Variable(%1), %2
+	%else
+		%error Bad variable index
+	%endif
+%endmacro
+
+%macro StoreVariableW 2
+	%if %1 < Frame_NumVariables
+		mov word Variable(%1), %2
+	%else
+		%error Bad variable index
+	%endif
+%endmacro
+
+%macro StoreVariableB 2
+	%if %1 < Frame_NumVariables
+		mov byte Variable(%1), %2
 	%else
 		%error Bad variable index
 	%endif
