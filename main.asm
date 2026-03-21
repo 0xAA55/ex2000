@@ -110,7 +110,7 @@ _start:
 	dll_func_group_load Kernel32, KFunc
 	dll_func_group_load User32, UFunc
 
-	invoke_dll_func GetProcessHeap
+	invoke_dll_stdcall GetProcessHeap
 	mov [_hHeap], eax
 
 	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
@@ -121,44 +121,30 @@ _start:
 	mov eax, [_hInstance]
 	mov [_WCEx + WNDCLASSEX.hInstance], eax
 
-	PrepStdCallParam 0, 32512
-	invoke_dll_func LoadIconA
-	AfterStdCall
+	invoke_dll_stdcall LoadIconA, 0, 32512
 
 	mov [_WCEx + WNDCLASSEX.hIcon], eax
 	mov [_WCEx + WNDCLASSEX.hIconSm], eax
 
-	PrepStdCallParam 0, 32512
-	invoke_dll_func LoadCursorA
-	AfterStdCall
+	invoke_dll_stdcall LoadCursorA, 0, 32512
 	mov [_WCEx + WNDCLASSEX.hCursor], eax
 
-	PrepStdCallParam _WCEx
-	invoke_dll_func RegisterClassExA
-	AfterStdCall
+	invoke_dll_stdcall RegisterClassExA, _WCEx
 	mov [_ClassAtom], eax
 
-	PrepStdCallParam 0, eax, _WindowTitle, WS_OVERLAPPEDWINDOW, \
+	invoke_dll_stdcall CreateWindowExA, \
+		0, eax, _WindowTitle, WS_OVERLAPPEDWINDOW, \
 		CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, \
 		0, 0, [_hInstance], 0
-	invoke_dll_func CreateWindowExA
-	AfterStdCall
 	mov [_hWnd], eax
 
-	PrepStdCallParam [_hWnd], 1
-	invoke_dll_func ShowWindow
-	AfterStdCall
-
-	PrepStdCallParam [_hWnd]
-	invoke_dll_func UpdateWindow
-	AfterStdCall
+	invoke_dll_stdcall ShowWindow, [_hWnd], 1
+	invoke_dll_stdcall UpdateWindow, [_hWnd]
 
 	call _SceneInit
 
 .msgloop:
-	PrepStdCallParam _MSG, 0, 0, 0, PM_REMOVE
-	invoke_dll_func PeekMessageA
-	AfterStdCall
+	invoke_dll_stdcall PeekMessageA, _MSG, 0, 0, 0, PM_REMOVE
 	test eax, eax
 	jnz .proc_message
 
@@ -169,13 +155,8 @@ _start:
 	cmp dword [_MSG + MSG.message], WM_QUIT
 	je .exit
 
-	PrepStdCallParam _MSG
-	invoke_dll_func TranslateMessage
-	AfterStdCall
-
-	PrepStdCallParam _MSG
-	invoke_dll_func DispatchMessageA
-	AfterStdCall
+	invoke_dll_stdcall TranslateMessage, _MSG
+	invoke_dll_stdcall DispatchMessageA, _MSG
 
 	jmp .msgloop
 
@@ -192,9 +173,7 @@ _WndProc@16:
 	cmp dword Param(1), WM_CREATE
 	jnz .other_than_WM_CREATE
 
-	PrepStdCallParam Param(0)
-	invoke_dll_func GetDC
-	AfterStdCall
+	invoke_dll_stdcall GetDC, Param(0)
 	mov [_hDC], eax
 
 	call _InitGL33
@@ -212,13 +191,8 @@ _WndProc@16:
 
 	call _DeInitGL33
 
-	PrepStdCallParam [_hWnd], [_hDC]
-	invoke_dll_func ReleaseDC
-	AfterStdCall
-
-	PrepStdCallParam 0
-	invoke_dll_func PostQuitMessage
-	AfterStdCall
+	invoke_dll_stdcall ReleaseDC, [_hWnd], [_hDC]
+	invoke_dll_stdcall PostQuitMessage, 0
 
 	xor eax, eax
 	jmp .end
@@ -232,11 +206,7 @@ _WndProc@16:
 global _malloc
 _malloc:
 	FrameBegin 0, 0
-
-	PrepStdCallParam [_hHeap], 4, Param(0)
-	invoke_dll_func HeapAlloc
-	AfterStdCall
-
+	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
 
@@ -246,9 +216,7 @@ _calloc:
 
 	mov eax, Param(0)
 	mul dword Param(1)
-	PrepStdCallParam [_hHeap], 8|4, eax
-	invoke_dll_func HeapAlloc
-	AfterStdCall
+	invoke_dll_stdcall HeapAlloc, [_hHeap], 8|4, eax
 
 	FrameEnd
 	ret
@@ -256,21 +224,13 @@ _calloc:
 global _realloc
 _realloc:
 	FrameBegin 0, 0
-
-	PrepStdCallParam [_hHeap], 4, Param(0), Param(1)
-	invoke_dll_func HeapReAlloc
-	AfterStdCall
-
+	invoke_dll_stdcall HeapReAlloc, [_hHeap], 4, Param(0), Param(1)
 	FrameEnd
 	ret
 
 global _free
 _free:
 	FrameBegin 0, 0
-
-	PrepStdCallParam [_hHeap], 4, Param(0)
-	invoke_dll_func HeapFree
-	AfterStdCall
-
+	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret

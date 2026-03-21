@@ -335,23 +335,15 @@ _CheckOpenGLProcAddress:
 	test eax, eax
 	jnz .success
 
-	push [_OpenGLNullFunctions]
-	invoke_dll_func strlen
+	invoke_dll_stdcall strlen, [_OpenGLNullFunctions]
 	test eax, eax
 	jnz .strcat_fn_name
 
-	push _FailedToGet
-	push [_OpenGLNullFunctions]
-	invoke_dll_func strcat
+	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], _FailedToGet
 
 .strcat_fn_name:
-	push [_FuncNameBuf]
-	push [_OpenGLNullFunctions]
-	invoke_dll_func strcat
-
-	push _NewLine
-	push [_OpenGLNullFunctions]
-	invoke_dll_func strcat
+	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], [_FuncNameBuf]
+	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], _NewLine
 
 	xor eax, eax
 .success:
@@ -360,29 +352,18 @@ _CheckOpenGLProcAddress:
 global _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
 _GetGL32ProcAddress:
 	FrameBegin 0, 0
-
 	call _DecodeProcName
-
-	push [_FuncNameBuf]
-	push [_addr_of_OpenGL32]
-	call [_addr_of_GetProcAddress]
-
+	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
 	call _CheckOpenGLProcAddress
-
 	FrameEnd
 	ret
 
 global _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 _GetGLProcAddress:
 	FrameBegin 0, 0
-
 	call _DecodeProcName
-
-	push [_FuncNameBuf]
-	invoke_dll_func wglGetProcAddress
-
+	invoke_dll_stdcall wglGetProcAddress, [_FuncNameBuf]
 	call _CheckOpenGLProcAddress
-
 	FrameEnd
 	ret
 
@@ -505,35 +486,20 @@ _StartDecodeGL32Functions:
 	LoadVariable ecx, 2
 	loop .loop_init_gl32
 
-	push _name_of_wglSwapInterval
-	invoke_dll_func wglGetProcAddress
+	invoke_dll_stdcall wglGetProcAddress, _name_of_wglSwapInterval
 	mov [_addr_of_wglSwapInterval], eax
 
-	push _PFD
-	push [_hDC]
-	invoke_dll_func ChoosePixelFormat
-
-	push _PFD
-	push eax ; Pixel format
-	push [_hDC]
-	invoke_dll_func SetPixelFormat
-
-	push [_hDC]
-	invoke_dll_func wglCreateContext
+	invoke_dll_stdcall ChoosePixelFormat, [_hDC], _PFD
+	invoke_dll_stdcall SetPixelFormat, [_hDC], eax, _PFD
+	invoke_dll_stdcall wglCreateContext, [_hDC]
 	mov [_hGLRC], eax
 
-	push eax
-	push [_hDC]
-	invoke_dll_func wglMakeCurrent
-
-	push GL_VENDOR
-	invoke_dll_func glGetString
+	invoke_dll_stdcall wglMakeCurrent, [_hDC], eax
+	invoke_dll_stdcall glGetString, GL_VENDOR
 	mov [_OpenGL_Vendor], eax
-	push GL_RENDERER
-	invoke_dll_func glGetString
+	invoke_dll_stdcall glGetString, GL_RENDERER
 	mov [_OpenGL_Renderer], eax
-	push GL_VERSION
-	invoke_dll_func glGetString
+	invoke_dll_stdcall glGetString, GL_VERSION
 	mov [_OpenGL_Version], eax
 
 	mov esi, [_OpenGL_Version]
@@ -544,23 +510,10 @@ _StartDecodeGL32Functions:
 	mov dword [_OpenGL_Is_ES], 1
 	jmp .parse_version
 .parse_fail:
-	push _ParseFailText
-	push [_FailInfoBuffer]
-	invoke_dll_func strcpy
-
-	push [_OpenGL_Version]
-	push [_FailInfoBuffer]
-	invoke_dll_func strcat
-
-	push [_FailReason]
-	push [_FailInfoBuffer]
-	invoke_dll_func strcat
-
-	push 0
-	push 0
-	push [_FailInfoBuffer]
-	push [_hWnd]
-	invoke_dll_func MessageBoxA
+	invoke_dll_stdcall strcpy, [_FailInfoBuffer], _ParseFailText
+	invoke_dll_stdcall strcat, [_FailInfoBuffer], [_OpenGL_Version]
+	invoke_dll_stdcall strcat, [_FailInfoBuffer], [_FailReason]
+	invoke_dll_stdcall MessageBoxA, [_hWnd], [_FailInfoBuffer], 0, 0
 
 	xor eax, eax
 	jmp _InitGL33_exit
@@ -1051,20 +1004,12 @@ _StartDecodeGLFunctions:
 	LoadVariable ecx, 2
 	loop .loop_init_gl
 
-	push [_OpenGLNullFunctions]
-	invoke_dll_func strlen
+	invoke_dll_stdcall strlen, [_OpenGLNullFunctions]
 	test eax, eax
 	jz .end
 
-	push _TheseFunc
-	push [_OpenGLNullFunctions]
-	invoke_dll_func strcat
-
-	push 0
-	push 0
-	push [_OpenGLNullFunctions]
-	push [_hWnd]
-	invoke_dll_func MessageBoxA
+	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], _TheseFunc
+	invoke_dll_stdcall MessageBoxA, [_hWnd], [_OpenGLNullFunctions], 0, 0
 
 .end:
 	mov eax, 1
@@ -1091,13 +1036,10 @@ _InitGL33_exit:
 global _DeInitGL33
 _DeInitGL33:
 	FrameBegin 0, 0
-	push 0
-	push 0
-	invoke_dll_func wglMakeCurrent
-
-	push [_hGLRC]
-	invoke_dll_func wglDeleteContext
-
-	mov dword[_hGLRC], 0
+	xor eax, eax
+	invoke_dll_stdcall wglMakeCurrent, eax, eax
+	invoke_dll_stdcall wglDeleteContext, [_hGLRC]
+	xor eax, eax
+	mov dword[_hGLRC], eax
 	FrameEnd
 	ret

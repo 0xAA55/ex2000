@@ -23,14 +23,8 @@ _Scene:
 	PrepParam 0, _Timer
 	call _UpdateTimer
 
-	push 0
-	push 0
-	push 0
-	push 0
-	invoke_dll_func glClearColor
-
-	push GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
-	invoke_dll_func glClear
+	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
+	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 
 
 
@@ -47,11 +41,10 @@ _SwapBuffers:
 	test eax, eax
 	jnz .swap_buffers
 
-	invoke_dll_func DwmFlush
+	invoke_dll_stdcall DwmFlush
 
 .swap_buffers:
-	push [_hDC]
-	invoke_dll_func wglSwapBuffers
+	invoke_dll_stdcall wglSwapBuffers, [_hDC]
 	ret
 
 global _SceneInit
@@ -65,8 +58,7 @@ _SceneInit:
 	test eax, eax
 	jz .no_swap_interval
 
-	push 1
-	invoke_dll_func wglSwapInterval
+	invoke_dll_stdcall wglSwapInterval, 1
 	jmp .load_scene
 .no_swap_interval:
 	load_dll Dwmapi
