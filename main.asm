@@ -1,4 +1,3 @@
-%include "frame.inc"
 %include "loaddll.inc"
 
 extern _InitLoadLibrary

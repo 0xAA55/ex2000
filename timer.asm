@@ -1,5 +1,4 @@
 %include "loaddll.inc"
-%include "frame.inc"
 %include "gl33.inc"
 
 %define TIMER_ASM

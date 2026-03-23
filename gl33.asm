@@ -1,5 +1,4 @@
 %include "loaddll.inc"
-%include "frame.inc"
 %define GL_NO_FUNC_IMPORT 1
 %include "gl33.inc"
 
