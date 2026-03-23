@@ -96,7 +96,7 @@
 	%if %2 < Frame_NumVariables
 		mov %1, Variable(%2)
 	%else
-		%error Bad variable index
+		%error Bad variable index %2
 	%endif
 %endmacro
 
@@ -104,7 +104,7 @@
 	%if %1 < Frame_NumVariables
 		mov dword Variable(%1), %2
 	%else
-		%error Bad variable index
+		%error Bad variable index %1
 	%endif
 %endmacro
 
@@ -112,7 +112,7 @@
 	%if %1 < Frame_NumVariables
 		mov word Variable(%1), %2
 	%else
-		%error Bad variable index
+		%error Bad variable index %1
 	%endif
 %endmacro
 
@@ -120,7 +120,7 @@
 	%if %1 < Frame_NumVariables
 		mov byte Variable(%1), %2
 	%else
-		%error Bad variable index
+		%error Bad variable index %1
 	%endif
 %endmacro
 
@@ -128,7 +128,7 @@
 	%if %1 < Frame_NumReservedParams
 		mov dword CallParam(%1), %2
 	%else
-		%error Bad param index
+		%error Bad param index %1
 	%endif
 %endmacro
 
