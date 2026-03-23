@@ -10,6 +10,7 @@ struc GlBuffer
 	.size_of_item resd 1
 	.gl_buffer resd 1
 	.gl_buffer_type resd 1
+	.gl_buffer_usage resd 1
 	.gl_buffer_size resd 1
 	.flushed resd 1
 	.size equ $ - .pointer
