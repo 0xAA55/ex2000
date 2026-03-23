@@ -252,8 +252,7 @@ dll_func_group_end WGLFunc
 segment .text
 global _DecodeProcName
 _DecodeProcName:
-	FrameBegin 1, 0
-	FramePush esi, edi
+	FrameBegin 1, 0, esi, edi
 
 	mov edx, [_FuncNameBuf]
 	mov word[edx], 'gl' ; Add prefix
@@ -309,7 +308,6 @@ _DecodeProcName:
 .end:
 	stosb ; Trail 0
 
-	FramePop esi, edi
 	FrameEnd
 	ret
 
@@ -365,8 +363,7 @@ _GetGLProcAddress:
 
 global _InitGL33
 _InitGL33:
-	FrameBegin 1, 1
-	FramePush esi, edi
+	FrameBegin 1, 1, esi, edi
 
 	def_dll_func_and_load GDI32, ChoosePixelFormat
 	def_dll_func_and_load GDI32, SetPixelFormat
@@ -473,12 +470,12 @@ _StartDecodeGL32Functions:
 	mov esi, _FirstNameOfGL32Func
 	mov edi, _FirstGL32Func
 .loop_init_gl32:
-	FramePush ecx
+	StoreVariable 0, ecx
 	mov eax, esi
 	call _GetGL32ProcAddress
 	stosd
 	call _NextString
-	FramePop ecx
+	LoadVariable ecx, 0
 	loop .loop_init_gl32
 
 	invoke_dll_stdcall wglGetProcAddress, _name_of_wglSwapInterval
@@ -991,12 +988,12 @@ _StartDecodeGLFunctions:
 	mov esi, _FirstNameOfGLFunc
 	mov edi, _FirstGLFunc
 .loop_init_gl:
-	FramePush ecx
+	StoreVariable 0, ecx
 	mov eax, esi
 	call _GetGLProcAddress
 	stosd
 	call _NextString
-	FramePop ecx
+	LoadVariable ecx, 0
 	loop .loop_init_gl
 
 	invoke_dll_stdcall strlen, [_OpenGLNullFunctions]
@@ -1010,7 +1007,7 @@ _StartDecodeGLFunctions:
 	mov eax, 1
 
 _InitGL33_exit:
-	FramePush eax
+	StoreVariable 0, eax
 	mov eax, [_OpenGLNullFunctions]
 	PrepParam 0, eax
 	call _free
@@ -1022,8 +1019,7 @@ _InitGL33_exit:
 	call _free
 	xor eax, eax
 	mov [_OpenGLNullFunctions], eax
-	FramePop eax
-	FramePop esi, edi
+	LoadVariable eax, 0
 	FrameEnd
 	ret
 

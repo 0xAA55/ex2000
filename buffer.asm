@@ -20,8 +20,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	%define PRM_NUM_ITEMS 4
 	%define VAR_GLOBJ 0
 	%define VAR_CBSIZE 1
-	FrameBegin 2, 1
-	FramePush esi, edi
+	FrameBegin 2, 1, esi, edi
 
 	StoreVariable VAR_GLOBJ, 0
 
@@ -86,7 +85,6 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 
 	xor eax, eax
 .end:
-	FramePop esi, edi
 	FrameEnd
 	%undef PRM_INST
 	%undef PRM_BUF_TYPE
@@ -99,8 +97,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 
 global _DeInitBuffer
 _DeInitBuffer:
-	FrameBegin 0, 1
-	FramePush edi
+	FrameBegin 0, 1, edi
 
 	LoadParam edi, 0
 	mov eax, [edi + GlBuffer.pointer]
@@ -119,7 +116,6 @@ _DeInitBuffer:
 	mov ecx, GlBuffer.size / 4
 	rep stosd
 
-	FramePop edi
 	FrameEnd
 	ret
 
