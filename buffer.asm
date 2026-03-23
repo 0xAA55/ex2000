@@ -60,7 +60,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacit
 	mov [esi + GlBuffer.flushed], eax
 	LoadVariable eax, VAR_GLOBJ
 	mov [esi + GlBuffer.capacity], ecx
-	mov [esi + GlBuffer.gl_buffer_size], ecx
+	mov [esi + GlBuffer.gl_buffer_cap], ecx
 	LoadParam ecx, PRM_BUF_USAGE
 	mov [esi + GlBuffer.gl_buffer_type], edi
 	mov [esi + GlBuffer.size_of_item], edx
