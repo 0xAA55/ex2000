@@ -25,7 +25,7 @@ extern _DeInitBuffer
 	PrepParam 1, %2 ;buffer_type
 	PrepParam 2, %3 ;buffer_usage
 	PrepParam 3, %4 ;item_size
-	PrepParam 4, %5 ;num_items
+	PrepParam 4, %5 ;capacity
 	call _InitBuffer
 %endmacro
 

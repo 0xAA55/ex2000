@@ -12,12 +12,12 @@ extern _free
 
 segment .text
 global _InitBuffer
-_InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_items
+_InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity
 	%define PRM_INST 0
 	%define PRM_BUF_TYPE 1
 	%define PRM_BUF_USAGE 2
 	%define PRM_ITEM_SIZE 3
-	%define PRM_NUM_ITEMS 4
+	%define PRM_CAPACITY 4
 	%define VAR_GLOBJ 0
 	%define VAR_CBSIZE 1
 	FrameBegin 2, 1, esi, edi
@@ -31,7 +31,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	rep stosd
 
 	LoadParam eax, PRM_ITEM_SIZE
-	mul dword Param(PRM_NUM_ITEMS)
+	mul dword Param(PRM_CAPACITY)
 	test edx, edx
 	jnz .failexit
 	StoreVariable VAR_CBSIZE, eax
@@ -65,7 +65,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	AfterStdCall
 
 	xor eax, eax
-	LoadParam ecx, PRM_NUM_ITEMS
+	LoadParam ecx, PRM_CAPACITY
 	LoadParam edx, PRM_ITEM_SIZE
 	mov [esi + GlBuffer.num_items], eax
 	mov [esi + GlBuffer.flushed], eax
@@ -90,7 +90,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	%undef PRM_BUF_TYPE
 	%undef PRM_BUF_USAGE
 	%undef PRM_ITEM_SIZE
-	%undef PRM_NUM_ITEMS
+	%undef PRM_CAPACITY
 	%undef VAR_GLOBJ
 	%undef VAR_CBSIZE
 	ret
