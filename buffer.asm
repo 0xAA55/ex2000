@@ -210,9 +210,10 @@ _BufferFlush:
 
 	mul dword [esi + GlBuffer.size_of_item]
 	StoreVariable 0, eax
+	test eax, eax
+	jz .empty
 
-	lea edi, [esi + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glDeleteBuffers, 1, edi
+	call .delbuf
 	invoke_dll_stdcall glGenBuffers, 1, edi
 	mov eax, [edi]
 	mov edi, [esi + GlBuffer.gl_buffer_type]
@@ -220,9 +221,17 @@ _BufferFlush:
 	invoke_dll_stdcall glBufferData, edi, Variable(0), [esi + GlBuffer.pointer], [esi + GlBuffer.gl_buffer_usage]
 	xor eax, eax
 	invoke_dll_stdcall glBindBuffer, edi, eax
+	mov eax, [esi + GlBuffer.capacity]
+	mov [esi + GlBuffer.gl_buffer_cap], eax
+	xor eax, eax
+	jmp .flushed
+.empty:
+	call .delbuf
 	jmp .flushed
 
 .map:
+	test eax, eax ; Check if capacity is zero
+	jz .empty
 	invoke_dll_stdcall glMapBuffer, [esi + GlBuffer.gl_buffer_type], GL_WRITE_ONLY
 	invoke_dll_stdcall memcpy, eax, [esi + GlBuffer.pointer], Variable(0)
 	invoke_dll_stdcall glUnmapBuffer, [esi + GlBuffer.gl_buffer_type]
@@ -235,6 +244,14 @@ _BufferFlush:
 .end:
 	FrameEnd
 	ret
+.delbuf:
+	lea edi, [esi + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glDeleteBuffers, 1, edi
+	xor eax, eax
+	mov [edi], eax
+	mov [esi + GlBuffer.gl_buffer_cap], eax
+	ret
+
 
 global _BufferTrimExcess
 _BufferTrimExcess:
