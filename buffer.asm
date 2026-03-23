@@ -236,3 +236,42 @@ _BufferFlush:
 	FrameEnd
 	ret
 
+global _BufferTrimExcess
+_BufferTrimExcess:
+	FrameBegin 0, 2, esi
+
+	LoadParam esi, 0
+	mov eax, [esi + GlBuffer.num_items]
+	cmp eax, [esi + GlBuffer.capacity]
+	je .success
+	mul dword [esi + GlBuffer.size_of_item]
+
+	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
+	mov [esi + GlBuffer.pointer], eax
+	test eax, eax
+	jz .failed
+
+	mov eax, [esi + GlBuffer.num_items]
+	mov [esi + GlBuffer.capacity], eax
+
+	xor eax, eax
+	mov [esi + GlBuffer.flushed], eax
+
+.success:
+	inc eax
+	jmp .end
+
+.failed:
+	lea eax, [esi + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glDeleteBuffers, 1, eax
+
+	xor eax, eax
+	mov [esi + GlBuffer.gl_buffer], eax
+	mov [esi + GlBuffer.gl_buffer_cap], eax
+	mov [esi + GlBuffer.num_items], eax
+	mov [esi + GlBuffer.capacity], eax
+
+.end:
+	FrameEnd
+	ret
+
