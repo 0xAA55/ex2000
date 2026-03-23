@@ -103,7 +103,7 @@ segment .text
 global _start
 _start:
 	FrameBegin 0, 0
-	call _InitLoadLibrary
+	invoke_cdecl _InitLoadLibrary
 	def_dll_and_load User32, "user32.dll"
 	def_dll_and_load GDI32, "gdi32.dll"
 
@@ -141,14 +141,14 @@ _start:
 	invoke_dll_stdcall ShowWindow, [_hWnd], 1
 	invoke_dll_stdcall UpdateWindow, [_hWnd]
 
-	call _SceneInit
+	invoke_cdecl _SceneInit
 
 .msgloop:
 	invoke_dll_stdcall PeekMessageA, _MSG, 0, 0, 0, PM_REMOVE
 	test eax, eax
 	jnz .proc_message
 
-	call _Scene
+	invoke_cdecl _Scene
 	jmp .msgloop
 .proc_message:
 
@@ -176,7 +176,7 @@ _WndProc@16:
 	invoke_dll_stdcall GetDC, Param(0)
 	mov [_hDC], eax
 
-	call _InitGL33
+	invoke_cdecl _InitGL33
 	test eax, eax
 	jz .fail
 
@@ -189,7 +189,7 @@ _WndProc@16:
 	cmp dword Param(1), WM_DESTROY
 	jnz .other_than_WM_DESTROY
 
-	call _DeInitGL33
+	invoke_cdecl _DeInitGL33
 
 	invoke_dll_stdcall ReleaseDC, [_hWnd], [_hDC]
 	invoke_dll_stdcall PostQuitMessage, 0
