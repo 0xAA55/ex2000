@@ -35,14 +35,12 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacit
 	test edx, edx
 	jnz .failexit
 	StoreVariable VAR_CBSIZE, eax
-	PrepParam 0, eax
-	call _malloc
+
+	invoke_cdecl _malloc, eax
 	mov [esi + GlBuffer.pointer], eax
 
 	lea eax, Variable(VAR_GLOBJ)
-	PrepStdCallParam 1, eax
-	invoke_dll_func glGenBuffers
-	AfterStdCall
+	invoke_dll_stdcall glGenBuffers, 1, eax
 
 	cmp dword [esi + GlBuffer.pointer], 0
 	jz .failexit
@@ -51,18 +49,9 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacit
 
 	mov edi, Param(PRM_BUF_TYPE)
 
-	PrepStdCallParam edi, Variable(VAR_GLOBJ)
-	invoke_dll_func glBindBuffer
-	AfterStdCall
-
-	mov eax, Variable(VAR_CBSIZE)
-	PrepStdCallParam edi, eax, 0, Param(PRM_BUF_USAGE)
-	invoke_dll_func glBufferData
-	AfterStdCall
-
-	PrepStdCallParam edi, 0
-	invoke_dll_func glBindBuffer
-	AfterStdCall
+	invoke_dll_stdcall glBindBuffer, edi, Variable(VAR_GLOBJ)
+	invoke_dll_stdcall glBufferData, edi, Variable(VAR_CBSIZE), 0, Param(PRM_BUF_USAGE)
+	invoke_dll_stdcall glBindBuffer, edi, 0
 
 	xor eax, eax
 	LoadParam ecx, PRM_CAPACITY
@@ -102,17 +91,13 @@ _DeInitBuffer:
 	FrameBegin 0, 1, edi
 
 	LoadParam edi, 0
-	mov eax, [edi + GlBuffer.pointer]
-	PrepParam 0, eax
-	call _free
+	invoke_cdecl _free, [edi + GlBuffer.pointer]
 
 	cmp dword [edi + GlBuffer.gl_buffer], 0
 	jz .end
 
 	lea eax, [edi + GlBuffer.gl_buffer]
-	PrepStdCallParam 1, eax
-	invoke_dll_func glDeleteBuffers
-	AfterStdCall
+	invoke_dll_stdcall glDeleteBuffers, 1, eax
 
 .end:
 	mov ecx, GlBuffer.size / 4
