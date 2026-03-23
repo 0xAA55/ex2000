@@ -47,8 +47,8 @@ _InitTimer:
 
 global _UpdateTimer
 _UpdateTimer:
-	FrameBegin 1, 0
-	StoreVariable 0, esi
+	FrameBegin 0, 0
+	FramePush esi
 
 	LoadParam esi, 0
 	mov eax, [esi + Timer.IsPaused]
@@ -64,7 +64,7 @@ _UpdateTimer:
 	fst qword [esi + Timer.TimerVal]
 
 .end:
-	LoadVariable esi, 0
+	FramePop esi
 	FrameEnd
 	ret
 
@@ -78,8 +78,8 @@ _IsTimerPaused:
 
 global _PauseTimer
 _PauseTimer:
-	FrameBegin 1, 0
-	StoreVariable 0, esi
+	FrameBegin 0, 0
+	FramePush esi
 
 	LoadParam esi, 0
 	mov eax, [esi + Timer.IsPaused]
@@ -93,14 +93,14 @@ _PauseTimer:
 	fst qword [esi + Timer.PausedTime]
 
 .end:
-	LoadVariable esi, 0
+	FramePop esi
 	FrameEnd
 	ret
 
 global _UnpauseTimer
 _UnpauseTimer:
-	FrameBegin 1, 0
-	StoreVariable 0, esi
+	FrameBegin 0, 0
+	FramePush esi
 
 	LoadParam esi, 0
 	mov eax, [esi + Timer.IsPaused]
@@ -116,6 +116,6 @@ _UnpauseTimer:
 	fst qword [esi + Timer.StartTime]
 
 .end:
-	LoadVariable esi, 0
+	FramePop esi
 	FrameEnd
 	ret

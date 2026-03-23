@@ -20,12 +20,9 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	%define PRM_NUM_ITEMS 4
 	%define VAR_GLOBJ 0
 	%define VAR_CBSIZE 1
-	%define VAR_ESI_HOME 2
-	%define VAR_EDI_HOME 3
-	FrameBegin 5, 1
+	FrameBegin 2, 1
+	FramePush esi, edi
 
-	StoreVariable VAR_ESI_HOME, esi
-	StoreVariable VAR_EDI_HOME, edi
 	StoreVariable VAR_GLOBJ, 0
 
 	xor eax, eax
@@ -36,6 +33,8 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 
 	LoadParam eax, PRM_ITEM_SIZE
 	mul dword Param(PRM_NUM_ITEMS)
+	test edx, edx
+	jnz .failexit
 	StoreVariable VAR_CBSIZE, eax
 	PrepParam 0, eax
 	call _malloc
@@ -67,14 +66,15 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	AfterStdCall
 
 	xor eax, eax
-	mov [esi + GlBuffer.num_items], eax
 	LoadParam ecx, PRM_NUM_ITEMS
+	LoadParam edx, PRM_ITEM_SIZE
+	mov [esi + GlBuffer.num_items], eax
+	mov [esi + GlBuffer.flushed], eax
+	LoadVariable eax, VAR_GLOBJ
 	mov [esi + GlBuffer.capacity], ecx
 	mov [esi + GlBuffer.gl_buffer_size], ecx
 	mov [esi + GlBuffer.gl_buffer_type], edi
-	LoadParam edx, PRM_ITEM_SIZE
 	mov [esi + GlBuffer.size_of_item], edx
-	LoadVariable eax, VAR_GLOBJ
 	mov [esi + GlBuffer.gl_buffer], eax
 
 	xor eax, eax
@@ -86,8 +86,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 
 	xor eax, eax
 .end:
-	LoadVariable esi, VAR_ESI_HOME
-	LoadVariable edi, VAR_EDI_HOME
+	FramePop esi, edi
 	FrameEnd
 	%undef PRM_INST
 	%undef PRM_BUF_TYPE
@@ -96,14 +95,12 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, num_ite
 	%undef PRM_NUM_ITEMS
 	%undef VAR_GLOBJ
 	%undef VAR_CBSIZE
-	%undef VAR_ESI_HOME
-	%undef VAR_EDI_HOME
 	ret
 
 global _DeInitBuffer
 _DeInitBuffer:
-	FrameBegin 2, 1
-	StoreVariable 0, edi
+	FrameBegin 0, 1
+	FramePush edi
 
 	LoadParam edi, 0
 	mov eax, [edi + GlBuffer.pointer]
@@ -122,6 +119,9 @@ _DeInitBuffer:
 	mov ecx, GlBuffer.size / 4
 	rep stosd
 
-	LoadVariable edi, 0
+	FramePop edi
+	FrameEnd
+	ret
+
 	FrameEnd
 	ret
