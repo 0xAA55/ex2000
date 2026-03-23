@@ -124,9 +124,75 @@
 	%endif
 %endmacro
 
+%define IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
+%define IsRegUsedForPass(reg) (%substr(PassRegUsed, 1, 3) == %str(reg) || %substr(PassRegUsed, 4, 3) == %str(reg) || %substr(PassRegUsed, 7, 3) == %str(reg))
+%define IsRegAvoidForPass(reg) (%substr(PassRegAvoid, 1, 3) == %str(reg) || %substr(PassRegAvoid, 4, 3) == %str(reg) || %substr(PassRegAvoid, 7, 3) == %str(reg))
+%define IsNoRegAvailableForPass (IsRegAvoidForPass(eax) && IsRegAvoidForPass(ecx) && IsRegAvoidForPass(edx))
+
+%macro AddRegUsedForPass 1
+	%ifndef PassRegUsed
+		%define PassRegUsed %str(%1)
+	%elif (IsRegUsedForPass(eax) && %1 != eax) || (IsRegUsedForPass(ecx) && %1 != ecx) || (IsRegUsedForPass(edx) && %1 != edx)
+		%define PassRegUsed %strcat(PassRegUsed, %str(%1))
+	%endif
+%endmacro
+
+%macro AddRegAvoidForPass 1
+	%ifndef PassRegAvoid
+		%define PassRegAvoid %str(%1)
+	%elif (IsRegAvoidForPass(eax) && %1 != eax) || (IsRegAvoidForPass(ecx) && %1 != ecx) || (IsRegAvoidForPass(edx) && %1 != edx)
+		%define PassRegAvoid %strcat(PassRegAvoid, %str(%1))
+	%endif
+%endmacro
+
+%macro RotatePassReg 0
+	%if IsNoRegAvailableForPass
+		%error No registers available to store address reference parameters to pass
+	%endif
+	%rep 4
+		%ifndef PassReg
+			%define PassReg eax
+		%elif PassReg == eax
+			%undef PassReg
+			%define PassReg ecx
+		%elif PassReg == ecx
+			%undef PassReg
+			%define PassReg edx
+		%else
+			%undef PassReg
+			%define PassReg eax
+		%endif
+		%if !IsRegAvoidForPass(PassReg)
+			AddRegUsedForPass PassReg
+			%exitrep
+		%endif
+	%endrep
+%endmacro
+
+%macro ResetPassReg 0
+	%ifdef PassReg
+		%undef PassReg
+	%endif
+	%ifdef PassRegUsed
+		%undef PassRegUsed
+	%endif
+	%ifdef PassRegAvoid
+		%undef PassRegAvoid
+	%endif
+%endmacro
+
 %macro PrepParam 2
 	%if %1 < Frame_NumReservedParams
-		mov dword CallParam(%1), %2
+		%if %substr(%str(%2), 1, 1) == "["
+			RotatePassReg
+			mov PassReg, %2
+			mov CallParam(%1), PassReg
+		%else
+			%if IsPassReg(%2) && IsRegUsedForPass(%2)
+				%error Register %2 was used for pass address reference parameters, here it was consumed.
+			%endif
+			mov dword CallParam(%1), %2
+		%endif
 	%else
 		%error Bad param index %1
 	%endif
