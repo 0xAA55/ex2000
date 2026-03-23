@@ -9,6 +9,7 @@
 extern _malloc
 extern _realloc
 extern _free
+import_dll_func memcpy
 
 segment .text
 global _InitBuffer
@@ -106,5 +107,133 @@ _DeInitBuffer:
 	FrameEnd
 	ret
 
+global _BufferSizeGrow
+_BufferSizeGrow:
+	FrameBegin 1, 2, esi
+
+	LoadParam esi, 0
+	mov eax, [esi + GlBuffer.capacity]
+	mov ecx, 3
+	mul ecx
+	dec ecx
+	div ecx
+	inc eax
+	StoreVariable 0, eax
+	mul dword [esi + GlBuffer.size_of_item]
+
+	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
+	test eax, eax
+	jz .end
+	mov [esi + GlBuffer.pointer], eax
+	mov dword [esi + GlBuffer.flushed], 0
+	LoadVariable ecx, 0
+	mov [esi + GlBuffer.capacity], ecx
+
+.end:
 	FrameEnd
 	ret
+
+global _BufferPushItem
+_BufferPushItem:
+	FrameBegin 0, 1, esi, edi
+
+	LoadParam esi, 0
+	mov eax, [esi + GlBuffer.num_items]
+	cmp eax, [esi + GlBuffer.capacity]
+	jb .proceed_to_push
+	invoke_cdecl _BufferSizeGrow, esi
+.proceed_to_push:
+	; Calculate new item address
+	mov ecx, [esi + GlBuffer.size_of_item]
+	mov eax, ecx
+	mul [esi + GlBuffer.num_items]
+	test edx, edx
+	jnz .fail
+	add eax, [esi + GlBuffer.pointer]
+
+	; Proceed to copy item data
+	LoadParam esi, 1
+	mov edi, eax
+	rep movsb
+
+	xor eax, eax
+	LoadParam esi, 0
+	mov [esi + GlBuffer.flushed], eax
+
+	inc eax
+	jmp .end
+.fail:
+	xor eax, eax
+.end:
+	FrameEnd
+	ret
+
+global _BufferPopItem
+_BufferPopItem:
+	FrameBegin 0, 0, esi, edi
+
+	LoadParam esi, 0
+	LoadParam edi, 1
+
+	xor edx, edx
+	mov eax, [esi + GlBuffer.num_items]
+	cmp eax, edx
+	jz .end
+
+	test edi, edi
+	jz .after_copy
+
+	mov ecx, [esi + GlBuffer.size_of_item]
+	mul ecx
+	add eax, [esi + GlBuffer.pointer]
+	mov esi, eax
+	rep movsb
+
+.after_copy:
+	dec dword [esi + GlBuffer.num_items]
+
+.end:
+	FrameEnd
+	ret
+
+global _BufferFlush
+_BufferFlush:
+	FrameBegin 1, 3, esi, edi
+
+	LoadParam esi, 0
+	mov eax, [esi + GlBuffer.flushed]
+	test eax, eax
+	jnz .end
+
+	mov eax, [esi + GlBuffer.capacity]
+	cmp eax, [esi + GlBuffer.gl_buffer_cap]
+	je .map
+
+	mul dword [esi + GlBuffer.size_of_item]
+	StoreVariable 0, eax
+
+	lea edi, [esi + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glDeleteBuffers, 1, edi
+	invoke_dll_stdcall glGenBuffers, 1, edi
+	mov eax, [edi]
+	mov edi, [esi + GlBuffer.gl_buffer_type]
+	invoke_dll_stdcall glBindBuffer, edi, eax
+	invoke_dll_stdcall glBufferData, edi, Variable(0), [esi + GlBuffer.pointer], [esi + GlBuffer.gl_buffer_usage]
+	xor eax, eax
+	invoke_dll_stdcall glBindBuffer, edi, eax
+	jmp .flushed
+
+.map:
+	invoke_dll_stdcall glMapBuffer, [esi + GlBuffer.gl_buffer_type], GL_WRITE_ONLY
+	invoke_dll_stdcall memcpy, eax, [esi + GlBuffer.pointer], Variable(0)
+	invoke_dll_stdcall glUnmapBuffer, [esi + GlBuffer.gl_buffer_type]
+	xor eax, eax
+
+.flushed:
+	inc eax
+	mov [esi + GlBuffer.flushed], eax
+
+.end:
+	FrameEnd
+	ret
+

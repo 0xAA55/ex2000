@@ -19,9 +19,15 @@ endstruc
 %ifndef BUFFER_ASM
 extern _InitBuffer
 extern _DeInitBuffer
+
+extern _BufferPushItem
+extern _BufferPopItem
+
+extern _BufferFlush
 %endif
 
 %macro InitBuffer 5
+	ResetPassReg
 	PrepParam 0, %1 ;pointer_to_GlBuffer
 	PrepParam 1, %2 ;buffer_type
 	PrepParam 2, %3 ;buffer_usage
@@ -31,8 +37,29 @@ extern _DeInitBuffer
 %endmacro
 
 %macro DeInitBuffer 1
+	ResetPassReg
 	PrepParam 0, %1 ;pointer_to_GlBuffer
 	call _DeInitBuffer
+%endmacro
+
+%macro BufferPushItem 2
+	ResetPassReg
+	PrepParam 0, %1 ;pointer_to_GlBuffer
+	PrepParam 1, %2 ;pointer_to_item
+	call _BufferPushItem
+%endmacro
+
+%macro BufferPopItem 2
+	ResetPassReg
+	PrepParam 0, %1 ;pointer_to_GlBuffer
+	PrepParam 1, %2 ;pointer_to_item or NULL
+	call _BufferPopItem
+%endmacro
+
+%macro BufferFlush 1
+	ResetPassReg
+	PrepParam 0, %1 ;pointer_to_GlBuffer
+	call _BufferFlush
 %endmacro
 
 %endif
