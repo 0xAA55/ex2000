@@ -125,4 +125,49 @@ extern _LoadFuncGroup
 	%endif
 %endmacro
 
+%macro invoke_cdecl 1-*
+	%if %0 == 1
+		call %1
+	%else
+		ResetPassReg
+		%rep %0 - 1
+			%rotate 1
+			%if IsPassReg(%1)
+				AddRegAvoidForPass %1
+			%endif
+		%endrep
+		%rotate 1
+		%assign CDeclParamIndex 0
+		%rep %0 - 1
+			%rotate 1
+			PrepParam CDeclParamIndex, %1
+			%assign CDeclParamIndex CDeclParamIndex + 1
+		%endrep
+		%rotate 1
+		call %1
+	%endif
+%endmacro
+
+%macro invoke_dll_cdecl 1-*
+	%if %0 == 1
+		invoke_dll_func %1
+	%else
+		ResetPassReg
+		%rep %0 - 1
+			%rotate 1
+			%if IsPassReg(%1)
+				AddRegAvoidForPass %1
+			%endif
+		%endrep
+		%assign CDeclParamIndex 0
+		%rep %0 - 1
+			%rotate 1
+			PrepParam CDeclParamIndex, %1
+			%assign CDeclParamIndex CDeclParamIndex + 1
+		%endrep
+		%rotate 1
+		invoke_dll_func %1
+	%endif
+%endmacro
+
 %endif
