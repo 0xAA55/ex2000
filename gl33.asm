@@ -372,18 +372,15 @@ _InitGL33:
 
 	dll_func_group_load OpenGL32, WGLFunc
 
-	PrepParam 0, 4096
-	call _malloc
+	invoke_cdecl _malloc, 4096
 	mov [_OpenGLNullFunctions], eax
 	mov [eax], 0
 
-	PrepParam 0, 256
-	call _malloc
+	invoke_cdecl _malloc, 1024
 	mov [_FailInfoBuffer], eax
 	mov [eax], 0
 
-	PrepParam 0, 256
-	call _malloc
+	invoke_cdecl _malloc, 1024
 	mov [_FuncNameBuf], eax
 	mov [eax], 0
 
@@ -1008,15 +1005,9 @@ _StartDecodeGLFunctions:
 
 _InitGL33_exit:
 	StoreVariable 0, eax
-	mov eax, [_OpenGLNullFunctions]
-	PrepParam 0, eax
-	call _free
-	mov eax, [_FailInfoBuffer]
-	PrepParam 0, eax
-	call _free
-	mov eax, [_FuncNameBuf]
-	PrepParam 0, eax
-	call _free
+	invoke_cdecl _free, [_OpenGLNullFunctions]
+	invoke_cdecl _free, [_FailInfoBuffer]
+	invoke_cdecl _free, [_FuncNameBuf]
 	xor eax, eax
 	mov [_OpenGLNullFunctions], eax
 	LoadVariable eax, 0
