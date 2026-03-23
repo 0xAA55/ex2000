@@ -203,8 +203,12 @@
 			mov PassReg, %2
 			mov CallParam(%1), PassReg
 		%else
-			%if IsPassReg(%2) && IsRegUsedForPass(%2)
-				%error Register %2 was used for pass address reference parameters, here it was consumed.
+			%if IsPassReg(%2)
+				%if IsRegUsedForPass(%2)
+					%error Register %2 was used for pass address reference parameters, here it was consumed by automatic allocating register.
+				%else
+					RemoveRegAvoidForPass %2
+				%endif
 			%endif
 			mov dword CallParam(%1), %2
 		%endif
