@@ -3,7 +3,7 @@
 
 ; %define Frame_UseEBP
 
-%macro FrameBegin 2
+%macro FrameBegin 2-3+
 	%assign Frame_NumVariables %1
 	%assign Frame_NumReservedParams %2
 	%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
@@ -11,6 +11,14 @@
 	%ifdef Frame_UseEBP
 		push ebp
 		mov ebp, esp
+	%endif
+	%if %0 > 2
+		%define Frame_SavedRegs %3
+		FramePush Frame_SavedRegs
+	%else
+		%ifdef Frame_SavedRegs
+			%undef Frame_SavedRegs
+		%endif
 	%endif
 	%if Frame_NumLocals != 0
 		sub esp, Frame_NumLocals * 4
@@ -20,6 +28,9 @@
 %macro FrameEnd 0
 	%if Frame_NumLocals != 0
 		add esp, Frame_NumLocals * 4
+	%endif
+	%ifdef Frame_SavedRegs
+		FramePop Frame_SavedRegs
 	%endif
 	%ifdef Frame_UseEBP
 		pop ebp
