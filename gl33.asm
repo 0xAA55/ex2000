@@ -311,8 +311,8 @@ _DecodeProcName:
 	FrameEnd
 	ret
 
-global _isdigit
-_isdigit:
+global _isdigit_al
+_isdigit_al:
 	mov dword [_FailReason], _ParseFailBecauseNondigit
 	cmp al, '0'
 	jb .parse_fail
@@ -514,7 +514,7 @@ _StartDecodeGL32Functions:
 	xor eax, eax
 .parse_version:
 	lodsb
-	call _isdigit
+	call _isdigit_al
 	test eax, eax
 	jz .parse_fail
 	sub al, '0'
@@ -524,7 +524,7 @@ _StartDecodeGL32Functions:
 	cmp al, '.'
 	jnz .parse_fail
 	lodsb
-	call _isdigit
+	call _isdigit_al
 	test eax, eax
 	jz .parse_fail
 	sub al, '0'
@@ -536,7 +536,7 @@ _StartDecodeGL32Functions:
 	cmp al, '.'
 	jnz .parse_fail
 	lodsb
-	call _isdigit
+	call _isdigit_al
 	test eax, eax
 	jz .parse_fail
 	sub al, '0'
