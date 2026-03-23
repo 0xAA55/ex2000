@@ -145,6 +145,21 @@
 	%endif
 %endmacro
 
+%macro RemoveRegAvoidForPass 1
+	%ifdef PassRegAvoid
+		%if %substr(PassRegAvoid, 1, 3) == %str(%1)
+			%substr PassRegAvoid PassRegAvoid 4
+		%elif %substr(PassRegAvoid, 4, 3) == %str(%1)
+			%define PassRegAvoid %strcat(%substr(PassRegAvoid, 1, 3), %substr(PassRegAvoid, 7))
+		%elif %substr(PassRegAvoid, 7, 3) == %str(%1)
+			%substr PassRegAvoid PassRegAvoid 1, 6
+		%endif
+		%if %strlen(PassRegAvoid) == 0
+			%undef PassRegAvoid
+		%endif
+	%endif
+%endmacro
+
 %macro RotatePassReg 0
 	%if IsNoRegAvailableForPass
 		%error No registers available to store address reference parameters to pass
