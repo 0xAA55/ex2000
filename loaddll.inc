@@ -159,6 +159,7 @@ extern _LoadFuncGroup
 				AddRegAvoidForPass %1
 			%endif
 		%endrep
+		%rotate 1
 		%assign CDeclParamIndex 0
 		%rep %0 - 1
 			%rotate 1
