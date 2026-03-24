@@ -15,8 +15,7 @@ global _Timer
 _Timer resb Timer.size
 
 segment .text
-global _Scene
-_Scene:
+DefFunc _Scene
 	FrameBegin 0, 1
 
 	PrepParam 0, _Timer
@@ -34,8 +33,7 @@ _Scene:
 	FrameEnd
 	ret
 
-global _SwapBuffers
-_SwapBuffers:
+DefFunc _SwapBuffers
 	mov eax, [_addr_of_wglSwapInterval]
 	test eax, eax
 	jnz .swap_buffers
@@ -46,8 +44,7 @@ _SwapBuffers:
 	invoke_dll_stdcall wglSwapBuffers, [_hDC]
 	ret
 
-global _SceneInit
-_SceneInit:
+DefFunc _SceneInit
 	FrameBegin 0, 1
 
 	PrepParam 0, _Timer
@@ -81,7 +78,6 @@ _SceneInit:
 	FrameEnd
 	ret
 
-global _FakeDwmFlush
-_FakeDwmFlush:
+DefFunc _FakeDwmFlush
 	xor eax, eax
 	ret

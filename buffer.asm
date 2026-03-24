@@ -11,8 +11,7 @@ import_dll_func memcpy
 import_dll_func memset
 
 segment .text
-global _InitBuffer
-_InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity
+DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity
 	%define PRM_INST 0
 	%define PRM_BUF_TYPE 1
 	%define PRM_BUF_USAGE 2
@@ -86,8 +85,7 @@ _InitBuffer: ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacit
 	%undef VAR_CBSIZE
 	ret
 
-global _DeInitBuffer
-_DeInitBuffer:
+DefFunc _DeInitBuffer
 	FrameBegin 0, 1, edi
 
 	LoadParam edi, 0
@@ -106,8 +104,7 @@ _DeInitBuffer:
 	FrameEnd
 	ret
 
-global _BufferSizeGrow
-_BufferSizeGrow:
+DefFunc _BufferSizeGrow
 	FrameBegin 1, 2, esi
 
 	LoadParam esi, 0
@@ -134,8 +131,7 @@ _BufferSizeGrow:
 	FrameEnd
 	ret
 
-global _BufferPushItem
-_BufferPushItem:
+DefFunc _BufferPushItem
 	FrameBegin 0, 1, esi, edi
 
 	LoadParam esi, 0
@@ -171,8 +167,7 @@ _BufferPushItem:
 	FrameEnd
 	ret
 
-global _BufferPopItem
-_BufferPopItem:
+DefFunc _BufferPopItem
 	FrameBegin 0, 0, esi, edi
 
 	LoadParam esi, 0
@@ -199,8 +194,7 @@ _BufferPopItem:
 	FrameEnd
 	ret
 
-global _BufferFlush
-_BufferFlush:
+DefFunc _BufferFlush
 	FrameBegin 1, 3, esi, edi
 
 	LoadParam esi, 0
@@ -256,8 +250,7 @@ _BufferFlush:
 	mov [esi + GlBuffer.gl_buffer_cap], eax
 	ret
 
-global _BufferTrimExcess
-_BufferTrimExcess:
+DefFunc _BufferTrimExcess
 	FrameBegin 0, 2, esi
 
 	LoadParam esi, 0
@@ -297,8 +290,7 @@ _BufferTrimExcess:
 	FrameEnd
 	ret
 
-global _BufferResize
-_BufferResize:
+DefFunc _BufferResize
 	FrameBegin 0, 2, esi
 
 	LoadParam esi, 0

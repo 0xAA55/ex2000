@@ -249,8 +249,7 @@ def_dll_func wglSwapBuffers
 dll_func_group_end WGLFunc
 
 segment .text
-global _DecodeProcName
-_DecodeProcName:
+DefFunc _DecodeProcName
 	FrameBegin 1, 0, esi, edi
 
 	mov edx, [_FuncNameBuf]
@@ -323,8 +322,7 @@ _isdigit_al:
 .end:
 	ret
 
-global _CheckOpenGLProcAddress
-_CheckOpenGLProcAddress:
+DefFunc _CheckOpenGLProcAddress
 	test eax, eax
 	jnz .success
 
@@ -342,8 +340,7 @@ _CheckOpenGLProcAddress:
 .success:
 	ret
 
-global _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
-_GetGL32ProcAddress:
+DefFunc _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
 	FrameBegin 0, 0
 	call _DecodeProcName
 	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
@@ -351,8 +348,7 @@ _GetGL32ProcAddress:
 	FrameEnd
 	ret
 
-global _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
-_GetGLProcAddress:
+DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 	FrameBegin 0, 0
 	call _DecodeProcName
 	invoke_dll_stdcall wglGetProcAddress, [_FuncNameBuf]
@@ -360,8 +356,7 @@ _GetGLProcAddress:
 	FrameEnd
 	ret
 
-global _InitGL33
-_InitGL33:
+DefFunc _InitGL33
 	FrameBegin 1, 1, esi, edi
 
 	def_dll_func_and_load GDI32, ChoosePixelFormat
@@ -979,7 +974,7 @@ _StartDecodeGL32Functions:
 	_LastGLFunc:
 
 	segment .text
-_StartDecodeGLFunctions:
+DefFunc _StartDecodeGLFunctions
 	mov ecx, (_LastGLFunc - _FirstGLFunc) / 4
 	mov esi, _FirstNameOfGLFunc
 	mov edi, _FirstGLFunc
@@ -1013,8 +1008,7 @@ _InitGL33_exit:
 	FrameEnd
 	ret
 
-global _DeInitGL33
-_DeInitGL33:
+DefFunc _DeInitGL33
 	FrameBegin 0, 0
 	xor eax, eax
 	invoke_dll_stdcall wglMakeCurrent, eax, eax

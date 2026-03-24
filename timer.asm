@@ -11,8 +11,7 @@ _PerfFreq resq 1
 _SysTimerVal resq 1
 
 segment .text
-global _GetSysTimerVal
-_GetSysTimerVal:
+DefFunc _GetSysTimerVal
 	push _PerfFreq
 	invoke_dll_func QueryPerformanceFrequency
 
@@ -24,16 +23,14 @@ _GetSysTimerVal:
 	fdiv
 	ret
 
-global _GetTimerVal
-_GetTimerVal:
+DefFunc _GetTimerVal
 	FrameBegin 0, 0
 	LoadParam eax, 0
 	fld qword [eax + Timer.TimerVal]
 	FrameEnd
 	ret
 
-global _InitTimer
-_InitTimer:
+DefFunc _InitTimer
 	FrameBegin 0, 0
 	call _GetSysTimerVal
 	LoadParam edx, 0
@@ -43,8 +40,7 @@ _InitTimer:
 	FrameEnd
 	ret
 
-global _UpdateTimer
-_UpdateTimer:
+DefFunc _UpdateTimer
 	FrameBegin 0, 0, esi
 
 	LoadParam esi, 0
@@ -64,16 +60,14 @@ _UpdateTimer:
 	FrameEnd
 	ret
 
-global _IsTimerPaused
-_IsTimerPaused:
+DefFunc _IsTimerPaused
 	FrameBegin 0, 0
 	LoadParam eax, 0
 	mov eax, [eax + Timer.IsPaused]
 	FrameEnd
 	ret
 
-global _PauseTimer
-_PauseTimer:
+DefFunc _PauseTimer
 	FrameBegin 0, 0, esi
 
 	LoadParam esi, 0
@@ -91,8 +85,7 @@ _PauseTimer:
 	FrameEnd
 	ret
 
-global _UnpauseTimer
-_UnpauseTimer:
+DefFunc _UnpauseTimer
 	FrameBegin 0, 0, esi
 
 	LoadParam esi, 0

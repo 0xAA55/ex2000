@@ -99,8 +99,7 @@ segment .bss
 _LastUFunc:
 
 segment .text
-global _start
-_start:
+DefFunc _start
 	FrameBegin 0, 0
 	invoke_cdecl _InitLoadLibrary
 	def_dll_and_load User32, "user32.dll"
@@ -166,8 +165,7 @@ _start:
 	AfterStdCall
 	ret
 
-global _WndProc@16
-_WndProc@16:
+DefFunc _WndProc@16
 	FrameBegin 0, 0
 	cmp dword Param(1), WM_CREATE
 	jnz .other_than_WM_CREATE
@@ -202,15 +200,13 @@ _WndProc@16:
 	FrameEnd
 	ret 16
 
-global _malloc
-_malloc:
+DefFunc _malloc
 	FrameBegin 0, 0
 	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
 
-global _calloc
-_calloc:
+DefFunc _calloc
 	FrameBegin 0, 0
 
 	mov eax, Param(0)
@@ -220,15 +216,13 @@ _calloc:
 	FrameEnd
 	ret
 
-global _realloc
-_realloc:
+DefFunc _realloc
 	FrameBegin 0, 0
 	invoke_dll_stdcall HeapReAlloc, [_hHeap], 4, Param(0), Param(1)
 	FrameEnd
 	ret
 
-global _free
-_free:
+DefFunc _free
 	FrameBegin 0, 0
 	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
 	FrameEnd

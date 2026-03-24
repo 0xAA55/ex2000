@@ -14,8 +14,7 @@ segment .rdata
 _name_of_LoadLibraryA db "LoadLibraryA", 0
 
 segment .text
-global _InitLoadLibrary
-_InitLoadLibrary:
+DefFunc _InitLoadLibrary
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
 	mov eax, [eax + 0x14]	; EAX = PEB->Ldr.InMemOrder.Flink (Current EXE)
@@ -67,8 +66,7 @@ _InitLoadLibrary:
 	mov [_addr_of_LoadLibraryA], eax
 	ret
 
-global _LoadFuncGroup
-_LoadFuncGroup:
+DefFunc _LoadFuncGroup
 	push ecx
 	push esi
 	push ebx
@@ -91,8 +89,7 @@ _LoadFuncGroup:
 	loop _LoadFuncGroup
 	ret
 
-global _NextString
-_NextString:
+DefFunc _NextString
 	lodsb
 	test al, al ; Find NUL
 	jnz _NextString
