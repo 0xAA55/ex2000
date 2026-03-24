@@ -39,14 +39,15 @@ endstruc
 
 %ifndef MATRIX_ASM
 extern _VectorMultMatrix
+extern _VectorMultMatrixTransposed
 extern _MatrixIdentity
 extern _MatrixRotationX
 extern _MatrixRotationY
 extern _MatrixRotationZ
 extern _MatrixRotationEuler
 extern _MatrixTranspose
-extern _MatrixTransposeInplace
-
+extern _MatrixMultiply
+extern _MatrixMultiplyTransposed
 
 %endif
 
