@@ -1,0 +1,244 @@
+%include "loaddll.inc"
+
+%define MATRIX_ASM 1
+%include "matrix.inc"
+
+%define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
+
+import_dll_func memcpy
+import_dll_func memset
+
+segment .bss
+align 16
+global _ZeroVector
+_ZeroVector resd 4
+
+segment .text
+global _VectorMultMatrix
+_VectorMultMatrix:
+	FrameBegin 0, 0
+
+	LoadParam eax, 0
+	LoadParam ecx, 1
+	LoadParam edx, 2
+
+	movaps xmm2, [ecx]
+	movaps xmm3, [ecx]
+
+	movaps xmm1, xmm2
+	shufps xmm1, xmm3, _MM_SHUFFLE(0, 0, 0, 0)
+	mulps xmm1, [edx + Matrix.x]
+	movaps xmm0, xmm1
+
+	movaps xmm1, xmm2
+	shufps xmm1, xmm3, _MM_SHUFFLE(1, 1, 1, 1)
+	mulps xmm1, [edx + Matrix.y]
+	addps xmm0, xmm1
+
+	movaps xmm1, xmm2
+	shufps xmm1, xmm3, _MM_SHUFFLE(2, 2, 2, 2)
+	mulps xmm1, [edx + Matrix.z]
+	addps xmm0, xmm1
+
+	movaps xmm1, xmm2
+	shufps xmm1, xmm3, _MM_SHUFFLE(3, 3, 3, 3)
+	mulps xmm1, [edx + Matrix.w]
+	addps xmm0, xmm1
+
+	movaps [eax], xmm0
+
+	FrameEnd
+	ret
+
+global _VectorMultMatrixTransposed
+_VectorMultMatrixTransposed:
+	FrameBegin 20, 2, esi
+
+	lea esi, Variable(4)
+	and esi, 0xFFFFFFF0
+
+	LoadParam ecx, 1
+	LoadParam edx, 2
+
+	movaps xmm1, [ecx]
+	mulps xmm1, [edx + Matrix.x]
+	movaps [esi + Matrix.x], xmm1
+	movaps xmm1, [ecx]
+	mulps xmm1, [edx + Matrix.y]
+	movaps [esi + Matrix.y], xmm1
+	movaps xmm1, [ecx]
+	mulps xmm1, [edx + Matrix.z]
+	movaps [esi + Matrix.z], xmm1
+	movaps xmm1, [ecx]
+	mulps xmm1, [edx + Matrix.w]
+	movaps [esi + Matrix.w], xmm1
+
+	invoke_cdecl _MatrixTranspose, esi, esi
+
+	movaps xmm0, [esi + Matrix.x]
+	movaps xmm1, [esi + Matrix.y]
+	addps xmm0, [esi + Matrix.z]
+	addps xmm1, [esi + Matrix.w]
+	addps xmm0, xmm1
+
+	LoadParam eax, 0
+	movaps [eax], xmm0
+
+	FrameEnd
+	ret
+
+global _PreMatRot
+_PreMatRot:
+	fld dword [eax]
+	fld st0
+	fcos
+	fst dword [edx + 0]
+	fsin
+	fld st0
+	fst dword [edx + 4]
+	fchs
+	fst dword [edx + 8]
+	ret
+
+global _MatrixIdentity
+_MatrixIdentity:
+	FrameBegin 0, 0, edi
+
+	LoadParam edi, 0
+	movaps xmm0, [_ZeroVector]
+	mov ecx, 4
+	xor eax, eax
+.fillzero:
+	movaps [edi + eax], xmm0
+	add al, 16
+	loop .fillzero
+
+	mov eax, 0x3F800000
+	mov [edi + Matrix.xx], eax
+	mov [edi + Matrix.yy], eax
+	mov [edi + Matrix.zz], eax
+	mov [edi + Matrix.ww], eax
+
+	FrameEnd
+	ret
+
+global _MatrixRotationX
+_MatrixRotationX:
+	FrameBegin 3, 1
+
+	invoke_cdecl _MatrixIdentity, Param(0)
+
+	lea eax, Param(1)
+	lea edx, Variable(0)
+	call _PreMatRot
+
+	LoadParam eax, 0
+	mov ecx, Variable(0)
+	mov edx, Variable(1)
+
+	mov [eax + Matrix.yy], ecx
+	mov [eax + Matrix.yz], edx
+	mov [eax + Matrix.zz], ecx
+	mov edx, Variable(2)
+	mov [eax + Matrix.zy], edx
+
+	FrameEnd
+	ret
+
+global _MatrixRotationY
+_MatrixRotationY:
+	FrameBegin 3, 1
+
+	invoke_cdecl _MatrixIdentity, Param(0)
+
+	lea eax, Param(1)
+	lea edx, Variable(0)
+	call _PreMatRot
+
+	LoadParam eax, 0
+	mov ecx, Variable(0)
+	mov edx, Variable(1)
+
+	mov [eax + Matrix.xx], ecx
+	mov [eax + Matrix.zx], edx
+	mov [eax + Matrix.zz], ecx
+	mov edx, Variable(2)
+	mov [eax + Matrix.xz], edx
+
+	FrameEnd
+	ret
+
+global _MatrixRotationZ
+_MatrixRotationZ:
+	FrameBegin 3, 1
+
+	invoke_cdecl _MatrixIdentity, Param(0)
+
+	lea eax, Param(1)
+	lea edx, Variable(0)
+	call _PreMatRot
+
+	LoadParam eax, 0
+	mov ecx, Variable(0)
+	mov edx, Variable(1)
+
+	mov [eax + Matrix.xx], ecx
+	mov [eax + Matrix.xy], edx
+	mov [eax + Matrix.yy], ecx
+	mov edx, Variable(2)
+	mov [eax + Matrix.yx], edx
+
+	FrameEnd
+	ret
+
+global _MatrixRotationEuler
+_MatrixRotationEuler:
+	FrameBegin 20, 1
+
+	
+
+
+
+	FrameEnd
+	ret
+
+global _MatrixTranspose
+_MatrixTranspose:
+	FrameBegin 0, 0
+
+	LoadParam edx, 0
+	LoadParam eax, 1
+
+	movaps xmm3, [eax + Matrix.y]
+	movaps xmm1, [eax + Matrix.x]
+	shufps xmm1, xmm3, 0x44
+	movaps xmm4, xmm1
+	movaps xmm1, [eax + Matrix.x]
+	shufps xmm1, xmm3, 0xEE
+	movaps xmm6, xmm1
+	movaps xmm1, [eax + Matrix.z]
+	movaps xmm3, [eax + Matrix.w]
+	shufps xmm1, xmm3, 0x44
+	movaps xmm5, xmm1
+	movaps xmm1, [eax + Matrix.z]
+	shufps xmm1, xmm3, 0xEE
+	movaps xmm7, xmm1
+
+	movaps xmm1, xmm4
+	movaps xmm3, xmm5
+	shufps xmm1, xmm3, 0x88
+	movaps [edx + Matrix.x], xmm1
+	movaps xmm1, xmm4
+	shufps xmm1, xmm3, 0xDD
+	movaps [edx + Matrix.y], xmm1
+	movaps xmm1, xmm6
+	movaps xmm3, xmm7
+	shufps xmm1, xmm3, 0x88
+	movaps [edx + Matrix.z], xmm1
+	movaps xmm1, xmm6
+	shufps xmm1, xmm3, 0xDD
+	movaps [edx + Matrix.w], xmm1
+
+	FrameEnd
+	ret
+
