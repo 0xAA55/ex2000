@@ -211,7 +211,8 @@ DefFunc _BufferFlush
 	test eax, eax
 	jz .empty
 
-	call .delbuf
+	lea edi, [esi + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glDeleteBuffers, 1, edi
 	invoke_dll_stdcall glGenBuffers, 1, edi
 	mov eax, [edi]
 	mov edi, [esi + GlBuffer.gl_buffer_type]
@@ -224,7 +225,11 @@ DefFunc _BufferFlush
 	xor eax, eax
 	jmp .flushed
 .empty:
-	call .delbuf
+	lea edi, [esi + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glDeleteBuffers, 1, edi
+	xor eax, eax
+	mov [edi], eax
+	mov [esi + GlBuffer.gl_buffer_cap], eax
 	jmp .flushed
 
 .map:
@@ -241,13 +246,6 @@ DefFunc _BufferFlush
 
 .end:
 	FrameEnd
-	ret
-.delbuf:
-	lea edi, [esi + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glDeleteBuffers, 1, edi
-	xor eax, eax
-	mov [edi], eax
-	mov [esi + GlBuffer.gl_buffer_cap], eax
 	ret
 
 DefFunc _BufferTrimExcess
