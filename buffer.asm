@@ -8,6 +8,7 @@ extern _malloc
 extern _realloc
 extern _free
 import_dll_func memcpy
+import_dll_func memset
 
 segment .text
 global _InitBuffer
@@ -126,6 +127,8 @@ _BufferSizeGrow:
 	mov dword [esi + GlBuffer.flushed], 0
 	LoadVariable ecx, 0
 	mov [esi + GlBuffer.capacity], ecx
+	xor eax, eax
+	inc eax
 
 .end:
 	FrameEnd
@@ -140,6 +143,8 @@ _BufferPushItem:
 	cmp eax, [esi + GlBuffer.capacity]
 	jb .proceed_to_push
 	invoke_cdecl _BufferSizeGrow, esi
+	test eax, eax
+	jz .fail
 .proceed_to_push:
 	; Calculate new item address
 	mov ecx, [esi + GlBuffer.size_of_item]
@@ -251,7 +256,6 @@ _BufferFlush:
 	mov [esi + GlBuffer.gl_buffer_cap], eax
 	ret
 
-
 global _BufferTrimExcess
 _BufferTrimExcess:
 	FrameBegin 0, 2, esi
@@ -278,6 +282,8 @@ _BufferTrimExcess:
 	jmp .end
 
 .failed:
+	invoke_cdecl _free, [esi + GlBuffer.pointer]
+
 	lea eax, [esi + GlBuffer.gl_buffer]
 	invoke_dll_stdcall glDeleteBuffers, 1, eax
 
@@ -291,3 +297,33 @@ _BufferTrimExcess:
 	FrameEnd
 	ret
 
+global _BufferResize
+_BufferResize:
+	FrameBegin 0, 2, esi
+
+	LoadParam esi, 0
+	LoadParam eax, 1
+	cmp eax, [esi + GlBuffer.capacity]
+	jbe .change_size
+
+	mul dword [esi + GlBuffer.size_of_item]
+	test edx, edx
+	jnz .failed
+
+	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
+	test eax, eax
+	jz .failed
+
+	LoadParam eax, 1
+	mov [esi + GlBuffer.capacity], eax
+
+.change_size: ;eax = new size
+	mov [esi + GlBuffer.num_items], eax
+
+	jmp .end
+.failed:
+	xor eax, eax
+
+.end:
+	FrameEnd
+	ret

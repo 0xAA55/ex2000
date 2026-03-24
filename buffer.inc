@@ -24,6 +24,8 @@ extern _BufferPushItem
 extern _BufferPopItem
 
 extern _BufferFlush
+extern _BufferTrimExcess
+extern _BufferResize
 %endif
 
 %macro InitBuffer 5
@@ -60,6 +62,19 @@ extern _BufferFlush
 	ResetPassReg
 	PrepParam 0, %1 ;pointer_to_GlBuffer
 	call _BufferFlush
+%endmacro
+
+%macro BufferTrimExcess 1
+	ResetPassReg
+	PrepParam 0, %1 ;pointer_to_GlBuffer
+	call _BufferTrimExcess
+%endmacro
+
+%macro BufferResize 2
+	ResetPassReg
+	PrepParam 0, %1 ;pointer_to_GlBuffer
+	PrepParam 1, %2 ;new size
+	call _BufferResize
 %endmacro
 
 %endif
