@@ -43,6 +43,22 @@ extern _LoadFuncGroup
 	push _name_of_ %+ %1
 	call [_addr_of_LoadLibraryA]
 	mov [_addr_of_ %+ %1], eax
+	%ifdef INVOKE_CHECK
+		segment .rdata
+		%%dllfail db %str(CurFuncName), ": On load dll `", %str(%1), "`: failed", 0
+
+		segment .text
+		test eax, eax
+		jnz %%success
+		extern _addr_of_MessageBoxA
+		push 0
+		push 0
+		push %%dllfail
+		push 0
+		call [_addr_of_MessageBoxA]
+		int3
+	%%success:
+	%endif
 %endmacro
 
 %macro load_dll_func 2
@@ -50,10 +66,36 @@ extern _LoadFuncGroup
 	push [_addr_of_ %+ %1]
 	call [_addr_of_GetProcAddress]
 	mov [_addr_of_ %+ %2], eax
+	%ifdef INVOKE_CHECK
+		test eax, eax
+		jnz %%success
+		int3
+	%%success:
+	%endif
 %endmacro
 
 %macro invoke_dll_func 1
-	call [_addr_of_ %+ %1]
+	%ifdef INVOKE_CHECK
+		mov eax, [_addr_of_ %+ %1]
+		test eax, eax
+		jnz %%success
+		segment .rdata
+		%%func_name db %str(CurFuncName), ": On call `", %str(%1), "`: NULL function pointer", 0
+
+		segment .text
+		extern _addr_of_MessageBoxA
+		push 0
+		push 0
+		push %%func_name
+		push 0
+		call [_addr_of_MessageBoxA]
+		jmp %%unsuccess
+		%%success:
+		call [_addr_of_ %+ %1]
+		%%unsuccess:
+	%else
+		call [_addr_of_ %+ %1]
+	%endif
 %endmacro
 
 %macro def_dll_and_load 2

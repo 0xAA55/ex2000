@@ -2,6 +2,13 @@
 %define _FRAME_INC_ 1
 
 ; %define Frame_UseEBP
+; %define INVOKE_CHECK
+
+%macro DefFunc 1
+	%define CurFuncName %1
+	global %1
+	%1:
+%endmacro
 
 %macro FrameBegin 2-3+
 	%assign Frame_NumVariables %1
