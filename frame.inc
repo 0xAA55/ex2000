@@ -160,6 +160,18 @@
 	%endif
 %endmacro
 
+%macro ResetPassReg 0
+	%ifdef PassReg
+		%undef PassReg
+	%endif
+	%ifdef PassRegUsed
+		%undef PassRegUsed
+	%endif
+	%ifdef PassRegAvoid
+		%undef PassRegAvoid
+	%endif
+%endmacro
+
 %macro RotatePassReg 0
 	%if IsNoRegAvailableForPass
 		%error No registers available to store address reference parameters to pass
@@ -182,18 +194,6 @@
 			%exitrep
 		%endif
 	%endrep
-%endmacro
-
-%macro ResetPassReg 0
-	%ifdef PassReg
-		%undef PassReg
-	%endif
-	%ifdef PassRegUsed
-		%undef PassRegUsed
-	%endif
-	%ifdef PassRegAvoid
-		%undef PassRegAvoid
-	%endif
 %endmacro
 
 %macro PrepParam 2
