@@ -1,5 +1,4 @@
 %include "loaddll.inc"
-%include "timer.inc"
 %include "gl33.inc"
 
 %define BUFFER_ASM
