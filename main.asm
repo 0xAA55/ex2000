@@ -160,9 +160,7 @@ DefFunc _start
 
 .exit:
 	FrameEnd
-	PrepStdCallParam 0
-	invoke_dll_func ExitProcess
-	AfterStdCall
+	invoke_dll_stdcall ExitProcess, 0
 	ret
 
 DefFunc _WndProc@16

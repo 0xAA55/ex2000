@@ -195,7 +195,7 @@ DefFunc _BufferPopItem
 	ret
 
 DefFunc _BufferFlush
-	FrameBegin 1, 3, esi, edi
+	FrameBegin 0, 3, ebx, esi, edi
 
 	LoadParam esi, 0
 	mov eax, [esi + GlBuffer.flushed]
@@ -207,7 +207,7 @@ DefFunc _BufferFlush
 	je .map
 
 	mul dword [esi + GlBuffer.size_of_item]
-	StoreVariable 0, eax
+	mov ebx, eax
 	test eax, eax
 	jz .empty
 
@@ -216,7 +216,7 @@ DefFunc _BufferFlush
 	mov eax, [edi]
 	mov edi, [esi + GlBuffer.gl_buffer_type]
 	invoke_dll_stdcall glBindBuffer, edi, eax
-	invoke_dll_stdcall glBufferData, edi, Variable(0), [esi + GlBuffer.pointer], [esi + GlBuffer.gl_buffer_usage]
+	invoke_dll_stdcall glBufferData, edi, ebx, [esi + GlBuffer.pointer], [esi + GlBuffer.gl_buffer_usage]
 	xor eax, eax
 	invoke_dll_stdcall glBindBuffer, edi, eax
 	mov eax, [esi + GlBuffer.capacity]
