@@ -59,11 +59,6 @@ _hHeap resd 1
 _MSG resb MSG.size
 
 dll_func_group_start KFunc
-def_dll_func_alias strcpy, "lstrcpyA"
-def_dll_func_alias strcat, "lstrcatA"
-def_dll_func_alias strlen, "lstrlenA"
-def_dll_func_alias memset, "RtlFillMemory"
-def_dll_func_alias memcpy, "RtlMoveMemory"
 def_dll_func ExitProcess
 def_dll_func QueryPerformanceFrequency
 def_dll_func QueryPerformanceCounter
@@ -74,8 +69,6 @@ def_dll_func HeapReAlloc
 def_dll_func HeapFree
 def_dll_func HeapLock
 def_dll_func HeapUnlock
-global _addr_of_memmove
-_addr_of_memmove equ _addr_of_memcpy
 dll_func_group_end KFunc
 
 dll_func_group_start UFunc
@@ -95,18 +88,32 @@ def_dll_func GetDC
 def_dll_func ReleaseDC
 dll_func_group_end UFunc
 
+dll_func_group_start CFunc
+def_dll_func strcpy
+def_dll_func strcat
+def_dll_func strlen
+def_dll_func printf
+def_dll_func memset
+def_dll_func memcpy
+def_dll_func memmove
+def_dll_func cos
+def_dll_func sin
+dll_func_group_end CFunc
+
 segment .bss
 _LastUFunc:
 
 segment .text
 DefFunc _start
-	FrameBegin 0, 0
+	FrameBegin 0, 1
 	invoke_cdecl _InitLoadLibrary
 	def_dll_and_load User32, "user32.dll"
 	def_dll_and_load GDI32, "gdi32.dll"
+	def_dll_and_load MSVCRT, "msvcrt.dll"
 
 	dll_func_group_load Kernel32, KFunc
 	dll_func_group_load User32, UFunc
+	dll_func_group_load MSVCRT, CFunc
 
 	invoke_dll_stdcall GetProcessHeap
 	mov [_hHeap], eax

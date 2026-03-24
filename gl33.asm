@@ -255,7 +255,7 @@ DefFunc _DecodeProcName
 	mov edx, [_FuncNameBuf]
 	mov word[edx], 'gl' ; Add prefix
 
-	mov esi, eax
+	LoadParam esi, 0
 	lea edi, [edx + 2]
 
 .decode_loop:
@@ -323,41 +323,45 @@ _isdigit_al:
 	ret
 
 DefFunc _CheckOpenGLProcAddress
+	FrameBegin 0, 2
+
+	LoadParam eax, 0
 	test eax, eax
 	jnz .success
 
-	invoke_dll_stdcall strlen, [_OpenGLNullFunctions]
+	invoke_dll_cdecl strlen, [_OpenGLNullFunctions]
 	test eax, eax
 	jnz .strcat_fn_name
 
-	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], _FailedToGet
+	invoke_dll_cdecl strcat, [_OpenGLNullFunctions], _FailedToGet
 
 .strcat_fn_name:
-	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], [_FuncNameBuf]
-	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], _NewLine
+	invoke_dll_cdecl strcat, [_OpenGLNullFunctions], [_FuncNameBuf]
+	invoke_dll_cdecl strcat, [_OpenGLNullFunctions], _NewLine
 
 	xor eax, eax
 .success:
+	FrameEnd
 	ret
 
 DefFunc _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
-	FrameBegin 0, 0
-	call _DecodeProcName
+	FrameBegin 0, 1
+	invoke_cdecl _DecodeProcName, Param(0)
 	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
-	call _CheckOpenGLProcAddress
+	invoke_cdecl _CheckOpenGLProcAddress, eax
 	FrameEnd
 	ret
 
 DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
-	FrameBegin 0, 0
-	call _DecodeProcName
+	FrameBegin 0, 1
+	invoke_cdecl _DecodeProcName, Param(0)
 	invoke_dll_stdcall wglGetProcAddress, [_FuncNameBuf]
-	call _CheckOpenGLProcAddress
+	invoke_cdecl _CheckOpenGLProcAddress, eax
 	FrameEnd
 	ret
 
 DefFunc _InitGL33
-	FrameBegin 1, 1, esi, edi
+	FrameBegin 1, 2, esi, edi
 
 	def_dll_func_and_load GDI32, ChoosePixelFormat
 	def_dll_func_and_load GDI32, SetPixelFormat
@@ -462,8 +466,7 @@ _StartDecodeGL32Functions:
 	mov edi, _FirstGL32Func
 .loop_init_gl32:
 	StoreVariable 0, ecx
-	mov eax, esi
-	call _GetGL32ProcAddress
+	invoke_cdecl _GetGL32ProcAddress, esi
 	stosd
 	call _NextString
 	LoadVariable ecx, 0
@@ -493,9 +496,9 @@ _StartDecodeGL32Functions:
 	mov dword [_OpenGL_Is_ES], 1
 	jmp .parse_version
 .parse_fail:
-	invoke_dll_stdcall strcpy, [_FailInfoBuffer], _ParseFailText
-	invoke_dll_stdcall strcat, [_FailInfoBuffer], [_OpenGL_Version]
-	invoke_dll_stdcall strcat, [_FailInfoBuffer], [_FailReason]
+	invoke_dll_cdecl strcpy, [_FailInfoBuffer], _ParseFailText
+	invoke_dll_cdecl strcat, [_FailInfoBuffer], [_OpenGL_Version]
+	invoke_dll_cdecl strcat, [_FailInfoBuffer], [_FailReason]
 	invoke_dll_stdcall MessageBoxA, [_hWnd], [_FailInfoBuffer], 0, 0
 
 	xor eax, eax
@@ -980,18 +983,17 @@ DefFunc _StartDecodeGLFunctions
 	mov edi, _FirstGLFunc
 .loop_init_gl:
 	StoreVariable 0, ecx
-	mov eax, esi
-	call _GetGLProcAddress
+	invoke_cdecl _GetGLProcAddress, esi
 	stosd
 	call _NextString
 	LoadVariable ecx, 0
 	loop .loop_init_gl
 
-	invoke_dll_stdcall strlen, [_OpenGLNullFunctions]
+	invoke_dll_cdecl strlen, [_OpenGLNullFunctions]
 	test eax, eax
 	jz .end
 
-	invoke_dll_stdcall strcat, [_OpenGLNullFunctions], _TheseFunc
+	invoke_dll_cdecl strcat, [_OpenGLNullFunctions], _TheseFunc
 	invoke_dll_stdcall MessageBoxA, [_hWnd], [_OpenGLNullFunctions], 0, 0
 
 .end:

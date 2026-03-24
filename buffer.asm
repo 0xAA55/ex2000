@@ -231,7 +231,7 @@ DefFunc _BufferFlush
 	test eax, eax ; Check if capacity is zero
 	jz .empty
 	invoke_dll_stdcall glMapBuffer, [esi + GlBuffer.gl_buffer_type], GL_WRITE_ONLY
-	invoke_dll_stdcall memcpy, eax, [esi + GlBuffer.pointer], Variable(0)
+	invoke_dll_cdecl memcpy, eax, [esi + GlBuffer.pointer], ebx
 	invoke_dll_stdcall glUnmapBuffer, [esi + GlBuffer.gl_buffer_type]
 	xor eax, eax
 
