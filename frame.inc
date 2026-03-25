@@ -39,7 +39,7 @@
 		%ifdef %1
 			%undef %1
 		%endif
-		%define %1 Variable(CurVarIndex)
+		%define %1 Variable(%[CurVarIndex])
 		%assign CurVarIndex CurVarIndex + 1
 		%rotate 1
 	%endrep
@@ -50,7 +50,7 @@
 		%ifdef %1
 			%undef %1
 		%endif
-		%define %1 Param(CurPrmIndex)
+		%define %1 Param(%[CurPrmIndex])
 		%assign CurPrmIndex CurPrmIndex + 1
 		%rotate 1
 	%endrep
