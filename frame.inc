@@ -30,6 +30,18 @@
 	%if Frame_NumLocals != 0
 		sub esp, Frame_NumLocals * 4
 	%endif
+	%assign CurVarIndex 0
+%endmacro
+
+%macro AssignVars 1-*
+	%rep %0
+		%ifdef %1
+			%undef %1
+		%endif
+		%define %1 Variable(CurVarIndex)
+		%assign CurVarIndex CurVarIndex + 1
+		%rotate 1
+	%endrep
 %endmacro
 
 %macro FrameEnd 0
