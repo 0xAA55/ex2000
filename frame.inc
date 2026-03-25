@@ -44,6 +44,17 @@
 	%endrep
 %endmacro
 
+%macro NameParams 1-*
+	%rep %0
+		%ifdef %1
+			%undef %1
+		%endif
+		%define %1 Param(CurVarIndex)
+		%assign CurVarIndex CurVarIndex + 1
+		%rotate 1
+	%endrep
+%endmacro
+
 %macro FrameEnd 0
 	%if Frame_NumLocals != 0
 		add esp, Frame_NumLocals * 4
