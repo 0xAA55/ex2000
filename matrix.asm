@@ -205,16 +205,26 @@ DefFunc _MatrixRotationEuler
 	loop .cysycpspcrsr
 	mov al, 0
 
-	movss xmm0, _CPCR
-	movss xmm1, _CY
-	movss xmm2, _CRSP
+	movss xmm0, _CP
+	movss xmm1, _CR
+	movss xmm2, _SR
 	movss xmm3, _SR
-	movss xmm4, _CRSP
+	mulss xmm0, _CR
+	mulss xmm1, _SP
+	mulss xmm2, _CP
+	mulss xmm3, _SP
+	movss _CPCR, xmm0
+	movss _CRSP, xmm1
+	movss _SRCP, xmm2
+	movss _SRSP, xmm3
+	movss xmm2, _CY
+	movss xmm3, _SR
+	movss xmm4, xmm1
 	movss xmm5, _ZR
 	movss xmm6, _CR
 	movss xmm7, _SY
-	mulss xmm1, _SR
-	mulss xmm2, _SY
+	mulss xmm1, _SY
+	mulss xmm2, _SR
 	mulss xmm3, _SY
 	mulss xmm4, _CY
 	mulss xmm6, _CY
