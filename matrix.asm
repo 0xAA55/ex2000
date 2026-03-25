@@ -240,13 +240,14 @@ DefFunc _MatrixRotationEuler
 	mov [ebx + Matrix.xw], eax
 	movss [ebx + Matrix.yx], xmm5
 	movss [ebx + Matrix.yy], xmm6
-	mov edx, _SP
 
 	movss xmm0, _SY
 	movss xmm1, _SRSP
 	movss xmm2, _ZR
 	movss xmm3, _CP
 	movss xmm4, _ZR
+	movss xmm5, _ZR
+	movss xmm6, _SP
 	mulss xmm0, _CR
 	mulss xmm1, _CY
 	subss xmm2, _SY
@@ -256,14 +257,14 @@ DefFunc _MatrixRotationEuler
 	mulss xmm2, _CP
 
 	movss [ebx + Matrix.yz], xmm0
-	mov [ebx + Matrix.yw], eax
-	mov [ebx + Matrix.zx], edx
+	movss [ebx + Matrix.yw], xmm5
+	movss [ebx + Matrix.zx], xmm6
 	movss [ebx + Matrix.zy], xmm2
 	movss [ebx + Matrix.zz], xmm3
-	mov [ebx + Matrix.zw], eax
-	mov [ebx + Matrix.wx], eax
+	movss [ebx + Matrix.zw], xmm5
+	movss [ebx + Matrix.wx], xmm5
 	movss [ebx + Matrix.wy], xmm4
-	mov [ebx + Matrix.wz], eax
+	movss [ebx + Matrix.wz], xmm5
 	mov dword [ebx + Matrix.ww], 0x3F800000
 
 	FrameEnd
