@@ -31,6 +31,7 @@
 		sub esp, Frame_NumLocals * 4
 	%endif
 	%assign CurVarIndex 0
+	%assign CurPrmIndex 0
 %endmacro
 
 %macro AssignVars 1-*
@@ -49,8 +50,8 @@
 		%ifdef %1
 			%undef %1
 		%endif
-		%define %1 Param(CurVarIndex)
-		%assign CurVarIndex CurVarIndex + 1
+		%define %1 Param(CurPrmIndex)
+		%assign CurPrmIndex CurPrmIndex + 1
 		%rotate 1
 	%endrep
 %endmacro

@@ -12,9 +12,9 @@ import_dll_func memset
 
 segment .text
 DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity
+	FrameBegin 2, 1, esi, edi
 	NameParams BufferInst, BufType, BufUsage, BufItemSize, BufCapacity
 	AssignVars GLObject, CBSize
-	FrameBegin 2, 1, esi, edi
 
 	xor eax, eax
 	mov GLObject, eax
