@@ -12,55 +12,49 @@ import_dll_func memset
 
 segment .text
 DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity
-	%define PRM_INST 0
-	%define PRM_BUF_TYPE 1
-	%define PRM_BUF_USAGE 2
-	%define PRM_ITEM_SIZE 3
-	%define PRM_CAPACITY 4
-	%define VAR_GLOBJ 0
-	%define VAR_CBSIZE 1
+	NameParams BufferInst, BufType, BufUsage, BufItemSize, BufCapacity
+	AssignVars GLObject, CBSize
 	FrameBegin 2, 1, esi, edi
 
-	StoreVariable VAR_GLOBJ, 0
-
 	xor eax, eax
+	mov GLObject, eax
 	mov ecx, GlBuffer.size / 4
-	LoadParam esi, PRM_INST
+	mov esi, BufferInst
 	mov edi, esi
 	rep stosd
 
-	LoadParam eax, PRM_ITEM_SIZE
-	mul dword Param(PRM_CAPACITY)
+	mov eax, BufItemSize
+	mul dword BufCapacity
 	test edx, edx
 	jnz .failexit
-	StoreVariable VAR_CBSIZE, eax
+	mov CBSize, eax
 
 	invoke_cdecl _malloc, eax
 	mov [esi + GlBuffer.pointer], eax
 
-	lea eax, Variable(VAR_GLOBJ)
+	lea eax, GLObject
 	invoke_dll_stdcall glGenBuffers, 1, eax
 
 	cmp dword [esi + GlBuffer.pointer], 0
 	jz .failexit
-	cmp dword Variable(VAR_GLOBJ), 0
+	cmp dword GLObject, 0
 	jz .failexit
 
-	mov edi, Param(PRM_BUF_TYPE)
+	mov edi, BufType
 
-	invoke_dll_stdcall glBindBuffer, edi, Variable(VAR_GLOBJ)
-	invoke_dll_stdcall glBufferData, edi, Variable(VAR_CBSIZE), 0, Param(PRM_BUF_USAGE)
+	invoke_dll_stdcall glBindBuffer, edi, GLObject
+	invoke_dll_stdcall glBufferData, edi, CBSize, 0, BufUsage
 	invoke_dll_stdcall glBindBuffer, edi, 0
 
 	xor eax, eax
-	LoadParam ecx, PRM_CAPACITY
-	LoadParam edx, PRM_ITEM_SIZE
+	mov ecx, BufCapacity
+	mov edx, BufItemSize
 	mov [esi + GlBuffer.num_items], eax
 	mov [esi + GlBuffer.flushed], eax
-	LoadVariable eax, VAR_GLOBJ
+	mov eax, GLObject
 	mov [esi + GlBuffer.capacity], ecx
 	mov [esi + GlBuffer.gl_buffer_cap], ecx
-	LoadParam ecx, PRM_BUF_USAGE
+	mov ecx, BufUsage
 	mov [esi + GlBuffer.gl_buffer_type], edi
 	mov [esi + GlBuffer.size_of_item], edx
 	mov [esi + GlBuffer.gl_buffer], eax
@@ -76,14 +70,14 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	xor eax, eax
 .end:
 	FrameEnd
-	%undef PRM_INST
-	%undef PRM_BUF_TYPE
-	%undef PRM_BUF_USAGE
-	%undef PRM_ITEM_SIZE
-	%undef PRM_CAPACITY
-	%undef VAR_GLOBJ
-	%undef VAR_CBSIZE
 	ret
+	%undef BufferInst
+	%undef BufType
+	%undef BufUsage
+	%undef BufItemSize
+	%undef BufCapacity
+	%undef GLObject
+	%undef CBSize
 
 DefFunc _DeInitBuffer
 	FrameBegin 0, 1, edi
