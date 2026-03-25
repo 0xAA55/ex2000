@@ -203,7 +203,6 @@ DefFunc _MatrixRotationEuler
 	inc edx
 	add al, 2
 	loop .cysycpspcrsr
-	mov al, 0
 
 	movss xmm0, _CP
 	movss xmm1, _CR
@@ -233,11 +232,12 @@ DefFunc _MatrixRotationEuler
 	addss xmm1, xmm2
 	addss xmm3, xmm4
 	subss xmm6, xmm7
+	movss xmm2, _ZR
 
 	movss [ebx + Matrix.xx], xmm0
 	movss [ebx + Matrix.xy], xmm1
 	movss [ebx + Matrix.xz], xmm3
-	mov [ebx + Matrix.xw], eax
+	movss [ebx + Matrix.xw], xmm2
 	movss [ebx + Matrix.yx], xmm5
 	movss [ebx + Matrix.yy], xmm6
 
