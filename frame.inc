@@ -231,7 +231,7 @@
 	%if %1 < Frame_NumReservedParams
 		%if %substr(%str(%2), 1, 2) == "&["
 			RotatePassReg
-			lea PassReg, %2
+			lea PassReg, %tok(%substr(%str(%2), 2))
 			mov CallParam(%1), PassReg
 		%elif %substr(%str(%2), 1, 1) == "["
 			RotatePassReg
