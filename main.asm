@@ -232,3 +232,40 @@ DefFunc _free
 	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
+
+DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
+	FrameBegin 0, 1
+
+	mov eax, Param(1)
+	cmp eax, 8
+	jae .proceed
+	mov al, 8
+	mov Param(1), eax
+
+.proceed:
+	mov eax, Param(0)
+	add eax, Param(1)
+	invoke_cdecl _malloc, eax
+
+	mov edx, eax
+	mov ecx, Param(1)
+	add eax, ecx
+	neg ecx
+	and eax, ecx
+	mov [eax - 4], edx
+
+	FrameEnd
+	ret
+
+DefFunc _aligned_free
+	FrameBegin 0, 1
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+
+	invoke_cdecl _free, [eax - 4]
+
+.end:
+	FrameEnd
+	ret
