@@ -17,15 +17,14 @@ _ZeroVector resd 4
 
 segment .text
 DefFunc _VectorMultMatrix
-	FrameBegin 0x14, 0
+	FrameBegin 0x10, 0
 
-	lea edx, Variable(4)
-	and edx, 0xFFFFFFF0
+	lea edx, Variable(0)
 
-	movaps [edx + 0x00], xmm0
-	movaps [edx + 0x10], xmm1
-	movaps [edx + 0x20], xmm2
-	movaps [edx + 0x30], xmm3
+	movups [edx + 0x00], xmm0
+	movups [edx + 0x10], xmm1
+	movups [edx + 0x20], xmm2
+	movups [edx + 0x30], xmm3
 
 	LoadParam eax, 2
 
@@ -54,10 +53,10 @@ DefFunc _VectorMultMatrix
 
 	movaps Param(0), xmm0
 
-	movaps xmm0, [edx + 0x00]
-	movaps xmm1, [edx + 0x10]
-	movaps xmm2, [edx + 0x20]
-	movaps xmm3, [edx + 0x30]
+	movups xmm0, [edx + 0x00]
+	movups xmm1, [edx + 0x10]
+	movups xmm2, [edx + 0x20]
+	movups xmm3, [edx + 0x30]
 
 	FrameEnd
 	ret
@@ -207,7 +206,7 @@ DefFunc _MatrixRotationZ
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR
-	FrameBegin 0x30, 2, ebx
+	FrameBegin 0x2B, 2, ebx
 
 	mov ebx, Param(0)
 	xor eax, eax
@@ -225,17 +224,16 @@ DefFunc _MatrixRotationEuler
 	add al, 2
 	loop .cysycpspcrsr
 
-	lea edx, Variable(16)
-	and edx, 0xFFFFFFF0
+	lea edx, Variable(11)
 
-	movaps [edx + 0x10], xmm0
-	movaps [edx + 0x20], xmm1
-	movaps [edx + 0x30], xmm2
-	movaps [edx + 0x40], xmm3
-	movaps [edx + 0x50], xmm4
-	movaps [edx + 0x60], xmm5
-	movaps [edx + 0x70], xmm6
-	movaps [edx + 0x80], xmm7
+	movups [edx + 0x10], xmm0
+	movups [edx + 0x20], xmm1
+	movups [edx + 0x30], xmm2
+	movups [edx + 0x40], xmm3
+	movups [edx + 0x50], xmm4
+	movups [edx + 0x60], xmm5
+	movups [edx + 0x70], xmm6
+	movups [edx + 0x80], xmm7
 
 	movss xmm0, _CP
 	movss xmm1, _CR
@@ -300,14 +298,14 @@ DefFunc _MatrixRotationEuler
 	movss [ebx + Matrix.wz], xmm5
 	mov dword [ebx + Matrix.ww], 0x3F800000
 
-	movaps xmm0, [edx + 0x10]
-	movaps xmm1, [edx + 0x20]
-	movaps xmm2, [edx + 0x30]
-	movaps xmm3, [edx + 0x40]
-	movaps xmm4, [edx + 0x50]
-	movaps xmm5, [edx + 0x60]
-	movaps xmm6, [edx + 0x70]
-	movaps xmm7, [edx + 0x80]
+	movups xmm0, [edx + 0x10]
+	movups xmm1, [edx + 0x20]
+	movups xmm2, [edx + 0x30]
+	movups xmm3, [edx + 0x40]
+	movups xmm4, [edx + 0x50]
+	movups xmm5, [edx + 0x60]
+	movups xmm6, [edx + 0x70]
+	movups xmm7, [edx + 0x80]
 
 	FrameEnd
 	ret
@@ -324,22 +322,21 @@ DefFunc _MatrixRotationEuler
 	%undef _ZR
 
 DefFunc _MatrixTranspose
-	FrameBegin 0x24, 0, ebx
+	FrameBegin 0x20, 0
 
-	lea ebx, Variable(4)
-	and ebx, 0xFFFFFFF0
+	lea ecx, Variable(0)
 
 	LoadParam edx, 0
 	LoadParam eax, 1
 
-	movaps [ebx + 0x10], xmm0
-	movaps [ebx + 0x20], xmm1
-	movaps [ebx + 0x30], xmm2
-	movaps [ebx + 0x40], xmm3
-	movaps [ebx + 0x50], xmm4
-	movaps [ebx + 0x60], xmm5
-	movaps [ebx + 0x70], xmm6
-	movaps [ebx + 0x80], xmm7
+	movups [ecx + 0x10], xmm0
+	movups [ecx + 0x20], xmm1
+	movups [ecx + 0x30], xmm2
+	movups [ecx + 0x40], xmm3
+	movups [ecx + 0x50], xmm4
+	movups [ecx + 0x60], xmm5
+	movups [ecx + 0x70], xmm6
+	movups [ecx + 0x80], xmm7
 
 	movaps xmm3, [eax + Matrix.y]
 	movaps xmm1, [eax + Matrix.x]
@@ -371,14 +368,14 @@ DefFunc _MatrixTranspose
 	shufps xmm1, xmm3, 0xDD
 	movaps [edx + Matrix.w], xmm1
 
-	movaps xmm0, [ebx + 0x10]
-	movaps xmm1, [ebx + 0x20]
-	movaps xmm2, [ebx + 0x30]
-	movaps xmm3, [ebx + 0x40]
-	movaps xmm4, [ebx + 0x50]
-	movaps xmm5, [ebx + 0x60]
-	movaps xmm6, [ebx + 0x70]
-	movaps xmm7, [ebx + 0x80]
+	movups xmm0, [ecx + 0x10]
+	movups xmm1, [ecx + 0x20]
+	movups xmm2, [ecx + 0x30]
+	movups xmm3, [ecx + 0x40]
+	movups xmm4, [ecx + 0x50]
+	movups xmm5, [ecx + 0x60]
+	movups xmm6, [ecx + 0x70]
+	movups xmm7, [ecx + 0x80]
 
 	FrameEnd
 	ret
