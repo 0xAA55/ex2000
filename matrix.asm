@@ -206,7 +206,7 @@ DefFunc _MatrixRotationZ
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR
-	FrameBegin 0x2B, 2, ebx
+	FrameBegin 19, 2, ebx
 
 	mov ebx, Param(0)
 	xor eax, eax
@@ -224,16 +224,14 @@ DefFunc _MatrixRotationEuler
 	add al, 2
 	loop .cysycpspcrsr
 
-	lea edx, Variable(11)
-
-	movups [edx + 0x10], xmm0
-	movups [edx + 0x20], xmm1
-	movups [edx + 0x30], xmm2
-	movups [edx + 0x40], xmm3
-	movups [edx + 0x50], xmm4
-	movups [edx + 0x60], xmm5
-	movups [edx + 0x70], xmm6
-	movups [edx + 0x80], xmm7
+	movss Variable(11), xmm0
+	movss Variable(12), xmm1
+	movss Variable(13), xmm2
+	movss Variable(14), xmm3
+	movss Variable(15), xmm4
+	movss Variable(16), xmm5
+	movss Variable(17), xmm6
+	movss Variable(18), xmm7
 
 	movss xmm0, _CP
 	movss xmm1, _CR
@@ -298,14 +296,14 @@ DefFunc _MatrixRotationEuler
 	movss [ebx + Matrix.wz], xmm5
 	mov dword [ebx + Matrix.ww], 0x3F800000
 
-	movups xmm0, [edx + 0x10]
-	movups xmm1, [edx + 0x20]
-	movups xmm2, [edx + 0x30]
-	movups xmm3, [edx + 0x40]
-	movups xmm4, [edx + 0x50]
-	movups xmm5, [edx + 0x60]
-	movups xmm6, [edx + 0x70]
-	movups xmm7, [edx + 0x80]
+	movss xmm0, Variable(11)
+	movss xmm1, Variable(12)
+	movss xmm2, Variable(13)
+	movss xmm3, Variable(14)
+	movss xmm4, Variable(15)
+	movss xmm5, Variable(16)
+	movss xmm6, Variable(17)
+	movss xmm7, Variable(18)
 
 	FrameEnd
 	ret
