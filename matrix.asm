@@ -17,7 +17,15 @@ _ZeroVector resd 4
 
 segment .text
 DefFunc _VectorMultMatrix
-	FrameBegin 0, 0
+	FrameBegin 0x14, 0
+
+	lea edx, Variable(4)
+	and edx, 0xFFFFFFF0
+
+	movaps [edx + 0x00], xmm0
+	movaps [edx + 0x10], xmm1
+	movaps [edx + 0x20], xmm2
+	movaps [edx + 0x30], xmm3
 
 	LoadParam eax, 2
 
@@ -46,14 +54,24 @@ DefFunc _VectorMultMatrix
 
 	movaps Param(0), xmm0
 
+	movaps xmm0, [edx + 0x00]
+	movaps xmm1, [edx + 0x10]
+	movaps xmm2, [edx + 0x20]
+	movaps xmm3, [edx + 0x30]
+
 	FrameEnd
 	ret
 
 DefFunc _VectorMultMatrixTransposed
-	FrameBegin 20, 2, esi
+	FrameBegin 0x1C, 2, esi, edi
 
 	lea esi, Variable(4)
 	and esi, 0xFFFFFFF0
+	mov edi, esi
+	add edi, Matrix.size
+
+	movaps [edi + 0x00], xmm0
+	movaps [edi + 0x10], xmm1
 
 	LoadParam eax, 2
 
@@ -80,6 +98,9 @@ DefFunc _VectorMultMatrixTransposed
 
 	LoadParam eax, 0
 	movaps [eax], xmm0
+
+	movaps xmm0, [edi + 0x00]
+	movaps xmm1, [edi + 0x10]
 
 	FrameEnd
 	ret
@@ -186,7 +207,7 @@ DefFunc _MatrixRotationZ
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR
-	FrameBegin 11, 2, ebx
+	FrameBegin 0x30, 2, ebx
 
 	mov ebx, Param(0)
 	xor eax, eax
@@ -203,6 +224,18 @@ DefFunc _MatrixRotationEuler
 	inc edx
 	add al, 2
 	loop .cysycpspcrsr
+
+	lea edx, Variable(16)
+	and edx, 0xFFFFFFF0
+
+	movaps [edx + 0x10], xmm0
+	movaps [edx + 0x20], xmm1
+	movaps [edx + 0x30], xmm2
+	movaps [edx + 0x40], xmm3
+	movaps [edx + 0x50], xmm4
+	movaps [edx + 0x60], xmm5
+	movaps [edx + 0x70], xmm6
+	movaps [edx + 0x80], xmm7
 
 	movss xmm0, _CP
 	movss xmm1, _CR
@@ -267,6 +300,15 @@ DefFunc _MatrixRotationEuler
 	movss [ebx + Matrix.wz], xmm5
 	mov dword [ebx + Matrix.ww], 0x3F800000
 
+	movaps xmm0, [edx + 0x10]
+	movaps xmm1, [edx + 0x20]
+	movaps xmm2, [edx + 0x30]
+	movaps xmm3, [edx + 0x40]
+	movaps xmm4, [edx + 0x50]
+	movaps xmm5, [edx + 0x60]
+	movaps xmm6, [edx + 0x70]
+	movaps xmm7, [edx + 0x80]
+
 	FrameEnd
 	ret
 	%undef _CY
@@ -282,10 +324,22 @@ DefFunc _MatrixRotationEuler
 	%undef _ZR
 
 DefFunc _MatrixTranspose
-	FrameBegin 0, 0
+	FrameBegin 0x24, 0, ebx
+
+	lea ebx, Variable(4)
+	and ebx, 0xFFFFFFF0
 
 	LoadParam edx, 0
 	LoadParam eax, 1
+
+	movaps [ebx + 0x10], xmm0
+	movaps [ebx + 0x20], xmm1
+	movaps [ebx + 0x30], xmm2
+	movaps [ebx + 0x40], xmm3
+	movaps [ebx + 0x50], xmm4
+	movaps [ebx + 0x60], xmm5
+	movaps [ebx + 0x70], xmm6
+	movaps [ebx + 0x80], xmm7
 
 	movaps xmm3, [eax + Matrix.y]
 	movaps xmm1, [eax + Matrix.x]
@@ -316,6 +370,15 @@ DefFunc _MatrixTranspose
 	movaps xmm1, xmm6
 	shufps xmm1, xmm3, 0xDD
 	movaps [edx + Matrix.w], xmm1
+
+	movaps xmm0, [ebx + 0x10]
+	movaps xmm1, [ebx + 0x20]
+	movaps xmm2, [ebx + 0x30]
+	movaps xmm3, [ebx + 0x40]
+	movaps xmm4, [ebx + 0x50]
+	movaps xmm5, [ebx + 0x60]
+	movaps xmm6, [ebx + 0x70]
+	movaps xmm7, [ebx + 0x80]
 
 	FrameEnd
 	ret
