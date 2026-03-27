@@ -229,7 +229,11 @@
 
 %macro PrepParam 2
 	%if %1 < Frame_NumReservedParams
-		%if %substr(%str(%2), 1, 1) == "["
+		%if %substr(%str(%2), 1, 2) == "&["
+			RotatePassReg
+			lea PassReg, %2
+			mov CallParam(%1), PassReg
+		%elif %substr(%str(%2), 1, 1) == "["
 			RotatePassReg
 			mov PassReg, %2
 			mov CallParam(%1), PassReg
