@@ -14,14 +14,15 @@
 	%assign Frame_NumVariables %1
 	%assign Frame_NumReservedParams %2
 	%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
-	%assign ESP_BIAS 0
+	%assign Frame_NumSavedRegs 0
+	%assign Frame_NumPushes 0
 	%ifdef Frame_UseEBP
 		push ebp
 		mov ebp, esp
 	%endif
 	%if %0 > 2
 		%define Frame_SavedRegs %3
-		FramePush Frame_SavedRegs
+		FrameSaveRegs Frame_SavedRegs
 	%else
 		%ifdef Frame_SavedRegs
 			%undef Frame_SavedRegs
@@ -61,7 +62,7 @@
 		add esp, Frame_NumLocals * 4
 	%endif
 	%ifdef Frame_SavedRegs
-		FramePop Frame_SavedRegs
+		FrameStoreRegs Frame_SavedRegs
 	%endif
 	%ifdef Frame_UseEBP
 		pop ebp
@@ -71,20 +72,66 @@
 %ifdef Frame_UseEBP
 	%define AddrOfParam(x) (ebp + (x + 2) * 4)
 	%define AddrOfVariable(x) (ebp - (x) * 4)
-	%define AddrOfCallParam(x) (esp + (x) * 4)
+	%define AddrOfCallParam(x) (ebp - (Frame_NumSavedRegs + Frame_NumLocals + (x)) * 4)
 %else
-	%define AddrOfParam(x) (esp + ESP_BIAS + (Frame_NumLocals + (x) + 1) * 4)
-	%define AddrOfVariable(x) (esp + ESP_BIAS + (Frame_NumReservedParams + (x)) * 4)
-	%define AddrOfCallParam(x) (esp + (x) * 4)
+	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1 + Frame_NumPushes) * 4)
+	%define AddrOfVariable(x) (esp + (Frame_NumSavedRegs + Frame_NumReservedParams + (x) + Frame_NumPushes) * 4)
+	%define AddrOfCallParam(x) (esp + ((x) + Frame_NumPushes) * 4)
 %endif
 %define Param(x) [AddrOfParam(x)]
 %define Variable(x) [AddrOfVariable(x)]
 %define CallParam(x) [AddrOfCallParam(x)]
 
+%macro FrameSaveRegs 1-*
+	%rep %0
+		%if %substr(%str(%1), 1, 3) == "xmm"
+			sub esp, 16
+			movups [esp], %1
+			%assign Frame_NumSavedRegs Frame_NumSavedRegs + 4
+		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
+			sub esp, 4
+			movups [esp], %tok(%substr(%str(%1), 4))
+			%assign Frame_NumSavedRegs Frame_NumSavedRegs + 1
+		%else
+			push %1
+			%assign Frame_NumSavedRegs Frame_NumSavedRegs + 1
+		%endif
+		%rotate 1
+	%endrep
+%endmacro
+
+%macro FrameStoreRegs 1-*
+	%rep %0
+		%rotate -1
+		%if %substr(%str(%1), 1, 3) == "xmm"
+			movups %1, [esp]
+			add esp, 16
+			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 4
+		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
+			movss %tok(%substr(%str(%1), 4)), [esp]
+			add esp, 4
+			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
+		%else
+			pop %1
+			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
+		%endif
+	%endrep
+%endmacro
+
 %macro FramePush 1-*
 	%rep %0
-		push %1
-		%assign ESP_BIAS ESP_BIAS + 4
+		%if %substr(%str(%1), 1, 3) == "xmm"
+			sub esp, 16
+			movups [esp], %1
+			%assign Frame_NumPushes Frame_NumPushes + 4
+		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
+			sub esp, 4
+			movups [esp], %tok(%substr(%str(%1), 4))
+			%assign Frame_NumPushes Frame_NumPushes + 1
+		%else
+			push %1
+			%assign Frame_NumPushes Frame_NumPushes + 1
+		%endif
 		%rotate 1
 	%endrep
 %endmacro
@@ -92,19 +139,29 @@
 %macro FramePop 1-*
 	%rep %0
 		%rotate -1
-		pop %1
-		%assign ESP_BIAS ESP_BIAS - 4
+		%if %substr(%str(%1), 1, 3) == "xmm"
+			movups %1, [esp]
+			add esp, 16
+			%assign Frame_NumPushes Frame_NumPushes - 4
+		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
+			movss %tok(%substr(%str(%1), 4)), [esp]
+			add esp, 4
+			%assign Frame_NumPushes Frame_NumPushes - 1
+		%else
+			pop %1
+			%assign Frame_NumPushes Frame_NumPushes - 1
+		%endif
 	%endrep
 %endmacro
 
 %macro FramePushA 0
 	pushad
-	%assign ESP_BIAS ESP_BIAS + 4 * 8
+	%assign Frame_NumPushes Frame_NumPushes + 8
 %endmacro
 
 %macro FramePopA 0
 	popad
-	%assign ESP_BIAS ESP_BIAS - 4 * 8
+	%assign Frame_NumPushes Frame_NumPushes - 8
 %endmacro
 
 %macro LoadParam 2
@@ -228,7 +285,9 @@
 %endmacro
 
 %macro PrepParam 2
-	%if %1 < Frame_NumReservedParams
+	%if Frame_NumPushes != 0
+		%error You had pushed Frame_NumPushes items at the stack top, must clean it up
+	%elif %1 < Frame_NumReservedParams
 		%if %substr(%str(%2), 1, 2) == "&["
 			RotatePassReg
 			lea PassReg, %tok(%substr(%str(%2), 2))
@@ -253,16 +312,16 @@
 %endmacro
 
 %macro PrepStdCallParam 1-*
-	%assign PrevBias ESP_BIAS
+	%assign Frame_SavedStdCallPushes Frame_NumPushes
 	%rep %0
 		%rotate -1
 		push %1
-		%assign ESP_BIAS ESP_BIAS + 4
+		%assign Frame_NumPushes Frame_NumPushes + 1
 	%endrep
 %endmacro
 
 %macro AfterStdCall 0
-	%assign ESP_BIAS PrevBias
+	%assign Frame_NumPushes Frame_SavedStdCallPushes
 %endmacro
 
 %endif
