@@ -80,8 +80,8 @@ void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 {
 	Matrix_t ym, pm, rm, rpm;
 	MatrixRotationZ(&rm, roll);
-	MatrixRotationY(&pm, pitch);
-	MatrixRotationX(&ym, yaw);
+	MatrixRotationX(&pm, pitch);
+	MatrixRotationY(&ym, yaw);
 	MatrixMultMatrix(&rpm, &rm, &pm);
 	MatrixMultMatrix(out, &rpm, &ym);
 }
