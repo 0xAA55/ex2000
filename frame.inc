@@ -309,7 +309,7 @@
 	%assign StdCallParamIndex 0
 	%rep %0
 		%rotate -1
-		%idefine esp esp + StdCallParamIndex * 4
+		%idefine esp (esp + StdCallParamIndex * 4)
 		push %1
 		%undef esp
 		%assign StdCallParamIndex StdCallParamIndex + 1
