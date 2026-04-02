@@ -54,20 +54,19 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	invoke_dll_stdcall glBufferData, edi, CBSize, BufData, BufUsage
 	invoke_dll_stdcall glBindBuffer, edi, 0
 
-	xor eax, eax
+	mov eax, GLObject
 	mov ecx, BufCapacity
 	mov edx, BufItemSize
-	mov [esi + GlBuffer.flushed], eax
-	mov eax, GLObject
+	mov [esi + GlBuffer.gl_buffer], eax
 	mov [esi + GlBuffer.capacity], ecx
 	mov [esi + GlBuffer.gl_buffer_cap], ecx
-	mov ecx, BufUsage
+	mov eax, BufUsage
 	mov [esi + GlBuffer.gl_buffer_type], edi
 	mov [esi + GlBuffer.size_of_item], edx
-	mov edx, NumData
-	mov [esi + GlBuffer.gl_buffer], eax
-	mov [esi + GlBuffer.gl_buffer_usage], ecx
-	mov [esi + GlBuffer.num_items], edx
+	mov ecx, NumData
+	mov [esi + GlBuffer.gl_buffer_usage], eax
+	mov [esi + GlBuffer.num_items], ecx
+	mov [esi + GlBuffer.flushed], ecx
 
 	xor eax, eax
 	inc eax
