@@ -255,7 +255,7 @@ DefFunc _DecodeProcName
 	mov edx, [_FuncNameBuf]
 	mov word[edx], 'gl' ; Add prefix
 
-	LoadParam esi, 0
+	mov esi, Param(0)
 	lea edi, [edx + 2]
 
 .decode_loop:
@@ -278,17 +278,17 @@ DefFunc _DecodeProcName
 	stosb ; No need to decode
 	jmp .decode_loop
 .code_01_40: ; Part 1
-	FramePush esi
+	push esi
 	dec al ; Start from 1
 	movzx esi, word[_DecodeTable.code_01_40 + eax * 2]
 	jmp .decode
 .code_5b_60: ; Part 2
-	FramePush esi
+	push esi
 	sub al, 0x5B
 	movzx esi, word[_DecodeTable.code_5b_60 + eax * 2]
 	jmp .decode
 .code_7b_ %+ LAST_CODE: ; Part 3
-	FramePush esi
+	push esi
 	sub al, 0x7B
 	movzx esi, word[_DecodeTable.code_7b_ %+ LAST_CODE + eax * 2]
 .decode:
@@ -300,7 +300,7 @@ DefFunc _DecodeProcName
 	stosb
 	jmp .copy_loop
 .decode_end:
-	FramePop esi
+	pop esi
 	jmp .decode_loop
 
 .end:

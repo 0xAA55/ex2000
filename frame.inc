@@ -15,7 +15,6 @@
 	%assign Frame_NumReservedParams %2
 	%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
 	%assign Frame_NumSavedRegs 0
-	%assign Frame_NumPushes 0
 	%ifdef Frame_UseEBP
 		push ebp
 		mov ebp, esp
@@ -40,9 +39,9 @@
 	%define AddrOfVariable(x) (ebp - (x) * 4)
 	%define AddrOfCallParam(x) (ebp - (Frame_NumSavedRegs + Frame_NumLocals + (x)) * 4)
 %else
-	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1 + Frame_NumPushes) * 4)
-	%define AddrOfVariable(x) (esp + (Frame_NumSavedRegs + Frame_NumReservedParams + (x) + Frame_NumPushes) * 4)
-	%define AddrOfCallParam(x) (esp + ((x) + Frame_NumPushes) * 4)
+	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1) * 4)
+	%define AddrOfVariable(x) (esp + (Frame_NumSavedRegs + Frame_NumReservedParams + (x)) * 4)
+	%define AddrOfCallParam(x) (esp + (x) * 4)
 %endif
 %define Param(x) [AddrOfParam(x)]
 %define Variable(x) [AddrOfVariable(x)]
@@ -110,52 +109,6 @@
 			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
 		%endif
 	%endrep
-%endmacro
-
-%macro FramePush 1-*
-	%rep %0
-		%if %substr(%str(%1), 1, 3) == "xmm"
-			sub esp, 16
-			movups [esp], %1
-			%assign Frame_NumPushes Frame_NumPushes + 4
-		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
-			sub esp, 4
-			movups [esp], %tok(%substr(%str(%1), 4))
-			%assign Frame_NumPushes Frame_NumPushes + 1
-		%else
-			push %1
-			%assign Frame_NumPushes Frame_NumPushes + 1
-		%endif
-		%rotate 1
-	%endrep
-%endmacro
-
-%macro FramePop 1-*
-	%rep %0
-		%rotate -1
-		%if %substr(%str(%1), 1, 3) == "xmm"
-			movups %1, [esp]
-			add esp, 16
-			%assign Frame_NumPushes Frame_NumPushes - 4
-		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
-			movss %tok(%substr(%str(%1), 4)), [esp]
-			add esp, 4
-			%assign Frame_NumPushes Frame_NumPushes - 1
-		%else
-			pop %1
-			%assign Frame_NumPushes Frame_NumPushes - 1
-		%endif
-	%endrep
-%endmacro
-
-%macro FramePushA 0
-	pushad
-	%assign Frame_NumPushes Frame_NumPushes + 8
-%endmacro
-
-%macro FramePopA 0
-	popad
-	%assign Frame_NumPushes Frame_NumPushes - 8
 %endmacro
 
 %macro LoadParam 2
@@ -279,9 +232,7 @@
 %endmacro
 
 %macro PrepParam 2
-	%if Frame_NumPushes != 0
-		%error You had pushed Frame_NumPushes items at the stack top, must clean it up
-	%elif %1 < Frame_NumReservedParams
+	%if %1 < Frame_NumReservedParams
 		%if %substr(%str(%2), 1, 1) == "&"
 			RotatePassReg
 			lea PassReg, %tok(%substr(%str(%2), 2))
