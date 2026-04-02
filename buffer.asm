@@ -11,12 +11,13 @@ import_dll_func memcpy
 import_dll_func memset
 
 segment .text
-DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity
-	FrameBegin 2, 1, esi, edi
-	NameParams BufferInst, BufType, BufUsage, BufItemSize, BufCapacity
-	AssignVars GLObject, CBSize
+DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity, data(or_null)
+	FrameBegin 3, 3, esi, edi
+	NameParams BufferInst, BufType, BufUsage, BufItemSize, BufCapacity, BufData
+	AssignVars GLObject, CBSize, NumData
 
 	xor eax, eax
+	mov NumData, eax
 	mov GLObject, eax
 	mov ecx, GlBuffer.size / 4
 	mov esi, BufferInst
@@ -40,16 +41,22 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	cmp dword GLObject, 0
 	jz .failexit
 
+	mov eax, BufData
+	test eax, eax
+	jz .after_copy
+	invoke_dll_cdecl memcpy, [esi + GlBuffer.pointer], BufData, CBSize
+	mov eax, BufCapacity
+	mov NumData, eax
+.after_copy:
 	mov edi, BufType
 
 	invoke_dll_stdcall glBindBuffer, edi, GLObject
-	invoke_dll_stdcall glBufferData, edi, CBSize, 0, BufUsage
+	invoke_dll_stdcall glBufferData, edi, CBSize, BufData, BufUsage
 	invoke_dll_stdcall glBindBuffer, edi, 0
 
 	xor eax, eax
 	mov ecx, BufCapacity
 	mov edx, BufItemSize
-	mov [esi + GlBuffer.num_items], eax
 	mov [esi + GlBuffer.flushed], eax
 	mov eax, GLObject
 	mov [esi + GlBuffer.capacity], ecx
@@ -57,8 +64,10 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	mov ecx, BufUsage
 	mov [esi + GlBuffer.gl_buffer_type], edi
 	mov [esi + GlBuffer.size_of_item], edx
+	mov edx, NumData
 	mov [esi + GlBuffer.gl_buffer], eax
 	mov [esi + GlBuffer.gl_buffer_usage], ecx
+	mov [esi + GlBuffer.num_items], edx
 
 	xor eax, eax
 	inc eax

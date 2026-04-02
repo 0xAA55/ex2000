@@ -28,13 +28,14 @@ extern _BufferTrimExcess
 extern _BufferResize
 %endif
 
-%macro InitBuffer 5
+%macro InitBuffer 6
 	ResetPassReg
 	PrepParam 0, %1 ;pointer_to_GlBuffer
 	PrepParam 1, %2 ;buffer_type
 	PrepParam 2, %3 ;buffer_usage
 	PrepParam 3, %4 ;item_size
 	PrepParam 4, %5 ;capacity
+	PrepParam 5, %6 ;pointer_to_data_or_null
 	call _InitBuffer
 %endmacro
 
