@@ -306,16 +306,17 @@
 %endmacro
 
 %macro PrepStdCallParam 1-*
-	%assign Frame_SavedStdCallPushes Frame_NumPushes
+	%assign StdCallParamIndex 0
 	%rep %0
 		%rotate -1
+		%idefine esp esp + StdCallParamIndex * 4
 		push %1
-		%assign Frame_NumPushes Frame_NumPushes + 1
+		%undef esp
+		%assign StdCallParamIndex StdCallParamIndex + 1
 	%endrep
 %endmacro
 
 %macro AfterStdCall 0
-	%assign Frame_NumPushes Frame_SavedStdCallPushes
 %endmacro
 
 %endif
