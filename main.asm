@@ -1,3 +1,4 @@
+%define MAIN_ASM 1
 %include "loaddll.inc"
 
 extern _InitLoadLibrary
@@ -92,7 +93,7 @@ dll_func_group_start CFunc
 def_dll_func strcpy
 def_dll_func strcat
 def_dll_func strlen
-def_dll_func printf
+def_dll_func vsnprintf
 def_dll_func memset
 def_dll_func memcpy
 def_dll_func memmove
