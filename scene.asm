@@ -1,6 +1,7 @@
 %include "loaddll.inc"
 %include "timer.inc"
 %include "gl33.inc"
+%include "buffer.inc"
 
 extern _hWnd
 extern _hDC
@@ -13,6 +14,50 @@ import_dll_func Sleep
 segment .bss
 global _Timer
 _Timer resb Timer.size
+global _BoxVerticesBuffer
+_BoxVerticesBuffer resd 1
+global _BoxIndicesBuffer
+_BoxIndicesBuffer resd 1
+
+segment .rdata
+global _BoxVertices
+_BoxVertices:
+	db -1, -1,  1
+	db  1, -1,  1
+	db -1,  1,  1
+	db  1,  1,  1
+	db -1, -1, -1
+	db  1, -1, -1
+	db -1,  1, -1
+	db  1,  1, -1
+.num equ $ - _BoxVertices
+
+global _BoxIndices
+_BoxIndices:
+	; Top
+	db 2, 6, 7
+	db 2, 3, 7
+
+	; Bottom
+	db 0, 4, 5
+	db 0, 1, 5
+
+	; Left
+	db 0, 2, 6
+	db 0, 4, 6
+
+	; Right
+	db 1, 3, 7
+	db 1, 5, 7
+
+	; Front
+	db 0, 2, 3
+	db 0, 1, 3
+
+	; Back
+	db 4, 6, 7
+	db 4, 5, 7
+.num equ $ - _BoxIndices
 
 segment .text
 DefFunc _Scene
@@ -45,7 +90,7 @@ DefFunc _SwapBuffers
 	ret
 
 DefFunc _SceneInit
-	FrameBegin 0, 1
+	FrameBegin 0, 6
 
 	PrepParam 0, _Timer
 	call _InitTimer
@@ -69,12 +114,11 @@ DefFunc _SceneInit
 	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
 
-
-
-
-
+	InitBuffer _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BoxVertices.num, _BoxVertices
+	InitBuffer _BoxIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BoxIndices.num, _BoxIndices
 
 .end:
+	mov eax, 1
 	FrameEnd
 	ret
 
