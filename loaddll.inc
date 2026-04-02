@@ -3,12 +3,6 @@
 
 %include "frame.inc"
 
-extern _addr_of_Kernel32
-extern _addr_of_GetProcAddress
-extern _addr_of_LoadLibraryA
-extern _hInstance
-extern _LoadFuncGroup
-
 %macro def_dll 2
 	segment .bss
 	global _addr_of_ %+ %1
@@ -212,5 +206,22 @@ extern _LoadFuncGroup
 		invoke_dll_func %1
 	%endif
 %endmacro
+
+%macro debug_msg 1-2+
+segment .rdata
+	%%format db %1, 0
+
+segment .text
+	invoke_cdecl _DebugMsg, %%format, %2
+%endmacro
+
+%ifndef LOADDLL_ASM
+import_dll Kernel32
+import_dll_func GetProcAddress
+import_dll_func LoadLibraryA
+extern _hInstance
+extern _LoadFuncGroup
+extern _DebugMsg
+%endif
 
 %endif

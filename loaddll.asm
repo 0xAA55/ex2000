@@ -1,10 +1,17 @@
-%include "frame.inc"
+%define LOADDLL_ASM 1
+%include "loaddll.inc"
 
-segment .bss
 global _addr_of_Kernel32
 global _addr_of_GetProcAddress
 global _addr_of_LoadLibraryA
 global _hInstance
+
+extern _calloc
+extern _hWnd
+import_dll_func MessageBoxA
+import_dll_func vsnprintf
+
+segment .bss
 _addr_of_LoadLibraryA resd 1
 _addr_of_Kernel32 resd 1
 _addr_of_GetProcAddress resd 1
@@ -93,4 +100,31 @@ DefFunc _NextString
 	lodsb
 	test al, al ; Find NUL
 	jnz _NextString
+	ret
+
+segment .bss
+global _DebugMsgBuffer
+_DebugMsgBuffer resd 1
+_DebugMsgBufferSize equ 4096
+
+segment .text
+DefFunc _DebugMsg
+	FrameBegin 0, 4
+
+	mov eax, [_DebugMsgBuffer]
+	test eax, eax
+	jnz .proceed_printf
+	invoke_cdecl _calloc, _DebugMsgBufferSize, 1
+	mov [_DebugMsgBuffer], eax
+	test eax, eax
+	jz .end
+.proceed_printf:
+
+	lea eax, Param(1)
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(0), eax
+	invoke_dll_stdcall MessageBoxA, [_hWnd], [_DebugMsgBuffer], 0, 0
+
+.end:
+	xor eax, eax
+	FrameEnd
 	ret
