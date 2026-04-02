@@ -84,8 +84,10 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	%undef BufUsage
 	%undef BufItemSize
 	%undef BufCapacity
+	%undef BufData
 	%undef GLObject
 	%undef CBSize
+	%undef NumData
 
 DefFunc _DeInitBuffer
 	FrameBegin 0, 1, edi
