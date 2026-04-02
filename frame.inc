@@ -282,7 +282,7 @@
 	%if Frame_NumPushes != 0
 		%error You had pushed Frame_NumPushes items at the stack top, must clean it up
 	%elif %1 < Frame_NumReservedParams
-		%if %substr(%str(%2), 1, 2) == "&["
+		%if %substr(%str(%2), 1, 1) == "&"
 			RotatePassReg
 			lea PassReg, %tok(%substr(%str(%2), 2))
 			mov CallParam(%1), PassReg
