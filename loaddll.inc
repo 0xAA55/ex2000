@@ -147,7 +147,6 @@
 	%else
 		PrepStdCallParam %2
 		call %1
-		AfterStdCall
 	%endif
 %endmacro
 
@@ -157,7 +156,6 @@
 	%else
 		PrepStdCallParam %2
 		invoke_dll_func %1
-		AfterStdCall
 	%endif
 %endmacro
 

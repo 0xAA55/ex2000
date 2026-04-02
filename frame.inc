@@ -316,7 +316,4 @@
 	%endrep
 %endmacro
 
-%macro AfterStdCall 0
-%endmacro
-
 %endif
