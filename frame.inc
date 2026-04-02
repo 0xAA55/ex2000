@@ -35,6 +35,19 @@
 	%assign CurPrmIndex 0
 %endmacro
 
+%ifdef Frame_UseEBP
+	%define AddrOfParam(x) (ebp + (x + 2) * 4)
+	%define AddrOfVariable(x) (ebp - (x) * 4)
+	%define AddrOfCallParam(x) (ebp - (Frame_NumSavedRegs + Frame_NumLocals + (x)) * 4)
+%else
+	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1 + Frame_NumPushes) * 4)
+	%define AddrOfVariable(x) (esp + (Frame_NumSavedRegs + Frame_NumReservedParams + (x) + Frame_NumPushes) * 4)
+	%define AddrOfCallParam(x) (esp + ((x) + Frame_NumPushes) * 4)
+%endif
+%define Param(x) [AddrOfParam(x)]
+%define Variable(x) [AddrOfVariable(x)]
+%define CallParam(x) [AddrOfCallParam(x)]
+
 %macro AssignVars 1-*
 	%rep %0
 		%define %1 Variable(%[CurVarIndex])
@@ -62,19 +75,6 @@
 		pop ebp
 	%endif
 %endmacro
-
-%ifdef Frame_UseEBP
-	%define AddrOfParam(x) (ebp + (x + 2) * 4)
-	%define AddrOfVariable(x) (ebp - (x) * 4)
-	%define AddrOfCallParam(x) (ebp - (Frame_NumSavedRegs + Frame_NumLocals + (x)) * 4)
-%else
-	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1 + Frame_NumPushes) * 4)
-	%define AddrOfVariable(x) (esp + (Frame_NumSavedRegs + Frame_NumReservedParams + (x) + Frame_NumPushes) * 4)
-	%define AddrOfCallParam(x) (esp + ((x) + Frame_NumPushes) * 4)
-%endif
-%define Param(x) [AddrOfParam(x)]
-%define Variable(x) [AddrOfVariable(x)]
-%define CallParam(x) [AddrOfCallParam(x)]
 
 %macro FrameSaveRegs 1-*
 	%rep %0
