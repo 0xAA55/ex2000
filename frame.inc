@@ -37,9 +37,6 @@
 
 %macro AssignVars 1-*
 	%rep %0
-		%ifdef %1
-			%undef %1
-		%endif
 		%define %1 Variable(%[CurVarIndex])
 		%assign CurVarIndex CurVarIndex + 1
 		%rotate 1
@@ -48,9 +45,6 @@
 
 %macro NameParams 1-*
 	%rep %0
-		%ifdef %1
-			%undef %1
-		%endif
 		%define %1 Param(%[CurPrmIndex])
 		%assign CurPrmIndex CurPrmIndex + 1
 		%rotate 1
