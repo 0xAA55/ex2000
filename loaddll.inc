@@ -210,7 +210,13 @@ segment .rdata
 	%%format db %1, 0
 
 segment .text
-	invoke_cdecl _DebugMsg, %%format, %2
+	%if %0 >= 2
+		invoke_stdcall _DebugMsg, %%format, %2
+		add esp, (1 + %count(%2)) * 4
+	%else
+		invoke_stdcall _DebugMsg, %%format
+		add esp, 4
+	%endif
 %endmacro
 
 %ifndef LOADDLL_ASM
