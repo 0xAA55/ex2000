@@ -1,5 +1,7 @@
 @echo off
 
+if not exist out mkdir out
+
 tools\nasm stub.asm -o out\stub.bin
 tools\nasm -f win32 main.asm -o out\main.obj
 tools\nasm -f win32 loaddll.asm -o out\loaddll.obj
