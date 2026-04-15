@@ -232,27 +232,29 @@
 %endmacro
 
 %macro PrepParam 2
-	%if %1 < Frame_NumReservedParams
-		%if %substr(%str(%2), 1, 1) == "&"
-			RotatePassReg
-			lea PassReg, %tok(%substr(%str(%2), 2))
-			mov CallParam(%1), PassReg
-		%elif %substr(%str(%2), 1, 1) == "["
-			RotatePassReg
-			mov PassReg, %2
-			mov CallParam(%1), PassReg
-		%else
-			%if IsPassReg(%2)
-				%if IsRegUsedForPass(%2)
-					%error Register %2 was used for pass address reference parameters, here it was consumed by automatic allocating register.
-				%else
-					RemoveRegAvoidForPass %2
-				%endif
-			%endif
-			mov dword CallParam(%1), %2
-		%endif
-	%else
+	%if %1 >= Frame_NumReservedParams
 		%error Bad param index %1
+		%exitmacro
+	%endif
+	%if %substr(%str(%2), 1, 1) == "&"
+		RotatePassReg
+		lea PassReg, %tok(%substr(%str(%2), 2))
+		mov CallParam(%1), PassReg
+	%elif %substr(%str(%2), 1, 1) == "["
+		RotatePassReg
+		mov PassReg, %2
+		mov CallParam(%1), PassReg
+	%else
+		%if IsPassReg(%2)
+			%if IsRegUsedForPass(%2)
+				%error Register %2 was used for pass address reference parameters, here it was consumed by automatic allocating register.
+			%else
+				RemoveRegAvoidForPass %2
+				%define PassReg %2
+				RotatePassReg
+			%endif
+		%endif
+		mov dword CallParam(%1), %2
 	%endif
 %endmacro
 
