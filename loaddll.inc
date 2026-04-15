@@ -141,20 +141,48 @@
 	call _LoadFuncGroup
 %endmacro
 
-%macro invoke_stdcall 1-2+
+%macro invoke_stdcall 1-*
 	%if %0 == 1
 		call %1
 	%else
-		PrepStdCallParam %2
+		ResetPassReg
+		%rep %0 - 1
+			%rotate -1
+			%if IsPassReg(%1)
+				AddRegAvoidForPass %1
+			%endif
+		%endrep
+		%rotate -1
+		%assign StdCallParamIndex 0
+		%rep %0 - 1
+			%rotate -1
+			PrepStdCallParam StdCallParamIndex, %1
+			%assign StdCallParamIndex StdCallParamIndex + 1
+		%endrep
+		%rotate -1
 		call %1
 	%endif
 %endmacro
 
-%macro invoke_dll_stdcall 1-2+
+%macro invoke_dll_stdcall 1-*
 	%if %0 == 1
 		invoke_dll_func %1
 	%else
-		PrepStdCallParam %2
+		ResetPassReg
+		%rep %0 - 1
+			%rotate -1
+			%if IsPassReg(%1)
+				AddRegAvoidForPass %1
+			%endif
+		%endrep
+		%rotate -1
+		%assign StdCallParamIndex 0
+		%rep %0 - 1
+			%rotate -1
+			PrepStdCallParam StdCallParamIndex, %1
+			%assign StdCallParamIndex StdCallParamIndex + 1
+		%endrep
+		%rotate -1
 		invoke_dll_func %1
 	%endif
 %endmacro
