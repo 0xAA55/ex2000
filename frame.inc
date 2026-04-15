@@ -258,15 +258,28 @@
 	%endif
 %endmacro
 
-%macro PrepStdCallParam 1-*
-	%assign StdCallParamIndex 0
-	%rep %0
-		%rotate -1
-		%idefine esp (esp + StdCallParamIndex * 4)
-		push %1
-		%undef esp
-		%assign StdCallParamIndex StdCallParamIndex + 1
-	%endrep
+%macro PrepStdCallParam 2
+	%ifdef esP
+		%error 'esP' had been defined to esP.
+	%endif
+	%define esp (Esp + (%1) * 4)
+	%if %substr(%str(%2), 1, 1) == "&"
+		RotatePassReg
+		lea PassReg, %tok(%substr(%str(%2), 2))
+		push PassReg
+	%else
+		%if IsPassReg(%2)
+			%if IsRegUsedForPass(%2)
+				%error Register %2 was used for pass address reference parameters, here it was consumed by automatic allocating register.
+			%else
+				RemoveRegAvoidForPass %2
+				%define PassReg %2
+				RotatePassReg
+			%endif
+		%endif
+		push %2
+	%endif
+	%undef esp
 %endmacro
 
 %endif
