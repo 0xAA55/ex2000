@@ -1,5 +1,6 @@
 %define MAIN_ASM 1
 %include "loaddll.inc"
+%include "assets.inc"
 
 extern _InitLoadLibrary
 extern _InitGL33
@@ -147,6 +148,7 @@ DefFunc _start
 	invoke_dll_stdcall ShowWindow, [_hWnd], 1
 	invoke_dll_stdcall UpdateWindow, [_hWnd]
 
+	invoke_cdecl _AssetsInit
 	invoke_cdecl _SceneInit
 
 .msgloop:
