@@ -58,8 +58,8 @@ DefFunc _ShaderCreate
 	%undef _InfoLogBuf
 
 DefFunc _ProgramCreate
-	FrameBegin 6, 4
-	AssignVars _PRG, _InfoLog, _InfoLogLen, _LinkStatus, _ShaderType, _FormatBuffer
+	FrameBegin 7, 4, esi, edi
+	AssignVars _ECX_Home, _PRG, _InfoLog, _InfoLogLen, _LinkStatus, _ShaderType, _FormatBuffer
 
 	mov eax, Param(0)
 	or eax, Param(1)
@@ -68,55 +68,41 @@ DefFunc _ProgramCreate
 
 	xor eax, eax
 	mov _InfoLog, eax
+	mov edi, eax
 
 	invoke_dll_stdcall glCreateProgram
 	mov _PRG, eax
 
-	mov eax, Param(0)
-	test eax, eax
-	jz .skip_vs
+	mov ecx, 3
+	mov esi, _ST_Offsets
+.add_shaders:
+	mov _ECX_Home, ecx
 
-	mov dword _ShaderType, _ST_Vertex_Shader
+	xor eax, eax
+	lodsb
+	add eax, _ST_Vertex_Shader
+	mov _ShaderType, eax
+
+	mov eax, Param(edi)
+	inc edi
+	test eax, eax
+	jz .skip_shader
+
 	invoke_cdecl _ShaderCreate, _PRG, GL_VERTEX_SHADER, eax, &_InfoLog
 	cmp eax, eax
-	jz .bad_compile
+	jnz .skip_shader
+	debug_msg "Shader compilation error :%s Shader: %s", _ShaderType, _InfoLog
+	jmp .bad_end
+.skip_shader:
+	mov ecx, _ECX_Home
+	loop .add_shaders
 
-.skip_vs:
-	mov eax, Param(1)
-	test eax, eax
-	jz .skip_gs
-
-	mov dword _ShaderType, _ST_Geometry_Shader
-	invoke_cdecl _ShaderCreate, _PRG, GL_GEOMETRY_SHADER, eax, &_InfoLog
-	cmp eax, eax
-	jz .bad_compile
-
-.skip_gs:
-	mov eax, Param(2)
-	test eax, eax
-	jz .skip_fs
-
-	mov dword _ShaderType, _ST_Fragment_Shader
-	invoke_cdecl _ShaderCreate, _PRG, GL_FRAGMENT_SHADER, eax, &_InfoLog
-	cmp eax, eax
-	jz .bad_compile
-
-.skip_fs:
 	invoke_dll_stdcall glLinkProgram, _PRG
 	invoke_dll_stdcall glGetProgramiv, _PRG, GL_LINK_STATUS, &_LinkStatus
 	mov eax, _LinkStatus
 	test eax, eax
-	jz .bad_link
+	jnz .good_link
 
-	mov eax, _PRG
-	jmp .end
-
-.bad_compile:
-	debug_msg "Error occurs while compiling %s: %s", _ShaderType, _InfoLog
-	invoke_cdecl _free, _InfoLog
-	jmp .bad_end
-
-.bad_link:
 	invoke_dll_stdcall glGetProgramiv, _PRG, GL_INFO_LOG_LENGTH, &_InfoLogLen
 	mov eax, _InfoLogLen
 	inc eax
@@ -125,18 +111,26 @@ DefFunc _ProgramCreate
 
 	invoke_dll_stdcall glGetProgramInfoLog, _PRG, _InfoLogLen, &_InfoLogLen, _InfoLog
 
-	debug_msg "Error occurs while linking the shader program: %s", _InfoLog
-	invoke_cdecl _free, _InfoLog
+	debug_msg "Shader linkage error: %s", _InfoLog
+	jmp .bad_end
+
+.good_link:
+	mov eax, _PRG
+	jmp .end
+
+.bad_param:
+	int3
+	jmp .bad_param
 
 .bad_end:
+	invoke_cdecl _free, _InfoLog
 	invoke_dll_stdcall glDeleteProgram, _PRG
 	xor eax, eax
 
 .end:
 	FrameEnd
 	ret
-.bad_param:
-	int3
+	%undef _ECX_Home
 	%undef _PRG
 	%undef _InfoLog
 	%undef _InfoLogLen
@@ -145,6 +139,11 @@ DefFunc _ProgramCreate
 	%undef _FormatBuffer
 
 segment .rdata
-_ST_Vertex_Shader db "Vertex Shader", 0
-_ST_Geometry_Shader db "Geometry Shader", 0
-_ST_Fragment_Shader db "Fragment Shader", 0
+global _ST_Vertex_Shader
+global _ST_Geometry_Shader
+global _ST_Fragment_Shader
+global _ST_Offsets
+_ST_Vertex_Shader db "Vertex", 0
+_ST_Geometry_Shader db "Geometry", 0
+_ST_Fragment_Shader db "Fragment", 0
+_ST_Offsets db 0, _ST_Geometry_Shader - _ST_Vertex_Shader, _ST_Fragment_Shader - _ST_Vertex_Shader
