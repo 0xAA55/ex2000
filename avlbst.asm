@@ -237,7 +237,7 @@ _AVLInsertRecursive:
 ; int AVLInsert(AVLBST_Node **ppn, char *key, void *userdata);
 global _AVLInsert
 _AVLInsert:
-	FrameBegin 0, 4, esi
+	FrameBegin 0, 3, esi
 
 	mov eax, Param(0)
 	test eax, eax
