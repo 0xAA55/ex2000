@@ -7,8 +7,6 @@ struc AVLBST_Node
 .key resd 1
 .l_child resd 1
 .r_child resd 1
-.prev resd 1
-.next resd 1
 .height resd 1
 .userdata resd 1
 .size equ $ - AVLBST_Node
