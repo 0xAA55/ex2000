@@ -11,7 +11,7 @@ import_dll_func strcmp
 import_dll_func memcpy
 
 segment .text
-;char *AVLKeyCopy(char *key)
+;char *AVLKeyCopy(char *key);
 global _AVLKeyCopy
 _AVLKeyCopy:
 	FrameBegin 0, 2
@@ -24,8 +24,9 @@ _AVLKeyCopy:
 	FrameEnd
 	ret
 
+;void _AVLKeyDelete(char *key);
 global _AVLKeyDelete
-_AVLKeyDelete： jmp _free
+_AVLKeyDelete: jmp _free
 
 ;int AVLInsert(AVLBST_Inst **ppavlbst, char *key, size_t cb_userdata);
 global _AVLInsert
