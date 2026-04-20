@@ -28,21 +28,19 @@ _AVLKeyCopy:
 global _AVLKeyDelete
 _AVLKeyDelete: jmp _free
 
-;AVLBST_Node *AVLNewNode(char *key, size_t cb_userdata);
+;AVLBST_Node *AVLNewNode(char *key, void* cb_userdata);
 global _AVLNewNode
 _AVLNewNode:
 	FrameBegin 0, 2, edi
 
-	mov eax, Param(1)
-	add eax, AVLBST_Node.head_size
-	invoke_cdecl _calloc, eax, 1
+	invoke_cdecl _calloc, AVLBST_Node.size, 1
 	mov edi, eax
 
 	invoke_cdecl _AVLKeyCopy, Param(0)
 	mov [edi + AVLBST_Node.key], eax
 
 	mov eax, Param(1)
-	mov [edi + AVLBST_Node.data_size], eax
+	mov [edi + AVLBST_Node.userdata], eax
 
 	mov eax, edi
 
