@@ -257,6 +257,81 @@ _AVLInsert:
 	FrameEnd
 	ret
 
+; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key, void(*on_free)(void *userdata))
+global _AVLRemoveRecursive
+_AVLRemoveRecursive:
+	FrameBegin 1, 3, esi, edi
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+
+	mov esi, eax
+	invoke_dll_cdecl strcmp, Param(1), [esi + AVLBST_Node.key]
+	cmp eax, 0
+	jz .equal
+	jg .key_gt
+	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2)
+	mov [esi + AVLBST_Node.l_child], eax
+	jmp .after_remove
+.key_gt:
+	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2)
+	mov [esi + AVLBST_Node.r_child], eax
+	jmp .after_remove
+.equal:
+	invoke_cdecl _free, [esi + AVLBST_Node.key]
+	invoke_cdecl Param(2), [esi + AVLBST_Node.userdata]
+	xor eax, eax
+	mov [esi + AVLBST_Node.key], eax
+	mov [esi + AVLBST_Node.userdata], eax
+
+	mov eax, [esi + AVLBST_Node.l_child]
+	and eax, [esi + AVLBST_Node.r_child]
+	jnz .2child
+
+	mov eax, [esi + AVLBST_Node.l_child]
+	test eax, eax
+	jnz .get_child
+	mov eax, [esi + AVLBST_Node.r_child]
+	test eax, eax
+	jz .no_child
+.get_child:
+	invoke_cdecl _free, esi
+	mov esi, eax
+	jmp .after_remove
+.no_child:
+	invoke_cdecl _free, esi
+	xor eax, eax
+	jmp .end
+.2child:
+	xor eax, eax
+	mov edi, [esi + AVLBST_Node.r_child]
+.while:
+	mov edx, [edi + AVLBST_Node.l_child]
+	cmp edx, eax
+	jz .wend
+	mov edi, edx
+	jmp .while
+.wend:
+	mov eax, [edi + AVLBST_Node.userdata]
+	mov Variable(0), eax
+	xor eax, eax
+	mov [edi + AVLBST_Node.userdata], eax
+	invoke_cdecl _AVLKeyCopy, [edi + AVLBST_Node.key]
+	mov [esi + AVLBST_Node.key], eax
+	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], eax, Param(2)
+	mov [esi + AVLBST_Node.r_child], eax
+	mov eax, Variable(0)
+	mov [esi + AVLBST_Node.userdata], eax
+
+.after_remove:
+	invoke_cdecl _AVLCalcHeight, esi
+	invoke_cdecl _AVLRotate, esi
+
+.end:
+	FrameEnd
+	ret
+
 ; AVLBST_Node* AVLSearch(AVLBST_Node *n, char *key);
 global _AVLSearch
 _AVLSearch:
