@@ -238,7 +238,7 @@ _AVLLast:
 ; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata);
 global _AVLInsertRecursive
 _AVLInsertRecursive:
-	FrameBegin 0, 4, esi
+	FrameBegin 0, 3, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -274,7 +274,7 @@ _AVLInsertRecursive:
 	FrameEnd
 	ret
 
-; int AVLInsert(AVLBST_Node **ppn, char *key, size_t cb_userdata, void *userdata);
+; int AVLInsert(AVLBST_Node **ppn, char *key, void *userdata);
 global _AVLInsert
 _AVLInsert:
 	FrameBegin 0, 4, esi
@@ -287,10 +287,13 @@ _AVLInsert:
 	jmp .bad_param
 .next_0:
 	mov esi, eax
-	invoke_cdecl _AVLInsertRecursive, [esi], Param(1), Param(2), Param(3)
+	invoke_cdecl _AVLInsertRecursive, [esi], Param(1), Param(2)
+	test eax, eax
+	jz .end
 	mov [esi], eax
 	xor eax, eax
 	inc eax
+.end:
 	FrameEnd
 	ret
 
