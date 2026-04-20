@@ -166,12 +166,10 @@ _AVLRotate:
 .ltree:
 	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.l_child]
 	cmp eax, 0
-	jl .next_0
-	invoke_cdecl _AVLRor, esi
-	jmp .end
-.next_0:
+	jge .next_0
 	invoke_cdecl _AVLRol, [esi + AVLBST_Node.l_child]
 	mov [esi + AVLBST_Node.l_child], eax
+.next_0:
 	invoke_cdecl _AVLRor, esi
 	jmp .end
 .rtree:
@@ -179,12 +177,10 @@ _AVLRotate:
 	jge .btree
 	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.r_child]
 	cmp eax, 0
-	jg .next_1
-	invoke_cdecl _AVLRol, esi
-	jmp .end
-.next_1:
+	jle .next_1
 	invoke_cdecl _AVLRor, [esi + AVLBST_Node.r_child]
 	mov [esi + AVLBST_Node.r_child], eax
+.next_1:
 	invoke_cdecl _AVLRol, esi
 	jmp .end
 .btree:
