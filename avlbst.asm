@@ -338,13 +338,20 @@ global _AVLRemove
 _AVLRemove:
 	FrameBegin 0, 3, esi
 
-	mov eax, Param(0)
+	mov eax, Param(2)
 	test eax, eax
 	jnz .next_0
+	mov eax, .return
+	mov Param(2), eax
+.next_0:
+
+	mov eax, Param(0)
+	test eax, eax
+	jnz .next_1
 .bad_param:
 	int3
 	jmp .bad_param
-.next_0:
+.next_1:
 	mov esi, eax
 	invoke_cdecl _AVLRemoveRecursive, [esi], Param(1), Param(2)
 	test eax, eax
@@ -354,6 +361,7 @@ _AVLRemove:
 	inc eax
 .end:
 	FrameEnd
+.return:
 	ret
 
 
@@ -381,4 +389,45 @@ _AVLSearch:
 .end:
 	mov eax, esi
 	FrameEnd
+	ret
+
+; void AVLClearRecursive(AVLBST_Node *n, void(*on_free)(void *userdata));
+global _AVLClearRecursive
+_AVLClearRecursive:
+	FrameBegin 0, 3, esi
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+	mov esi, eax
+	invoke_cdecl _AVLClearRecursive, [esi + AVLBST_Node.l_child]
+	invoke_cdecl _AVLClearRecursive, [esi + AVLBST_Node.r_child]
+
+	invoke_cdecl _free, [esi + AVLBST_Node.key]
+	invoke_cdecl Param(1), [esi + AVLBST_Node.userdata]
+	invoke_cdecl _free, esi
+
+.end:
+	FrameEnd
+	ret
+
+; void AVLClear(AVLBST_Node **ppn, void(*on_free)(void *userdata));
+global _AVLClear
+_AVLClear:
+	FrameBegin 0, 3, esi
+
+	mov eax, Param(1)
+	test eax, eax
+	jnz .next_0
+	mov eax, .return
+	mov Param(1), eax
+.next_0:
+
+	mov esi, Param(0)
+	invoke_cdecl _AVLClearRecursive, [esi], Param(1)
+	xor eax, eax
+	mov [esi], eax
+
+	FrameEnd
+.return:
 	ret

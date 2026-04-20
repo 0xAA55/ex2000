@@ -18,6 +18,7 @@ extern _AVLKeyDelete
 extern _AVLInsert
 extern _AVLSearch
 extern _AVLRemove
+extern _AVLClear
 %endif
 
 %endif
