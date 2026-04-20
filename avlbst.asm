@@ -77,6 +77,24 @@ _AVLHeight:
 	FrameEnd
 	ret
 
+; void AVLCalcHeight(AVLBST_Node *n);
+global _AVLCalcHeight
+_AVLCalcHeight:
+	FrameBegin 1, 2, esi
+
+	mov esi, Param(0)
+	invoke_cdecl _AVLHeight, [esi + AVLBST_Node.l_child]
+	StoreVariable 0, eax
+
+	invoke_cdecl _AVLHeight, [esi + AVLBST_Node.r_child]
+	LoadVariable ecx, 0
+
+	invoke_cdecl _AVLMaxInt, eax, ecx
+	inc eax
+	mov [esi + AVLBST_Node.height], eax
+
+	FrameEnd
+	ret
 
 	FrameEnd
 	ret
