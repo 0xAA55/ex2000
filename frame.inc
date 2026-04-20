@@ -246,13 +246,9 @@
 		mov CallParam(%1), PassReg
 	%else
 		%if IsPassReg(%2)
-			%if IsRegUsedForPass(%2)
-				%error Register %2 was used for pass address reference parameters, here it was consumed by automatic allocating register.
-			%else
-				RemoveRegAvoidForPass %2
-				%define PassReg %2
-				RotatePassReg
-			%endif
+			RemoveRegAvoidForPass %2
+			%define PassReg %2
+			RotatePassReg
 		%endif
 		mov dword CallParam(%1), %2
 	%endif
@@ -269,13 +265,9 @@
 		push PassReg
 	%else
 		%if IsPassReg(%2)
-			%if IsRegUsedForPass(%2)
-				%error Register %2 was used for pass address reference parameters, here it was consumed by automatic allocating register.
-			%else
-				RemoveRegAvoidForPass %2
-				%define PassReg %2
-				RotatePassReg
-			%endif
+			RemoveRegAvoidForPass %2
+			%define PassReg %2
+			RotatePassReg
 		%endif
 		push %2
 	%endif
