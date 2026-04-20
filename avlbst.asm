@@ -335,6 +335,31 @@ _AVLInsert:
 	FrameEnd
 	ret
 
+; AVLBST_Node* AVLSearch(AVLBST_Node *n, char *key);
+global _AVLSearch
+_AVLSearch:
+	FrameBegin 0, 2, esi
+
+	mov esi, Param(0)
+
+.doloop:
+	invoke_dll_cdecl strcmp, [esi + AVLBST_Node.key], Param(1)
+	cmp eax, 0
+	jz .end
+	jg .gt
+	mov esi, [esi + AVLBST_Node.l_child]
+	jmp .while
+.gt:
+	mov esi, [esi + AVLBST_Node.r_child]
+.while:
+	test esi, esi
+	jz .end
+	jmp .doloop
+
+.end:
+	mov eax, esi
+	FrameEnd
+	ret
 
 
 

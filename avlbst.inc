@@ -19,6 +19,7 @@ endstruc
 extern _AVLKeyCopy
 extern _AVLKeyDelete
 extern _AVLInsert
+extern _AVLSearch
 %endif
 
 %endif
