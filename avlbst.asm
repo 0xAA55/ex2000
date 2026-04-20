@@ -96,6 +96,22 @@ _AVLCalcHeight:
 	FrameEnd
 	ret
 
+; AVLBST_Node *AVLRol(AVLBST_Node *x);
+global _AVLRol
+_AVLRol:
+	FrameBegin 1, 1, esi, edi
+
+	mov esi, Param(0)
+	mov edi, [esi + AVLBST_Node.r_child]
+	mov eax, [edi + AVLBST_Node.l_child]
+	mov [edi + AVLBST_Node.l_child], esi
+	mov [esi + AVLBST_Node.r_child], eax
+
+	invoke_cdecl _AVLCalcHeight, esi
+	invoke_cdecl _AVLCalcHeight, edi
+
+	mov eax, edi
+
 	FrameEnd
 	ret
 
