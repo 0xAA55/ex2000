@@ -267,10 +267,53 @@ _AVLLast:
 	FrameEnd
 	ret
 
+; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, size_t cb_userdata, void *userdata);
+global _AVLInsertRecursive
+_AVLInsertRecursive:
+	FrameBegin 0, 4, esi
 
+	mov eax, Param(0)
+	test eax, eax
+	jnz .next_0
 
+	invoke_cdecl _AVLNewNode, Param(1), Param(2)
+	mov esi, eax
+	invoke_dll_cdecl memcpy, &[esi + AVLBST_Node.data], Param(3), [esi + AVLBST_Node.data_size]
+	mov eax, esi
+	jmp .end
+.next_0:
 
+	mov esi, eax
+	invoke_dll_cdecl strcmp, Param(1), [esi + AVLBST_Node.key]
+	cmp eax, 0
+	jz .end
+	jg .next_1
 
+	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2), Param(3)
+	mov [esi + AVLBST_Node.l_child], eax
+
+	jmp .next_2
+.next_1:
+	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2), Param(3)
+	mov [esi + AVLBST_Node.r_child], eax
+
+.next_2:
+	invoke_cdecl _AVLCalcHeight, esi
+	invoke_cdecl _AVLKeepBalanceOnInsert, esi, Param(1)
+	mov esi, eax
+
+	invoke_cdecl _AVLLast, esi
+	cmp esi, eax
+	jz .finish
+	mov [eax + AVLBST_Node.next], esi
+	mov [esi + AVLBST_Node.prev], eax
+
+.finish:
+	mov eax, esi
+
+.end:
+	FrameEnd
+	ret
 
 
 
