@@ -134,6 +134,26 @@ _AVLRor:
 	FrameEnd
 	ret
 
+; int AVLGetBalance(AVLBST_Node *x);
+global _AVLGetBalance
+_AVLGetBalance:
+	FrameBegin 1, 1, esi
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+
+	mov esi, eax
+	invoke_cdecl _AVLHeight, [esi + AVLBST_Node.l_child]
+	mov Variable(0), eax
+	invoke_cdecl _AVLHeight, [esi + AVLBST_Node.r_child]
+	mov edx, eax
+	mov eax, Variable(0)
+	sub eax, edx
+
+.end:
+	FrameEnd
+	ret
 
 
 
