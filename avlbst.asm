@@ -153,73 +153,43 @@ _AVLGetBalance:
 	FrameEnd
 	ret
 
-; AVLBST_Node *AVLKeepBalanceOnInsert(AVLBST_Node *x, char *key);
-global _AVLKeepBalanceOnInsert
-_AVLKeepBalanceOnInsert:
+; AVLBST_Node *AVLRotate(AVLBST_Node *x, char *key);
+global _AVLRotate
+_AVLRotate:
 	FrameBegin 1, 2, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AVLGetBalance, esi
-	mov Variable(0), eax
-
 	cmp eax, 1
-	jle .next_0
+	jle .rtree
 
-	mov eax, [esi + AVLBST_Node.l_child]
-	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
+.ltree:
+	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.l_child]
 	cmp eax, 0
-	jge .next_0
-
+	jl .next_0
 	invoke_cdecl _AVLRor, esi
 	jmp .end
 .next_0:
-	mov Variable(0), eax
-
+	invoke_cdecl _AVLRol, [esi + AVLBST_Node.l_child]
+	mov [esi + AVLBST_Node.l_child], eax
+	invoke_cdecl _AVLRor, esi
+	jmp .end
+.rtree:
 	cmp eax, -1
-	jge .next_1
-
-	mov eax, [esi + AVLBST_Node.r_child]
-	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
+	jge .btree
+	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.r_child]
 	cmp eax, 0
-	jle .next_1
-
+	jg .next_1
 	invoke_cdecl _AVLRol, esi
 	jmp .end
 .next_1:
-	mov Variable(0), eax
-
-	cmp eax, 1
-	jle .next_2
-
-	mov eax, [esi + AVLBST_Node.l_child]
-	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
-	cmp eax, 0
-	jle .next_2
-
-	invoke_cdecl _AVLRol, [esi + AVLBST_Node.l_child]
-	mov [esi + AVLBST_Node.l_child], eax
-
-	invoke_cdecl _AVLRor, esi
-	jmp .end
-.next_2:
-	mov Variable(0), eax
-
-	cmp eax, 1
-	jge .next_3
-
-	mov eax, [esi + AVLBST_Node.r_child]
-	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
-	cmp eax, 0
-	jge .next_3
-
 	invoke_cdecl _AVLRor, [esi + AVLBST_Node.r_child]
 	mov [esi + AVLBST_Node.r_child], eax
-
 	invoke_cdecl _AVLRol, esi
 	jmp .end
-
-.next_3:
+.btree:
 	mov eax, esi
+	jmp .end
 
 .end:
 	FrameEnd
@@ -265,7 +235,7 @@ _AVLLast:
 	FrameEnd
 	ret
 
-; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, size_t cb_userdata, void *userdata);
+; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata);
 global _AVLInsertRecursive
 _AVLInsertRecursive:
 	FrameBegin 0, 4, esi
@@ -275,9 +245,6 @@ _AVLInsertRecursive:
 	jnz .next_0
 
 	invoke_cdecl _AVLNewNode, Param(1), Param(2)
-	mov esi, eax
-	invoke_dll_cdecl memcpy, &[esi + AVLBST_Node.data], Param(3), [esi + AVLBST_Node.data_size]
-	mov eax, esi
 	jmp .end
 .next_0:
 
@@ -287,24 +254,18 @@ _AVLInsertRecursive:
 	jz .end
 	jg .next_1
 
-	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2), Param(3)
+	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2)
 	mov [esi + AVLBST_Node.l_child], eax
 
 	jmp .next_2
 .next_1:
-	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2), Param(3)
+	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2)
 	mov [esi + AVLBST_Node.r_child], eax
 
 .next_2:
 	invoke_cdecl _AVLCalcHeight, esi
-	invoke_cdecl _AVLKeepBalanceOnInsert, esi, Param(1)
-	mov esi, eax
-
-	invoke_cdecl _AVLLast, esi
-	cmp esi, eax
-	jz .finish
-	mov [eax + AVLBST_Node.next], esi
-	mov [esi + AVLBST_Node.prev], eax
+	invoke_cdecl _AVLRotate, esi, Param(1)
+	jmp .end
 
 .finish:
 	mov eax, esi
@@ -358,52 +319,3 @@ _AVLSearch:
 	mov eax, esi
 	FrameEnd
 	ret
-
-; AVLBST_Node *AVLKeepBalanceOnRemove(AVLBST_Node *x);
-global _AVLKeepBalanceOnRemove
-_AVLKeepBalanceOnRemove:
-	FrameBegin 1, 1, esi
-
-	mov esi, Param(0)
-	invoke_cdecl _AVLGetBalance, esi
-	StoreVariable 0, eax
-
-	cmp eax, 1
-	jle .next_0
-
-	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.l_child]
-	cmp eax, 0
-	jl .lt
-
-	invoke_cdecl _AVLRor, esi
-	jmp .end
-.lt:
-	invoke_cdecl _AVLRol, [esi + AVLBST_Node.l_child]
-	mov [esi + AVLBST_Node.l_child], eax
-
-	invoke_cdecl _AVLRor, esi
-	jmp .end
-.next_0:
-	LoadVariable eax, 0
-
-	cmp eax, -1
-	jge .next_1
-
-	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.r_child]
-	cmp eax, 0
-	jg .gt
-
-	invoke_cdecl _AVLRol, esi
-	jmp .end
-.gt:
-	invoke_cdecl _AVLRor, [esi + AVLBST_Node.r_child]
-	mov [esi + AVLBST_Node.r_child], eax
-
-	invoke_cdecl _AVLRol, esi
-	jmp .end
-.next_1:
-	mov eax, esi
-.end:
-	FrameEnd
-	ret
-
