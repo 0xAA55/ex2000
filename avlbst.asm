@@ -28,18 +28,27 @@ _AVLKeyCopy:
 global _AVLKeyDelete
 _AVLKeyDelete: jmp _free
 
-;int AVLInsert(AVLBST_Inst **ppavlbst, char *key, size_t cb_userdata);
-global _AVLInsert
-_AVLInsert:
+;AVLBST_Node *AVLNewNode(char *key, size_t cb_userdata);
+global _AVLNewNode
+_AVLNewNode:
 	FrameBegin 0, 2, edi
 
-	mov eax, Param(2)
-	add eax, AVLBST_Inst.head_size
-	invoke_cdecl _malloc, eax
+	mov eax, Param(1)
+	add eax, AVLBST_Node.head_size
+	invoke_cdecl _calloc, eax, 1
 	mov edi, eax
 
-	invoke_cdecl _AVLKeyCopy, Param(1)
-	mov [edi + AVLBST_Inst.key], eax
+	invoke_cdecl _AVLKeyCopy, Param(0)
+	mov [edi + AVLBST_Node.key], eax
+
+	mov eax, Param(1)
+	mov [edi + AVLBST_Node.data_size], eax
+
+	mov eax, edi
+
+	FrameEnd
+	ret
+
 
 
 	FrameEnd
