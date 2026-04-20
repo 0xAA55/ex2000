@@ -361,6 +361,51 @@ _AVLSearch:
 	FrameEnd
 	ret
 
+; AVLBST_Node *AVLKeepBalanceOnRemove(AVLBST_Node *x);
+global _AVLKeepBalanceOnRemove
+_AVLKeepBalanceOnRemove:
+	FrameBegin 1, 1, esi
 
+	mov esi, Param(0)
+	invoke_cdecl _AVLGetBalance, esi
+	StoreVariable 0, eax
 
+	cmp eax, 1
+	jle .next_0
+
+	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.l_child]
+	cmp eax, 0
+	jl .lt
+
+	invoke_cdecl _AVLRor, esi
+	jmp .end
+.lt:
+	invoke_cdecl _AVLRol, [esi + AVLBST_Node.l_child]
+	mov [esi + AVLBST_Node.l_child], eax
+
+	invoke_cdecl _AVLRor, esi
+	jmp .end
+.next_0:
+	LoadVariable eax, 0
+
+	cmp eax, -1
+	jge .next_1
+
+	invoke_cdecl _AVLGetBalance, [esi + AVLBST_Node.r_child]
+	cmp eax, 0
+	jg .gt
+
+	invoke_cdecl _AVLRol, esi
+	jmp .end
+.gt:
+	invoke_cdecl _AVLRor, [esi + AVLBST_Node.r_child]
+	mov [esi + AVLBST_Node.r_child], eax
+
+	invoke_cdecl _AVLRol, esi
+	jmp .end
+.next_1:
+	mov eax, esi
+.end:
+	FrameEnd
+	ret
 
