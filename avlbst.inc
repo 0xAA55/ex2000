@@ -3,13 +3,12 @@
 
 %include "loaddll.inc"
 
-struc AVLBST_Inst
+struc AVLBST_Node
 .key resd 1
 .l_child resd 1
 .r_child resd 1
 .prev resd 1
 .next resd 1
-.head_size equ $ - AVLBST_Inst
 .data:
 endstruc
 
