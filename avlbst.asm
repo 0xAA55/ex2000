@@ -195,46 +195,6 @@ _AVLRotate:
 	FrameEnd
 	ret
 
-; AVLBST_Node *AVLFirst(AVLBST_Node *n)
-global _AVLFirst
-_AVLFirst:
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	test eax, eax
-	jz .end
-
-	xor edx, edx
-.while:
-	cmp [eax + AVLBST_Node.prev], edx
-	je .end
-	mov eax, [eax + AVLBST_Node.prev]
-	jmp .while
-
-.end:
-	FrameEnd
-	ret
-
-; AVLBST_Node *AVLLast(AVLBST_Node *n)
-global _AVLLast
-_AVLLast:
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	test eax, eax
-	jz .end
-
-	xor edx, edx
-.while:
-	cmp [eax + AVLBST_Node.next], edx
-	je .end
-	mov eax, [eax + AVLBST_Node.next]
-	jmp .while
-
-.end:
-	FrameEnd
-	ret
-
 ; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata);
 global _AVLInsertRecursive
 _AVLInsertRecursive:
