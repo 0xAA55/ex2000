@@ -155,6 +155,78 @@ _AVLGetBalance:
 	FrameEnd
 	ret
 
+; AVLBST_Node *AVLKeepBalanceOnInsert(AVLBST_Node *x, char *key);
+global _AVLKeepBalanceOnInsert
+_AVLKeepBalanceOnInsert:
+	FrameBegin 1, 2, esi
+
+	mov esi, Param(0)
+	invoke_cdecl _AVLGetBalance, esi
+	mov Variable(0), eax
+
+	cmp eax, 1
+	jle .next_0
+
+	mov eax, [esi + AVLBST_Node.l_child]
+	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
+	cmp eax, 0
+	jge .next_0
+
+	invoke_cdecl _AVLRor, esi
+	jmp .end
+.next_0:
+	mov Variable(0), eax
+
+	cmp eax, -1
+	jge .next_1
+
+	mov eax, [esi + AVLBST_Node.r_child]
+	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
+	cmp eax, 0
+	jle .next_1
+
+	invoke_cdecl _AVLRol, esi
+	jmp .end
+.next_1:
+	mov Variable(0), eax
+
+	cmp eax, 1
+	jle .next_2
+
+	mov eax, [esi + AVLBST_Node.l_child]
+	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
+	cmp eax, 0
+	jle .next_2
+
+	invoke_cdecl _AVLRol, [esi + AVLBST_Node.l_child]
+	mov [esi + AVLBST_Node.l_child], eax
+
+	invoke_cdecl _AVLRor, esi
+	jmp .end
+.next_2:
+	mov Variable(0), eax
+
+	cmp eax, 1
+	jge .next_3
+
+	mov eax, [esi + AVLBST_Node.r_child]
+	invoke_dll_cdecl strcmp, Param(1), [eax + AVLBST_Node.key]
+	cmp eax, 0
+	jge .next_3
+
+	invoke_cdecl _AVLRor, [esi + AVLBST_Node.r_child]
+	mov [esi + AVLBST_Node.r_child], eax
+
+	invoke_cdecl _AVLRol, esi
+	jmp .end
+
+.next_3:
+	mov eax, esi
+
+.end:
+	FrameEnd
+	ret
+
 
 
 
