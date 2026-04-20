@@ -9,6 +9,9 @@ struc AVLBST_Node
 .r_child resd 1
 .prev resd 1
 .next resd 1
+.height resd 1
+.data_size resd 1
+.head_size equ $ - AVLBST_Node
 .data:
 endstruc
 
