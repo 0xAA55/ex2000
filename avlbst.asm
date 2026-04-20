@@ -49,6 +49,18 @@ _AVLNewNode:
 	FrameEnd
 	ret
 
+; int AVLMaxInt(int a, int b);
+global _AVLMaxInt
+_AVLMaxInt:
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	cmp eax, Param(1)
+	jg .a_gt_b
+	mov eax, Param(1)
+.a_gt_b:
+	FrameEnd
+	ret
 
 
 	FrameEnd
