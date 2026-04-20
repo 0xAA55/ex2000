@@ -10,9 +10,8 @@ struc AVLBST_Node
 .prev resd 1
 .next resd 1
 .height resd 1
-.data_size resd 1
-.head_size equ $ - AVLBST_Node
-.data:
+.userdata resd 1
+.size equ $ - AVLBST_Node
 endstruc
 
 %ifndef AVLBST_ASM
