@@ -62,6 +62,21 @@ _AVLMaxInt:
 	FrameEnd
 	ret
 
+; int AVLHeight(AVLBST_Node *n);
+global _AVLHeight
+_AVLHeight:
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+
+	mov eax, [eax + AVLBST_Node.height]
+
+.end:
+	FrameEnd
+	ret
+
 
 	FrameEnd
 	ret
