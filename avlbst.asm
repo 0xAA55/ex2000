@@ -256,7 +256,7 @@ _AVLInsert:
 ; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key, void(*on_free)(void *userdata))
 global _AVLRemoveRecursive
 _AVLRemoveRecursive:
-	FrameBegin 1, 3, esi, edi
+	FrameBegin 2, 3, esi, edi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -275,8 +275,6 @@ _AVLRemoveRecursive:
 	mov [esi + AVLBST_Node.r_child], eax
 	jmp .after_remove
 .equal:
-	invoke_cdecl _free, [esi + AVLBST_Node.key]
-	invoke_cdecl Param(2), [esi + AVLBST_Node.userdata]
 	xor eax, eax
 	mov [esi + AVLBST_Node.key], eax
 	mov [esi + AVLBST_Node.userdata], eax
@@ -292,10 +290,14 @@ _AVLRemoveRecursive:
 	test eax, eax
 	jz .no_child
 .get_child:
+	invoke_cdecl _free, [esi + AVLBST_Node.key]
+	invoke_cdecl Param(2), [esi + AVLBST_Node.userdata]
 	invoke_cdecl _free, esi
 	mov esi, eax
 	jmp .after_remove
 .no_child:
+	invoke_cdecl _free, [esi + AVLBST_Node.key]
+	invoke_cdecl Param(2), [esi + AVLBST_Node.userdata]
 	invoke_cdecl _free, esi
 	xor eax, eax
 	jmp .end
@@ -309,16 +311,19 @@ _AVLRemoveRecursive:
 	mov edi, edx
 	jmp .while
 .wend:
-	mov eax, [edi + AVLBST_Node.userdata]
-	mov Variable(0), eax
 	xor eax, eax
+	mov ecx, [edi + AVLBST_Node.userdata]
+	mov Variable(0), ecx
 	mov [edi + AVLBST_Node.userdata], eax
 	invoke_cdecl _AVLKeyCopy, [edi + AVLBST_Node.key]
-	mov [esi + AVLBST_Node.key], eax
+	mov Variable(1), eax
 	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], eax, Param(2)
 	mov [esi + AVLBST_Node.r_child], eax
 	mov eax, Variable(0)
 	mov [esi + AVLBST_Node.userdata], eax
+	invoke_cdecl _free, [esi + AVLBST_Node.key]
+	mov ecx, Variable(1)
+	mov [esi + AVLBST_Node.key], ecx
 
 .after_remove:
 	invoke_cdecl _AVLCalcHeight, esi
