@@ -15,9 +15,17 @@ endstruc
 %ifndef AVLBST_ASM
 extern _AVLKeyCopy
 extern _AVLKeyDelete
+
+; int AVLInsert(AVLBST_Node **ppn, char *key, void *userdata);
 extern _AVLInsert
+
+; AVLBST_Node* AVLSearch(AVLBST_Node *n, char *key);
 extern _AVLSearch
+
+; int AVLRemove(AVLBST_Node **ppn, char *key, void(*on_free)(void *userdata));
 extern _AVLRemove
+
+; void AVLClear(AVLBST_Node **ppn, void(*on_free)(void *userdata));
 extern _AVLClear
 %endif
 
