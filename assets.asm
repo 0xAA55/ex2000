@@ -291,3 +291,45 @@ _AssetsFnRead:
 	FrameEnd
 	ret
 
+; int AssetsFileGrowCapacity(FileStruct *f, size_t desired_minimal_capacity)
+global _AssetsFileGrowCapacity
+_AssetsFileGrowCapacity:
+	FrameBegin 1, 3, esi
+
+	mov esi, Param(0)
+	mov eax, [esi + FileStruct.file_capacity]
+	mov ecx, 2
+	mov edx, ecx
+	inc edx
+	mul edx
+	div ecx
+	inc eax
+	cmp eax, Param(1)
+	jge .enough_size
+	mov eax, Param(1)
+.enough_size:
+	mov Variable(0), eax
+	invoke_cdecl _realloc, [esi + FileStruct.data], eax
+	test eax, eax
+	jz .failed
+	mov [esi + FileStruct.data], eax
+	mov ecx, Variable(0)
+	add eax, [esi + FileStruct.file_capacity]
+	sub ecx, [esi + FileStruct.file_capacity]
+	jz .cleared
+	invoke_dll_cdecl memset, eax, 0, ecx
+.cleared:
+	mov eax, Variable(0)
+	mov [esi + FileStruct.file_capacity], eax
+	jmp .end
+.failed:
+	invoke_cdecl _free, [esi + FileStruct.data]
+	xor eax, eax
+	mov [esi + FileStruct.data], eax
+	mov [esi + FileStruct.file_size], eax
+	mov [esi + FileStruct.file_capacity], eax
+
+.end:
+	FrameEnd
+	ret
+
