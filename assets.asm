@@ -3,9 +3,9 @@
 %include "assets.inc"
 
 dll_func_group_start CabinetFunc
-def_dll_func _FDICreate
-def_dll_func _FDICopy
-def_dll_func _FDIDestroy
+def_dll_func FDICreate
+def_dll_func FDICopy
+def_dll_func FDIDestroy
 dll_func_group_end CabinetFunc
 
 segment .text
