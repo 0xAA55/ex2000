@@ -8,6 +8,15 @@ def_dll_func FDICopy
 def_dll_func FDIDestroy
 dll_func_group_end CabinetFunc
 
+struc FileStruct
+.file_pointer resd 1
+.opened resd 1
+.file_size resd 1
+.file_capacity resd 1
+.data resd 1
+.size equ $ - FileStruct
+endstruc
+
 segment .text
 global _AssetsInit
 _AssetsInit:
