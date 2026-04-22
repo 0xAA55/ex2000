@@ -370,7 +370,9 @@ global _AVLSearch
 _AVLSearch:
 	FrameBegin 0, 2, esi
 
-	mov esi, Param(0)
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
 
 .doloop:
 	invoke_dll_cdecl strcmp, [esi + AVLBST_Node.key], Param(1)
@@ -383,11 +385,12 @@ _AVLSearch:
 	mov esi, [esi + AVLBST_Node.r_child]
 .while:
 	test esi, esi
-	jz .end
+	jz .wend
 	jmp .doloop
+.wend:
+	mov eax, esi
 
 .end:
-	mov eax, esi
 	FrameEnd
 	ret
 
