@@ -235,3 +235,59 @@ _AssetsFnClose:
 	FrameEnd
 	ret
 
+global _AssetsFnRead
+_AssetsFnRead:
+	FrameBegin 0, 3, esi
+
+	debug_msg "Read file: %p, %p", Param(0), Param(2)
+	mov eax, Param(0)
+	test eax, eax
+	jz .is_null_file
+	cmp eax, 1
+	jz .is_cab_file
+
+	mov esi, eax
+	invoke_cdecl _AssetsAssertFileIsOpened, esi
+
+	mov eax, [esi + FileStruct.file_size]
+	sub eax, [esi + FileStruct.file_pointer]
+	jle .eof
+	mov edx, Param(2)
+	cmp eax, edx
+	jle .proceed_file
+	mov eax, edx
+.proceed_file:
+	mov Param(2), eax
+	mov eax, [esi + FileStruct.data]
+	add eax, Param(2)
+	invoke_dll_cdecl memcpy, Param(1), eax, Param(2)
+	mov eax, Param(2)
+	add [esi + FileStruct.file_pointer], eax
+	jmp .end
+.is_null_file:
+	int3
+	jmp .is_null_file
+
+.is_cab_file:
+	mov eax, _AssetsCabSize
+	sub eax, [_AssetsCabFile.file_pointer]
+	jle .eof
+	mov edx, Param(2)
+	cmp eax, edx
+	jle .proceed_cab
+	mov eax, edx
+.proceed_cab:
+	mov Param(2), eax
+	mov eax, _AssetsCab
+	add eax, [_AssetsCabFile.file_pointer]
+	invoke_dll_cdecl memcpy, Param(1), eax, Param(2)
+	mov eax, Param(2)
+	add [_AssetsCabFile.file_pointer], eax
+	jmp .end
+.eof:
+	xor eax, eax
+
+.end:
+	FrameEnd
+	ret
+
