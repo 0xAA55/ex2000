@@ -119,5 +119,44 @@ _AssetsInitLoadDll:
 	FrameEnd
 	ret
 
+global _AssetsFnOpen
+_AssetsFnOpen:
+	FrameBegin 0, 3, esi
 
+	invoke_dll_cdecl strcmp, Param(0), _AssetsCabName
+	test eax, eax
+	jz .is_cab_file
+
+	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
+	test eax, eax
+	jnz .found
+
+	invoke_cdecl _calloc, 1, FileStruct.size
+	mov esi, eax
+	mov [esi + FileStruct.opened], eax
+
+	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi
+	debug_msg "Opening file: %s -> %p", Param(0), esi
+	mov eax, esi
+	jmp .end
+.found:
+	mov eax, [eax + AVLBST_Node.userdata]
+	cmp dword [eax + FileStruct.opened], 0
+	jnz .already_opened
+	inc dword [eax + FileStruct.opened]
+	push eax
+	debug_msg "Opening file: %s -> %p", Param(0), eax
+	pop eax
+	jmp .end
+.already_opened:
+	int3
+	jmp .already_opened
+.is_cab_file:
+	debug_msg "Opening file: %s -> %p", Param(0), 1
+	xor eax, eax
+	inc eax
+
+.end:
+	FrameEnd
+	ret
 
