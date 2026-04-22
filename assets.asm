@@ -375,3 +375,73 @@ _AssetsFnWrite:
 	FrameEnd
 	ret
 
+global _AssetsFnSeek
+_AssetsFnSeek:
+	FrameBegin 0, 1
+
+	debug_msg "Seek file: %p, %d, %p", Param(0), Param(1), Param(2)
+	mov eax, Param(0)
+	test eax, eax
+	jz .is_null_file
+	cmp eax, 1
+	jz .is_cab_file
+	mov esi, eax
+	invoke_cdecl _AssetsAssertFileIsOpened, esi
+
+	mov eax, Param(2)
+	cmp eax, 0
+	jz .seek_set
+	cmp eax, 1
+	jz .seek_cur
+	cmp eax, 2
+	jz .seek_end
+.bad_seek:
+	int3
+	jmp .bad_seek
+.seek_set:
+	mov eax, Param(1)
+	mov [esi + FileStruct.file_pointer], eax
+	jmp .end
+.seek_cur:
+	mov eax, [esi + FileStruct.file_pointer]
+	add eax, Param(1)
+	mov [esi + FileStruct.file_pointer], eax
+	jmp .end
+.seek_end:
+	mov eax, [esi + FileStruct.file_size]
+	add eax, Param(1)
+	mov [esi + FileStruct.file_pointer], eax
+	jmp .end
+.is_null_file:
+	int3
+	jmp .is_null_file
+
+.is_cab_file:
+	mov eax, Param(2)
+	cmp eax, 0
+	jz .cab_seek_set
+	cmp eax, 1
+	jz .cab_seek_cur
+	cmp eax, 2
+	jz .cab_seek_end
+.cab_bad_seek:
+	int3
+	jmp .cab_bad_seek
+.cab_seek_set:
+	mov eax, Param(1)
+	mov [_AssetsCabFile.file_pointer], eax
+	jmp .end
+.cab_seek_cur:
+	mov eax, [_AssetsCabFile.file_pointer]
+	add eax, Param(1)
+	mov [_AssetsCabFile.file_pointer], eax
+	jmp .end
+.cab_seek_end:
+	mov eax, _AssetsCabSize
+	add eax, Param(1)
+	mov [_AssetsCabFile.file_pointer], eax
+
+.end:
+	FrameEnd
+	ret
+
