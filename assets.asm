@@ -484,3 +484,20 @@ _AssetsFnOnNotify:
 	FrameEnd
 	ret
 
+global _AssetsInit
+_AssetsInit:
+	FrameBegin 1, 9
+
+	invoke_cdecl _AssetsInitLoadDll
+
+	invoke_dll_cdecl FDICreate, _malloc, _free, _AssetsFnOpen, _AssetsFnRead, _AssetsFnWrite, _AssetsFnClose, _AssetsFnSeek, -1, _AssetsFDIERF
+	mov Variable(0), eax
+	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
+
+	invoke_dll_cdecl FDICopy, Variable(0), _AssetsCabName, _AssetsCabPathName, 0, _AssetsFnOnNotify, 0, 0
+	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
+	invoke_dll_cdecl FDIDestroy, Variable(0)
+	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
+
+	FrameEnd
+	ret
