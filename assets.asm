@@ -333,3 +333,45 @@ _AssetsFileGrowCapacity:
 	FrameEnd
 	ret
 
+global _AssetsFnWrite
+_AssetsFnWrite:
+	FrameBegin 0, 3, esi
+
+	debug_msg "Write file: %p, %p", Param(0), Param(2)
+	mov eax, Param(0)
+	test eax, eax
+	jz .is_null_file
+	cmp eax, 1
+	jz .is_cab_file
+
+	mov esi, eax
+	invoke_cdecl _AssetsAssertFileIsOpened, esi
+	mov eax, [esi + FileStruct.file_pointer]
+	add eax, Param(2)
+	cmp eax, [esi + FileStruct.file_capacity]
+	jle .good_capacity
+	invoke_cdecl _AssetsFileGrowCapacity, esi, eax
+	test eax, eax
+	jz .grow_fail
+.good_capacity:
+	mov eax, [esi + FileStruct.data]
+	add eax, [esi + FileStruct.file_pointer]
+	invoke_dll_cdecl memcpy, eax, Param(1), Param(2)
+	mov eax, [esi + FileStruct.file_pointer]
+	add eax, Param(2)
+	mov [esi + FileStruct.file_pointer], eax
+	cmp eax, [esi + FileStruct.file_size]
+	jle .end
+	mov [esi + FileStruct.file_size], eax
+	mov eax, Param(2)
+	jmp .end
+.is_null_file:
+.is_cab_file:
+.grow_fail:
+	int3
+	jmp .is_cab_file
+
+.end:
+	FrameEnd
+	ret
+
