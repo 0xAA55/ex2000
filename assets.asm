@@ -36,6 +36,12 @@ endstruc
 segment .bss
 global _AssetsCabPathName
 _AssetsCabPathName resd 1
+global _AssetsFDIERF
+_AssetsFDIERF:
+.oper resd 1
+.type resd 1
+.error resd 1
+
 segment .rdata
 global _AssetsCab
 _AssetsCab:
