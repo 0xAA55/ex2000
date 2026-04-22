@@ -17,6 +17,16 @@ struc FileStruct
 .size equ $ - FileStruct
 endstruc
 
+segment .bss
+global _AssetsCabPathName
+_AssetsCabPathName resd 1
+segment .rdata
+global _AssetsCab
+_AssetsCab:
+incbin "out/assets.cab"
+_AssetsCabSize equ $ - _AssetsCab
+global _AssetsCabName
+_AssetsCabName db "assets.cab", 0
 segment .text
 global _AssetsInit
 _AssetsInit:
@@ -27,9 +37,4 @@ _AssetsInit:
 	ret
 
 
-segment .rdata
-global _AssetsCab
-_AssetsCab:
-incbin "out/assets.cab"
-_AssetsCabSize equ $ - _AssetsCab
 
