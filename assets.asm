@@ -471,6 +471,7 @@ _AssetsFnOnNotify:
 	jmp .end
 .close_file:
 	invoke_cdecl _AssetsFnClose, [esi + FDINOTIFICATION.hf]
+	inc eax
 	jmp .end
 .cab_info:
 .partial_file:
