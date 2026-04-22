@@ -140,10 +140,12 @@ _AssetsFnOpen:
 	mov eax, esi
 	jmp .end
 .found:
+	xor edx, edx
 	mov eax, [eax + AVLBST_Node.userdata]
-	cmp dword [eax + FileStruct.opened], 0
+	cmp [eax + FileStruct.opened], edx
 	jnz .already_opened
 	inc dword [eax + FileStruct.opened]
+	mov [eax + FileStruct.file_pointer], edx
 	push eax
 	debug_msg "Opening file: %s -> %p", Param(0), eax
 	pop eax
