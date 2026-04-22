@@ -160,3 +160,32 @@ _AssetsFnOpen:
 	FrameEnd
 	ret
 
+global _AssetsTrimFileMemory
+_AssetsTrimFileMemory:
+	FrameBegin 0, 2, esi
+
+	mov esi, Param(0)
+	mov eax, [esi + FileStruct.file_size]
+	test eax, eax
+	jz .is_empty_file
+	cmp eax, [esi + FileStruct.file_capacity]
+	jz .end
+
+	mov [esi + FileStruct.file_capacity], eax
+	invoke_cdecl _realloc, [esi + FileStruct.data], [esi + FileStruct.file_size]
+	test eax, eax
+	jz .fail_exit
+	mov [esi + FileStruct.data], eax
+	jmp .end
+.fail_exit:
+.is_empty_file:
+	invoke_cdecl _free, [esi + FileStruct.data]
+	xor eax, eax
+	mov [esi + FileStruct.data], eax
+	mov [esi + FileStruct.file_size], eax
+	mov [esi + FileStruct.file_capacity], eax
+
+.end:
+	FrameEnd
+	ret
+
