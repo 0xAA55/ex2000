@@ -227,7 +227,14 @@ DefFunc _calloc
 
 DefFunc _realloc
 	FrameBegin 0, 0
+	mov eax, Param(0)
+	test eax, eax
+	jz .ptr_is_null
 	invoke_dll_stdcall HeapReAlloc, [_hHeap], 4, Param(0), Param(1)
+	jmp .end
+.ptr_is_null:
+	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(1)
+.end:
 	FrameEnd
 	ret
 
