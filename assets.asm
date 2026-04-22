@@ -2,6 +2,17 @@
 %define ASSETS_ASM 1
 %include "assets.inc"
 
+extern _calloc
+extern _malloc
+extern _realloc
+extern _free
+
+import_dll_func strlen
+import_dll_func strcpy
+import_dll_func strcmp
+import_dll_func memset
+import_dll_func memcpy
+
 dll_func_group_start CabinetFunc
 def_dll_func FDICreate
 def_dll_func FDICopy
