@@ -17,6 +17,22 @@ struc FileStruct
 .size equ $ - FileStruct
 endstruc
 
+struc FDINOTIFICATION
+.cb resd 1
+.psz1 resd 1
+.psz2 resd 1
+.psz3 resd 1
+.pv resd 1
+.hf resd 1
+.date resw 1
+.time resw 1
+.attrib resw 1
+.set_id resw 1
+.i_cabinet resw 1
+.i_folder resw 1
+.fdie resd 1
+endstruc
+
 segment .bss
 global _AssetsCabPathName
 _AssetsCabPathName resd 1
