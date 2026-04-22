@@ -189,3 +189,18 @@ _AssetsTrimFileMemory:
 	FrameEnd
 	ret
 
+global _AssetsAssertFileIsOpened
+_AssetsAssertFileIsOpened:
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	cmp dword [eax + FileStruct.opened], 0
+	jnz .end
+.is_closed_file:
+	int3
+	jmp .is_closed_file
+
+.end:
+	FrameEnd
+	ret
+
