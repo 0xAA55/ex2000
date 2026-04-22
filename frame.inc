@@ -40,7 +40,7 @@
 	%define AddrOfCallParam(x) (ebp - (Frame_NumSavedRegs + Frame_NumLocals + (x)) * 4)
 %else
 	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1) * 4)
-	%define AddrOfVariable(x) (esp + (Frame_NumSavedRegs + Frame_NumReservedParams + (x)) * 4)
+	%define AddrOfVariable(x) (esp + (Frame_NumReservedParams + (x)) * 4)
 	%define AddrOfCallParam(x) (esp + (x) * 4)
 %endif
 %define Param(x) [AddrOfParam(x)]
