@@ -445,3 +445,42 @@ _AssetsFnSeek:
 	FrameEnd
 	ret
 
+global _AssetsFnOnNotify
+_AssetsFnOnNotify:
+	FrameBegin 0, 1, esi
+
+	debug_msg "NOTIFY: %d", Param(0)
+
+	mov eax, Param(0)
+	mov esi, Param(1)
+	cmp eax, 0
+	jz .cab_info
+	cmp eax, 1
+	jz .partial_file
+	cmp eax, 2
+	jz .copy_file
+	cmp eax, 3
+	jz .close_file
+	cmp eax, 4
+	jz .next_cab
+	cmp eax, 5
+	jz .enumerate
+.bad_call:
+	int3
+	jmp .bad_call
+
+.copy_file:
+	invoke_cdecl _AssetsFnOpen, [esi + FDINOTIFICATION.psz1]
+	jmp .end
+.close_file:
+	invoke_cdecl _AssetsFnClose, [esi + FDINOTIFICATION.hf]
+	jmp .end
+.cab_info:
+.partial_file:
+.next_cab:
+.enumerate:
+	xor eax, eax
+.end:
+	FrameEnd
+	ret
+
