@@ -61,6 +61,8 @@ endstruc
 segment .bss
 global _AssetsCabPathName
 _AssetsCabPathName resd 1
+global _AssetsTree
+_AssetsTree resd 1
 global _AssetsCabFile
 _AssetsCabFile:
 .file_pointer resd 1
