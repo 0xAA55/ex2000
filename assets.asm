@@ -216,16 +216,13 @@ _AssetsFnClose:
 	jz .is_null_file
 	cmp eax, 1
 	jz .is_cab_file
-
 	mov esi, eax
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
 	invoke_cdecl _AssetsTrimFileMemory, esi
 	xor eax, eax
 	mov [esi + FileStruct.opened], eax
 	mov [esi + FileStruct.file_pointer], eax
-
 	jmp .end
-
 .is_cab_file:
 	xor eax, eax
 	mov [_AssetsCabFile.file_pointer], eax
