@@ -204,3 +204,32 @@ _AssetsAssertFileIsOpened:
 	FrameEnd
 	ret
 
+global _AssetsFnClose
+_AssetsFnClose:
+	FrameBegin 0, 1, esi
+
+	debug_msg "Closing file: %p", Param(0)
+	mov eax, Param(0)
+	test eax, eax
+	jz .is_null_file
+	cmp eax, 1
+	jz .is_cab_file
+
+	mov esi, eax
+	invoke_cdecl _AssetsAssertFileIsOpened, esi
+	invoke_cdecl _AssetsTrimFileMemory, esi
+	xor eax, eax
+	mov [esi + FileStruct.opened], eax
+	mov [esi + FileStruct.file_pointer], eax
+
+	jmp .end
+
+.is_cab_file:
+	xor eax, eax
+	mov [_AssetsCabFile.file_pointer], eax
+
+.is_null_file:
+.end:
+	FrameEnd
+	ret
+
