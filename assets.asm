@@ -98,8 +98,8 @@ dd _AssetsCabErrorString.e11
 dd _AssetsCabErrorString.e12
 
 segment .text
-global _AssetsInit
-_AssetsInit:
+global _AssetsInitLoadDll
+_AssetsInitLoadDll:
 	FrameBegin 0, 0
 	def_dll_and_load Cabinet, "cabinet.dll"
 	dll_func_group_load Cabinet, CabinetFunc
