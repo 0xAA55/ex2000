@@ -373,6 +373,7 @@ _AVLSearch:
 	mov eax, Param(0)
 	test eax, eax
 	jz .end
+	mov esi, eax
 
 .doloop:
 	invoke_dll_cdecl strcmp, [esi + AVLBST_Node.key], Param(1)
@@ -380,6 +381,8 @@ _AVLSearch:
 	jz .end
 	jg .gt
 	mov esi, [esi + AVLBST_Node.l_child]
+	cmp esi, 0
+	jz .wend
 	jmp .while
 .gt:
 	mov esi, [esi + AVLBST_Node.r_child]
