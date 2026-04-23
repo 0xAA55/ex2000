@@ -215,7 +215,6 @@ _AssetsFnClose:
 	xor eax, eax
 	mov [esi + FileStruct.opened], eax
 	mov [esi + FileStruct.file_pointer], eax
-	debug_msg "%s", [esi + FileStruct.data]
 	jmp .end
 .is_cab_file:
 	xor eax, eax
@@ -427,8 +426,6 @@ _AssetsFnSeek:
 global _AssetsFnOnNotify
 _AssetsFnOnNotify:
 	FrameBegin 0, 1, esi
-
-	debug_msg "NOTIFY: %d", Param(0)
 
 	mov eax, Param(0)
 	mov esi, Param(1)
