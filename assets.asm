@@ -481,3 +481,24 @@ _AssetsInit:
 	mov eax, [_AssetsFDIERF.error]
 	FrameEnd
 	ret
+
+global _AssetsQuery
+_AssetsQuery:
+	FrameBegin 0, 0
+
+	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
+	test eax, eax
+	jz .end
+	mov eax, [eax + AVLBST_Node.userdata]
+
+	mov edx, Param(1)
+	test edx, edx
+	jz .want_ptr
+	mov ecx, [eax + FileStruct.file_size]
+	mov [edx], ecx
+.want_ptr:
+	mov eax, [eax + FileStruct.data]
+
+.end:
+	FrameEnd
+	ret

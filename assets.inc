@@ -3,17 +3,9 @@
 
 %include "loaddll.inc"
 
-
-
-
-
-
-
-
-
-
 %ifndef ASSETS_ASM
-extern _AssetsInit
+extern _AssetsInit ; int AssetsInit();
+extern _AssetsQuery ; void *AssetsQuery(char *key, int *size);
 %endif
 
 %endif
