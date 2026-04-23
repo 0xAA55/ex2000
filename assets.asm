@@ -58,6 +58,8 @@ endstruc
 %define FDIERROR_USER_ABORT 11
 %define FDIERROR_EOF 12
 
+%define MAX_CAB_OPEN_TIMES 4
+
 segment .bss
 global _AssetsCabPathName
 _AssetsCabPathName resd 1
@@ -65,7 +67,8 @@ global _AssetsTree
 _AssetsTree resd 1
 global _AssetsCabFile
 _AssetsCabFile:
-.file_pointer resd 1
+.file_pointers resd MAX_CAB_OPEN_TIMES
+.is_opened resb MAX_CAB_OPEN_TIMES
 global _AssetsFDIERF
 _AssetsFDIERF:
 .oper resd 1
@@ -136,7 +139,6 @@ _AssetsFnOpen:
 	mov [esi + FileStruct.opened], eax
 
 	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi
-	debug_msg "Opening file: %s -> %p", Param(0), esi
 	mov eax, esi
 	jmp .end
 .found:
@@ -147,16 +149,31 @@ _AssetsFnOpen:
 	inc dword [eax + FileStruct.opened]
 	mov [eax + FileStruct.file_pointer], edx
 	push eax
-	debug_msg "Opening file: %s -> %p", Param(0), eax
 	pop eax
 	jmp .end
 .already_opened:
+.opened_too_many:
 	int3
 	jmp .already_opened
 .is_cab_file:
-	debug_msg "Opening file: %s -> %p", Param(0), 1
+	lea esi, [_AssetsCabFile.is_opened]
+	mov ecx, MAX_CAB_OPEN_TIMES
+	xor edx, edx
+.next_file:
+	lodsb
+	test al, al
+	jz .found_file
+	inc edx
+	loop .next_file
+	jmp .opened_too_many
+.found_file:
 	xor eax, eax
+	mov [_AssetsCabFile.file_pointers + edx * 4], eax
+	inc al
+	mov [_AssetsCabFile.is_opened + edx], al
+	mov eax, edx
 	inc eax
+	jmp .end
 
 .end:
 	FrameEnd
@@ -196,11 +213,21 @@ _AssetsAssertFileIsOpened:
 	FrameBegin 0, 0
 
 	mov eax, Param(0)
+	test eax, eax
+	jz .is_bad_condition
+	cmp eax, MAX_CAB_OPEN_TIMES
+	jle .is_cab_file
 	cmp dword [eax + FileStruct.opened], 0
 	jnz .end
-.is_closed_file:
+.is_bad_condition:
 	int3
-	jmp .is_closed_file
+	jmp .is_bad_condition
+
+.is_cab_file:
+	dec eax
+	mov al, [_AssetsCabFile.is_opened + eax]
+	test al, al
+	jz .is_bad_condition
 
 .end:
 	FrameEnd
@@ -210,22 +237,21 @@ global _AssetsFnClose
 _AssetsFnClose:
 	FrameBegin 0, 1, esi
 
-	debug_msg "Closing file: %p", Param(0)
-	mov eax, Param(0)
-	test eax, eax
-	jz .is_null_file
-	cmp eax, 1
-	jz .is_cab_file
-	mov esi, eax
+	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
+	cmp esi, MAX_CAB_OPEN_TIMES
+	jle .is_cab_file
 	invoke_cdecl _AssetsTrimFileMemory, esi
 	xor eax, eax
 	mov [esi + FileStruct.opened], eax
 	mov [esi + FileStruct.file_pointer], eax
+	debug_msg "%s", [esi + FileStruct.data]
 	jmp .end
 .is_cab_file:
 	xor eax, eax
-	mov [_AssetsCabFile.file_pointer], eax
+	dec esi
+	mov [_AssetsCabFile.file_pointers + esi * 4], eax
+	mov [_AssetsCabFile.is_opened + esi], al
 
 .is_null_file:
 .end:
@@ -236,15 +262,10 @@ global _AssetsFnRead
 _AssetsFnRead:
 	FrameBegin 0, 3, esi
 
-	debug_msg "Read file: %p, %p", Param(0), Param(2)
-	mov eax, Param(0)
-	test eax, eax
-	jz .is_null_file
-	cmp eax, 1
-	jz .is_cab_file
-
-	mov esi, eax
+	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
+	cmp esi, MAX_CAB_OPEN_TIMES
+	jle .is_cab_file
 
 	mov eax, [esi + FileStruct.file_size]
 	sub eax, [esi + FileStruct.file_pointer]
@@ -261,13 +282,11 @@ _AssetsFnRead:
 	mov eax, Param(2)
 	add [esi + FileStruct.file_pointer], eax
 	jmp .end
-.is_null_file:
-	int3
-	jmp .is_null_file
 
 .is_cab_file:
+	lea esi, [_AssetsCabFile.file_pointers + (esi - 1) * 4]
 	mov eax, _AssetsCabSize
-	sub eax, [_AssetsCabFile.file_pointer]
+	sub eax, [esi]
 	jle .eof
 	mov edx, Param(2)
 	cmp eax, edx
@@ -276,13 +295,14 @@ _AssetsFnRead:
 .proceed_cab:
 	mov Param(2), eax
 	mov eax, _AssetsCab
-	add eax, [_AssetsCabFile.file_pointer]
+	add eax, [esi]
 	invoke_dll_cdecl memcpy, Param(1), eax, Param(2)
 	mov eax, Param(2)
-	add [_AssetsCabFile.file_pointer], eax
+	add [esi], eax
 	jmp .end
 .eof:
 	xor eax, eax
+	dec eax
 
 .end:
 	FrameEnd
@@ -334,15 +354,11 @@ global _AssetsFnWrite
 _AssetsFnWrite:
 	FrameBegin 0, 3, esi
 
-	debug_msg "Write file: %p, %p", Param(0), Param(2)
-	mov eax, Param(0)
-	test eax, eax
-	jz .is_null_file
-	cmp eax, 1
-	jz .is_cab_file
-
-	mov esi, eax
+	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
+	cmp esi, MAX_CAB_OPEN_TIMES
+	jle .is_cab_file
+
 	mov eax, [esi + FileStruct.file_pointer]
 	add eax, Param(2)
 	cmp eax, [esi + FileStruct.file_capacity]
@@ -362,7 +378,6 @@ _AssetsFnWrite:
 	mov [esi + FileStruct.file_size], eax
 	mov eax, Param(2)
 	jmp .end
-.is_null_file:
 .is_cab_file:
 .grow_fail:
 	int3
@@ -374,16 +389,12 @@ _AssetsFnWrite:
 
 global _AssetsFnSeek
 _AssetsFnSeek:
-	FrameBegin 0, 1
+	FrameBegin 0, 1, esi
 
-	debug_msg "Seek file: %p, %d, %p", Param(0), Param(1), Param(2)
-	mov eax, Param(0)
-	test eax, eax
-	jz .is_null_file
-	cmp eax, 1
-	jz .is_cab_file
-	mov esi, eax
+	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
+	cmp esi, MAX_CAB_OPEN_TIMES
+	jle .is_cab_file
 
 	mov eax, Param(2)
 	cmp eax, 0
@@ -414,6 +425,7 @@ _AssetsFnSeek:
 	jmp .is_null_file
 
 .is_cab_file:
+	lea esi, [_AssetsCabFile.file_pointers + (esi - 1) * 4]
 	mov eax, Param(2)
 	cmp eax, 0
 	jz .cab_seek_set
@@ -426,17 +438,17 @@ _AssetsFnSeek:
 	jmp .cab_bad_seek
 .cab_seek_set:
 	mov eax, Param(1)
-	mov [_AssetsCabFile.file_pointer], eax
+	mov [esi], eax
 	jmp .end
 .cab_seek_cur:
-	mov eax, [_AssetsCabFile.file_pointer]
+	mov eax, [esi]
 	add eax, Param(1)
-	mov [_AssetsCabFile.file_pointer], eax
+	mov [esi], eax
 	jmp .end
 .cab_seek_end:
 	mov eax, _AssetsCabSize
 	add eax, Param(1)
-	mov [_AssetsCabFile.file_pointer], eax
+	mov [esi], eax
 
 .end:
 	FrameEnd
@@ -463,8 +475,9 @@ _AssetsFnOnNotify:
 	cmp eax, 5
 	jz .enumerate
 .bad_call:
-	int3
-	jmp .bad_call
+	xor eax, eax
+	dec eax
+	jmp .end
 
 .copy_file:
 	invoke_cdecl _AssetsFnOpen, [esi + FDINOTIFICATION.psz1]
