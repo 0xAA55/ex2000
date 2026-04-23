@@ -478,5 +478,6 @@ _AssetsInit:
 .noerror:
 	invoke_dll_cdecl FDIDestroy, Variable(0)
 
+	mov eax, [_AssetsFDIERF.error]
 	FrameEnd
 	ret
