@@ -82,36 +82,6 @@ incbin "out/assets.cab"
 _AssetsCabSize equ $ - _AssetsCab
 global _AssetsCabName
 _AssetsCabName db "assets.cab", 0
-global _AssetsCabErrorString
-_AssetsCabErrorString:
-.e00 db "none", 0
-.e01 db "cabinet not found", 0
-.e02 db "not a cabinet", 0
-.e03 db "unknown cabinet version", 0
-.e04 db "corrupt cabinet", 0
-.e05 db "alloc fail", 0
-.e06 db "bad compr type", 0
-.e07 db "MDI fail", 0
-.e08 db "target file", 0
-.e09 db "reserve mismatch", 0
-.e10 db "wrong cabinet", 0
-.e11 db "user abort", 0
-.e12 db "EOF", 0
-global _AssetsCabErrors
-_AssetsCabErrors:
-dd _AssetsCabErrorString.e00
-dd _AssetsCabErrorString.e01
-dd _AssetsCabErrorString.e02
-dd _AssetsCabErrorString.e03
-dd _AssetsCabErrorString.e04
-dd _AssetsCabErrorString.e05
-dd _AssetsCabErrorString.e06
-dd _AssetsCabErrorString.e07
-dd _AssetsCabErrorString.e08
-dd _AssetsCabErrorString.e09
-dd _AssetsCabErrorString.e10
-dd _AssetsCabErrorString.e11
-dd _AssetsCabErrorString.e12
 
 segment .text
 global _AssetsInitLoadDll
@@ -486,10 +456,10 @@ _AssetsFnOnNotify:
 	invoke_cdecl _AssetsFnClose, [esi + FDINOTIFICATION.hf]
 	inc eax
 	jmp .end
+.enumerate:
 .cab_info:
 .partial_file:
 .next_cab:
-.enumerate:
 	xor eax, eax
 .end:
 	FrameEnd
@@ -503,12 +473,13 @@ _AssetsInit:
 
 	invoke_dll_cdecl FDICreate, _malloc, _free, _AssetsFnOpen, _AssetsFnRead, _AssetsFnWrite, _AssetsFnClose, _AssetsFnSeek, -1, _AssetsFDIERF
 	mov Variable(0), eax
-	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
 
 	invoke_dll_cdecl FDICopy, Variable(0), _AssetsCabName, _AssetsCabPathName, 0, _AssetsFnOnNotify, 0, 0
+	test eax, eax
+	jnz .noerror
 	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
+.noerror:
 	invoke_dll_cdecl FDIDestroy, Variable(0)
-	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
 
 	FrameEnd
 	ret
