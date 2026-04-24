@@ -60,34 +60,7 @@ _BoxIndices:
 .num equ $ - _BoxIndices
 
 segment .text
-DefFunc _Scene
-	FrameBegin 0, 1
 
-	PrepParam 0, _Timer
-	call _UpdateTimer
-
-	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
-	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
-
-
-
-
-
-
-	call _SwapBuffers
-	FrameEnd
-	ret
-
-DefFunc _SwapBuffers
-	mov eax, [_addr_of_wglSwapInterval]
-	test eax, eax
-	jnz .swap_buffers
-
-	invoke_dll_stdcall DwmFlush
-
-.swap_buffers:
-	invoke_dll_stdcall wglSwapBuffers, [_hDC]
-	ret
 
 DefFunc _SceneInit
 	FrameBegin 0, 6
@@ -124,4 +97,33 @@ DefFunc _SceneInit
 
 DefFunc _FakeDwmFlush
 	xor eax, eax
+	ret
+
+DefFunc _Scene
+	FrameBegin 0, 1
+
+	PrepParam 0, _Timer
+	call _UpdateTimer
+
+	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
+	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
+
+
+
+
+
+
+	call _SwapBuffers
+	FrameEnd
+	ret
+
+DefFunc _SwapBuffers
+	mov eax, [_addr_of_wglSwapInterval]
+	test eax, eax
+	jnz .swap_buffers
+
+	invoke_dll_stdcall DwmFlush
+
+.swap_buffers:
+	invoke_dll_stdcall wglSwapBuffers, [_hDC]
 	ret
