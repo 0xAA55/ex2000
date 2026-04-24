@@ -364,21 +364,17 @@ DefFunc _AVLSearch
 .doloop:
 	invoke_dll_cdecl strcmp, [esi + AVLBST_Node.key], Param(1)
 	cmp eax, 0
-	jz .end
-	jg .gt
-	mov esi, [esi + AVLBST_Node.l_child]
-	cmp esi, 0
 	jz .wend
+	jg .gt
+	mov esi, [esi + AVLBST_Node.r_child]
 	jmp .while
 .gt:
-	mov esi, [esi + AVLBST_Node.r_child]
+	mov esi, [esi + AVLBST_Node.l_child]
 .while:
 	test esi, esi
-	jz .wend
-	jmp .doloop
+	jnz .doloop
 .wend:
 	mov eax, esi
-
 .end:
 	FrameEnd
 	ret
