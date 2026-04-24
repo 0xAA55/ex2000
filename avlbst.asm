@@ -23,8 +23,9 @@ DefFunc _AVLKeyCopy
 	FrameEnd
 	ret
 
-;void _AVLKeyDelete(char *key);
-DefFunc _AVLKeyDelete jmp _free
+;void AVLKeyDelete(char *key);
+DefFunc _AVLKeyDelete
+	jmp _free
 
 ;AVLBST_Node *AVLNewNode(char *key, void* cb_userdata);
 DefFunc _AVLNewNode
