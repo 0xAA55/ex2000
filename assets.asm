@@ -154,6 +154,7 @@ DefFunc _AssetsTrimFileMemory
 	mov eax, [esi + FileStruct.file_size]
 	test eax, eax
 	jz .is_empty_file
+	inc eax ; Keep one extra byte for string assets
 	cmp eax, [esi + FileStruct.file_capacity]
 	jz .end
 
@@ -162,6 +163,8 @@ DefFunc _AssetsTrimFileMemory
 	test eax, eax
 	jz .fail_exit
 	mov [esi + FileStruct.data], eax
+	add eax, [esi + FileStruct.file_size]
+	mov byte [eax], 0
 	jmp .end
 .fail_exit:
 .is_empty_file:
