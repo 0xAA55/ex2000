@@ -59,9 +59,36 @@ _BoxIndices:
 	db 4, 5, 7
 .num equ $ - _BoxIndices
 
+%macro SceneLoadShaderProgram 4
+segment .rdata
+%%VSAssetsPath db %2, 0
+%%GSAssetsPath db %3, 0
+%%FSAssetsPath db %4, 0
+
 segment .text
+invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
+%endmacro
 
+segment .text
+; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
+DefFunc _SceneLoadShaderProgram
+	FrameBegin 3, 3, esi
 
+	mov esi, Param(0)
+	invoke_cdecl _AssetsQuery, Param(1), 0
+	mov Variable(0), eax
+	invoke_cdecl _AssetsQuery, Param(2), 0
+	mov Variable(1), eax
+	invoke_cdecl _AssetsQuery, Param(3), 0
+	mov Variable(2), eax
+
+	invoke_cdecl _ProgramCreate, Variable(0), Variable(1), Variable(2)
+	mov [esi], eax
+
+	FrameEnd
+	ret
+
+;int SceneInit();
 DefFunc _SceneInit
 	FrameBegin 0, 6
 
