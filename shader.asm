@@ -7,6 +7,10 @@ extern _free
 
 import_dll_func strlen
 
+segment .rdata
+global _ShaderTypes
+_ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
+
 segment .text
 ; int ShaderCreate(int program, int shader_type, char *shader_code, char **pp_out_infolog)
 DefFunc _ShaderCreate
@@ -57,6 +61,7 @@ DefFunc _ShaderCreate
 	%undef _InfoLogLen
 	%undef _InfoLogBuf
 
+; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 DefFunc _ProgramCreate
 	FrameBegin 7, 4, esi, edi
 	AssignVars _ECX_Home, _PRG, _InfoLog, _InfoLogLen, _LinkStatus, _ShaderType, _FormatBuffer
@@ -75,7 +80,9 @@ DefFunc _ProgramCreate
 
 	mov ecx, 3
 	mov esi, _ST_Offsets
+	dec edi
 .add_shaders:
+	inc edi
 	mov _ECX_Home, ecx
 
 	xor eax, eax
@@ -84,12 +91,11 @@ DefFunc _ProgramCreate
 	mov _ShaderType, eax
 
 	mov eax, Param(edi)
-	inc edi
 	test eax, eax
 	jz .skip_shader
 
-	invoke_cdecl _ShaderCreate, _PRG, GL_VERTEX_SHADER, eax, &_InfoLog
-	cmp eax, eax
+	invoke_cdecl _ShaderCreate, _PRG, [_ShaderTypes + edi * 4], eax, &_InfoLog
+	test eax, eax
 	jnz .skip_shader
 	debug_msg "Shader compilation error :%s Shader: %s", _ShaderType, _InfoLog
 	jmp .bad_end
