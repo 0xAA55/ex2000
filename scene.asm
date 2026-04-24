@@ -2,6 +2,8 @@
 %include "timer.inc"
 %include "gl33.inc"
 %include "buffer.inc"
+%include "assets.inc"
+%include "shader.inc"
 
 extern _hWnd
 extern _hDC
@@ -14,6 +16,8 @@ import_dll_func Sleep
 segment .bss
 global _Timer
 _Timer resb Timer.size
+global _BillboardVerticesBuffer
+_BillboardVerticesBuffer resd 1
 global _DrawBillboardProgram
 _DrawBillboardProgram resd 1
 global _BoxVerticesBuffer
@@ -22,6 +26,14 @@ global _BoxIndicesBuffer
 _BoxIndicesBuffer resd 1
 
 segment .rdata
+global _BillBoardVertices
+_BillBoardVertices:
+	db 0, 0
+	db 1, 0
+	db 0, 1
+	db 1, 1
+.num equ $ - _BillBoardVertices
+
 global _BoxVertices
 _BoxVertices:
 	db -1, -1,  1
@@ -33,7 +45,6 @@ _BoxVertices:
 	db -1,  1, -1
 	db  1,  1, -1
 .num equ $ - _BoxVertices
-
 global _BoxIndices
 _BoxIndices:
 	; Top
