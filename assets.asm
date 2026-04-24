@@ -452,6 +452,21 @@ DefFunc _AssetsFnOnNotify
 	FrameEnd
 	ret
 
+;DefFunc _AssetsShow
+;	FrameBegin 0, 1, esi
+;
+;	mov esi, Param(0)
+;	test esi, esi
+;	jz .end
+;	debug_msg "key: %s, height: %d", [esi + AVLBST_Node.key], [esi + AVLBST_Node.height]
+;
+;	invoke_cdecl _AssetsShow, [esi + AVLBST_Node.l_child]
+;	invoke_cdecl _AssetsShow, [esi + AVLBST_Node.r_child]
+;
+;.end:
+;	FrameEnd
+;	ret
+
 DefFunc _AssetsInit
 	FrameBegin 1, 9
 
@@ -466,6 +481,8 @@ DefFunc _AssetsInit
 	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
 .noerror:
 	invoke_dll_cdecl FDIDestroy, Variable(0)
+
+	;invoke_cdecl _AssetsShow, [_AssetsTree]
 
 	mov eax, [_AssetsFDIERF.error]
 	FrameEnd
