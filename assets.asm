@@ -498,10 +498,10 @@ DefFunc _AssetsQuery
 
 	mov edx, Param(1)
 	test edx, edx
-	jz .want_ptr
+	jz .return_ptr
 	mov ecx, [eax + FileStruct.file_size]
 	mov [edx], ecx
-.want_ptr:
+.return_ptr:
 	mov eax, [eax + FileStruct.data]
 
 .end:
