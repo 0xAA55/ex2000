@@ -4,7 +4,7 @@ if not exist out mkdir out
 
 del /f /s /q out\assets.cab
 
-tools\cabarc -m LZX:21 -p -r N out\assets.cab assets\*
+tools\cabarc -r -p -m LZX:21 N out\assets.cab assets\*
 
 tools\nasm stub.asm -o out\stub.bin
 tools\nasm -f win32 main.asm -o out\main.obj
