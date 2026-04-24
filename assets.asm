@@ -84,16 +84,14 @@ global _AssetsCabName
 _AssetsCabName db "assets.cab", 0
 
 segment .text
-global _AssetsInitLoadDll
-_AssetsInitLoadDll:
+DefFunc _AssetsInitLoadDll
 	FrameBegin 0, 0
 	def_dll_and_load Cabinet, "cabinet.dll"
 	dll_func_group_load Cabinet, CabinetFunc
 	FrameEnd
 	ret
 
-global _AssetsFnOpen
-_AssetsFnOpen:
+DefFunc _AssetsFnOpen
 	FrameBegin 0, 3, esi
 
 	invoke_dll_cdecl strcmp, Param(0), _AssetsCabName
@@ -149,8 +147,7 @@ _AssetsFnOpen:
 	FrameEnd
 	ret
 
-global _AssetsTrimFileMemory
-_AssetsTrimFileMemory:
+DefFunc _AssetsTrimFileMemory
 	FrameBegin 0, 2, esi
 
 	mov esi, Param(0)
@@ -178,8 +175,7 @@ _AssetsTrimFileMemory:
 	FrameEnd
 	ret
 
-global _AssetsAssertFileIsOpened
-_AssetsAssertFileIsOpened:
+DefFunc _AssetsAssertFileIsOpened
 	FrameBegin 0, 0
 
 	mov eax, Param(0)
@@ -203,8 +199,7 @@ _AssetsAssertFileIsOpened:
 	FrameEnd
 	ret
 
-global _AssetsFnClose
-_AssetsFnClose:
+DefFunc _AssetsFnClose
 	FrameBegin 0, 1, esi
 
 	mov esi, Param(0)
@@ -227,8 +222,7 @@ _AssetsFnClose:
 	FrameEnd
 	ret
 
-global _AssetsFnRead
-_AssetsFnRead:
+DefFunc _AssetsFnRead
 	FrameBegin 0, 3, esi
 
 	mov esi, Param(0)
@@ -278,8 +272,7 @@ _AssetsFnRead:
 	ret
 
 ; int AssetsFileGrowCapacity(FileStruct *f, size_t desired_minimal_capacity)
-global _AssetsFileGrowCapacity
-_AssetsFileGrowCapacity:
+DefFunc _AssetsFileGrowCapacity
 	FrameBegin 1, 3, esi
 
 	mov esi, Param(0)
@@ -319,8 +312,7 @@ _AssetsFileGrowCapacity:
 	FrameEnd
 	ret
 
-global _AssetsFnWrite
-_AssetsFnWrite:
+DefFunc _AssetsFnWrite
 	FrameBegin 0, 3, esi
 
 	mov esi, Param(0)
@@ -356,8 +348,7 @@ _AssetsFnWrite:
 	FrameEnd
 	ret
 
-global _AssetsFnSeek
-_AssetsFnSeek:
+DefFunc _AssetsFnSeek
 	FrameBegin 0, 1, esi
 
 	mov esi, Param(0)
@@ -423,8 +414,7 @@ _AssetsFnSeek:
 	FrameEnd
 	ret
 
-global _AssetsFnOnNotify
-_AssetsFnOnNotify:
+DefFunc _AssetsFnOnNotify
 	FrameBegin 0, 1, esi
 
 	mov eax, Param(0)
@@ -462,8 +452,7 @@ _AssetsFnOnNotify:
 	FrameEnd
 	ret
 
-global _AssetsInit
-_AssetsInit:
+DefFunc _AssetsInit
 	FrameBegin 1, 9
 
 	invoke_cdecl _AssetsInitLoadDll
@@ -482,9 +471,8 @@ _AssetsInit:
 	FrameEnd
 	ret
 
-global _AssetsQuery
-_AssetsQuery:
-	FrameBegin 0, 0
+DefFunc _AssetsQuery
+	FrameBegin 0, 2
 
 	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
 	test eax, eax
