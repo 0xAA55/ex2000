@@ -14,6 +14,8 @@ import_dll_func Sleep
 segment .bss
 global _Timer
 _Timer resb Timer.size
+global _DrawBillboardProgram
+_DrawBillboardProgram resd 1
 global _BoxVerticesBuffer
 _BoxVerticesBuffer resd 1
 global _BoxIndicesBuffer
@@ -114,6 +116,9 @@ DefFunc _SceneInit
 	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
 
+	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
+
+	InitBuffer _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BillBoardVertices.num, _BillBoardVertices
 	InitBuffer _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BoxVertices.num, _BoxVertices
 	InitBuffer _BoxIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BoxIndices.num, _BoxIndices
 
