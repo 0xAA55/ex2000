@@ -13,6 +13,15 @@ def_dll_func DwmFlush
 
 import_dll_func Sleep
 
+extern _calloc
+extern _realloc
+extern _free
+import_dll_func memcpy
+import_dll_func strcpy
+import_dll_func strlen
+import_dll_func strcat
+import_dll_func snprintf
+
 segment .bss
 global _Timer
 _Timer resb Timer.size
