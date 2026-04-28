@@ -26,13 +26,13 @@ segment .bss
 global _Timer
 _Timer resb Timer.size
 global _BillboardVerticesBuffer
-_BillboardVerticesBuffer resd 1
+_BillboardVerticesBuffer resb GlBuffer.size
 global _DrawBillboardProgram
 _DrawBillboardProgram resd 1
 global _BoxVerticesBuffer
-_BoxVerticesBuffer resd 1
+_BoxVerticesBuffer resb GlBuffer.size
 global _BoxIndicesBuffer
-_BoxIndicesBuffer resd 1
+_BoxIndicesBuffer resb GlBuffer.size
 
 segment .rdata
 global _BillBoardVertices
@@ -138,9 +138,9 @@ DefFunc _SceneInit
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
 
-	InitBuffer _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BillBoardVertices.num, _BillBoardVertices
-	InitBuffer _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BoxVertices.num, _BoxVertices
-	InitBuffer _BoxIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 1, _BoxIndices.num, _BoxIndices
+	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
+	invoke_cdecl _InitBuffer, _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxVertices.num / 2, _BoxVertices
+	invoke_cdecl _InitBuffer, _BoxIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxIndices.num / 2, _BoxIndices
 
 .end:
 	mov eax, 1
