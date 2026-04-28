@@ -36,9 +36,11 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	lea eax, GLObject
 	invoke_dll_stdcall glGenBuffers, 1, eax
 
-	cmp dword [esi + GlBuffer.pointer], 0
+	mov eax, [esi + GlBuffer.pointer]
+	test eax, eax
 	jz .failexit
-	cmp dword GLObject, 0
+	mov eax, GLObject
+	test eax, eax
 	jz .failexit
 
 	mov eax, BufData
