@@ -1,5 +1,6 @@
 #version 330
 
+uniform mat4 model_view;
 out vec4 color;
 
 void main()
