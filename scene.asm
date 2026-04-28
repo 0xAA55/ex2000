@@ -27,6 +27,8 @@ global _Timer
 _Timer resb Timer.size
 global _BillboardVerticesBuffer
 _BillboardVerticesBuffer resb GlBuffer.size
+global _DrawBillboardVAO
+_DrawBillboardVAO resd 1
 global _DrawBillboardProgram
 _DrawBillboardProgram resd 1
 global _BoxVerticesBuffer
@@ -91,6 +93,14 @@ segment .text
 invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
 %endmacro
 
+%macro GetAttribLocation 2
+segment .rdata
+%%AttribName db %2, 0
+
+segment .text
+invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
+%endmacro
+
 segment .text
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 DefFunc _SceneLoadShaderProgram
@@ -112,7 +122,7 @@ DefFunc _SceneLoadShaderProgram
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 0, 6
+	FrameBegin 1, 6
 
 	PrepParam 0, _Timer
 	call _InitTimer
@@ -142,6 +152,16 @@ DefFunc _SceneInit
 	invoke_cdecl _InitBuffer, _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxVertices.num / 2, _BoxVertices
 	invoke_cdecl _InitBuffer, _BoxIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxIndices.num / 2, _BoxIndices
 
+	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
+	GetAttribLocation [_DrawBillboardProgram], "position"
+	mov Variable(0), eax
+	invoke_dll_stdcall glEnableVertexAttribArray, Variable(0)
+	invoke_dll_stdcall glVertexAttribPointer, Variable(0), 2, GL_BYTE, 0, 2, 0
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
+	invoke_dll_stdcall glBindVertexArray, 0
+
 .end:
 	mov eax, 1
 	FrameEnd
@@ -160,8 +180,10 @@ DefFunc _Scene
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 
-
-
+	invoke_dll_stdcall glUseProgram, [_DrawBillboardProgram]
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	invoke_dll_stdcall glBindVertexArray, 0
 
 
 
