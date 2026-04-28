@@ -13,69 +13,30 @@ struc GlBuffer
 	.gl_buffer_usage resd 1
 	.gl_buffer_cap resd 1
 	.flushed resd 1 ; Non-zero or zero
-	.size equ $ - .pointer
+	.size equ $ - GlBuffer
 endstruc
 
 %ifndef BUFFER_ASM
+; void InitBuffer(GlBuffer *p_buffer, GLenum buffer_type, GLenum buffer_usage, size_t item_size, size_t capacity, void *pointer_to_data_or_null);
 extern _InitBuffer
+
+; void DeInitBuffer(GlBuffer *p_buffer);
 extern _DeInitBuffer
 
+; void BufferPushItem(GlBuffer *p_buffer, void *item);
 extern _BufferPushItem
+
+; void BufferPopItem(GlBuffer *p_buffer, void *item_or_null);
 extern _BufferPopItem
 
+; void BufferFlush(GlBuffer *p_buffer);
 extern _BufferFlush
+
+; void BufferTrimExcess(GlBuffer *p_buffer);
 extern _BufferTrimExcess
+
+; vooid BufferResize(GlBuffer *p_buffer, size_t new_num_items);
 extern _BufferResize
 %endif
-
-%macro InitBuffer 6
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	PrepParam 1, %2 ;buffer_type
-	PrepParam 2, %3 ;buffer_usage
-	PrepParam 3, %4 ;item_size
-	PrepParam 4, %5 ;capacity
-	PrepParam 5, %6 ;pointer_to_data_or_null
-	call _InitBuffer
-%endmacro
-
-%macro DeInitBuffer 1
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	call _DeInitBuffer
-%endmacro
-
-%macro BufferPushItem 2
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	PrepParam 1, %2 ;pointer_to_item
-	call _BufferPushItem
-%endmacro
-
-%macro BufferPopItem 2
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	PrepParam 1, %2 ;pointer_to_item or NULL
-	call _BufferPopItem
-%endmacro
-
-%macro BufferFlush 1
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	call _BufferFlush
-%endmacro
-
-%macro BufferTrimExcess 1
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	call _BufferTrimExcess
-%endmacro
-
-%macro BufferResize 2
-	ResetPassReg
-	PrepParam 0, %1 ;pointer_to_GlBuffer
-	PrepParam 1, %2 ;new size
-	call _BufferResize
-%endmacro
 
 %endif
