@@ -128,3 +128,13 @@ DefFunc _DebugMsg
 	xor eax, eax
 	FrameEnd
 	ret
+
+DefFunc _snprintf
+	FrameBegin 0, 4
+
+	lea eax, Param(3)
+	invoke_dll_cdecl vsnprintf, Param(0), Param(1), Param(2), eax
+
+.end:
+	FrameEnd
+	ret

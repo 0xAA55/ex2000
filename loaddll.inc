@@ -247,6 +247,18 @@ segment .text
 	%endif
 %endmacro
 
+%macro snprintf 3-4+
+segment .rdata
+	%%format db %3, 0
+
+segment .text
+	%if %0 >= 4
+		invoke_cdecl _snprintf, %1, %2, %%format, %4
+	%else
+		invoke_cdecl _snprintf, %1, %2, %%format
+	%endif
+%endmacro
+
 %ifndef LOADDLL_ASM
 import_dll Kernel32
 import_dll_func GetProcAddress
@@ -254,6 +266,7 @@ import_dll_func LoadLibraryA
 extern _hInstance
 extern _LoadFuncGroup
 extern _DebugMsg
+extern _snprintf
 %endif
 
 %endif
