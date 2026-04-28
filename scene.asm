@@ -120,6 +120,90 @@ DefFunc _SceneLoadShaderProgram
 	FrameEnd
 	ret
 
+;DefFunc _ReallocateStringCat
+;	FrameBegin 1, 2
+;
+;	mov eax, Param(0)
+;	test eax, eax
+;	jz .new
+;	invoke_dll_cdecl strlen, eax
+;	mov Variable(0), eax
+;	invoke_dll_cdecl strlen, Param(1)
+;	add eax, Variable(0)
+;	inc eax
+;	invoke_cdecl _realloc, Param(0), eax
+;	test eax, eax
+;	jz .failed
+;	mov Variable(0), eax
+;	invoke_dll_cdecl strcat, eax, Param(1)
+;	mov eax, Variable(0)
+;	jmp .end
+;.new:
+;	invoke_dll_cdecl strlen, Param(1)
+;	inc eax
+;	invoke_cdecl _calloc, eax, 1
+;	test eax, eax
+;	jz .failed
+;	mov Variable(0), eax
+;	invoke_dll_cdecl strcpy, eax, Param(1)
+;	mov eax, Variable(0)
+;
+;	jmp .end
+;.failed:
+;	invoke_cdecl _free, Param(0)
+;	xor eax, eax
+;
+;.end:
+;	FrameEnd
+;	ret
+;
+;segment .rdata
+;global _NL
+;_NL db 10, 0
+;
+;segment .text
+;DefFunc _SceneDebugGetAttribs
+;	FrameBegin 7, 7, esi, edi
+;
+;	xor eax, eax
+;	mov esi, eax
+;	lea edi, Variable(0)
+;	mov ecx, 7
+;	rep stosd
+;	invoke_dll_stdcall glGetProgramiv, Param(0), GL_ACTIVE_ATTRIBUTES, &Variable(1)
+;	invoke_dll_stdcall glGetProgramiv, Param(0), GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &Variable(2)
+;	mov eax, Variable(2)
+;	add eax, 64
+;	mov Variable(2), eax
+;	invoke_cdecl _calloc, eax, 1
+;	test eax, eax
+;	jz .end
+;	mov Variable(3), eax
+;	invoke_cdecl _calloc, Variable(2), 1
+;	test eax, eax
+;	jz .end
+;	mov Variable(6), eax
+;
+;.enum:
+;	invoke_dll_stdcall glGetActiveAttrib, Param(0), esi, Variable(2), 0, &Variable(4), &Variable(5), Variable(6)
+;	snprintf Variable(3), Variable(2), "%d: %p(%d) %s", esi, Variable(5), Variable(4), Variable(6)
+;	invoke_cdecl _ReallocateStringCat, Variable(0), Variable(3)
+;	invoke_cdecl _ReallocateStringCat, eax, _NL
+;	mov Variable(0), eax
+;
+;	inc esi
+;	cmp esi, Variable(1)
+;	jb .enum
+;
+;	debug_msg "AA: %s", Variable(0)
+;
+;.end:
+;	invoke_cdecl _free, Variable(0)
+;	invoke_cdecl _free, Variable(3)
+;	invoke_cdecl _free, Variable(6)
+;	FrameEnd
+;	ret
+
 ;int SceneInit();
 DefFunc _SceneInit
 	FrameBegin 1, 6
