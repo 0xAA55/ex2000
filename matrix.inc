@@ -38,6 +38,8 @@ endstruc
 
 
 %ifndef MATRIX_ASM
+extern _ZeroVector
+
 ; void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross
 
