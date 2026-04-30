@@ -258,7 +258,7 @@
 	%ifdef esP
 		%error 'esP' had been defined to esP.
 	%endif
-	%define esp (Esp + (%1) * 4)
+	%define esp (esP + (%1) * 4)
 	%if %substr(%str(%2), 1, 1) == "&"
 		RotatePassReg
 		lea PassReg, %tok(%substr(%str(%2), 2))
