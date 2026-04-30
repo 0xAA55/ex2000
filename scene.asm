@@ -41,6 +41,7 @@ global _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
 .Aspect resd 1
+.FovY resd 1
 global _Timer
 _Timer resb Timer.size
 global _ClientRect
@@ -65,6 +66,8 @@ _CursorPos:
 .y resd 1
 global _Aspect
 _Aspect resd 1
+global _FovY
+_FovY resd 1
 global _BillboardVerticesBuffer
 _BillboardVerticesBuffer resb GlBuffer.size
 global _DrawBillboardVAO
@@ -77,6 +80,13 @@ global _BoxIndicesBuffer
 _BoxIndicesBuffer resb GlBuffer.size
 
 segment .rdata
+global _point_001
+_point_001 dd 0x3a83126f
+global _PI
+_PI dd 0x40490fdb
+global _FovRatio
+_FovRatio dw 3
+
 global _BillBoardVertices
 _BillBoardVertices:
 	db 0, 0
@@ -127,8 +137,8 @@ global _name_ofu_CameraMatrix
 _name_ofu_CameraMatrix db "camera", 0
 global _name_ofu_Aspect
 _name_ofu_Aspect db "aspect", 0
-global _point_001
-_point_001 dd 0x3a83126f
+global _name_ofu_FovY
+_name_ofu_FovY db "fovy", 0
 
 %macro SceneLoadShaderProgram 4
 segment .rdata
@@ -208,10 +218,18 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glVertexAttribPointer, Variable(0), 2, GL_BYTE, 0, 2, 0
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
+
 	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_CameraMatrix
 	mov [_BillboardProgramLocations.CameraMatrix], eax
 	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_Aspect
 	mov [_BillboardProgramLocations.Aspect], eax
+	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_FovY
+	mov [_BillboardProgramLocations.FovY], eax
+
+	fld dword [_PI]
+	fidivr word [_FovRatio]
+	fcos
+	fstp dword [_FovY]
 
 .end:
 	mov eax, 1
@@ -273,6 +291,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUseProgram, [_DrawBillboardProgram]
 	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
+	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovY]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
