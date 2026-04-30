@@ -38,6 +38,7 @@ endstruc
 
 
 %ifndef MATRIX_ASM
+extern _VectorCross
 extern _VectorMultMatrix
 extern _VectorMultMatrixTransposed
 extern _MatrixIdentity
