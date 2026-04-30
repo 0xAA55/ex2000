@@ -38,16 +38,37 @@ endstruc
 
 
 %ifndef MATRIX_ASM
+; void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross
+
+; void VectorMultMatrix(Vector *out, Vector *v, Matrix *m);
 extern _VectorMultMatrix
+
+; void VectorMultMatrixTransposed(Vector *out, Vector *v, Matrix *m);
 extern _VectorMultMatrixTransposed
+
+; void MatrixIdentity(Matrix *out);
 extern _MatrixIdentity
+
+; void MatrixRotationX(Matrix *out, float angle);
 extern _MatrixRotationX
+
+; void MatrixRotationY(Matrix *out, float angle);
 extern _MatrixRotationY
+
+; void MatrixRotationZ(Matrix *out, float angle);
 extern _MatrixRotationZ
+
+; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
+
+; void MatrixTranspose(Matrix *out, Matrix *m);
 extern _MatrixTranspose
+
+; void MatrixMultiply(Matrix *out, Matrix *l, Matrix *r);
 extern _MatrixMultiply
+
+; void MatrixMultiplyTransposed(Matrix *out, Matrix *l, Matrix *r);
 extern _MatrixMultiplyTransposed
 
 %endif
