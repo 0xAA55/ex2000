@@ -40,6 +40,41 @@ DefFunc _VectorCross
 	FrameEnd
 	ret
 
+DefFunc _VectorLength
+	FrameBegin 0, 0
+
+	mov eax, Param(1)
+	mov ecx, Param(2)
+	mov edx, Param(0)
+	fldz
+.muladd:
+	fld dword [eax]
+	fmul dword [eax]
+	fadd
+	add eax, 4
+	loop .muladd
+	fsqrt
+	fst dword [edx]
+
+	FrameEnd
+	ret
+
+DefFunc _VectorNormal
+	FrameBegin 1, 3
+
+	invoke_cdecl _VectorLength, &Variable(0), Param(1), Param(2)
+	mov eax, Param(1)
+	mov ecx, Param(2)
+	mov edx, Param(0)
+.divide:
+	fld dword [eax + (ecx - 1) * 4]
+	fdiv dword Variable(0)
+	fst dword [edx + (ecx - 1) * 4]
+	loop .divide
+
+	FrameEnd
+	ret
+
 DefFunc _VectorMultMatrix
 	FrameBegin 0, 0
 

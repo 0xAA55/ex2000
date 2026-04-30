@@ -43,6 +43,12 @@ extern _ZeroVector
 ; void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross
 
+; void VectorLength(float *out, Vector *v, int dim);
+extern _VectorLength
+
+; void VectorNormal(Vector *out, Vector *v, int dim);
+extern _VectorNormal
+
 ; void VectorMultMatrix(Vector *out, Vector *v, Matrix *m);
 extern _VectorMultMatrix
 
