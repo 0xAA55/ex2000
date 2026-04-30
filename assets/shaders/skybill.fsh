@@ -11,6 +11,6 @@ void main()
 	uv.x *= aspect;
 	vec3 position = vec3(uv, 1.0);
 	position *= mat3(camera);
-	position = normalize(position);// * 0.5 + 0.5;
+	position = min(max(normalize(position) * 10.0, vec3(-1.0)), vec3(1.0)) * 0.5 + 0.5;
 	color = vec4(position, 1.0);
 }
