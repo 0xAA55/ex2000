@@ -16,6 +16,7 @@ import_dll_func Sleep
 import_dll_func GetCursorPos
 import_dll_func SetCursorPos
 import_dll_func ShowCursor
+import_dll_func GetWindowRect
 import_dll_func GetClientRect
 import_dll_func GetAsyncKeyState
 
@@ -44,10 +45,24 @@ global _Timer
 _Timer resb Timer.size
 global _ClientRect
 _ClientRect:
-.x resd 1
-.y resd 1
+.l resd 1
+.t resd 1
 .r resd 1
 .b resd 1
+global _WindowRect
+_WindowRect:
+.l resd 1
+.t resd 1
+.r resd 1
+.b resd 1
+global _WindowCenter
+_WindowCenter:
+.x resd 1
+.y resd 1
+global _CursorPos
+_CursorPos:
+.x resd 1
+.y resd 1
 global _Aspect
 _Aspect resd 1
 global _BillboardVerticesBuffer
@@ -112,6 +127,8 @@ global _name_ofu_CameraMatrix
 _name_ofu_CameraMatrix db "camera", 0
 global _name_ofu_Aspect
 _name_ofu_Aspect db "aspect", 0
+global _point_001
+_point_001 dd 0x3a83126f
 
 %macro SceneLoadShaderProgram 4
 segment .rdata
@@ -299,7 +316,32 @@ DefFunc _Scene
 	jnz .quit
 
 	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
-	invoke_dll_stdcall glViewport, [_ClientRect.x], [_ClientRect.y], [_ClientRect.r], [_ClientRect.b]
+	invoke_dll_stdcall GetWindowRect, [_hWnd], _WindowRect
+	invoke_dll_stdcall GetCursorPos, _CursorPos
+	invoke_dll_stdcall glViewport, [_ClientRect.l], [_ClientRect.t], [_ClientRect.r], [_ClientRect.b]
+
+	mov eax, [_WindowRect.r]
+	mov edx, [_WindowRect.b]
+	add eax, [_WindowRect.l]
+	add edx, [_WindowRect.t]
+	shr eax, 1
+	shr edx, 1
+	mov [_WindowCenter.x], eax
+	mov [_WindowCenter.y], edx
+
+	fild dword [_CursorPos.x]
+	fisub dword [_WindowCenter.x]
+	fmul dword [_point_001]
+	fadd dword [_CameraYaw]
+	fstp dword [_CameraYaw]
+
+	fild dword [_CursorPos.y]
+	fisub dword [_WindowCenter.y]
+	fmul dword [_point_001]
+	fadd dword [_CameraPitch]
+	fstp dword [_CameraPitch]
+
+	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
 
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
