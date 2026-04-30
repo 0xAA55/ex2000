@@ -159,19 +159,24 @@ DefFunc _AssetsTrimFileMemory
 	jz .end
 
 	mov [esi + FileStruct.file_capacity], eax
-	invoke_cdecl _realloc, [esi + FileStruct.data], [esi + FileStruct.file_size]
+	invoke_cdecl _realloc, [esi + FileStruct.data], eax
 	test eax, eax
 	jz .fail_exit
 	mov [esi + FileStruct.data], eax
+	mov eax, [esi + FileStruct.data]
 	add eax, [esi + FileStruct.file_size]
 	mov byte [eax], 0
 	jmp .end
 .fail_exit:
+	int3
+	jmp .fail_exit
 .is_empty_file:
 	invoke_cdecl _free, [esi + FileStruct.data]
-	xor eax, eax
+	invoke_cdecl _calloc, 1, 1
 	mov [esi + FileStruct.data], eax
+	xor eax, eax
 	mov [esi + FileStruct.file_size], eax
+	inc eax
 	mov [esi + FileStruct.file_capacity], eax
 
 .end:
