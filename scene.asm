@@ -13,6 +13,11 @@ def_dll Dwmapi, "dwmapi.dll"
 def_dll_func DwmFlush
 
 import_dll_func Sleep
+import_dll_func GetCursorPos
+import_dll_func SetCursorPos
+import_dll_func ShowCursor
+import_dll_func GetClientRect
+import_dll_func GetAsyncKeyState
 
 extern _calloc
 extern _realloc
@@ -24,8 +29,27 @@ import_dll_func strcat
 import_dll_func snprintf
 
 segment .bss
+alignb 16
+global _CameraMatrix
+_CameraMatrix resb Matrix.size
+global _CameraYaw
+_CameraYaw resd 1
+global _CameraPitch
+_CameraPitch resd 1
+global _BillboardProgramLocations
+_BillboardProgramLocations:
+.CameraMatrix resd 1
+.Aspect resd 1
 global _Timer
 _Timer resb Timer.size
+global _ClientRect
+_ClientRect:
+.x resd 1
+.y resd 1
+.r resd 1
+.b resd 1
+global _Aspect
+_Aspect resd 1
 global _BillboardVerticesBuffer
 _BillboardVerticesBuffer resb GlBuffer.size
 global _DrawBillboardVAO
@@ -83,6 +107,11 @@ _BoxIndices:
 	db 4, 6, 7
 	db 4, 5, 7
 .num equ $ - _BoxIndices
+
+global _name_ofu_CameraMatrix
+_name_ofu_CameraMatrix db "camera", 0
+global _name_ofu_Aspect
+_name_ofu_Aspect db "aspect", 0
 
 %macro SceneLoadShaderProgram 4
 segment .rdata
@@ -246,6 +275,10 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glVertexAttribPointer, Variable(0), 2, GL_BYTE, 0, 2, 0
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
+	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_CameraMatrix
+	mov [_BillboardProgramLocations.CameraMatrix], eax
+	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_Aspect
+	mov [_BillboardProgramLocations.Aspect], eax
 
 .end:
 	mov eax, 1
@@ -257,22 +290,42 @@ DefFunc _FakeDwmFlush
 	ret
 
 DefFunc _Scene
-	FrameBegin 0, 1
+	FrameBegin 0, 4
 
-	PrepParam 0, _Timer
-	call _UpdateTimer
+	invoke_cdecl _UpdateTimer, _Timer
+
+	invoke_dll_stdcall GetAsyncKeyState, 0x1B
+	test eax, eax
+	jnz .quit
+
+	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
+	invoke_dll_stdcall glViewport, [_ClientRect.x], [_ClientRect.y], [_ClientRect.r], [_ClientRect.b]
+
+	fild dword [_ClientRect.r]
+	fidiv dword [_ClientRect.b]
+	fstp dword [_Aspect]
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 
+	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
+
 	invoke_dll_stdcall glUseProgram, [_DrawBillboardProgram]
+	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
+	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
+	invoke_dll_stdcall glUseProgram, 0
 
+	invoke_cdecl _SwapBuffers
+	xor eax, eax
+	inc eax
+	jmp .end
+.quit:
+	xor eax, eax
 
-
-	call _SwapBuffers
+.end:
 	FrameEnd
 	ret
 

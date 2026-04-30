@@ -88,6 +88,11 @@ def_dll_func PostQuitMessage
 def_dll_func DefWindowProcA
 def_dll_func GetDC
 def_dll_func ReleaseDC
+def_dll_func GetClientRect
+def_dll_func GetCursorPos
+def_dll_func SetCursorPos
+def_dll_func ShowCursor
+def_dll_func GetAsyncKeyState
 dll_func_group_end UFunc
 
 dll_func_group_start CFunc
