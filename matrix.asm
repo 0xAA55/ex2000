@@ -382,15 +382,17 @@ DefFunc _MatrixLookAt
 	ret
 
 DefFunc _MatrixTranspose
-	FrameBegin 0x10, 0
+	FrameBegin 0x14, 0
 
 	mov eax, Param(1)
+	lea ecx, Variable(4)
 	mov edx, Param(0)
 
-	movups Variable(0x00), xmm4
-	movups Variable(0x04), xmm5
-	movups Variable(0x08), xmm6
-	movups Variable(0x0C), xmm7
+	and ecx, 0xFFFFFFF0
+	movaps [ecx + 0x00], xmm4
+	movaps [ecx + 0x10], xmm5
+	movaps [ecx + 0x20], xmm6
+	movaps [ecx + 0x30], xmm7
 
 	movaps xmm3, [eax + Matrix.y]
 	movaps xmm1, [eax + Matrix.x]
@@ -422,10 +424,10 @@ DefFunc _MatrixTranspose
 	shufps xmm1, xmm3, 0xDD
 	movaps [edx + Matrix.w], xmm1
 
-	movups xmm4, Variable(0x00)
-	movups xmm5, Variable(0x04)
-	movups xmm6, Variable(0x08)
-	movups xmm7, Variable(0x0C)
+	movaps xmm4, [ecx + 0x00]
+	movaps xmm5, [ecx + 0x10]
+	movaps xmm6, [ecx + 0x20]
+	movaps xmm7, [ecx + 0x30]
 
 	FrameEnd
 	ret
