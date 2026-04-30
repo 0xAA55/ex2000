@@ -43,9 +43,11 @@ DefFunc _VectorCross
 DefFunc _VectorMultMatrix
 	FrameBegin 0, 0
 
-	LoadParam eax, 2
+	mov eax, Param(2)
+	mov ecx, Param(1)
+	mov edx, Param(0)
 
-	movaps xmm2, Param(1)
+	movaps xmm2, [ecx]
 	movaps xmm3, xmm2
 
 	movaps xmm1, xmm2
@@ -68,7 +70,7 @@ DefFunc _VectorMultMatrix
 	mulps xmm1, [eax + Matrix.w]
 	addps xmm0, xmm1
 
-	movaps Param(0), xmm0
+	movaps [edx], xmm0
 
 	FrameEnd
 	ret
@@ -79,18 +81,19 @@ DefFunc _VectorMultMatrixTransposed
 	lea esi, Variable(4)
 	and esi, 0xFFFFFFF0
 
-	LoadParam eax, 2
+	mov eax, Param(2)
+	mov ecx, Param(1)
 
-	movaps xmm1, Param(1)
+	movaps xmm1, [ecx]
 	mulps xmm1, [eax + Matrix.x]
 	movaps [esi + Matrix.x], xmm1
-	movaps xmm1, Param(1)
+	movaps xmm1, [ecx]
 	mulps xmm1, [eax + Matrix.y]
 	movaps [esi + Matrix.y], xmm1
-	movaps xmm1, Param(1)
+	movaps xmm1, [ecx]
 	mulps xmm1, [eax + Matrix.z]
 	movaps [esi + Matrix.z], xmm1
-	movaps xmm1, Param(1)
+	movaps xmm1, [ecx]
 	mulps xmm1, [eax + Matrix.w]
 	movaps [esi + Matrix.w], xmm1
 
