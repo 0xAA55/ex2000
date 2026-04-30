@@ -76,7 +76,7 @@ DefFunc _VectorMultMatrix
 	ret
 
 DefFunc _VectorMultMatrixTransposed
-	FrameBegin 0x10, 2, esi
+	FrameBegin 0x14, 2, esi
 
 	lea esi, Variable(4)
 	and esi, 0xFFFFFFF0
