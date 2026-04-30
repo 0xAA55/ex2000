@@ -332,12 +332,14 @@ DefFunc _Scene
 	fild dword [_CursorPos.x]
 	fisub dword [_WindowCenter.x]
 	fmul dword [_point_001]
+	fchs
 	fadd dword [_CameraYaw]
 	fstp dword [_CameraYaw]
 
 	fild dword [_CursorPos.y]
 	fisub dword [_WindowCenter.y]
 	fmul dword [_point_001]
+	fchs
 	fadd dword [_CameraPitch]
 	fstp dword [_CameraPitch]
 
