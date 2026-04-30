@@ -22,6 +22,7 @@ _name_of_LoadLibraryA db "LoadLibraryA", 0
 
 segment .text
 DefFunc _InitLoadLibrary
+	FrameBegin 0, 0, ebx
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
 	mov eax, [eax + 0x14]	; EAX = PEB->Ldr.InMemOrder.Flink (Current EXE)
@@ -71,6 +72,7 @@ DefFunc _InitLoadLibrary
 	push ebx	; Base offset of kernel32
 	call edx	; GetProcAddress
 	mov [_addr_of_LoadLibraryA], eax
+	FrameEnd
 	ret
 
 DefFunc _LoadFuncGroup
