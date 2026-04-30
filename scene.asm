@@ -277,6 +277,7 @@ DefFunc _Scene
 	ret
 
 DefFunc _SwapBuffers
+	FrameBegin 0, 0
 	mov eax, [_addr_of_wglSwapInterval]
 	test eax, eax
 	jnz .swap_buffers
@@ -285,4 +286,5 @@ DefFunc _SwapBuffers
 
 .swap_buffers:
 	invoke_dll_stdcall wglSwapBuffers, [_hDC]
+	FrameEnd
 	ret
