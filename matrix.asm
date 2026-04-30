@@ -11,7 +11,7 @@ import_dll_func cos
 import_dll_func sin
 
 segment .bss
-align 16
+alignb 16
 global _ZeroVector
 _ZeroVector resd 4
 
