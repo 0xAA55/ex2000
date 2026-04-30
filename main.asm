@@ -163,6 +163,8 @@ DefFunc _start
 	jnz .proc_message
 
 	invoke_cdecl _Scene
+	test eax, eax
+	jz .exit
 	jmp .msgloop
 .proc_message:
 
