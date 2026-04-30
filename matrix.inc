@@ -70,6 +70,9 @@ extern _MatrixRotationZ
 ; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
 
+; void MatrixLookAt(Matrix *out, Vector *eye, Vector *dir, Vector *up);
+extern _MatrixLookAt
+
 ; void MatrixTranspose(Matrix *out, Matrix *m);
 extern _MatrixTranspose
 

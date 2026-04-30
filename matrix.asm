@@ -341,6 +341,46 @@ DefFunc _MatrixRotationEuler
 	%undef _ZR3
 	%undef _ZR4
 
+DefFunc _MatrixLookAt
+	FrameBegin 0x14, 3, esi
+
+	lea esi, Variable(4)
+	and esi, 0xFFFFFFF0
+
+	xor eax, eax
+	mov [esi + 0x20 + Vector.w], eax
+	invoke_cdecl _VectorNormal, &[esi + 0x20], Param(2), 3
+	mov eax, Param(3)
+	invoke_cdecl _VectorCross, esi, eax, &[esi + 0x20]
+	invoke_cdecl _VectorCross, &[esi + 0x10], &[esi + 0x20], esi
+
+	movaps xmm0, [_ZeroVector]
+	movaps [esi + 0x30], xmm0
+	mov dword[esi + 0x30 + Vector.w], 0x3F800000
+
+	xor eax, eax
+	mov edx, Param(1)
+.w:
+	fld dword [esi + eax + Vector.x]
+	fmul dword [edx + Vector.x]
+	fld dword [esi + eax + Vector.y]
+	fmul dword [edx + Vector.y]
+	fadd
+	fld dword [esi + eax + Vector.z]
+	fmul dword [edx + Vector.z]
+	fadd
+	fchs
+	fst dword [esi + eax + Vector.w]
+
+	add eax, 0x10
+	cmp eax, 0x30
+	jb .w
+
+	invoke_cdecl _MatrixTranspose, Param(0), esi
+
+	FrameEnd
+	ret
+
 DefFunc _MatrixTranspose
 	FrameBegin 0x10, 0
 
