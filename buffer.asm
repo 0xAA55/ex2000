@@ -151,7 +151,7 @@ DefFunc _BufferPushItem
 	; Calculate new item address
 	mov ecx, [esi + GlBuffer.size_of_item]
 	mov eax, ecx
-	mul [esi + GlBuffer.num_items]
+	mul dword [esi + GlBuffer.num_items]
 	test edx, edx
 	jnz .fail
 	add eax, [esi + GlBuffer.pointer]
