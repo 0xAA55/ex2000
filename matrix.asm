@@ -54,7 +54,7 @@ DefFunc _VectorLength
 	add eax, 4
 	loop .muladd
 	fsqrt
-	fst dword [edx]
+	fstp dword [edx]
 
 	FrameEnd
 	ret
@@ -69,7 +69,7 @@ DefFunc _VectorNormal
 .divide:
 	fld dword [eax + (ecx - 1) * 4]
 	fdiv dword Variable(0)
-	fst dword [edx + (ecx - 1) * 4]
+	fstp dword [edx + (ecx - 1) * 4]
 	loop .divide
 
 	FrameEnd
@@ -247,45 +247,57 @@ DefFunc _MatrixRotationZ
 
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
-	FrameBegin 18, 3, edi
-	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR1, _ZR2, _ZR3, _ZR4
+	FrameBegin 15, 0, edi
+	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR, _H4, _H5, _H6, _H7
 
 	xor eax, eax
+	mov _ZR, eax
+	mov ecx, 3
 	mov edx, 1
-	mov ecx, 4
-	lea edi, _ZR1
-	rep stosd
 	mov edi, Param(0)
-	movups xmm0, _ZR1
+	movaps xmm0, [_ZeroVector]
 	movaps [edi + Matrix.x], xmm0
 	movaps [edi + Matrix.y], xmm0
 	movaps [edi + Matrix.z], xmm0
 	movaps [edi + Matrix.w], xmm0
-	mov cl, 3
 .cysycpspcrsr:
 	fld dword Param(edx)
 	fld st0
 	fcos
-	fst dword Variable(eax)
+	fstp dword Variable(eax)
 	fsin
-	fst dword Variable(eax + 1)
+	fstp dword Variable(eax + 1)
+	ffree st0
 	inc edx
 	add al, 2
 	loop .cysycpspcrsr
 
-	movss Variable(14), xmm4
-	movss Variable(15), xmm5
-	movss Variable(16), xmm6
-	movss Variable(17), xmm7
+	movss xmm0, _CP
+	movss xmm1, _CR
+	movss xmm2, _SR
+	movss xmm3, _SR
+	mulss xmm0, _CR
+	mulss xmm1, _SP
+	mulss xmm2, _CP
+	mulss xmm3, _SP
+	movss _CPCR, xmm0
+	movss _CRSP, xmm1
+	movss _SRCP, xmm2
+	movss _SRSP, xmm3
+
+	movss _H4, xmm4
+	movss _H5, xmm5
+	movss _H6, xmm6
+	movss _H7, xmm7
 
 	movss xmm0, _CY
 	movss xmm1, _SY
 	movss xmm2, _SRCP
 	movss xmm3, _SRSP
 	movss xmm4, _CR
+	movss xmm5, _SY
+	movss xmm6, _CY
 	movss xmm7, _CPCR
-	movss xmm5, xmm1
-	movss xmm6, xmm0
 	mulss xmm0, _CR
 	mulss xmm1, _SRSP
 	mulss xmm3, _CY
@@ -303,11 +315,11 @@ DefFunc _MatrixRotationEuler
 
 	movss xmm0, _SY
 	movss xmm1, _CRSP
-	movss xmm2, xmm0
-	movss xmm3, _ZR1
+	movss xmm2, _SY
+	movss xmm3, _ZR
 	movss xmm4, _CY
 	mulss xmm0, _SR
-	mulss xmm1, xmm4
+	mulss xmm1, _CY
 	mulss xmm2, _CP
 	subss xmm3, _SP
 	mulss xmm4, _CP
@@ -319,10 +331,10 @@ DefFunc _MatrixRotationEuler
 	movss [edi + Matrix.zz], xmm4
 	mov dword [edi + Matrix.ww], 0x3F800000
 
-	movss xmm4, Variable(14)
-	movss xmm5, Variable(15)
-	movss xmm6, Variable(16)
-	movss xmm7, Variable(17)
+	movss xmm4, _H4
+	movss xmm5, _H5
+	movss xmm6, _H6
+	movss xmm7, _H7
 
 	FrameEnd
 	ret
@@ -336,10 +348,11 @@ DefFunc _MatrixRotationEuler
 	%undef _CRSP
 	%undef _SRCP
 	%undef _SRSP
-	%undef _ZR1
-	%undef _ZR2
-	%undef _ZR3
-	%undef _ZR4
+	%undef _ZR
+	%undef _H4
+	%undef _H5
+	%undef _H6
+	%undef _H7
 
 DefFunc _MatrixLookAt
 	FrameBegin 0x14, 3, esi
@@ -370,7 +383,7 @@ DefFunc _MatrixLookAt
 	fmul dword [edx + Vector.z]
 	fadd
 	fchs
-	fst dword [esi + eax + Vector.w]
+	fstp dword [esi + eax + Vector.w]
 
 	add eax, 0x10
 	cmp eax, 0x30
