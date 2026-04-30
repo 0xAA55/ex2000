@@ -215,7 +215,6 @@ DefFunc _MatrixRotationEuler
 	FrameBegin 18, 3, edi
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR1, _ZR2, _ZR3, _ZR4
 
-	mov edi, Param(0)
 	xor eax, eax
 	mov edx, 1
 	mov ecx, 4
