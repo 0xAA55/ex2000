@@ -105,7 +105,7 @@ DefFunc _VectorMultMatrixTransposed
 	addps xmm1, [esi + Matrix.w]
 	addps xmm0, xmm1
 
-	LoadParam eax, 0
+	mov eax, Param(0)
 	movaps [eax], xmm0
 
 	FrameEnd
@@ -126,7 +126,7 @@ DefFunc _PreMatRot
 DefFunc _MatrixIdentity
 	FrameBegin 0, 0, edi
 
-	LoadParam edi, 0
+	mov edi, Param(0)
 	movaps xmm0, [_ZeroVector]
 	mov ecx, 4
 	xor eax, eax
@@ -175,7 +175,7 @@ DefFunc _MatrixRotationY
 	lea edx, Variable(0)
 	call _PreMatRot
 
-	LoadParam eax, 0
+	mov eax, Param(0)
 	mov ecx, Variable(0)
 	mov edx, Variable(1)
 
@@ -197,7 +197,7 @@ DefFunc _MatrixRotationZ
 	lea edx, Variable(0)
 	call _PreMatRot
 
-	LoadParam eax, 0
+	mov eax, Param(0)
 	mov ecx, Variable(0)
 	mov edx, Variable(1)
 
@@ -309,8 +309,8 @@ DefFunc _MatrixRotationEuler
 DefFunc _MatrixTranspose
 	FrameBegin 0x10, 0
 
-	LoadParam edx, 0
-	LoadParam eax, 1
+	mov eax, Param(1)
+	mov edx, Param(0)
 
 	movups Variable(0x00), xmm4
 	movups Variable(0x04), xmm5
@@ -358,8 +358,8 @@ DefFunc _MatrixTranspose
 DefFunc _MatrixMultiply
 	FrameBegin 0, 3, esi, edi
 
-	LoadParam edi, 0
-	LoadParam esi, 1
+	mov esi, Param(1)
+	mov edi, Param(0)
 
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.x], &[esi + Matrix.x], Param(2)
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.y], &[esi + Matrix.y], Param(2)
@@ -372,8 +372,8 @@ DefFunc _MatrixMultiply
 DefFunc _MatrixMultiplyTransposed
 	FrameBegin 0, 3, esi, edi
 
-	LoadParam edi, 0
-	LoadParam esi, 1
+	mov esi, Param(1)
+	mov edi, Param(0)
 
 	invoke_cdecl _VectorMultMatrixTransposed, &[edi + Matrix.x], &[esi + Matrix.x], Param(2)
 	invoke_cdecl _VectorMultMatrixTransposed, &[edi + Matrix.y], &[esi + Matrix.y], Param(2)
