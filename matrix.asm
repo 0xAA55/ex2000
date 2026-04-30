@@ -5,6 +5,9 @@
 
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
+extern _aligned_malloc
+extern _aligned_free
+
 import_dll_func memcpy
 import_dll_func memset
 import_dll_func cos
@@ -150,12 +153,12 @@ DefFunc _PreMatRot
 	fld dword [eax]
 	fld st0
 	fcos
-	fst dword [edx + 0]
+	fstp dword [edx + 0]
 	fsin
-	fld st0
 	fst dword [edx + 4]
 	fchs
-	fst dword [edx + 8]
+	fstp dword [edx + 8]
+	ffree st0
 	ret
 
 DefFunc _MatrixIdentity
@@ -247,112 +250,30 @@ DefFunc _MatrixRotationZ
 
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
-	FrameBegin 15, 0, edi
-	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPCR, _CRSP, _SRCP, _SRSP, _ZR, _H4, _H5, _H6, _H7
+	FrameBegin 4, 3
 
-	xor eax, eax
-	mov _ZR, eax
-	mov ecx, 3
-	mov edx, 1
-	mov edi, Param(0)
-	movaps xmm0, [_ZeroVector]
-	movaps [edi + Matrix.x], xmm0
-	movaps [edi + Matrix.y], xmm0
-	movaps [edi + Matrix.z], xmm0
-	movaps [edi + Matrix.w], xmm0
-.cysycpspcrsr:
-	fld dword Param(edx)
-	fld st0
-	fcos
-	fstp dword Variable(eax)
-	fsin
-	fstp dword Variable(eax + 1)
-	ffree st0
-	inc edx
-	add al, 2
-	loop .cysycpspcrsr
+	invoke_cdecl _aligned_malloc, Matrix.size, 16
+	mov Variable(0), eax
+	invoke_cdecl _aligned_malloc, Matrix.size, 16
+	mov Variable(1), eax
+	invoke_cdecl _aligned_malloc, Matrix.size, 16
+	mov Variable(2), eax
+	invoke_cdecl _aligned_malloc, Matrix.size, 16
+	mov Variable(3), eax
 
-	movss xmm0, _CP
-	movss xmm1, _CR
-	movss xmm2, _SR
-	movss xmm3, _SR
-	mulss xmm0, _CR
-	mulss xmm1, _SP
-	mulss xmm2, _CP
-	mulss xmm3, _SP
-	movss _CPCR, xmm0
-	movss _CRSP, xmm1
-	movss _SRCP, xmm2
-	movss _SRSP, xmm3
+	invoke_cdecl _MatrixRotationX, Variable(1), Param(2)
+	invoke_cdecl _MatrixRotationY, Variable(0), Param(1)
+	invoke_cdecl _MatrixRotationZ, Variable(2), Param(3)
+	invoke_cdecl _MatrixMultiply, Variable(3), Variable(2), Variable(1)
+	invoke_cdecl _MatrixMultiply, Param(0), Variable(0), Variable(3)
 
-	movss _H4, xmm4
-	movss _H5, xmm5
-	movss _H6, xmm6
-	movss _H7, xmm7
-
-	movss xmm0, _CY
-	movss xmm1, _SY
-	movss xmm2, _SRCP
-	movss xmm3, _SRSP
-	movss xmm4, _CR
-	movss xmm5, _SY
-	movss xmm6, _CY
-	movss xmm7, _CPCR
-	mulss xmm0, _CR
-	mulss xmm1, _SRSP
-	mulss xmm3, _CY
-	mulss xmm4, _SY
-	mulss xmm5, _CRSP
-	mulss xmm6, _SR
-	addss xmm0, xmm1
-	subss xmm3, xmm4
-	subss xmm5, xmm6
-	movss [edi + Matrix.xx], xmm0
-	movss [edi + Matrix.xy], xmm2
-	movss [edi + Matrix.xz], xmm3
-	movss [edi + Matrix.yx], xmm5
-	movss [edi + Matrix.yy], xmm7
-
-	movss xmm0, _SY
-	movss xmm1, _CRSP
-	movss xmm2, _SY
-	movss xmm3, _ZR
-	movss xmm4, _CY
-	mulss xmm0, _SR
-	mulss xmm1, _CY
-	mulss xmm2, _CP
-	subss xmm3, _SP
-	mulss xmm4, _CP
-	addss xmm0, xmm1
-
-	movss [edi + Matrix.yz], xmm0
-	movss [edi + Matrix.zx], xmm2
-	movss [edi + Matrix.zy], xmm3
-	movss [edi + Matrix.zz], xmm4
-	mov dword [edi + Matrix.ww], 0x3F800000
-
-	movss xmm4, _H4
-	movss xmm5, _H5
-	movss xmm6, _H6
-	movss xmm7, _H7
+	invoke_cdecl _aligned_free, Variable(0)
+	invoke_cdecl _aligned_free, Variable(1)
+	invoke_cdecl _aligned_free, Variable(2)
+	invoke_cdecl _aligned_free, Variable(3)
 
 	FrameEnd
 	ret
-	%undef _CY
-	%undef _SY
-	%undef _CP
-	%undef _SP
-	%undef _CR
-	%undef _SR
-	%undef _CPCR
-	%undef _CRSP
-	%undef _SRCP
-	%undef _SRSP
-	%undef _ZR
-	%undef _H4
-	%undef _H5
-	%undef _H6
-	%undef _H7
 
 DefFunc _MatrixLookAt
 	FrameBegin 0x14, 3, esi
