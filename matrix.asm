@@ -289,16 +289,17 @@ DefFunc _MatrixLookAt
 	xor eax, eax
 	mov edx, Param(1)
 .w:
-	fld dword [esi + eax + Vector.x]
-	fmul dword [edx + Vector.x]
-	fld dword [esi + eax + Vector.y]
-	fmul dword [edx + Vector.y]
-	fadd
-	fld dword [esi + eax + Vector.z]
-	fmul dword [edx + Vector.z]
-	fadd
-	fchs
-	fstp dword [esi + eax + Vector.w]
+	movss xmm0, [esi + eax + Vector.x]
+	movss xmm1, [esi + eax + Vector.y]
+	movss xmm2, [esi + eax + Vector.z]
+	movss xmm3, [_ZeroVector]
+	mulss xmm0, [edx + Vector.x]
+	mulss xmm1, [edx + Vector.y]
+	mulss xmm2, [edx + Vector.z]
+	addss xmm0, xmm1
+	addss xmm0, xmm2
+	subss xmm3, xmm0
+	movss [esi + eax + Vector.w], xmm3
 
 	add eax, 0x10
 	cmp eax, 0x30
