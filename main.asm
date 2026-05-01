@@ -108,6 +108,7 @@ def_dll_func memcpy
 def_dll_func memmove
 def_dll_func cos
 def_dll_func sin
+def_dll_func rand
 dll_func_group_end CFunc
 
 segment .bss
