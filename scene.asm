@@ -83,8 +83,6 @@ _BoxIndicesBuffer resb GlBuffer.size
 segment .rdata
 global _point_001
 _point_001 dd 0x3a83126f
-global _PI
-_PI dd 0x40490fdb
 global _FovRatio
 _FovRatio dw 3
 
@@ -227,7 +225,7 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_FovY
 	mov [_BillboardProgramLocations.FovY], eax
 
-	fld dword [_PI]
+	fldpi
 	fidivr word [_FovRatio]
 	fcos
 	fstp dword [_FovY]
