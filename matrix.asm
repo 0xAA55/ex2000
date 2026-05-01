@@ -12,17 +12,105 @@ import_dll_func memcpy
 import_dll_func memset
 import_dll_func cos
 import_dll_func sin
+import_dll_func ExitProcess
+
+%define SEED_OF_RAND(s) ((0x343fD * (s) + 0x269EC3) & 0xFFFFFFFF)
+%define RAND(s) (SEED_OF_RAND(s) & 0x7FFF)
 
 segment .bss
 alignb 16
 global _ZeroVector
 _ZeroVector resd 4
+global _Rand4MulVal
+_Rand4MulVal resd 4
+global _Rand4AddVal
+_Rand4AddVal resd 4
+global _Rand4AndVal
+_Rand4AndVal resd 4
+global _0101
+_0101 resd 4
+
+segment .data
+global _addr_of_rand4int
+_addr_of_rand4int dd _rand4int_sse2
+align 16
+global _SeedVector
+_SeedVector dd SEED_OF_RAND(1), SEED_OF_RAND(0xAA55), SEED_OF_RAND(0x11037), SEED_OF_RAND(0x269EC3)
 
 segment .rdata
+align 16
 global _2.0f
 _2.0f dd 0x40000000
 
 segment .text
+DefFunc _MathInit
+	FrameBegin 0, 0, ebx
+
+	mov ecx, 4
+.init_rand:
+	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
+	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
+	mov dword [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
+	loop .init_rand
+	dec ecx
+	mov [_0101], ecx
+	mov [_0101 + 8], ecx
+
+	xor eax, eax
+	inc eax
+	cpuid
+	test edx, (1 << 26)
+	jz .no_sse2
+	test ecx, (1 << 19)
+	jz .no_sse41
+
+	mov dword [_addr_of_rand4int], _rand4int_sse41
+	jmp .end
+
+.no_sse2:
+	debug_msg "SSE2 is needed for the program to run."
+	invoke_dll_stdcall ExitProcess, 1
+
+.no_sse41:
+.end:
+	FrameEnd
+	ret
+
+DefFunc _rand4int_sse2
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	movaps xmm0, [_SeedVector]
+	movaps xmm1, [_SeedVector]
+	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
+	pmuludq xmm0, [_Rand4MulVal]
+	pmuludq xmm1, [_Rand4MulVal]
+	pand xmm0, [_0101]
+	pand xmm1, [_0101]
+	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
+	paddd xmm0, xmm1
+	paddd xmm0, [_Rand4AddVal]
+	movaps [_SeedVector], xmm0
+	pand xmm0, [_Rand4AndVal]
+	movaps [eax], xmm0
+
+	FrameEnd
+	ret
+
+DefFunc _rand4int_sse41
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	movaps xmm0, [_SeedVector]
+	pmulld xmm0, [_Rand4MulVal]
+	paddd xmm0, [_Rand4AddVal]
+	movaps [_SeedVector], xmm0
+	pand xmm0, [_Rand4AndVal]
+	movaps [eax], xmm0
+
+	FrameEnd
+	ret
+
 DefFunc _VectorCross
 	FrameBegin 0, 0
 
