@@ -187,10 +187,8 @@ DefFunc _MatrixRotationEuler
 	movaps [edi + Matrix.w], xmm0
 .sincos:
 	fld dword Param(edx)
-	fld st0
-	fcos
+	fsincos
 	fstp Variable(eax)
-	fsin
 	fstp Variable(eax + 1)
 	ffree st0
 	inc edx
