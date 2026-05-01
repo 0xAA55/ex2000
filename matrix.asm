@@ -187,7 +187,6 @@ DefFunc _MatrixRotationEuler
 	fsincos
 	fstp Variable(eax)
 	fstp Variable(eax + 1)
-	ffree st0
 	inc edx
 	add al, 2
 	loop .sincos
