@@ -201,6 +201,7 @@ DefFunc _SceneInit
 .no_dwmflush:
 	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
+	invoke_cdecl _MathInit
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
 
