@@ -351,8 +351,6 @@ DefFunc _MatrixTranspose
 	FrameBegin 0, 0
 
 	mov eax, Param(1)
-	mov edx, Param(0)
-
 	movaps xmm3, [eax + Matrix.y]
 	movaps xmm1, [eax + Matrix.x]
 	shufps xmm1, xmm3, 0x44
@@ -368,20 +366,21 @@ DefFunc _MatrixTranspose
 	shufps xmm1, xmm3, 0xEE
 	movaps xmm7, xmm1
 
+	mov eax, Param(0)
 	movaps xmm1, xmm4
 	movaps xmm3, xmm5
 	shufps xmm1, xmm3, 0x88
-	movaps [edx + Matrix.x], xmm1
+	movaps [eax + Matrix.x], xmm1
 	movaps xmm1, xmm4
 	shufps xmm1, xmm3, 0xDD
-	movaps [edx + Matrix.y], xmm1
+	movaps [eax + Matrix.y], xmm1
 	movaps xmm1, xmm6
 	movaps xmm3, xmm7
 	shufps xmm1, xmm3, 0x88
-	movaps [edx + Matrix.z], xmm1
+	movaps [eax + Matrix.z], xmm1
 	movaps xmm1, xmm6
 	shufps xmm1, xmm3, 0xDD
-	movaps [edx + Matrix.w], xmm1
+	movaps [eax + Matrix.w], xmm1
 
 	FrameEnd
 	ret
