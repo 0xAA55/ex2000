@@ -466,7 +466,7 @@ DefFunc _AssetsFnOnNotify
 ;	mov esi, Param(0)
 ;	test esi, esi
 ;	jz .end
-;	debug_msg "key: %s, height: %d", [esi + AVLBST_Node.key], [esi + AVLBST_Node.height]
+;	debug_msg "height: %d, key: %s", [esi + AVLBST_Node.height], [esi + AVLBST_Node.key]
 ;
 ;	invoke_cdecl _AssetsShow, [esi + AVLBST_Node.l_child]
 ;	invoke_cdecl _AssetsShow, [esi + AVLBST_Node.r_child]
