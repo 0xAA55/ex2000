@@ -172,19 +172,12 @@ DefFunc _MatrixIdentity
 
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
-	FrameBegin 9, 0, edi
-	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPSR, _SPSR, _ZR
+	FrameBegin 8, 0
+	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPSR, _SPSR
 
 	xor eax, eax
-	movaps xmm0, [_ZeroVector]
 	mov ecx, 3
 	mov edx, 1
-	mov edi, Param(0)
-	mov _ZR, eax
-	movaps [edi + Matrix.x], xmm0
-	movaps [edi + Matrix.y], xmm0
-	movaps [edi + Matrix.z], xmm0
-	movaps [edi + Matrix.w], xmm0
 .sincos:
 	fld dword Param(edx)
 	fsincos
@@ -194,6 +187,13 @@ DefFunc _MatrixRotationEuler
 	inc edx
 	add al, 2
 	loop .sincos
+
+	mov eax, Param(0)
+	movaps xmm0, [_ZeroVector]
+	movaps [eax + Matrix.x], xmm0
+	movaps [eax + Matrix.y], xmm0
+	movaps [eax + Matrix.z], xmm0
+	movaps [eax + Matrix.w], xmm0
 
 	;xx = _CY * _CR
 	;xy = _CY * _CPSR + _SY * _SP;
@@ -228,13 +228,13 @@ DefFunc _MatrixRotationEuler
 	subss xmm6, xmm7
 	movss _CPSR, xmm0
 	movss _SPSR, xmm1
-	movss [edi + Matrix.xx], xmm3
-	movss [edi + Matrix.xy], xmm4
-	movss [edi + Matrix.xz], xmm6
-	movss [edi + Matrix.yy], xmm2
+	movss [eax + Matrix.xx], xmm3
+	movss [eax + Matrix.xy], xmm4
+	movss [eax + Matrix.xz], xmm6
+	movss [eax + Matrix.yy], xmm2
 
 	movss xmm0, _CR
-	movss xmm1, _ZR
+	movss xmm1, [_ZeroVector]
 	movss xmm2, _CR
 	movss xmm3, _CPSR
 	movss xmm4, _SP
@@ -250,13 +250,13 @@ DefFunc _MatrixRotationEuler
 	subss xmm0, _SR
 	subss xmm3, xmm4
 	addss xmm5, xmm6
-	movss [edi + Matrix.yz], xmm0
-	movss [edi + Matrix.yx], xmm1
-	movss [edi + Matrix.yw], xmm1
-	movss [edi + Matrix.zx], xmm2
-	movss [edi + Matrix.zy], xmm3
-	movss [edi + Matrix.zz], xmm5
-	mov dword[edi + Matrix.ww], 0x3F800000
+	movss [eax + Matrix.yz], xmm0
+	movss [eax + Matrix.yx], xmm1
+	movss [eax + Matrix.yw], xmm1
+	movss [eax + Matrix.zx], xmm2
+	movss [eax + Matrix.zy], xmm3
+	movss [eax + Matrix.zz], xmm5
+	mov dword[eax + Matrix.ww], 0x3F800000
 
 	FrameEnd
 	ret
@@ -268,7 +268,6 @@ DefFunc _MatrixRotationEuler
 	%undef _SR
 	%undef _CPSR
 	%undef _SPSR
-	%undef _ZR
 
 DefFunc _MatrixLookAt
 	FrameBegin 0x14, 3, esi
