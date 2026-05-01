@@ -94,6 +94,7 @@ def_dll_func GetCursorPos
 def_dll_func SetCursorPos
 def_dll_func ShowCursor
 def_dll_func GetAsyncKeyState
+def_dll_func GetForegroundWindow
 dll_func_group_end UFunc
 
 dll_func_group_start CFunc

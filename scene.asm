@@ -19,6 +19,7 @@ import_dll_func ShowCursor
 import_dll_func GetWindowRect
 import_dll_func GetClientRect
 import_dll_func GetAsyncKeyState
+import_dll_func GetForegroundWindow
 
 extern _calloc
 extern _realloc
@@ -245,6 +246,9 @@ DefFunc _Scene
 
 	invoke_cdecl _UpdateTimer, _Timer
 
+	invoke_dll_stdcall GetForegroundWindow
+	cmp eax, [_hWnd]
+	jnz .not_front
 	invoke_dll_stdcall GetAsyncKeyState, 0x1B
 	test eax, eax
 	jnz .quit
@@ -282,6 +286,7 @@ DefFunc _Scene
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
+.not_front:
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
