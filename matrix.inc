@@ -64,6 +64,9 @@ extern _MatrixRotationEuler
 ; void MatrixLookAt(Matrix *out, Vector *eye, Vector *dir, Vector *up);
 extern _MatrixLookAt
 
+; void MatrixProjection(Matrix *out, float fovy, float aspect, float zn, float zf);
+extern _MatrixProjection
+
 ; void MatrixTranspose(Matrix *out, Matrix *m);
 extern _MatrixTranspose
 
