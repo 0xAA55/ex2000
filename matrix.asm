@@ -172,13 +172,8 @@ DefFunc _MatrixIdentity
 
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
-	FrameBegin 13, 0, edi
-	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPSR, _SPSR, _ZR, _H0, _H1, _H2, _H3
-
-	movss _H0, xmm4
-	movss _H1, xmm5
-	movss _H2, xmm6
-	movss _H3, xmm7
+	FrameBegin 9, 0, edi
+	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPSR, _SPSR, _ZR
 
 	xor eax, eax
 	movaps xmm0, [_ZeroVector]
@@ -265,11 +260,6 @@ DefFunc _MatrixRotationEuler
 	movss [edi + Matrix.yz], xmm6
 	mov dword[edi + Matrix.ww], 0x3F800000
 
-	movss xmm4, _H0
-	movss xmm5, _H1
-	movss xmm6, _H2
-	movss xmm7, _H3
-
 	FrameEnd
 	ret
 	%undef _CY
@@ -281,10 +271,6 @@ DefFunc _MatrixRotationEuler
 	%undef _CPSR
 	%undef _SPSR
 	%undef _ZR
-	%undef _H0
-	%undef _H1
-	%undef _H2
-	%undef _H3
 
 DefFunc _MatrixLookAt
 	FrameBegin 0x14, 3, esi
@@ -327,17 +313,10 @@ DefFunc _MatrixLookAt
 	ret
 
 DefFunc _MatrixTranspose
-	FrameBegin 0x14, 0
+	FrameBegin 0, 0
 
 	mov eax, Param(1)
-	lea ecx, Variable(4)
 	mov edx, Param(0)
-
-	and ecx, 0xFFFFFFF0
-	movaps [ecx + 0x00], xmm4
-	movaps [ecx + 0x10], xmm5
-	movaps [ecx + 0x20], xmm6
-	movaps [ecx + 0x30], xmm7
 
 	movaps xmm3, [eax + Matrix.y]
 	movaps xmm1, [eax + Matrix.x]
@@ -368,11 +347,6 @@ DefFunc _MatrixTranspose
 	movaps xmm1, xmm6
 	shufps xmm1, xmm3, 0xDD
 	movaps [edx + Matrix.w], xmm1
-
-	movaps xmm4, [ecx + 0x00]
-	movaps xmm5, [ecx + 0x10]
-	movaps xmm6, [ecx + 0x20]
-	movaps xmm7, [ecx + 0x30]
 
 	FrameEnd
 	ret
