@@ -149,18 +149,6 @@ DefFunc _VectorMultMatrixTransposed
 	FrameEnd
 	ret
 
-DefFunc _PreMatRot
-	fld dword [eax]
-	fld st0
-	fcos
-	fstp dword [edx + 0]
-	fsin
-	fst dword [edx + 4]
-	fchs
-	fstp dword [edx + 8]
-	ffree st0
-	ret
-
 DefFunc _MatrixIdentity
 	FrameBegin 0, 0, edi
 
@@ -178,72 +166,6 @@ DefFunc _MatrixIdentity
 	mov [edi + Matrix.yy], eax
 	mov [edi + Matrix.zz], eax
 	mov [edi + Matrix.ww], eax
-
-	FrameEnd
-	ret
-
-DefFunc _MatrixRotationX
-	FrameBegin 3, 1
-
-	invoke_cdecl _MatrixIdentity, Param(0)
-
-	lea eax, Param(1)
-	lea edx, Variable(0)
-	call _PreMatRot
-
-	LoadParam eax, 0
-	mov ecx, Variable(0)
-	mov edx, Variable(1)
-
-	mov [eax + Matrix.yy], ecx
-	mov [eax + Matrix.yz], edx
-	mov [eax + Matrix.zz], ecx
-	mov edx, Variable(2)
-	mov [eax + Matrix.zy], edx
-
-	FrameEnd
-	ret
-
-DefFunc _MatrixRotationY
-	FrameBegin 3, 1
-
-	invoke_cdecl _MatrixIdentity, Param(0)
-
-	lea eax, Param(1)
-	lea edx, Variable(0)
-	call _PreMatRot
-
-	mov eax, Param(0)
-	mov ecx, Variable(0)
-	mov edx, Variable(1)
-
-	mov [eax + Matrix.xx], ecx
-	mov [eax + Matrix.zx], edx
-	mov [eax + Matrix.zz], ecx
-	mov edx, Variable(2)
-	mov [eax + Matrix.xz], edx
-
-	FrameEnd
-	ret
-
-DefFunc _MatrixRotationZ
-	FrameBegin 3, 1
-
-	invoke_cdecl _MatrixIdentity, Param(0)
-
-	lea eax, Param(1)
-	lea edx, Variable(0)
-	call _PreMatRot
-
-	mov eax, Param(0)
-	mov ecx, Variable(0)
-	mov edx, Variable(1)
-
-	mov [eax + Matrix.xx], ecx
-	mov [eax + Matrix.xy], edx
-	mov [eax + Matrix.yy], ecx
-	mov edx, Variable(2)
-	mov [eax + Matrix.yx], edx
 
 	FrameEnd
 	ret

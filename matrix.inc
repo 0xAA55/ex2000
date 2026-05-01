@@ -58,15 +58,6 @@ extern _VectorMultMatrixTransposed
 ; void MatrixIdentity(Matrix *out);
 extern _MatrixIdentity
 
-; void MatrixRotationX(Matrix *out, float angle);
-extern _MatrixRotationX
-
-; void MatrixRotationY(Matrix *out, float angle);
-extern _MatrixRotationY
-
-; void MatrixRotationZ(Matrix *out, float angle);
-extern _MatrixRotationZ
-
 ; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
 
