@@ -235,29 +235,29 @@ DefFunc _MatrixRotationEuler
 	movss [edi + Matrix.xz], xmm6
 	movss [edi + Matrix.yy], xmm2
 
-	movss xmm0, _ZR
-	movss xmm1, _CR
-	movss xmm2, _CPSR
-	movss xmm3, _SP
-	movss xmm4, _SPSR
-	movss xmm5, _CY
-	movss xmm6, _CR
-	subss xmm0, _SR
-	mulss xmm1, _SY
+	movss xmm0, _CR
+	movss xmm1, _ZR
+	movss xmm2, _CR
+	movss xmm3, _CPSR
+	movss xmm4, _SP
+	movss xmm5, _SPSR
+	movss xmm6, _CY
+	mulss xmm0, _SP
+	subss xmm1, _SR
 	mulss xmm2, _SY
-	mulss xmm3, _CY
-	mulss xmm4, _SY
-	mulss xmm5, _CP
-	mulss xmm6, _SP
-	subss xmm2, xmm3
-	addss xmm4, xmm5
-	subss xmm6, _SR
-	movss [edi + Matrix.yx], xmm0
-	movss [edi + Matrix.yw], xmm0
-	movss [edi + Matrix.zx], xmm1
-	movss [edi + Matrix.zy], xmm2
-	movss [edi + Matrix.zz], xmm4
-	movss [edi + Matrix.yz], xmm6
+	mulss xmm3, _SY
+	mulss xmm4, _CY
+	mulss xmm5, _SY
+	mulss xmm6, _CP
+	subss xmm0, _SR
+	subss xmm3, xmm4
+	addss xmm5, xmm6
+	movss [edi + Matrix.yz], xmm0
+	movss [edi + Matrix.yx], xmm1
+	movss [edi + Matrix.yw], xmm1
+	movss [edi + Matrix.zx], xmm2
+	movss [edi + Matrix.zy], xmm3
+	movss [edi + Matrix.zz], xmm5
 	mov dword[edi + Matrix.ww], 0x3F800000
 
 	FrameEnd
