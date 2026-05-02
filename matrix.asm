@@ -290,12 +290,11 @@ DefFunc _MatrixRotationEuler
 	;xy = _CY * _CPSR + _SY * _SP;
 	;xz = _CY * _SPSR - _SY * _CP;
 	;yx = -_SR;
-	;yy = _CRCPMSR;
-	;yz = _CRSPMSR;
-	;yw = -_SR;
-	;zx = _CR * SY + ZR12 + ZR27 + 0.0;
+	;yy = _CRCP;
+	;yz = _CRSP;
+	;zx = _CR * _SY;
 	;zy = _CPSR * _SY - _SP * _CY;
-	;zz = _SPSR * _SY + _CY * CP;
+	;zz = _SPSR * _SY + _CP * _CY;
 	;ww = 1.0;
 
 	movss xmm0, _CP
@@ -314,7 +313,6 @@ DefFunc _MatrixRotationEuler
 	mulss xmm5, _SP
 	mulss xmm6, xmm1
 	mulss xmm7, _CP
-	subss xmm2, _SR
 	addss xmm4, xmm5
 	subss xmm6, xmm7
 	movss _CPSR, xmm0
@@ -338,12 +336,10 @@ DefFunc _MatrixRotationEuler
 	mulss xmm4, _CY
 	mulss xmm5, _SY
 	mulss xmm6, _CP
-	subss xmm0, _SR
 	subss xmm3, xmm4
 	addss xmm5, xmm6
 	movss [eax + Matrix.yz], xmm0
 	movss [eax + Matrix.yx], xmm1
-	movss [eax + Matrix.yw], xmm1
 	movss [eax + Matrix.zx], xmm2
 	movss [eax + Matrix.zy], xmm3
 	movss [eax + Matrix.zz], xmm5
