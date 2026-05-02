@@ -322,15 +322,15 @@ DefFunc _MatrixRotationEuler
 	movss [eax + Matrix.xz], xmm6
 	movss [eax + Matrix.yy], xmm2
 
-	movss xmm0, _CR
-	movss xmm1, [_ZeroVector]
+	movss xmm0, [_ZeroVector]
+	movss xmm1, _CR
 	movss xmm2, _CR
 	movss xmm3, _CPSR
 	movss xmm4, _SP
 	movss xmm5, _SPSR
 	movss xmm6, _CY
-	mulss xmm0, _SP
-	subss xmm1, _SR
+	subss xmm0, _SR
+	mulss xmm1, _SP
 	mulss xmm2, _SY
 	mulss xmm3, _SY
 	mulss xmm4, _CY
@@ -338,8 +338,8 @@ DefFunc _MatrixRotationEuler
 	mulss xmm6, _CP
 	subss xmm3, xmm4
 	addss xmm5, xmm6
-	movss [eax + Matrix.yz], xmm0
-	movss [eax + Matrix.yx], xmm1
+	movss [eax + Matrix.yx], xmm0
+	movss [eax + Matrix.yz], xmm1
 	movss [eax + Matrix.zx], xmm2
 	movss [eax + Matrix.zy], xmm3
 	movss [eax + Matrix.zz], xmm5
