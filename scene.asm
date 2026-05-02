@@ -247,7 +247,7 @@ DefFunc _Scene
 
 	invoke_dll_stdcall GetForegroundWindow
 	cmp eax, [_hWnd]
-	jnz .not_front
+	jnz .after_check_input
 	invoke_dll_stdcall GetAsyncKeyState, 0x1B
 	test eax, eax
 	jnz .quit
@@ -285,7 +285,7 @@ DefFunc _Scene
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
-.not_front:
+.after_check_input:
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
