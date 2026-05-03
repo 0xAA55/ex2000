@@ -263,22 +263,20 @@ DefFunc _VectorMultMatrixTransposed
 	ret
 
 DefFunc _MatrixIdentity
-	FrameBegin 0, 0, edi
+	FrameBegin 0, 0
 
-	mov edi, Param(0)
+	mov edx, Param(0)
 	movaps xmm0, [_ZeroVector]
-	mov ecx, 4
-	xor eax, eax
-.fillzero:
-	movaps [edi + eax], xmm0
-	add al, 16
-	loop .fillzero
+	movaps [edx + Matrix.x], xmm0
+	movaps [edx + Matrix.y], xmm0
+	movaps [edx + Matrix.z], xmm0
+	movaps [edx + Matrix.w], xmm0
 
 	mov eax, 0x3F800000
-	mov [edi + Matrix.xx], eax
-	mov [edi + Matrix.yy], eax
-	mov [edi + Matrix.zz], eax
-	mov [edi + Matrix.ww], eax
+	mov [edx + Matrix.xx], eax
+	mov [edx + Matrix.yy], eax
+	mov [edx + Matrix.zz], eax
+	mov [edx + Matrix.ww], eax
 
 	FrameEnd
 	ret
