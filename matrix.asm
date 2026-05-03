@@ -329,7 +329,7 @@ DefFunc _MatrixRotationEuler
 	%undef _SPSR
 
 DefFunc _MatrixTransformPositionEuler
-	FrameBegin 0, 4, ebx
+	FrameBegin 0, 4
 
 	invoke_cdecl _MatrixRotationEuler, Param(0), Param(2), Param(3), Param(4)
 	mov eax, Param(0)
