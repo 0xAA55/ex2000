@@ -377,6 +377,19 @@ DefFunc _MatrixRotationEuler
 	%undef _CPSR
 	%undef _SPSR
 
+DefFunc _MatrixTransformPositionEuler
+	FrameBegin 0, 4, ebx
+
+	invoke_cdecl _MatrixRotationEuler, Param(0), Param(2), Param(3), Param(4)
+	mov eax, Param(0)
+	mov ecx, Param(1)
+	movaps xmm0, [ecx]
+	movaps [eax + Matrix.w], xmm0
+	mov dword [eax + Matrix.ww], 0x3F800000
+
+	FrameEnd
+	ret
+
 DefFunc _MatrixViewEuler
 	FrameBegin 10, 0
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, CYCP, SYSP, SYCP, CYSP
