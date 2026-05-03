@@ -74,6 +74,7 @@ static void VectorMultMatrix(Vector_p out, Vector_p v, Matrix_p m)
 	};
 }
 
+__attribute__((always_inline))
 static void MatrixMultMatrix(Matrix_p out, Matrix_p l, Matrix_p r)
 {
 	Vector_t ox, oy, oz, ow;
@@ -103,6 +104,7 @@ void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 	MatrixMultMatrix(&rpm, &rm, &pm);
 	MatrixMultMatrix(out, &ym, &rpm);
 }
+
 void MatrixViewEuler(Matrix_p out, Vector_p pos, float yaw, float pitch, float roll)
 {
 	Matrix_t ym, pm, rm, rpm;
