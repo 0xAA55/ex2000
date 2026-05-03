@@ -40,6 +40,7 @@ endstruc
 %ifndef MATRIX_ASM
 extern _ZeroVector
 extern _SeedVector
+extern _IdentityMatrix
 
 ; void _MathInit();
 extern _MathInit

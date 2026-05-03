@@ -29,6 +29,8 @@ global _Rand4AndVal
 _Rand4AndVal resd 4
 global _0101
 _0101 resd 4
+global _IdentityMatrix
+_IdentityMatrix resb Matrix.size
 
 segment .data
 global _addr_of_rand4int
@@ -47,6 +49,12 @@ _M1.0f dd 0xBF800000
 segment .text
 DefFunc _MathInit
 	FrameBegin 0, 0, ebx
+
+	mov eax, 0x3F800000
+	mov [_IdentityMatrix + Matrix.xx], eax
+	mov [_IdentityMatrix + Matrix.yy], eax
+	mov [_IdentityMatrix + Matrix.zz], eax
+	mov [_IdentityMatrix + Matrix.ww], eax
 
 	mov ecx, 4
 .init_rand:
