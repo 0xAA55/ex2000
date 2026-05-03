@@ -411,7 +411,7 @@ DefFunc _MatrixViewEuler
 	%define EYEY [edx + Vector.y]
 	%define EYEZ [edx + Vector.z]
 	%define CYCR [eax + Matrix.xx]
-	%define NSR [eax + Matrix.xy]
+	%define NSR  [eax + Matrix.xy]
 	%define SYCR [eax + Matrix.xz]
 	%define CPCR [eax + Matrix.yy]
 	%define SPCR [eax + Matrix.zy]
@@ -506,7 +506,6 @@ DefFunc _MatrixViewEuler
 	movss [eax + Matrix.zw], xmm6
 	mulss xmm0, [_M1.0f]
 	movss [eax + Matrix.xw], xmm0
-
 	mov dword [eax + Matrix.ww], 0x3F800000
 
 	FrameEnd
