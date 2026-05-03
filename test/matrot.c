@@ -10,6 +10,14 @@ typedef struct Matrix_s
 	Vector_t x, y, z, w;
 }Matrix_t, *Matrix_p;
 
+static float VectorDot3(Vector_p a, Vector_p b)
+{
+	return
+		a->x * b->x +
+		a->y * b->y +
+		a->z * b->z;
+}
+
 static void MatrixItentity(Matrix_p out)
 {
 	*out = (Matrix_t){
