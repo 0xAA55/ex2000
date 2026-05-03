@@ -44,7 +44,7 @@ extern _SeedVector
 ; void _MathInit();
 extern _MathInit
 
-; void (*rand4int)(Vector *out);
+; void (*rand4int)(Vector *out, size_t count);
 import_dll_func rand4int
 
 ; void VectorCross(Vector *out, Vector *v1, Vector *v2);

@@ -80,19 +80,29 @@ DefFunc _rand4int_sse2
 	FrameBegin 0, 0
 
 	mov eax, Param(0)
-	movaps xmm0, [_SeedVector]
-	movaps xmm1, [_SeedVector]
+	mov ecx, Param(1)
+	movaps xmm2, [_SeedVector]
+	movaps xmm3, [_Rand4MulVal]
+	movaps xmm4, [_0101]
+	movaps xmm5, [_Rand4AddVal]
+	movaps xmm6, [_Rand4AndVal]
+.nextrand:
+	movaps xmm0, xmm2
+	movaps xmm1, xmm2
 	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
-	pmuludq xmm0, [_Rand4MulVal]
-	pmuludq xmm1, [_Rand4MulVal]
-	pand xmm0, [_0101]
-	pand xmm1, [_0101]
+	pmuludq xmm0, xmm3
+	pmuludq xmm1, xmm3
+	pand xmm0, xmm4
+	pand xmm1, xmm4
 	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
 	paddd xmm0, xmm1
-	paddd xmm0, [_Rand4AddVal]
-	movaps [_SeedVector], xmm0
-	pand xmm0, [_Rand4AndVal]
+	paddd xmm0, xmm5
+	movaps xmm2, xmm0
+	pand xmm0, xmm6
 	movaps [eax], xmm0
+	add eax, 16
+	loop .nextrand
+	movaps [_SeedVector], xmm2
 
 	FrameEnd
 	ret
@@ -101,12 +111,21 @@ DefFunc _rand4int_sse41
 	FrameBegin 0, 0
 
 	mov eax, Param(0)
-	movaps xmm0, [_SeedVector]
-	pmulld xmm0, [_Rand4MulVal]
-	paddd xmm0, [_Rand4AddVal]
-	movaps [_SeedVector], xmm0
-	pand xmm0, [_Rand4AndVal]
+	mov ecx, Param(1)
+	movaps xmm2, [_SeedVector]
+	movaps xmm3, [_Rand4MulVal]
+	movaps xmm4, [_Rand4AddVal]
+	movaps xmm5, [_Rand4AndVal]
+.nextrand:
+	movaps xmm0, xmm2
+	pmulld xmm0, xmm3
+	paddd xmm0, xmm4
+	movaps xmm2, xmm0
+	pand xmm0, xmm5
 	movaps [eax], xmm0
+	add eax, 16
+	loop .nextrand
+	movaps [_SeedVector], xmm2
 
 	FrameEnd
 	ret
