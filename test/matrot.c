@@ -84,6 +84,16 @@ static void MatrixMultMatrix(Matrix_p out, Matrix_p l, Matrix_p r)
 	*out = (Matrix_t){ox, oy, oz, ow};
 }
 
+static void MatrixTranspose(Matrix_p out, Matrix_p m)
+{
+	*out = (Matrix_t){
+		{m->x.x, m->y.x, m->z.x, m->w.x},
+		{m->x.y, m->y.y, m->z.y, m->w.y},
+		{m->x.z, m->y.z, m->z.z, m->w.z},
+		{m->x.w, m->y.w, m->z.w, m->w.w},
+	};
+}
+
 void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 {
 	Matrix_t ym, pm, rm, rpm;
