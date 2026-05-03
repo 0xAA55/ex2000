@@ -36,13 +36,11 @@
 
 %ifdef Frame_UseEBP
 	%define AddrOfParam(x) (ebp + (x + 2) * 4)
-	%define AddrOfVariable(x) (ebp - (x) * 4)
-	%define AddrOfCallParam(x) (ebp - (Frame_NumSavedRegs + Frame_NumLocals + (x)) * 4)
 %else
 	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1) * 4)
-	%define AddrOfVariable(x) (esp + (Frame_NumReservedParams + (x)) * 4)
-	%define AddrOfCallParam(x) (esp + (x) * 4)
 %endif
+%define AddrOfVariable(x) (esp + (Frame_NumReservedParams + (x)) * 4)
+%define AddrOfCallParam(x) (esp + (x) * 4)
 %define Param(x) [AddrOfParam(x)]
 %define Variable(x) [AddrOfVariable(x)]
 %define CallParam(x) [AddrOfCallParam(x)]
