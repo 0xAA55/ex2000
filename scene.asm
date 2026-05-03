@@ -81,8 +81,9 @@ global _BoxIndicesBuffer
 _BoxIndicesBuffer resb GlBuffer.size
 
 segment .rdata
+align 16
 global _point_001
-_point_001 dd 0x3a83126f
+_point_001 dd 0x3a83126f, 0x3a83126f
 global _FovRatio
 _FovRatio dw 3
 
@@ -266,19 +267,16 @@ DefFunc _Scene
 	mov [_WindowCenter.x], eax
 	mov [_WindowCenter.y], edx
 
-	fild dword [_CursorPos.x]
-	fisub dword [_WindowCenter.x]
-	fmul dword [_point_001]
-	fchs
-	fadd dword [_CameraYaw]
-	fstp dword [_CameraYaw]
-
-	fild dword [_CursorPos.y]
-	fisub dword [_WindowCenter.y]
-	fmul dword [_point_001]
-	fchs
-	fadd dword [_CameraPitch]
-	fstp dword [_CameraPitch]
+	movq xmm0, [_CursorPos]
+	movq xmm1, [_WindowCenter]
+	movq xmm2, [_CameraYaw]
+	movq xmm3, [_point_001]
+	cvtdq2ps xmm0, xmm0
+	cvtdq2ps xmm1, xmm1
+	subps xmm0, xmm1
+	mulps xmm0, xmm3
+	subps xmm2, xmm0
+	movq [_CameraYaw], xmm2
 
 	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
 
