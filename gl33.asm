@@ -931,7 +931,7 @@ DefFunc _InitGL33
 	invoke_dll_stdcall MessageBoxA, [_hWnd], [_FailInfoBuffer], 0, 0
 
 	xor eax, eax
-	jmp _InitGL33_exit
+	jmp .exit
 .parse_version_non_es:
 	mov esi, [_OpenGL_Version]
 	xor eax, eax
@@ -987,7 +987,7 @@ DefFunc _InitGL33
 .end:
 	mov eax, 1
 
-_InitGL33_exit:
+.exit:
 	StoreVariable 0, eax
 	invoke_cdecl _free, [_OpenGLNullFunctions]
 	invoke_cdecl _free, [_FailInfoBuffer]
