@@ -59,12 +59,6 @@ extern _VectorNormal
 ; void VectorMultMatrix(Vector *out, Vector *v, Matrix *m);
 extern _VectorMultMatrix
 
-; void VectorMultMatrixTransposed(Vector *out, Vector *v, Matrix *m);
-extern _VectorMultMatrixTransposed
-
-; void MatrixIdentity(Matrix *out);
-extern _MatrixIdentity
-
 ; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
 
@@ -82,9 +76,6 @@ extern _MatrixTranspose
 
 ; void MatrixMultiply(Matrix *out, Matrix *l, Matrix *r);
 extern _MatrixMultiply
-
-; void MatrixMultiplyTransposed(Matrix *out, Matrix *l, Matrix *r);
-extern _MatrixMultiplyTransposed
 
 %endif
 

@@ -226,61 +226,6 @@ DefFunc _VectorMultMatrix
 	FrameEnd
 	ret
 
-DefFunc _VectorMultMatrixTransposed
-	FrameBegin 0x14, 2, esi
-
-	lea esi, Variable(4)
-	and esi, 0xFFFFFFF0
-
-	mov eax, Param(2)
-	mov ecx, Param(1)
-
-	movaps xmm1, [ecx]
-	mulps xmm1, [eax + Matrix.x]
-	movaps [esi + Matrix.x], xmm1
-	movaps xmm1, [ecx]
-	mulps xmm1, [eax + Matrix.y]
-	movaps [esi + Matrix.y], xmm1
-	movaps xmm1, [ecx]
-	mulps xmm1, [eax + Matrix.z]
-	movaps [esi + Matrix.z], xmm1
-	movaps xmm1, [ecx]
-	mulps xmm1, [eax + Matrix.w]
-	movaps [esi + Matrix.w], xmm1
-
-	invoke_cdecl _MatrixTranspose, esi, esi
-
-	movaps xmm0, [esi + Matrix.x]
-	movaps xmm1, [esi + Matrix.y]
-	addps xmm0, [esi + Matrix.z]
-	addps xmm1, [esi + Matrix.w]
-	addps xmm0, xmm1
-
-	mov eax, Param(0)
-	movaps [eax], xmm0
-
-	FrameEnd
-	ret
-
-DefFunc _MatrixIdentity
-	FrameBegin 0, 0
-
-	mov edx, Param(0)
-	movaps xmm0, [_ZeroVector]
-	movaps [edx + Matrix.x], xmm0
-	movaps [edx + Matrix.y], xmm0
-	movaps [edx + Matrix.z], xmm0
-	movaps [edx + Matrix.w], xmm0
-
-	mov eax, 0x3F800000
-	mov [edx + Matrix.xx], eax
-	mov [edx + Matrix.yy], eax
-	mov [edx + Matrix.zz], eax
-	mov [edx + Matrix.ww], eax
-
-	FrameEnd
-	ret
-
 ; void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 DefFunc _MatrixRotationEuler
 	FrameBegin 8, 0
@@ -608,20 +553,6 @@ DefFunc _MatrixMultiply
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.y], &[esi + Matrix.y], Param(2)
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.z], &[esi + Matrix.z], Param(2)
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.w], &[esi + Matrix.w], Param(2)
-
-	FrameEnd
-	ret
-
-DefFunc _MatrixMultiplyTransposed
-	FrameBegin 0, 3, esi, edi
-
-	mov esi, Param(1)
-	mov edi, Param(0)
-
-	invoke_cdecl _VectorMultMatrixTransposed, &[edi + Matrix.x], &[esi + Matrix.x], Param(2)
-	invoke_cdecl _VectorMultMatrixTransposed, &[edi + Matrix.y], &[esi + Matrix.y], Param(2)
-	invoke_cdecl _VectorMultMatrixTransposed, &[edi + Matrix.z], &[esi + Matrix.z], Param(2)
-	invoke_cdecl _VectorMultMatrixTransposed, &[edi + Matrix.w], &[esi + Matrix.w], Param(2)
 
 	FrameEnd
 	ret
