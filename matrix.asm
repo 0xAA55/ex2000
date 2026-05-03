@@ -31,16 +31,15 @@ global _0101
 _0101 resd 4
 global _IdentityMatrix
 _IdentityMatrix resb Matrix.size
-
-segment .data
-global _addr_of_rand4int
-_addr_of_rand4int dd _rand4int_sse2
-align 16
 global _SeedVector
-_SeedVector dd SEED_OF_RAND(1), SEED_OF_RAND(0xAA55), SEED_OF_RAND(0x11037), SEED_OF_RAND(0x269EC3)
+_SeedVector resd 4
+global _addr_of_rand4int
+_addr_of_rand4int resd 1
 
 segment .rdata
 align 16
+global _InitSeedVector
+_InitSeedVector dd SEED_OF_RAND(1), SEED_OF_RAND(0xAA55), SEED_OF_RAND(0x11037), SEED_OF_RAND(0x269EC3)
 global _2.0f
 _2.0f dd 0x40000000
 global _M1.0f
@@ -51,12 +50,15 @@ DefFunc _MathInit
 	FrameBegin 0, 0, ebx
 
 	mov eax, 0x3F800000
+	mov ecx, 4
+	movaps xmm0, [_InitSeedVector]
 	mov [_IdentityMatrix + Matrix.xx], eax
 	mov [_IdentityMatrix + Matrix.yy], eax
 	mov [_IdentityMatrix + Matrix.zz], eax
 	mov [_IdentityMatrix + Matrix.ww], eax
+	movaps [_SeedVector], xmm0
 
-	mov ecx, 4
+	mov dword [_addr_of_rand4int], _rand4int_sse2
 .init_rand:
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
