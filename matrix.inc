@@ -68,8 +68,8 @@ extern _MatrixIdentity
 ; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
 
-; void MatrixLookAt(Matrix *out, Vector *eye, Vector *dir, Vector *up);
-extern _MatrixLookAt
+; void MatrixViewEuler(Matrix *out, Vector *eye, float yaw, float pitch, float roll);
+extern _MatrixViewEuler
 
 ; void MatrixProjection(Matrix *out, float fovy, float aspect, float zn, float zf);
 extern _MatrixProjection
