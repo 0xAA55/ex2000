@@ -65,6 +65,7 @@ def_dll_func ExitProcess
 def_dll_func QueryPerformanceFrequency
 def_dll_func QueryPerformanceCounter
 def_dll_func Sleep
+def_dll_func GetTickCount
 def_dll_func GetProcessHeap
 def_dll_func HeapAlloc
 def_dll_func HeapReAlloc
@@ -109,6 +110,7 @@ def_dll_func memmove
 def_dll_func cos
 def_dll_func sin
 def_dll_func rand
+def_dll_func srand
 dll_func_group_end CFunc
 
 segment .bss
