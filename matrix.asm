@@ -664,3 +664,22 @@ DefFunc _GenPerlinMap2D
 	FrameEnd
 	ret
 
+DefFunc _GetXYFloatMap
+	FrameBegin 0, 0, ebx
+
+	mov ebx, Param(2)
+	mov ecx, [ebx + FloatMap.size]
+	dec ecx
+	mov eax, Param(1)
+	mov edx, Param(0)
+	and eax, ecx
+	and edx, ecx
+	mul dword [ebx + FloatMap.size]
+	add eax, edx
+	lea eax, [eax * 4]
+	mul dword Param(3)
+	add eax, [ebx + FloatMap.data]
+
+	FrameEnd
+	ret
+

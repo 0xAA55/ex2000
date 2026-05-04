@@ -92,6 +92,9 @@ extern _SmootherStep
 ; void GenPerlinMap2D(FloatMap *out, int size_bits);
 extern _GenPerlinMap2D
 
+; float* GetXYFloatMap(int x, int y, FloatMap *map, int dims);
+extern _GetXYFloatMap
+
 %endif
 
 
