@@ -5,6 +5,8 @@
 
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
+extern _malloc
+extern _free
 extern _aligned_malloc
 extern _aligned_free
 
@@ -683,3 +685,198 @@ DefFunc _GetXYFloatMap
 	FrameEnd
 	ret
 
+DefFunc _ConvertPerlinMapToAltitude
+	FrameBegin 16, 4, ebx, esi, edi
+	AssignVars _RATIO, _STEPS, _X, _Y, _BX, _BY, _IX, _IY, _P00, _P10, _P01, _P11, _DOT00, _DOT01, _DOT10, _DOT11
+
+	xor eax, eax
+	mov edx, eax
+	mov esi, Param(2)
+	mov edi, Param(0)
+	mov ecx, Param(1)
+	inc eax
+	add ecx, [esi + FloatMap.size_bits]
+	mov [edi + FloatMap.size_bits], ecx
+	shl eax, ecx
+	mov [edi + FloatMap.size], eax
+	div [esi + FloatMap.size]
+	mov _RATIO, eax
+	invoke_cdecl _malloc, &[eax * 4]
+	mov _STEPS, eax
+	mov ebx, eax
+	test eax, eax
+	jz .fail
+	xor eax, eax
+	mov _X, eax
+.get_steps:
+	fild dword _X
+	fidiv dword _RATIO
+	fstp CallParam(0)
+	call _SmootherStep
+	fstp dword [ebx]
+	add ebx, 4
+	mov eax, _X
+	inc eax
+	mov _X, eax
+	cmp eax, _RATIO
+	jb .get_steps
+	mov eax, [edi + FloatMap.size]
+	mul eax
+	invoke_cdecl _aligned_malloc, &[eax * 4], 0x10
+	mov [edi + FloatMap.data], eax
+	test eax, eax
+	jnz .success
+.fail:
+	int3
+	jmp .fail
+.success:
+	xor eax, eax
+	mov _Y, eax
+.loopy:
+	mov eax, _Y
+	mul eax, _RATIO
+	mov _BY, eax
+	xor eax, eax
+	mov _X, eax
+.loopx:
+	mov eax, _X
+	mul eax, _RATIO
+	mov _BX, eax
+	invoke_cdecl _GetXYFloatMap, _X, _Y, esi, 2
+	mov _P00, eax
+	mov eax, _X
+	inc eax
+	invoke_cdecl _GetXYFloatMap, eax, _Y, esi, 2
+	mov _P10, eax
+	mov eax, _Y
+	inc eax
+	invoke_cdecl _GetXYFloatMap, _X, eax, esi, 2
+	mov _P01, eax
+	mov eax, _X
+	mov ecx, _Y
+	inc eax
+	inc ecx
+	invoke_cdecl _GetXYFloatMap, eax, ecx, esi, 2
+	mov _P11, eax
+	xor eax, eax
+	mov _IY, eax
+.iloopy:
+	xor eax, eax
+	mov _IX, eax
+.iloopx:
+	mov eax, _P00
+	fild dword _IX
+	fidiv dword _RATIO
+	fmul dword [eax]
+	fild dword _IY
+	fidiv dword _RATIO
+	fmul dword [eax + 4]
+	fadd
+	fstp dword _DOT00
+
+	mov eax, _P01
+	fild dword _RATIO
+	fild dword _IX
+	fidiv dword _RATIO
+	fmul dword [eax]
+	fild dword _IY
+	fidiv dword _RATIO
+	fmul dword [eax + 4]
+	fadd
+	fstp dword _DOT01
+
+	mov eax, _P10
+	fild dword _IX
+	fidiv dword _RATIO
+	fmul dword [eax]
+	fild dword _RATIO
+	fisub dword _IY
+	fidiv dword _RATIO
+	fmul dword [eax + 4]
+	fadd
+	fstp dword _DOT10
+
+	mov eax, _P11
+	fild dword _RATIO
+	fisub dword _IX
+	fidiv dword _RATIO
+	fmul dword [eax]
+	fild dword _RATIO
+	fisub dword _IY
+	fidiv dword _RATIO
+	fmul dword [eax + 4]
+	fadd
+	fstp dword _DOT11
+
+	mov eax, _IX
+	mov ecx, _IY
+	lea eax, [eax * 4]
+	lea ecx, [ecx * 4]
+	add eax, _STEPS
+	add ecx, _STEPS
+
+	movss xmm0, _DOT10
+	movss xmm1, _DOT11
+	subss xmm0, _DOT00
+	subss xmm1, _DOT01
+	mulss xmm0, [eax]
+	mulss xmm1, [eax]
+	addss xmm0, _DOT00
+	addss xmm1, _DOT01
+	subss xmm1, xmm0
+	mulss xmm1, [ecx]
+	addss xmm1, xmm0
+	movss _DOT00, xmm1
+
+	mov eax, _BX
+	mov ecx, _BY
+	add eax, _IX
+	add ecx, _IY
+	invoke_cdecl _GetXYFloatMap, eax, ecx, edi, 1
+	mov edx, _DOT00
+	mov [eax], edx
+
+	mov eax, _IX
+	inc eax
+	mov _IX, eax
+	cmp eax, _RATIO
+	jb .iloopx
+
+	mov eax, _IY
+	inc eax
+	mov _IY, eax
+	cmp eax, _RATIO
+	jb .iloopy
+
+	mov eax, _X
+	inc eax
+	mov _X, eax
+	cmp eax, [esi + FloatMap.size]
+	jb .loopx
+
+	mov eax, _Y
+	inc eax
+	mov _Y, eax
+	cmp eax, [esi + FloatMap.size]
+	jb .loopy
+
+	invoke_cdecl _free, _STEPS
+
+	FrameEnd
+	ret
+	%undef _RATIO
+	%undef _X
+	%undef _Y
+	%undef _IX
+	%undef _IY
+	%undef _P00
+	%undef _P10
+	%undef _P01
+	%undef _P11
+	%undef _DOT00
+	%undef _DOT01
+	%undef _DOT10
+	%undef _DOT11
+	%undef _STEPS
+	%undef _Mix0
+	%undef _Mix1
