@@ -27,12 +27,14 @@ global _Rand4AddVal
 _Rand4AddVal resd 4
 global _Rand4AndVal
 _Rand4AndVal resd 4
+global _F1111
+_F1111 resd 4
 global _0101
 _0101 resd 4
-global _IdentityMatrix
-_IdentityMatrix resb Matrix.size
 global _SeedVector
 _SeedVector resd 4
+global _IdentityMatrix
+_IdentityMatrix resb Matrix.size
 global _addr_of_rand4int
 _addr_of_rand4int resd 1
 
@@ -52,18 +54,19 @@ DefFunc _MathInit
 	mov eax, 0x3F800000
 	mov ecx, 4
 	movaps xmm0, [_InitSeedVector]
-	mov [_IdentityMatrix + Matrix.xx], eax
-	mov [_IdentityMatrix + Matrix.yy], eax
-	mov [_IdentityMatrix + Matrix.zz], eax
-	mov [_IdentityMatrix + Matrix.ww], eax
 	movaps [_SeedVector], xmm0
 
+	mov ecx, 4
+	xor edx, edx
 	mov dword [_addr_of_rand4int], _rand4int_sse2
-.init_rand:
+.init_math:
+	mov [_IdentityMatrix + edx], eax
+	mov [_F1111 + (ecx - 1) * 4], eax
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
 	mov dword [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
-	loop .init_rand
+	add edx, 20
+	loop .init_math
 	dec ecx
 	mov [_0101], ecx
 	mov [_0101 + 8], ecx

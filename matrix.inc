@@ -38,6 +38,7 @@ endstruc
 
 
 %ifndef MATRIX_ASM
+extern _F1111
 extern _ZeroVector
 extern _SeedVector
 extern _IdentityMatrix
