@@ -617,7 +617,7 @@ DefFunc _GenPerlinMap2D
 	invoke_cdecl _aligned_malloc, &[eax * 8], 0x10
 	mov [ebx + FloatMap.data], eax
 	test eax, eax
-	jnz .success
+	jz .end
 .fail:
 	int3
 	jmp .fail
@@ -661,6 +661,7 @@ DefFunc _GenPerlinMap2D
 	loop .generate
 
 .end:
+	mov eax, [ebx + FloatMap.data]
 	FrameEnd
 	ret
 
@@ -702,7 +703,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov _STEPS, eax
 	mov ebx, eax
 	test eax, eax
-	jz .fail
+	jz .end
 	xor eax, eax
 	mov _X, eax
 	fld1
@@ -728,11 +729,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	invoke_cdecl _aligned_malloc, &[eax * 4], 0x10
 	mov [edi + FloatMap.data], eax
 	test eax, eax
-	jnz .success
-.fail:
-	int3
-	jmp .fail
-.success:
+	jz .end
 	xor eax, eax
 	mov _Y, eax
 .loopy:
@@ -861,8 +858,10 @@ DefFunc _ConvertPerlinMapToAltitude
 	cmp eax, [esi + FloatMap.border_len]
 	jb .loopy
 
-	invoke_cdecl _free, _STEPS
 
+.end:
+	invoke_cdecl _free, _STEPS
+	mov eax, [edi + FloatMap.data]
 	FrameEnd
 	ret
 	%undef _STEPS
