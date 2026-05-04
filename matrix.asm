@@ -34,6 +34,10 @@ global _F1111
 _F1111 resd 4
 global _0101
 _0101 resd 4
+global _Scale127_5
+_Scale127_5 resd 4
+global _BMxmm
+_BMxmm resd 4
 global _SeedVector
 _SeedVector resd 4
 global _IdentityMatrix
@@ -71,9 +75,11 @@ DefFunc _MathInit
 .init_math:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
+	mov dword [_Scale127_5 + (ecx - 1) * 4], 0x42FF0000
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
 	mov dword [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
+	mov byte [_BMxmm + (ecx - 1) * 4], 0xFF
 	add edx, 20
 	loop .init_math
 	dec ecx
@@ -912,5 +918,41 @@ DefFunc _GenPerlinAltitude
 	xor eax, eax
 
 .end:
+	FrameEnd
+	ret
+
+DefFunc _FloatsToRGBA
+	FrameBegin 0, 0
+
+	mov eax, Param(0)
+	mov ecx, Param(1)
+	movaps xmm5, [_F1111]
+	movaps xmm6, [_Scale127_5]
+	movdqa xmm7, [_BMxmm]
+.process:
+	movaps xmm0, [eax]
+	addps xmm0, xmm5
+	mulps xmm0, xmm6
+	cvtps2dq xmm0, xmm0
+	packssdw xmm0, xmm0
+	packuswb xmm0, xmm0
+	pxor xmm1, xmm1
+	punpcklbw xmm0, xmm1
+	punpcklwd xmm0, xmm1
+	pshufd xmm1, xmm0, 0x00
+	pshufd xmm2, xmm0, 0x55
+	pshufd xmm3, xmm0, 0xAA
+	pshufd xmm4, xmm0, 0xFF
+	pslldq xmm2, 4
+	pslldq xmm3, 8
+	pslldq xmm4, 12
+	por xmm1, xmm2
+	por xmm1, xmm3
+	por xmm1, xmm4
+
+	movdqu [eax], xmm1
+	add eax, 0x10
+	loop .process
+
 	FrameEnd
 	ret
