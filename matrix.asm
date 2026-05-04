@@ -613,16 +613,16 @@ DefFunc _GenPerlinMap2D
 	mov [ebx + FloatMap.border_len], eax
 	mul eax
 	cmp eax, 4
-	jb .fail
+	jae .success
+.fail:
+	int3
+	jmp .fail
+.success:
 	mov Variable(0), eax
 	invoke_cdecl _aligned_malloc, &[eax * 8], 0x10
 	mov [ebx + FloatMap.data], eax
 	test eax, eax
 	jz .end
-.fail:
-	int3
-	jmp .fail
-.success:
 	mov ecx, Variable(0)
 	shr ecx, 1
 	movaps xmm2, [_F1111]
