@@ -86,6 +86,9 @@ extern _MatrixMultiply
 ; void CleanupFloatMap(FloatMap *map);
 extern _CleanupFloatMap
 
+; float SmootherStep(float x);
+extern _SmootherStep
+
 %endif
 
 

@@ -46,6 +46,12 @@ global _2.0f
 _2.0f dd 0x40000000
 global _M1.0f
 _M1.0f dd 0xBF800000
+global _W6
+_W6 dw 6
+global _W10
+_W10 dw 10
+global _W15
+_W15 dw 15
 
 segment .text
 DefFunc _MathInit
@@ -577,6 +583,21 @@ DefFunc _CleanupFloatMap
 	invoke_cdecl _aligned_free, [ebx + FloatMap.data]
 	xor eax, eax
 	mov [ebx + FloatMap.data], eax
+
+	FrameEnd
+	ret
+
+DefFunc _SmootherStep
+	FrameBegin 0, 0
+
+	fld dword Param(0)
+	fimul word [_W6]
+	fisub word [_W15]
+	fmul dword Param(0)
+	fiadd word [_W10]
+	fmul dword Param(0)
+	fmul dword Param(0)
+	fmul dword Param(0)
 
 	FrameEnd
 	ret
