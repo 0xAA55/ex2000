@@ -766,8 +766,8 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov _IX, eax
 .iloopx:
 	movq xmm0, _IX
-	cvtdq2ps xmm0
-	movq _IX, xmm0
+	cvtdq2ps xmm0, xmm0
+	movq _FIX, xmm0
 
 	mov eax, _P00
 	mov ecx, _P01
