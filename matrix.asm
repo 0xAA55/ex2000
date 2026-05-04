@@ -6,6 +6,7 @@
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 extern _malloc
+extern _calloc
 extern _free
 extern _aligned_malloc
 extern _aligned_free
@@ -883,3 +884,33 @@ DefFunc _ConvertPerlinMapToAltitude
 	%undef _DOT01
 	%undef _DOT10
 	%undef _DOT11
+
+DefFunc _GenPerlinAltitude
+	FrameBegin 1, 4
+
+	invoke_cdecl _calloc, FloatMap.size, 1
+	mov Variable(0), eax
+	test eax, eax
+	jz .fail
+	invoke_cdecl _GenPerlinMap2D, Variable(0), Param(1)
+	test eax, eax
+	jz .fail
+	invoke_cdecl _ConvertPerlinMapToAltitude, Param(0), Param(2), Variable(0)
+	test eax, eax
+	jz .fail
+
+	invoke_cdecl _CleanupFloatMap, Variable(0)
+	invoke_cdecl _free, Variable(0)
+	jmp .end
+.fail:
+	mov eax, Variable(0)
+	test eax, eax
+	jz .free_1
+	invoke_cdecl _CleanupFloatMap, eax
+	invoke_cdecl _free, Variable(0)
+.free_1:
+	xor eax, eax
+
+.end:
+	FrameEnd
+	ret
