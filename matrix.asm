@@ -687,8 +687,8 @@ DefFunc _GetXYFloatMap
 	ret
 
 DefFunc _ConvertPerlinMapToAltitude
-	FrameBegin 15, 4, ebx, esi, edi
-	AssignVars _STEPS, _X, _Y, _BX, _BY, _IX, _IY, _P00, _P10, _P01, _P11, _DOT00, _DOT01, _DOT10, _DOT11
+	FrameBegin 19, 4, ebx, esi, edi
+	AssignVars _STEPS, _RECIPROCAL, _1PRECIPROCAL, _X, _Y, _BX, _BY, _IX, _IY, _FIX, _FIY, _P00, _P10, _P01, _P11, _DOT00, _DOT01, _DOT10, _DOT11
 
 	xor eax, eax
 	mov edx, eax
@@ -705,9 +705,15 @@ DefFunc _ConvertPerlinMapToAltitude
 	jz .fail
 	xor eax, eax
 	mov _X, eax
+	fld1
+	fidiv dword Param(1)
+	fstp dword _RECIPROCAL
+	fld1
+	fsub dword _RECIPROCAL
+	fstp _1PRECIPROCAL
 .get_steps:
 	fild dword _X
-	fidiv dword Param(1)
+	fmul dword _RECIPROCAL
 	fstp CallParam(0)
 	call _SmootherStep
 	fstp dword [ebx]
@@ -761,49 +767,47 @@ DefFunc _ConvertPerlinMapToAltitude
 	xor eax, eax
 	mov _IX, eax
 .iloopx:
+	movq xmm0, _IX
+	cvtdq2ps xmm0
+	movq _IX, xmm0
+
 	mov eax, _P00
-	fild dword _IX
-	fidiv dword Param(1)
-	fmul dword [eax]
-	fild dword _IY
-	fidiv dword Param(1)
-	fmul dword [eax + 4]
-	fadd
-	fstp dword _DOT00
+	mov ecx, _P01
+	mov edx, _P10
+	mov ebx, _P11
 
-	mov eax, _P01
-	fild dword Param(1)
-	fild dword _IX
-	fidiv dword Param(1)
-	fmul dword [eax]
-	fild dword _IY
-	fidiv dword Param(1)
-	fmul dword [eax + 4]
-	fadd
-	fstp dword _DOT01
-
-	mov eax, _P10
-	fild dword _IX
-	fidiv dword Param(1)
-	fmul dword [eax]
-	fild dword Param(1)
-	fisub dword _IY
-	fidiv dword Param(1)
-	fmul dword [eax + 4]
-	fadd
-	fstp dword _DOT10
-
-	mov eax, _P11
-	fild dword Param(1)
-	fisub dword _IX
-	fidiv dword Param(1)
-	fmul dword [eax]
-	fild dword Param(1)
-	fisub dword _IY
-	fidiv dword Param(1)
-	fmul dword [eax + 4]
-	fadd
-	fstp dword _DOT11
+	movss xmm0, _FIX
+	movss xmm1, _FIY
+	movss xmm2, _FIX
+	movss xmm3, _FIY
+	movss xmm4, _FIX
+	movss xmm5, _FIY
+	movss xmm6, _FIX
+	movss xmm7, _FIY
+	mulss xmm0, _RECIPROCAL
+	mulss xmm1, _RECIPROCAL
+	mulss xmm2, _1PRECIPROCAL
+	mulss xmm3, _RECIPROCAL
+	mulss xmm4, _RECIPROCAL
+	mulss xmm5, _1PRECIPROCAL
+	mulss xmm6, _1PRECIPROCAL
+	mulss xmm7, _1PRECIPROCAL
+	mulss xmm0, [eax]
+	mulss xmm1, [eax + 4]
+	mulss xmm2, [ecx]
+	mulss xmm3, [ecx + 4]
+	mulss xmm4, [edx]
+	mulss xmm5, [edx + 4]
+	mulss xmm6, [ebx]
+	mulss xmm7, [ebx + 4]
+	addss xmm0, xmm1
+	addss xmm2, xmm3
+	addss xmm4, xmm5
+	addss xmm6, xmm7
+	movss _DOT00, xmm0
+	movss _DOT01, xmm2
+	movss _DOT10, xmm4
+	movss _DOT11, xmm6
 
 	mov eax, _IX
 	mov ecx, _IY
@@ -862,12 +866,16 @@ DefFunc _ConvertPerlinMapToAltitude
 	FrameEnd
 	ret
 	%undef _STEPS
+	%undef _RECIPROCAL
+	%undef _1PRECIPROCAL
 	%undef _X
 	%undef _Y
 	%undef _BX
 	%undef _BY
 	%undef _IX
 	%undef _IY
+	%undef _FIX
+	%undef _FIY
 	%undef _P00
 	%undef _P10
 	%undef _P01
@@ -876,5 +884,3 @@ DefFunc _ConvertPerlinMapToAltitude
 	%undef _DOT01
 	%undef _DOT10
 	%undef _DOT11
-	%undef _Mix0
-	%undef _Mix1
