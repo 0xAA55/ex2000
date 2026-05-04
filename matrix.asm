@@ -569,3 +569,15 @@ DefFunc _MatrixMultiply
 
 	FrameEnd
 	ret
+
+DefFunc _CleanupFloatMap
+	FrameBegin 0, 1, ebx
+
+	mov ebx, Param(0)
+	invoke_cdecl _aligned_free, [ebx + FloatMap.data]
+	xor eax, eax
+	mov [ebx + FloatMap.data], eax
+
+	FrameEnd
+	ret
+

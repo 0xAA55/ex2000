@@ -35,7 +35,11 @@ struc Matrix
 	.size equ $ - .x
 endstruc
 
-
+struc FloatMap
+.data resd 1
+.size resd 1
+.size_bits resb 1
+endstruc
 
 %ifndef MATRIX_ASM
 extern _F1111
@@ -78,6 +82,9 @@ extern _MatrixTranspose
 
 ; void MatrixMultiply(Matrix *out, Matrix *l, Matrix *r);
 extern _MatrixMultiply
+
+; void CleanupFloatMap(FloatMap *map);
+extern _CleanupFloatMap
 
 %endif
 
