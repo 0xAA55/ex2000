@@ -89,6 +89,9 @@ extern _CleanupFloatMap
 ; float SmootherStep(float x);
 extern _SmootherStep
 
+; void GenPerlinMap2D(FloatMap *out, int size_bits);
+extern _GenPerlinMap2D
+
 %endif
 
 

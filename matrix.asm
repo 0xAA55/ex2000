@@ -602,3 +602,65 @@ DefFunc _SmootherStep
 	FrameEnd
 	ret
 
+DefFunc _GenPerlinMap2D
+	FrameBegin 1, 2, ebx
+
+	mov ebx, Param(0)
+	mov ecx, Param(1)
+	mov [ebx + FloatMap.size_bits], ecx
+	xor eax, eax
+	inc eax
+	shl eax, ecx
+	mov [ebx + FloatMap.size], eax
+	mul eax
+	mov Variable(0), eax
+	invoke_cdecl _aligned_malloc, &[eax * 8], 0x10
+	mov [ebx + FloatMap.data], eax
+	test eax, eax
+	jnz .success
+.fail:
+	int3
+	jmp .fail
+.success:
+	mov ecx, Variable(0)
+	shr ecx, 1
+	movaps xmm2, [_F1111]
+	movaps xmm3, [_SeedVector]
+	movaps xmm4, [_Rand4MulVal]
+	movaps xmm5, [_0101]
+	movaps xmm6, [_Rand4AddVal]
+	movaps xmm7, [_Rand4AndVal]
+.generate:
+	movaps xmm0, xmm3
+	pmuludq xmm0, xmm4
+	pand xmm0, xmm5
+	paddd xmm0, xmm6
+	movaps xmm3, xmm0
+	pand xmm0, xmm7
+	paddd xmm0, xmm0
+	cvtdq2ps xmm0, xmm0
+	cvtdq2ps xmm1, xmm7
+	divps xmm0, xmm1
+	subps xmm0, xmm2
+	movaps [eax], xmm0
+
+	fld dword [eax]
+	fldpi
+	fmul
+	fsincos
+	fstp dword [eax]
+	fstp dword [eax + 4]
+	fld dword [eax + 8]
+	fldpi
+	fmul
+	fsincos
+	fstp dword [eax + 8]
+	fstp dword [eax + 12]
+
+	add eax, 0x10
+	loop .generate
+
+.end:
+	FrameEnd
+	ret
+
