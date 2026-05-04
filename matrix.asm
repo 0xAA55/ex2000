@@ -608,13 +608,11 @@ DefFunc _GenPerlinMap2D
 	FrameBegin 1, 2, ebx
 
 	mov ebx, Param(0)
-	mov ecx, Param(1)
-	mov [ebx + FloatMap.size_bits], ecx
-	xor eax, eax
-	inc eax
-	shl eax, ecx
+	mov eax, Param(1)
 	mov [ebx + FloatMap.size], eax
 	mul eax
+	cmp eax, 4
+	jb .fail
 	mov Variable(0), eax
 	invoke_cdecl _aligned_malloc, &[eax * 8], 0x10
 	mov [ebx + FloatMap.data], eax
@@ -669,15 +667,18 @@ DefFunc _GenPerlinMap2D
 DefFunc _GetXYFloatMap
 	FrameBegin 0, 0, ebx
 
+	xor edx, edx
 	mov ebx, Param(2)
-	mov ecx, [ebx + FloatMap.size]
-	dec ecx
 	mov eax, Param(1)
-	mov edx, Param(0)
-	and eax, ecx
-	and edx, ecx
+	div dword [ebx + FloatMap.size]
+	mov Param(1), edx
+	xor edx, edx
+	mov eax, Param(0)
+	div dword [ebx + FloatMap.size]
+	mov Param(0), edx
+	mov eax, Param(1)
 	mul dword [ebx + FloatMap.size]
-	add eax, edx
+	add eax, Param(0)
 	lea eax, [eax * 4]
 	mul dword Param(3)
 	add eax, [ebx + FloatMap.data]
@@ -686,21 +687,17 @@ DefFunc _GetXYFloatMap
 	ret
 
 DefFunc _ConvertPerlinMapToAltitude
-	FrameBegin 16, 4, ebx, esi, edi
-	AssignVars _RATIO, _STEPS, _X, _Y, _BX, _BY, _IX, _IY, _P00, _P10, _P01, _P11, _DOT00, _DOT01, _DOT10, _DOT11
+	FrameBegin 15, 4, ebx, esi, edi
+	AssignVars _STEPS, _X, _Y, _BX, _BY, _IX, _IY, _P00, _P10, _P01, _P11, _DOT00, _DOT01, _DOT10, _DOT11
 
 	xor eax, eax
 	mov edx, eax
 	mov esi, Param(2)
 	mov edi, Param(0)
-	mov ecx, Param(1)
-	inc eax
-	add ecx, [esi + FloatMap.size_bits]
-	mov [edi + FloatMap.size_bits], ecx
-	shl eax, ecx
+	mov eax, Param(1)
+	mul eax, [esi + FloatMap.size]
 	mov [edi + FloatMap.size], eax
-	div [esi + FloatMap.size]
-	mov _RATIO, eax
+	mov eax, Param(1)
 	invoke_cdecl _malloc, &[eax * 4]
 	mov _STEPS, eax
 	mov ebx, eax
@@ -710,7 +707,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov _X, eax
 .get_steps:
 	fild dword _X
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fstp CallParam(0)
 	call _SmootherStep
 	fstp dword [ebx]
@@ -718,7 +715,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	cmp eax, _RATIO
+	cmp eax, Param(1)
 	jb .get_steps
 	mov eax, [edi + FloatMap.size]
 	mul eax
@@ -734,13 +731,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov _Y, eax
 .loopy:
 	mov eax, _Y
-	mul eax, _RATIO
+	mul eax, Param(1)
 	mov _BY, eax
 	xor eax, eax
 	mov _X, eax
 .loopx:
 	mov eax, _X
-	mul eax, _RATIO
+	mul eax, Param(1)
 	mov _BX, eax
 	invoke_cdecl _GetXYFloatMap, _X, _Y, esi, 2
 	mov _P00, eax
@@ -766,44 +763,44 @@ DefFunc _ConvertPerlinMapToAltitude
 .iloopx:
 	mov eax, _P00
 	fild dword _IX
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax]
 	fild dword _IY
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax + 4]
 	fadd
 	fstp dword _DOT00
 
 	mov eax, _P01
-	fild dword _RATIO
+	fild dword Param(1)
 	fild dword _IX
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax]
 	fild dword _IY
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax + 4]
 	fadd
 	fstp dword _DOT01
 
 	mov eax, _P10
 	fild dword _IX
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax]
-	fild dword _RATIO
+	fild dword Param(1)
 	fisub dword _IY
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax + 4]
 	fadd
 	fstp dword _DOT10
 
 	mov eax, _P11
-	fild dword _RATIO
+	fild dword Param(1)
 	fisub dword _IX
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax]
-	fild dword _RATIO
+	fild dword Param(1)
 	fisub dword _IY
-	fidiv dword _RATIO
+	fidiv dword Param(1)
 	fmul dword [eax + 4]
 	fadd
 	fstp dword _DOT11
@@ -839,13 +836,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _IX
 	inc eax
 	mov _IX, eax
-	cmp eax, _RATIO
+	cmp eax, Param(1)
 	jb .iloopx
 
 	mov eax, _IY
 	inc eax
 	mov _IY, eax
-	cmp eax, _RATIO
+	cmp eax, Param(1)
 	jb .iloopy
 
 	mov eax, _X
@@ -864,9 +861,11 @@ DefFunc _ConvertPerlinMapToAltitude
 
 	FrameEnd
 	ret
-	%undef _RATIO
+	%undef _STEPS
 	%undef _X
 	%undef _Y
+	%undef _BX
+	%undef _BY
 	%undef _IX
 	%undef _IY
 	%undef _P00
@@ -877,6 +876,5 @@ DefFunc _ConvertPerlinMapToAltitude
 	%undef _DOT01
 	%undef _DOT10
 	%undef _DOT11
-	%undef _STEPS
 	%undef _Mix0
 	%undef _Mix1

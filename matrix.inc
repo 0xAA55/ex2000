@@ -38,7 +38,6 @@ endstruc
 struc FloatMap
 .data resd 1
 .size resd 1
-.size_bits resb 1
 endstruc
 
 %ifndef MATRIX_ASM
@@ -89,7 +88,7 @@ extern _CleanupFloatMap
 ; float SmootherStep(float x);
 extern _SmootherStep
 
-; void GenPerlinMap2D(FloatMap *out, int size_bits);
+; void GenPerlinMap2D(FloatMap *out, int size);
 extern _GenPerlinMap2D
 
 ; float* GetXYFloatMap(int x, int y, FloatMap *map, int dims);
@@ -97,6 +96,9 @@ extern _GetXYFloatMap
 
 ; void ConvertPerlinMapToAltitude(FloatMap *out, int ratio, FloatMap *map);
 extern _ConvertPerlinMapToAltitude
+
+; void GenPerlinAltitude(FloatMap *out, int size, int ratio);
+extern _GenPerlinAltitude
 %endif
 
 
