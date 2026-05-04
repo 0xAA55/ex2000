@@ -7,7 +7,7 @@ struc Vector
 	.y resd 1
 	.z resd 1
 	.w resd 1
-	.size equ $ - .x
+	.size equ $ - Vector
 endstruc
 
 ; Must be 16-byte aligned
@@ -32,12 +32,13 @@ struc Matrix
 	.wy resd 1
 	.wz resd 1
 	.ww resd 1
-	.size equ $ - .x
+	.size equ $ - Matrix
 endstruc
 
 struc FloatMap
 .data resd 1
-.size resd 1
+.border_len resd 1
+.size equ $ - FloatMap
 endstruc
 
 %ifndef MATRIX_ASM
@@ -88,7 +89,7 @@ extern _CleanupFloatMap
 ; float SmootherStep(float x);
 extern _SmootherStep
 
-; void GenPerlinMap2D(FloatMap *out, int size);
+; void GenPerlinMap2D(FloatMap *out, int border_len);
 extern _GenPerlinMap2D
 
 ; float* GetXYFloatMap(int x, int y, FloatMap *map, int dims);
@@ -97,7 +98,7 @@ extern _GetXYFloatMap
 ; void ConvertPerlinMapToAltitude(FloatMap *out, int ratio, FloatMap *map);
 extern _ConvertPerlinMapToAltitude
 
-; void GenPerlinAltitude(FloatMap *out, int size, int ratio);
+; void GenPerlinAltitude(FloatMap *out, int border_len, int ratio);
 extern _GenPerlinAltitude
 %endif
 

@@ -609,7 +609,7 @@ DefFunc _GenPerlinMap2D
 
 	mov ebx, Param(0)
 	mov eax, Param(1)
-	mov [ebx + FloatMap.size], eax
+	mov [ebx + FloatMap.border_len], eax
 	mul eax
 	cmp eax, 4
 	jb .fail
@@ -670,14 +670,14 @@ DefFunc _GetXYFloatMap
 	xor edx, edx
 	mov ebx, Param(2)
 	mov eax, Param(1)
-	div dword [ebx + FloatMap.size]
+	div dword [ebx + FloatMap.border_len]
 	mov Param(1), edx
 	xor edx, edx
 	mov eax, Param(0)
-	div dword [ebx + FloatMap.size]
+	div dword [ebx + FloatMap.border_len]
 	mov Param(0), edx
 	mov eax, Param(1)
-	mul dword [ebx + FloatMap.size]
+	mul dword [ebx + FloatMap.border_len]
 	add eax, Param(0)
 	lea eax, [eax * 4]
 	mul dword Param(3)
@@ -695,8 +695,8 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov esi, Param(2)
 	mov edi, Param(0)
 	mov eax, Param(1)
-	mul eax, [esi + FloatMap.size]
-	mov [edi + FloatMap.size], eax
+	mul eax, [esi + FloatMap.border_len]
+	mov [edi + FloatMap.border_len], eax
 	mov eax, Param(1)
 	invoke_cdecl _malloc, &[eax * 4]
 	mov _STEPS, eax
@@ -723,7 +723,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov _X, eax
 	cmp eax, Param(1)
 	jb .get_steps
-	mov eax, [edi + FloatMap.size]
+	mov eax, [edi + FloatMap.border_len]
 	mul eax
 	invoke_cdecl _aligned_malloc, &[eax * 4], 0x10
 	mov [edi + FloatMap.data], eax
@@ -852,13 +852,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	cmp eax, [esi + FloatMap.size]
+	cmp eax, [esi + FloatMap.border_len]
 	jb .loopx
 
 	mov eax, _Y
 	inc eax
 	mov _Y, eax
-	cmp eax, [esi + FloatMap.size]
+	cmp eax, [esi + FloatMap.border_len]
 	jb .loopy
 
 	invoke_cdecl _free, _STEPS
