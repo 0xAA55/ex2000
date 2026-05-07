@@ -416,11 +416,11 @@ DefFunc _MatrixViewEuler
 
 	movss xmm0, _CY
 	movss xmm1, _SY
-	movss xmm2, _SY
-	movss xmm3, _CY
-	movss xmm4, _CY
+	movss xmm2, xmm1
+	movss xmm3, xmm0
+	movss xmm4, xmm0
 	movaps xmm5, [_ZeroVector]
-	movss xmm6, _SY
+	movss xmm6, xmm1
 	movss xmm7, _CP
 	mulss xmm0, _CP
 	mulss xmm1, _SP
@@ -782,12 +782,12 @@ DefFunc _ConvertPerlinMapToAltitude
 
 	movss xmm0, _FIX
 	movss xmm1, _FIY
-	movss xmm2, _FIX
-	movss xmm3, _FIY
-	movss xmm4, _FIX
-	movss xmm5, _FIY
-	movss xmm6, _FIX
-	movss xmm7, _FIY
+	movss xmm2, xmm0
+	movss xmm3, xmm1
+	movss xmm4, xmm0
+	movss xmm5, xmm1
+	movss xmm6, xmm0
+	movss xmm7, xmm1
 	mulss xmm0, _RECIPROCAL
 	mulss xmm1, _RECIPROCAL
 	mulss xmm2, _1PRECIPROCAL
