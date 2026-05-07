@@ -869,7 +869,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mulss xmm0, [eax]
 	mulss xmm1, [eax]
 	addss xmm0, [_DP_00_10_01_11 + Vector.x]
-	addss xmm1, [_DP_00_10_01_11 + Vector.y]
+	addss xmm1, [_DP_00_10_01_11 + Vector.z]
 	subss xmm1, xmm0
 	mulss xmm1, [ecx]
 	addss xmm0, xmm1
