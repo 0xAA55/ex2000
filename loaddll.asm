@@ -1,6 +1,8 @@
 %define LOADDLL_ASM 1
 %include "loaddll.inc"
 
+%define NOIAT 1
+
 global _addr_of_Kernel32
 global _addr_of_GetProcAddress
 global _addr_of_LoadLibraryA
@@ -22,14 +24,16 @@ _name_of_LoadLibraryA db "LoadLibraryA", 0
 
 segment .text
 DefFunc _InitLoadLibrary
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, 0, ebx, esi, edi
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
 	mov eax, [eax + 0x14]	; EAX = PEB->Ldr.InMemOrder.Flink (Current EXE)
 	mov ebx, [eax + 0x10]
 	mov [_hInstance], ebx
+%ifdef NOIAT
 	mov eax, [eax]			; EAX = Flink(ntdll.dll)
 	mov eax, [eax]			; EAX = Flink(kernel32.dll)
+
 	mov ebx, [eax + 0x10]
 	mov [_addr_of_Kernel32], ebx
 
@@ -40,11 +44,12 @@ DefFunc _InitLoadLibrary
 	add edx, ebx			; EDX = EAT
 	mov esi, [edx + 0x20]	; ESI = Offset of Name Table
 	add esi, ebx			; ESI = Name Table
+	mov ecx, [esi - 0x8]
 
 	; Get index of GetProcAddress
-	xor ecx, ecx
-	.loop_get_func:
-	inc ecx
+	xor edi, edi
+.loop_get_func:
+	inc edi
 	lodsd
 	add eax, ebx
 	cmp dword [eax], 'GetP'
@@ -59,11 +64,11 @@ DefFunc _InitLoadLibrary
 	; Get the address of GetProcAddress by the index
 	mov esi, [edx + 0x24]    ; ESI = Offset of Index Table
 	add esi, ebx             ; ESI = Index Table
-	mov cx, [esi + ecx * 2]  ; CX = Index
-	dec ecx
+	mov di, [esi + edi * 2]  ; CX = Index
+	dec edi
 	mov esi, [edx + 0x1c]    ; ESI = Offset of Address Table
 	add esi, ebx             ; ESI = Address Table
-	mov edx, [esi + ecx * 4] ; EDX = Pointer
+	mov edx, [esi + edi * 4] ; EDX = Pointer
 	add edx, ebx             ; EDX = GetProcAddress
 	mov [_addr_of_GetProcAddress], edx
 
@@ -72,6 +77,19 @@ DefFunc _InitLoadLibrary
 	push ebx	; Base offset of kernel32
 	call edx	; GetProcAddress
 	mov [_addr_of_LoadLibraryA], eax
+%else
+segment .rdata
+.name_of_Kernel32 db "kernel32.dll", 0
+segment .text
+	extern __imp__GetProcAddress@8
+	extern __imp__LoadLibraryA@4
+	mov eax, [__imp__GetProcAddress@8]
+	mov ecx, [__imp__LoadLibraryA@4]
+	mov [_addr_of_GetProcAddress], eax
+	mov [_addr_of_LoadLibraryA], ecx
+	invoke_dll_stdcall LoadLibraryA, .name_of_Kernel32
+	mov [_addr_of_Kernel32], eax
+%endif
 	FrameEnd
 	ret
 
