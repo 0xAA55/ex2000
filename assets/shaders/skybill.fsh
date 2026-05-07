@@ -15,4 +15,6 @@ void main()
 	position *= mat3(camera);
 	position = normalize(position) * 0.5 + 0.5;
 	color = vec4(position, 1.0);
+
+	color = vec4(vec3(texture2D(noise, texcoord).r * 0.5 + 0.5), 0.0);
 }
