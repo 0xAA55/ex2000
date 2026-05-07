@@ -77,7 +77,6 @@ DefFunc _MathInit
 
 	mov ecx, 4
 	xor edx, edx
-	mov dword [_addr_of_rand4int], _rand4int_sse2
 .init_math:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
@@ -105,7 +104,6 @@ DefFunc _MathInit
 	jz .no_sse41
 	mov byte [_HaveSSE41], 1
 
-	mov dword [_addr_of_rand4int], _rand4int_sse41
 	jmp .end
 
 .no_sse2:
@@ -114,60 +112,6 @@ DefFunc _MathInit
 
 .no_sse41:
 .end:
-	FrameEnd
-	ret
-
-DefFunc _rand4int_sse2
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	mov ecx, Param(1)
-	movaps xmm2, [_SeedVector]
-	movaps xmm3, [_Rand4MulVal]
-	movaps xmm4, [_0101]
-	movaps xmm5, [_Rand4AddVal]
-	movaps xmm6, [_Rand4AndVal]
-.nextrand:
-	movaps xmm0, xmm2
-	movaps xmm1, xmm2
-	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
-	pmuludq xmm0, xmm3
-	pmuludq xmm1, xmm3
-	pand xmm0, xmm4
-	pand xmm1, xmm4
-	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
-	paddd xmm0, xmm1
-	paddd xmm0, xmm5
-	movaps xmm2, xmm0
-	pand xmm0, xmm6
-	movaps [eax], xmm0
-	add eax, 16
-	loop .nextrand
-	movaps [_SeedVector], xmm2
-
-	FrameEnd
-	ret
-
-DefFunc _rand4int_sse41
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	mov ecx, Param(1)
-	movaps xmm2, [_SeedVector]
-	movaps xmm3, [_Rand4MulVal]
-	movaps xmm4, [_Rand4AddVal]
-	movaps xmm5, [_Rand4AndVal]
-.nextrand:
-	movaps xmm0, xmm2
-	pmulld xmm0, xmm3
-	paddd xmm0, xmm4
-	movaps xmm2, xmm0
-	pand xmm0, xmm5
-	movaps [eax], xmm0
-	add eax, 16
-	loop .nextrand
-	movaps [_SeedVector], xmm2
-
 	FrameEnd
 	ret
 
@@ -949,41 +893,5 @@ DefFunc _GenPerlinAltitude
 	xor eax, eax
 
 .end:
-	FrameEnd
-	ret
-
-DefFunc _FloatsToRGBA
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	mov ecx, Param(1)
-	movaps xmm5, [_F1111]
-	movaps xmm6, [_Scale127_5]
-	movdqa xmm7, [_BMxmm]
-.process:
-	movaps xmm0, [eax]
-	addps xmm0, xmm5
-	mulps xmm0, xmm6
-	cvtps2dq xmm0, xmm0
-	packssdw xmm0, xmm0
-	packuswb xmm0, xmm0
-	pxor xmm1, xmm1
-	punpcklbw xmm0, xmm1
-	punpcklwd xmm0, xmm1
-	pshufd xmm1, xmm0, 0x00
-	pshufd xmm2, xmm0, 0x55
-	pshufd xmm3, xmm0, 0xAA
-	pshufd xmm4, xmm0, 0xFF
-	pslldq xmm2, 4
-	pslldq xmm3, 8
-	pslldq xmm4, 12
-	por xmm1, xmm2
-	por xmm1, xmm3
-	por xmm1, xmm4
-
-	movdqu [eax], xmm1
-	add eax, 0x10
-	loop .process
-
 	FrameEnd
 	ret

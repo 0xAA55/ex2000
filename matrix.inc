@@ -52,9 +52,6 @@ extern _IdentityMatrix
 ; void _MathInit();
 extern _MathInit
 
-; void (*rand4int)(Vector *out, size_t count);
-import_dll_func rand4int
-
 ; void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross
 
@@ -102,9 +99,6 @@ extern _ConvertPerlinMapToAltitude
 
 ; void GenPerlinAltitude(FloatMap *out, int perlin_border_len, int ratio, float amplitude);
 extern _GenPerlinAltitude
-
-; void FloatsToRGBA(Vector *f, size_t s);
-extern _FloatsToRGBA
 %endif
 
 
