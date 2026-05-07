@@ -21,6 +21,14 @@ import_dll_func ExitProcess
 %define RAND(s) (SEED_OF_RAND(s) & 0x7FFF)
 
 segment .bss
+global _addr_of_rand4int
+_addr_of_rand4int resd 1
+global _HaveSSE3
+_HaveSSE3 resd 1
+global _HaveSSE41
+_HaveSSE41 resd 1
+
+segment .bss
 alignb 16
 global _ZeroVector
 _ZeroVector resd 4
@@ -42,8 +50,6 @@ global _SeedVector
 _SeedVector resd 4
 global _IdentityMatrix
 _IdentityMatrix resb Matrix.size
-global _addr_of_rand4int
-_addr_of_rand4int resd 1
 
 segment .rdata
 align 16
@@ -91,8 +97,13 @@ DefFunc _MathInit
 	cpuid
 	test edx, (1 << 26)
 	jz .no_sse2
+	test ecx, (1 << 0)
+	jz .no_sse3
+	mov byte [_HaveSSE3], 1
+.no_sse3:
 	test ecx, (1 << 19)
 	jz .no_sse41
+	mov byte [_HaveSSE41], 1
 
 	mov dword [_addr_of_rand4int], _rand4int_sse41
 	jmp .end
