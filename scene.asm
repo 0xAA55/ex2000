@@ -143,21 +143,29 @@ global _name_ofu_FovY
 _name_ofu_FovY db "fovy", 0
 
 %macro SceneLoadShaderProgram 4
-segment .rdata
-%%VSAssetsPath db %2, 0
-%%GSAssetsPath db %3, 0
-%%FSAssetsPath db %4, 0
+	segment .rdata
+	%%VSAssetsPath db %2, 0
+	%%GSAssetsPath db %3, 0
+	%%FSAssetsPath db %4, 0
 
-segment .text
-invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
+	segment .text
+	invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
 %endmacro
 
-%macro GetAttribLocation 2
-segment .rdata
-%%AttribName db %2, 0
+%macro GetAttribLocation 2+
+	segment .rdata
+	%%AttribName db %2, 0
 
-segment .text
-invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
+	segment .text
+	invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
+%endmacro
+
+%macro GetUniformLocation 2+
+	segment .rdata
+	%%UniformName db %2, 0
+
+	segment .text
+	invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
 %endmacro
 
 segment .text
