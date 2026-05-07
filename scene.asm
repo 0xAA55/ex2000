@@ -41,8 +41,12 @@ global _BoxVerticesBuffer
 _BoxVerticesBuffer resb GlBuffer.size
 global _BoxIndicesBuffer
 _BoxIndicesBuffer resb GlBuffer.size
+global _PerlinNoiseTexture
+_PerlinNoiseTexture resd 1
 global _Timer
 _Timer resb Timer.size
+global _TempFloatMap
+_TempFloatMap resb FloatMap.size
 global _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
@@ -207,6 +211,17 @@ DefFunc _SceneInit
 	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
 	invoke_cdecl _MathInit
+
+	invoke_cdecl _GenPerlinAltitude, _TempFloatMap, 64, 16
+	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [_TempFloatMap + FloatMap.border_len], [_TempFloatMap + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [_TempFloatMap + FloatMap.data]
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_cdecl _CleanupFloatMap, _TempFloatMap
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
 
