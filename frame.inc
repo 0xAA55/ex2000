@@ -203,6 +203,10 @@
 	%ifdef PassRegAvoid
 		%undef PassRegAvoid
 	%endif
+	%ifdef LastPassParam
+		%undef LastPassParam
+	%endif
+	%defstr LastPassParam
 %endmacro
 
 %macro RotatePassReg 0
@@ -235,12 +239,16 @@
 		%exitmacro
 	%endif
 	%if %substr(%str(%2), 1, 1) == "&"
-		RotatePassReg
-		lea PassReg, %tok(%substr(%str(%2), 2))
+		%ifnidn %str(%2), LastPassParam
+			RotatePassReg
+			lea PassReg, %tok(%substr(%str(%2), 2))
+		%endif
 		mov CallParam(%1), PassReg
 	%elif %substr(%str(%2), 1, 1) == "["
-		RotatePassReg
-		mov PassReg, %2
+		%ifnidn %str(%2), LastPassParam
+			RotatePassReg
+			mov PassReg, %2
+		%endif
 		mov CallParam(%1), PassReg
 	%else
 		%if IsPassReg(%2)
@@ -250,6 +258,7 @@
 		%endif
 		mov dword CallParam(%1), %2
 	%endif
+	%defstr LastPassParam %2
 %endmacro
 
 %macro PrepStdCallParam 2
