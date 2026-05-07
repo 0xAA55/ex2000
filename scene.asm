@@ -212,7 +212,7 @@ DefFunc _SceneInit
 .load_scene:
 	invoke_cdecl _MathInit
 
-	invoke_cdecl _GenPerlinAltitude, _TempFloatMap, 64, 16, 0x3F800000
+	invoke_cdecl _GenPerlinAltitude, _TempFloatMap, 8, 32, 0x3F800000
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [_TempFloatMap + FloatMap.border_len], [_TempFloatMap + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [_TempFloatMap + FloatMap.data]
