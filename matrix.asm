@@ -586,6 +586,7 @@ DefFunc _GenPerlinMap2D
 	jz .end
 	mov ecx, Variable(0)
 	shr ecx, 1
+	mov edx, [_HaveSSE41]
 	movaps xmm2, [_F1111]
 	movaps xmm3, [_SeedVector]
 	movaps xmm4, [_Rand4MulVal]
@@ -594,10 +595,23 @@ DefFunc _GenPerlinMap2D
 	movaps xmm7, [_Rand4AndVal]
 .generate:
 	movaps xmm0, xmm3
+	test edx, edx
+	jz .no_sse41
+	pmulld xmm0, xmm4
+	jmp .after_mul
+.no_sse41:
+	movaps xmm1, xmm0
+	psrldq xmm1, 4
 	pmuludq xmm0, xmm4
+	pmuludq xmm1, xmm4
 	pand xmm0, xmm5
+	pand xmm1, xmm5
+	pslldq xmm1, 4
+	paddd xmm0, xmm1
+.after_mul:
 	paddd xmm0, xmm6
 	movaps xmm3, xmm0
+	pand xmm0, xmm5
 	pand xmm0, xmm7
 	paddd xmm0, xmm0
 	cvtdq2ps xmm0, xmm0
@@ -621,6 +635,8 @@ DefFunc _GenPerlinMap2D
 
 	add eax, 0x10
 	loop .generate
+
+	movaps [_SeedVector], xmm3
 
 .end:
 	mov eax, [ebx + FloatMap.data]
