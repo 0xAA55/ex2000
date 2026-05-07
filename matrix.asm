@@ -706,9 +706,20 @@ DefFunc _GetXYFloatMap
 	ret
 
 DefFunc _ConvertPerlinMapToAltitude
-	FrameBegin 19, 4, ebx, esi, edi
-	AssignVars _STEPS, _RECIPROCAL, _1PRECIPROCAL, _X, _Y, _BX, _BY, _IX, _IY, _FIX, _FIY, _P00, _P10, _P01, _P11, _DOT00, _DOT01, _DOT10, _DOT11
+	FrameBegin 10, 4, ebx, esi, edi
+	AssignVars _STEPS, _RECIPROCAL, _1PRECIPROCAL, _MATRIX
+	AssignVars _X, _Y, _BX, _BY, _IX, _IY
+	%define _FIXIY ebx
+	%define _P00XY_P10XY ebx + 0x10
+	%define _P01XY_P11XY ebx + 0x20
+	%define _V0XY_V1XY ebx + 0x30
+	%define _V2XY_V3XY ebx + 0x40
+	%define _DP_00_10_01_11 ebx + 0x50
 
+	invoke_cdecl _aligned_malloc, 6 * 0x10, 0x10
+	mov _MATRIX, eax
+	test eax, eax
+	jz .end
 	xor eax, eax
 	mov edx, eax
 	mov esi, Param(2)
@@ -719,7 +730,6 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, Param(1)
 	invoke_cdecl _malloc, &[eax * 4]
 	mov _STEPS, eax
-	mov ebx, eax
 	test eax, eax
 	jz .end
 	xor eax, eax
@@ -730,6 +740,18 @@ DefFunc _ConvertPerlinMapToAltitude
 	fld1
 	fsub dword _RECIPROCAL
 	fstp _1PRECIPROCAL
+	mov eax, _RECIPROCAL
+	mov edx, _1PRECIPROCAL
+	mov ebx, _MATRIX
+	mov [_V0XY_V1XY + Vector.x], eax
+	mov [_V0XY_V1XY + Vector.y], eax
+	mov [_V0XY_V1XY + Vector.z], edx
+	mov [_V0XY_V1XY + Vector.w], eax
+	mov [_V2XY_V3XY + Vector.x], eax
+	mov [_V2XY_V3XY + Vector.y], edx
+	mov [_V2XY_V3XY + Vector.z], edx
+	mov [_V2XY_V3XY + Vector.w], edx
+	mov ebx, _STEPS
 .get_steps:
 	fild dword _X
 	fmul dword _RECIPROCAL
@@ -742,6 +764,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov _X, eax
 	cmp eax, Param(1)
 	jb .get_steps
+	mov ebx, _MATRIX
 	mov eax, [edi + FloatMap.border_len]
 	mul eax
 	invoke_cdecl _aligned_malloc, &[eax * 4], 0x10
@@ -761,21 +784,33 @@ DefFunc _ConvertPerlinMapToAltitude
 	mul eax, Param(1)
 	mov _BX, eax
 	invoke_cdecl _GetXYFloatMap, _X, _Y, esi, 2
-	mov _P00, eax
+	mov edx, [eax + 4]
+	mov eax, [eax]
+	mov [_P00XY_P10XY + Vector.x], eax
+	mov [_P00XY_P10XY + Vector.y], edx
 	mov eax, _X
 	inc eax
 	invoke_cdecl _GetXYFloatMap, eax, _Y, esi, 2
-	mov _P10, eax
+	mov edx, [eax + 4]
+	mov eax, [eax]
+	mov [_P00XY_P10XY + Vector.z], eax
+	mov [_P00XY_P10XY + Vector.w], edx
 	mov eax, _Y
 	inc eax
 	invoke_cdecl _GetXYFloatMap, _X, eax, esi, 2
-	mov _P01, eax
+	mov edx, [eax + 4]
+	mov eax, [eax]
+	mov [_P01XY_P11XY + Vector.x], eax
+	mov [_P01XY_P11XY + Vector.y], edx
 	mov eax, _X
 	mov ecx, _Y
 	inc eax
 	inc ecx
 	invoke_cdecl _GetXYFloatMap, eax, ecx, esi, 2
-	mov _P11, eax
+	mov edx, [eax + 4]
+	mov eax, [eax]
+	mov [_P01XY_P11XY + Vector.z], eax
+	mov [_P01XY_P11XY + Vector.w], edx
 	xor eax, eax
 	mov _IY, eax
 .iloopy:
@@ -784,46 +819,34 @@ DefFunc _ConvertPerlinMapToAltitude
 .iloopx:
 	movq xmm0, _IX
 	cvtdq2ps xmm0, xmm0
-	movq _FIX, xmm0
+	movq [_FIXIY], xmm0
+	movq [_FIXIY + 8], xmm0
 
-	mov eax, _P00
-	mov ecx, _P01
-	mov edx, _P10
-	mov ebx, _P11
+	movaps xmm0, [_FIXIY]
+	movaps xmm1, [_FIXIY]
+	mulps xmm0, [_V0XY_V1XY]
+	mulps xmm1, [_V2XY_V3XY]
+	mulps xmm0, [_P00XY_P10XY]
+	mulps xmm1, [_P01XY_P11XY]
+	cmp dword [_HaveSSE3], 0
+	jz .no_sse3
+	haddps xmm0, xmm1
+	movups [_DP_00_10_01_11], xmm0
+	jmp .after_dot
+.no_sse3:
+	movaps xmm2, xmm0
+	shufps xmm2, xmm0, _MM_SHUFFLE(2, 3, 0, 1)
+	addps xmm0, xmm2
+	shufps xmm0, xmm0, _MM_SHUFFLE(3, 1, 2, 0)
+	movaps xmm2, xmm1
+	shufps xmm2, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
+	addps xmm1, xmm2
+	shufps xmm1, xmm1, _MM_SHUFFLE(3, 1, 2, 0)
+	movhlps xmm2, xmm0
+	movlhps xmm2, xmm1
+	movups [_DP_00_10_01_11], xmm2
 
-	movss xmm0, _FIX
-	movss xmm1, _FIY
-	movss xmm2, xmm0
-	movss xmm3, xmm1
-	movss xmm4, xmm0
-	movss xmm5, xmm1
-	movss xmm6, xmm0
-	movss xmm7, xmm1
-	mulss xmm0, _RECIPROCAL
-	mulss xmm1, _RECIPROCAL
-	mulss xmm2, _1PRECIPROCAL
-	mulss xmm3, _RECIPROCAL
-	mulss xmm4, _RECIPROCAL
-	mulss xmm5, _1PRECIPROCAL
-	mulss xmm6, _1PRECIPROCAL
-	mulss xmm7, _1PRECIPROCAL
-	mulss xmm0, [eax]
-	mulss xmm1, [eax + 4]
-	mulss xmm2, [ecx]
-	mulss xmm3, [ecx + 4]
-	mulss xmm4, [edx]
-	mulss xmm5, [edx + 4]
-	mulss xmm6, [ebx]
-	mulss xmm7, [ebx + 4]
-	addss xmm0, xmm1
-	addss xmm2, xmm3
-	addss xmm4, xmm5
-	addss xmm6, xmm7
-	movss _DOT00, xmm0
-	movss _DOT01, xmm2
-	movss _DOT10, xmm4
-	movss _DOT11, xmm6
-
+.after_dot:
 	mov eax, _IX
 	mov ecx, _IY
 	lea eax, [eax * 4]
@@ -831,25 +854,25 @@ DefFunc _ConvertPerlinMapToAltitude
 	add eax, _STEPS
 	add ecx, _STEPS
 
-	movss xmm0, _DOT10
-	movss xmm1, _DOT11
-	subss xmm0, _DOT00
-	subss xmm1, _DOT01
+	movss xmm0, [_DP_00_10_01_11 + Vector.y]
+	movss xmm1, [_DP_00_10_01_11 + Vector.w]
+	subss xmm0, [_DP_00_10_01_11 + Vector.x]
+	subss xmm1, [_DP_00_10_01_11 + Vector.z]
 	mulss xmm0, [eax]
 	mulss xmm1, [eax]
-	addss xmm0, _DOT00
-	addss xmm1, _DOT01
+	addss xmm0, [_DP_00_10_01_11 + Vector.x]
+	addss xmm1, [_DP_00_10_01_11 + Vector.y]
 	subss xmm1, xmm0
 	mulss xmm1, [ecx]
 	addss xmm1, xmm0
-	movss _DOT00, xmm1
+	movss [_DP_00_10_01_11], xmm1
 
 	mov eax, _BX
 	mov ecx, _BY
 	add eax, _IX
 	add ecx, _IY
 	invoke_cdecl _GetXYFloatMap, eax, ecx, edi, 1
-	mov edx, _DOT00
+	mov edx, [_DP_00_10_01_11]
 	mov [eax], edx
 
 	mov eax, _IX
@@ -879,28 +902,26 @@ DefFunc _ConvertPerlinMapToAltitude
 
 .end:
 	invoke_cdecl _free, _STEPS
+	invoke_cdecl _aligned_free, _MATRIX
 	mov eax, [edi + FloatMap.data]
 	FrameEnd
 	ret
 	%undef _STEPS
 	%undef _RECIPROCAL
 	%undef _1PRECIPROCAL
+	%undef _MATRIX
 	%undef _X
 	%undef _Y
 	%undef _BX
 	%undef _BY
 	%undef _IX
 	%undef _IY
-	%undef _FIX
-	%undef _FIY
-	%undef _P00
-	%undef _P10
-	%undef _P01
-	%undef _P11
-	%undef _DOT00
-	%undef _DOT01
-	%undef _DOT10
-	%undef _DOT11
+	%undef _FIXIY
+	%undef _P00XY_P10XY
+	%undef _P01XY_P11XY
+	%undef _V0XY_V1XY
+	%undef _V2XY_V3XY
+	%undef _DP_00_10_01_11
 
 DefFunc _GenPerlinAltitude
 	FrameBegin 1, 4
