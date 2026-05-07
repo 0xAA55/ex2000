@@ -315,6 +315,9 @@ DefFunc _Scene
 	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovY]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
+	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
