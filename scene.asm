@@ -31,20 +31,28 @@ import_dll_func strcat
 import_dll_func snprintf
 
 segment .bss
-alignb 16
-global _CameraMatrix
-_CameraMatrix resb Matrix.size
-global _CameraYaw
-_CameraYaw resd 1
-global _CameraPitch
-_CameraPitch resd 1
+global _BillboardVerticesBuffer
+_BillboardVerticesBuffer resb GlBuffer.size
+global _DrawBillboardVAO
+_DrawBillboardVAO resd 1
+global _DrawBillboardProgram
+_DrawBillboardProgram resd 1
+global _BoxVerticesBuffer
+_BoxVerticesBuffer resb GlBuffer.size
+global _BoxIndicesBuffer
+_BoxIndicesBuffer resb GlBuffer.size
+global _Timer
+_Timer resb Timer.size
 global _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
 .Aspect resd 1
 .FovY resd 1
-global _Timer
-_Timer resb Timer.size
+
+segment .bss
+alignb 16
+global _CameraMatrix
+_CameraMatrix resb Matrix.size
 global _ClientRect
 _ClientRect:
 .l resd 1
@@ -65,20 +73,14 @@ global _CursorPos
 _CursorPos:
 .x resd 1
 .y resd 1
+global _CameraYaw
+_CameraYaw resd 1
+global _CameraPitch
+_CameraPitch resd 1
 global _Aspect
 _Aspect resd 1
 global _FovY
 _FovY resd 1
-global _BillboardVerticesBuffer
-_BillboardVerticesBuffer resb GlBuffer.size
-global _DrawBillboardVAO
-_DrawBillboardVAO resd 1
-global _DrawBillboardProgram
-_DrawBillboardProgram resd 1
-global _BoxVerticesBuffer
-_BoxVerticesBuffer resb GlBuffer.size
-global _BoxIndicesBuffer
-_BoxIndicesBuffer resb GlBuffer.size
 
 segment .rdata
 align 16
