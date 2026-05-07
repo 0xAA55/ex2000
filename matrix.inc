@@ -1,6 +1,8 @@
 %ifndef _MATRIX_INC_
 %define _MATRIX_INC_ 1
 
+%include "loaddll.inc"
+
 ; Must be 16-byte aligned
 struc Vector
 	.x resd 1
