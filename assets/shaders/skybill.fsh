@@ -3,6 +3,7 @@
 uniform mat4 camera;
 uniform float aspect;
 uniform float fovy;
+uniform sampler2D noise;
 in vec2 texcoord;
 out vec4 color;
 

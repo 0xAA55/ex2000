@@ -48,6 +48,7 @@ _BillboardProgramLocations:
 .CameraMatrix resd 1
 .Aspect resd 1
 .FovY resd 1
+.Noise resd 1
 
 segment .bss
 alignb 16
@@ -229,6 +230,8 @@ DefFunc _SceneInit
 	mov [_BillboardProgramLocations.Aspect], eax
 	GetUniformLocation [_DrawBillboardProgram], "fovy"
 	mov [_BillboardProgramLocations.FovY], eax
+	GetUniformLocation [_DrawBillboardProgram], "noise"
+	mov [_BillboardProgramLocations.Noise], eax
 
 	fldpi
 	fidivr word [_FovRatio]
