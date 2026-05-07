@@ -100,7 +100,7 @@ extern _GetXYFloatMap
 ; void ConvertPerlinMapToAltitude(FloatMap *out, int ratio, FloatMap *map);
 extern _ConvertPerlinMapToAltitude
 
-; void GenPerlinAltitude(FloatMap *out, int border_len, int ratio);
+; void GenPerlinAltitude(FloatMap *out, int perlin_border_len, int ratio);
 extern _GenPerlinAltitude
 
 ; void FloatsToRGBA(Vector *f, size_t s);
