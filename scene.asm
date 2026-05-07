@@ -135,13 +135,6 @@ _BoxIndices:
 	db 4, 5, 7
 .num equ $ - _BoxIndices
 
-global _name_ofu_CameraMatrix
-_name_ofu_CameraMatrix db "camera", 0
-global _name_ofu_Aspect
-_name_ofu_Aspect db "aspect", 0
-global _name_ofu_FovY
-_name_ofu_FovY db "fovy", 0
-
 %macro SceneLoadShaderProgram 4
 	segment .rdata
 	%%VSAssetsPath db %2, 0
@@ -230,11 +223,11 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_CameraMatrix
+	GetUniformLocation [_DrawBillboardProgram], "camera"
 	mov [_BillboardProgramLocations.CameraMatrix], eax
-	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_Aspect
+	GetUniformLocation [_DrawBillboardProgram], "aspect"
 	mov [_BillboardProgramLocations.Aspect], eax
-	invoke_dll_stdcall glGetUniformLocation, [_DrawBillboardProgram], _name_ofu_FovY
+	GetUniformLocation [_DrawBillboardProgram], "fovy"
 	mov [_BillboardProgramLocations.FovY], eax
 
 	fldpi
