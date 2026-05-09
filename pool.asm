@@ -87,11 +87,11 @@ DefFunc _PoolRun
 	invoke_dll_stdcall CloseHandle, [eax * 4 + edx]
 	cmp esi, Param(2)
 	jb .more_jobs
-	jz .end
 	lea eax, [edi * 4]
 	add eax, [ebx + Pool.workers]
 	mov ecx, _NUM_WORKERS
 	dec ecx
+	jz .end
 	mov _NUM_WORKERS, ecx
 	lea ecx, [ecx * 4]
 	add ecx, [ebx + Pool.workers]
