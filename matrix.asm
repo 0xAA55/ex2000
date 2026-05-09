@@ -606,8 +606,6 @@ DefFunc _GenPerlinMap2D
 	FrameBegin 1, 2, ebx, esi
 
 	invoke_cdecl _CreateSeedVector
-	test eax, eax
-	jz .fail
 	mov esi, eax
 
 	mov ebx, Param(0)
@@ -616,15 +614,10 @@ DefFunc _GenPerlinMap2D
 	mul eax
 	cmp eax, 4
 	jae .success
-.fail:
-	int3
-	jmp .fail
 .success:
 	mov Variable(0), eax
 	invoke_cdecl _aligned_malloc, &[eax * 8], 0x10
 	mov [ebx + FloatMap.data], eax
-	test eax, eax
-	jz .end
 	mov ecx, Variable(0)
 	shr ecx, 1
 	mov edx, [_HaveSSE41]
@@ -719,8 +712,6 @@ DefFunc _ConvertPerlinMapToAltitude
 
 	invoke_cdecl _aligned_malloc, 6 * 0x10, 0x10
 	mov _MATRIX, eax
-	test eax, eax
-	jz .end
 	xor eax, eax
 	mov edx, eax
 	mov esi, Param(3)
@@ -731,8 +722,6 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, Param(1)
 	invoke_cdecl _malloc, &[eax * 4]
 	mov _STEPS, eax
-	test eax, eax
-	jz .end
 	xor eax, eax
 	mov _X, eax
 	fld1
@@ -771,8 +760,6 @@ DefFunc _ConvertPerlinMapToAltitude
 	mul eax
 	invoke_cdecl _aligned_malloc, &[eax * 4], 0x10
 	mov [edi + FloatMap.data], eax
-	test eax, eax
-	jz .end
 	xor eax, eax
 	mov _Y, eax
 .loopy:
@@ -925,30 +912,11 @@ DefFunc _ConvertPerlinMapToAltitude
 
 DefFunc _GenPerlinAltitude
 	FrameBegin 1, 4
-
 	invoke_cdecl _calloc, FloatMap.size, 1
 	mov Variable(0), eax
-	test eax, eax
-	jz .fail
 	invoke_cdecl _GenPerlinMap2D, Variable(0), Param(1)
-	test eax, eax
-	jz .fail
 	invoke_cdecl _ConvertPerlinMapToAltitude, Param(0), Param(2), Param(3), Variable(0)
-	test eax, eax
-	jz .fail
-
 	invoke_cdecl _CleanupFloatMap, Variable(0)
 	invoke_cdecl _free, Variable(0)
-	jmp .end
-.fail:
-	mov eax, Variable(0)
-	test eax, eax
-	jz .free_1
-	invoke_cdecl _CleanupFloatMap, eax
-	invoke_cdecl _free, Variable(0)
-.free_1:
-	xor eax, eax
-
-.end:
 	FrameEnd
 	ret
