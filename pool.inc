@@ -16,6 +16,8 @@ endstruc
 
 %ifndef POOL_ASM
 ; void* PoolRun(int(*work_proc)(void *param), int num_workers, int num_jobs, void* job_list, int stack_size);
+; // Returns a pointer to the newly allocated array containing the results from `work_proc`.
+; // The caller is responsible for freeing this memory with `free()`.
 extern _PoolRun
 %endif
 
