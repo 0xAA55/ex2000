@@ -13,16 +13,16 @@ extern _aligned_free
 
 import_dll_func memcpy
 import_dll_func memset
-import_dll_func cos
-import_dll_func sin
+import_dll_func rand
+import_dll_func srand
 import_dll_func ExitProcess
 
 %define SEED_OF_RAND(s) ((0x343fD * (s) + 0x269EC3) & 0xFFFFFFFF)
 %define RAND(s) (SEED_OF_RAND(s) & 0x7FFF)
 
 segment .bss
-global _addr_of_rand4int
-_addr_of_rand4int resd 1
+global _counter
+_counter resd 1
 global _HaveSSE3
 _HaveSSE3 resd 1
 global _HaveSSE41
@@ -46,15 +46,11 @@ global _Scale127_5
 _Scale127_5 resd 4
 global _BMxmm
 _BMxmm resd 4
-global _SeedVector
-_SeedVector resd 4
 global _IdentityMatrix
 _IdentityMatrix resb Matrix.size
 
 segment .rdata
 align 16
-global _InitSeedVector
-_InitSeedVector dd SEED_OF_RAND(1), SEED_OF_RAND(0xAA55), SEED_OF_RAND(0x11037), SEED_OF_RAND(0x269EC3)
 global _2.0f
 _2.0f dd 0x40000000
 global _M1.0f
@@ -71,10 +67,6 @@ DefFunc _MathInit
 	FrameBegin 0, 0, ebx
 
 	mov eax, 0x3F800000
-	mov ecx, 4
-	movaps xmm0, [_InitSeedVector]
-	movaps [_SeedVector], xmm0
-
 	mov ecx, 4
 	xor edx, edx
 .init_math:
@@ -112,6 +104,50 @@ DefFunc _MathInit
 
 .no_sse41:
 .end:
+	FrameEnd
+	ret
+
+DefFunc _CreateSeedVector
+	FrameBegin 0, 2, ebx
+
+	invoke_cdecl _aligned_malloc, 16, 16
+	mov ebx, eax
+
+	mov eax, 1
+	lock xadd [_counter], eax
+	mov [esp], eax
+	fild dword [esp]
+	fsincos
+	fadd
+	fstp dword [esp]
+	call [_addr_of_srand]
+	invoke_dll_cdecl rand
+	mov [ebx], eax
+
+	fild dword [ebx]
+	fidiv dword [_Rand4AndVal]
+	fldpi
+	fldpi
+	fadd
+	fmul
+	fst dword [ebx]
+	fld st0
+	fsincos
+	fstp dword [ebx + 4]
+	fstp dword [ebx + 8]
+	fsincos
+	fadd
+	fstp dword [ebx + 12]
+
+	mov eax, ebx
+	FrameEnd
+	ret
+
+DefFunc _DestroySeedVector
+	FrameBegin 0, 1
+
+	invoke_cdecl _aligned_free, Param(0)
+
 	FrameEnd
 	ret
 
@@ -567,7 +603,12 @@ DefFunc _SmootherStep
 	ret
 
 DefFunc _GenPerlinMap2D
-	FrameBegin 1, 2, ebx
+	FrameBegin 1, 2, ebx, esi
+
+	invoke_cdecl _CreateSeedVector
+	test eax, eax
+	jz .fail
+	mov esi, eax
 
 	mov ebx, Param(0)
 	mov eax, Param(1)
@@ -588,7 +629,7 @@ DefFunc _GenPerlinMap2D
 	shr ecx, 1
 	mov edx, [_HaveSSE41]
 	movaps xmm2, [_F1111]
-	movaps xmm3, [_SeedVector]
+	movaps xmm3, [esi]
 	movaps xmm4, [_Rand4MulVal]
 	movaps xmm5, [_0101]
 	movaps xmm6, [_Rand4AddVal]
@@ -636,7 +677,7 @@ DefFunc _GenPerlinMap2D
 	add eax, 0x10
 	loop .generate
 
-	movaps [_SeedVector], xmm3
+	invoke_cdecl _DestroySeedVector, esi
 
 .end:
 	mov eax, [ebx + FloatMap.data]

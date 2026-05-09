@@ -46,11 +46,16 @@ endstruc
 %ifndef MATRIX_ASM
 extern _F1111
 extern _ZeroVector
-extern _SeedVector
 extern _IdentityMatrix
 
-; void _MathInit();
+; void MathInit();
 extern _MathInit
+
+; int128_t *CreateSeedVector()
+extern _CreateSeedVector
+
+; void DestroySeedVector(int128_t *sv)
+extern _DestroySeedVector
 
 ; void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross
