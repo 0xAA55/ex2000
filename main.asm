@@ -64,14 +64,14 @@ dll_func_group_start KFunc
 def_dll_func ExitProcess
 def_dll_func QueryPerformanceFrequency
 def_dll_func QueryPerformanceCounter
-def_dll_func Sleep
-def_dll_func GetTickCount
 def_dll_func GetProcessHeap
 def_dll_func HeapAlloc
 def_dll_func HeapReAlloc
 def_dll_func HeapFree
 def_dll_func HeapLock
 def_dll_func HeapUnlock
+def_dll_func Sleep
+def_dll_func GetTickCount
 def_dll_func CreateThread
 def_dll_func CloseHandle
 def_dll_func WaitForMultipleObjects
