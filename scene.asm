@@ -278,20 +278,13 @@ DefFunc _Scene
 	test eax, eax
 	jnz .quit
 
-
-	mov eax, [_WindowRect.r]
-	mov edx, [_WindowRect.b]
-	add eax, [_WindowRect.l]
-	add edx, [_WindowRect.t]
-	shr eax, 1
-	shr edx, 1
-	mov [_WindowCenter.x], eax
-	mov [_WindowCenter.y], edx
-
+	movq xmm1, [_WindowRect.r]
 	movq xmm0, [_CursorPos]
-	movq xmm1, [_WindowCenter]
+	paddd xmm1, [_WindowRect.l]
 	movq xmm2, [_CameraYaw]
+	psrld xmm1, 1
 	movq xmm3, [_point_001]
+	movq [_WindowCenter.x], xmm1
 	cvtdq2ps xmm0, xmm0
 	cvtdq2ps xmm1, xmm1
 	subps xmm0, xmm1
