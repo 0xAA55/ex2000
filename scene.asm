@@ -187,7 +187,7 @@ DefFunc _SceneLoadShaderProgram
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 1, 6
+	FrameBegin 1, 6, ebx
 
 	PrepParam 0, _Timer
 	call _InitTimer
@@ -212,16 +212,18 @@ DefFunc _SceneInit
 .load_scene:
 	invoke_cdecl _MathInit
 
-	invoke_cdecl _GenPerlinAltitude, _TempFloatMap, 8, 32, 0x3F800000
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 0x3F800000, 8
+	mov ebx, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [_TempFloatMap + FloatMap.border_len], [_TempFloatMap + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [_TempFloatMap + FloatMap.data]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	invoke_cdecl _CleanupFloatMap, _TempFloatMap
+	invoke_cdecl _CleanupFloatMap, ebx
+	invoke_cdecl _free, ebx
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
 
