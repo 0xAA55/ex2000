@@ -267,6 +267,10 @@ DefFunc _Scene
 
 	invoke_cdecl _UpdateTimer, _Timer
 
+	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
+	invoke_dll_stdcall GetWindowRect, [_hWnd], _WindowRect
+	invoke_dll_stdcall GetCursorPos, _CursorPos
+
 	invoke_dll_stdcall GetForegroundWindow
 	cmp eax, [_hWnd]
 	jnz .after_check_input
@@ -274,10 +278,6 @@ DefFunc _Scene
 	test eax, eax
 	jnz .quit
 
-	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
-	invoke_dll_stdcall GetWindowRect, [_hWnd], _WindowRect
-	invoke_dll_stdcall GetCursorPos, _CursorPos
-	invoke_dll_stdcall glViewport, [_ClientRect.l], [_ClientRect.t], [_ClientRect.r], [_ClientRect.b]
 
 	mov eax, [_WindowRect.r]
 	mov edx, [_WindowRect.b]
@@ -300,11 +300,12 @@ DefFunc _Scene
 	movq [_CameraYaw], xmm2
 
 	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
+.after_check_input:
 
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
-.after_check_input:
+	invoke_dll_stdcall glViewport, [_ClientRect.l], [_ClientRect.t], [_ClientRect.r], [_ClientRect.b]
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
