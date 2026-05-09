@@ -920,3 +920,73 @@ DefFunc _GenPerlinAltitude
 	invoke_cdecl _free, Variable(0)
 	FrameEnd
 	ret
+DefFunc _AccumulateAltitude
+	FrameBegin 0, 0, esi, edi
+
+	mov esi, Param(1)
+	mov edi, Param(0)
+	mov eax, [esi + FloatMap.border_len]
+	cmp eax, [edi + FloatMap.border_len]
+	jz .good_size
+.bad_size:
+	int3
+	jmp .bad_size
+.good_size:
+	mul eax
+	mov esi, [esi + FloatMap.data]
+	mov edi, [edi + FloatMap.data]
+	mov ecx, eax
+	xor eax, eax
+	test ecx, 0xF
+	jnz .tail
+	shr ecx, 4
+	cmp dword [_HaveSSE41], 0
+	jz .legacy_proc
+.proc:
+	movntdqa xmm0, [esi + eax]
+	movntdqa xmm1, [esi + eax + 16]
+	movntdqa xmm2, [esi + eax + 32]
+	movntdqa xmm3, [esi + eax + 48]
+	movntdqa xmm4, [edi + eax]
+	movntdqa xmm5, [edi + eax + 16]
+	movntdqa xmm6, [edi + eax + 32]
+	movntdqa xmm7, [edi + eax + 48]
+	addps xmm0, xmm4
+	addps xmm1, xmm5
+	addps xmm2, xmm6
+	addps xmm3, xmm7
+	movntps [edi + eax], xmm0
+	movntps [edi + eax + 16], xmm1
+	movntps [edi + eax + 32], xmm2
+	movntps [edi + eax + 48], xmm3
+	add eax, 64
+	loop .proc
+	jmp .end
+.legacy_proc:
+	add eax, 64
+	movaps xmm0, [esi + eax]
+	movaps xmm1, [esi + eax + 16]
+	movaps xmm2, [esi + eax + 32]
+	movaps xmm3, [esi + eax + 48]
+	addps xmm0, [edi + eax]
+	addps xmm1, [edi + eax + 16]
+	addps xmm2, [edi + eax + 32]
+	addps xmm3, [edi + eax + 48]
+	movaps [edi + eax], xmm0
+	movaps [edi + eax + 16], xmm1
+	movaps [edi + eax + 32], xmm2
+	movaps [edi + eax + 48], xmm3
+	add eax, 64
+	loop .legacy_proc
+	jmp .end
+.tail:
+	movss xmm0, [esi + eax]
+	addss xmm0, [edi + eax]
+	movss [edi + eax], xmm0
+	add eax, 4
+	loop .tail
+
+.end:
+	FrameEnd
+	ret
+
