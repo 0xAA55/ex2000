@@ -301,7 +301,9 @@ DefFunc _Scene
 
 	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
 .after_check_input:
-
+	mov eax, [_ClientRect.b]
+	cmp eax, [_ClientRect.t]
+	jbe .skip_frame
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
@@ -324,6 +326,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
+.skip_frame:
 	invoke_cdecl _SwapBuffers
 	xor eax, eax
 	inc eax
