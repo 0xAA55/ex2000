@@ -17,6 +17,7 @@ tools\nasm -f win32 shader.asm -o out\shader.obj
 tools\nasm -f win32 matrix.asm -o out\matrix.obj
 tools\nasm -f win32 assets.asm -o out\assets.obj
 tools\nasm -f win32 avlbst.asm -o out\avlbst.obj
-tools\link /NOLOGO /ENTRY:start /INCREMENTAL:NO /WS:AGGRESSIVE /OPT:REF /LARGEADDRESSAWARE /NODEFAULTLIB /DEBUG /SUBSYSTEM:WINDOWS /STUB:out\stub.bin /OUT:ex2000.exe lib\kernel32.lib out\main.obj out\loaddll.obj out\gl33.obj out\scene.obj out\timer.obj out\buffer.obj out\shader.obj out\matrix.obj out\assets.obj out\avlbst.obj 
+tools\nasm -f win32 pool.asm -o out\pool.obj
+tools\link /NOLOGO /ENTRY:start /INCREMENTAL:NO /WS:AGGRESSIVE /OPT:REF /LARGEADDRESSAWARE /NODEFAULTLIB /DEBUG /SUBSYSTEM:WINDOWS /STUB:out\stub.bin /OUT:ex2000.exe lib\kernel32.lib out\main.obj out\loaddll.obj out\gl33.obj out\scene.obj out\timer.obj out\buffer.obj out\shader.obj out\matrix.obj out\assets.obj out\avlbst.obj out\pool.obj
 
 pause
