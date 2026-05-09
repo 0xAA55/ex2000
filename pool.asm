@@ -129,7 +129,7 @@ DefFunc _PoolThreadProc
 	mov esi, [eax + 4]
 	lea eax, [esi * 4]
 	add eax, [ebx + Pool.jobs]
-	invoke_cdecl [ebx + Pool.work_proc], eax
+	invoke_cdecl [ebx + Pool.work_proc], [eax]
 	lea esi, [esi * 4]
 	add esi, [ebx + Pool.results]
 	mov [esi], eax
