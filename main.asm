@@ -72,6 +72,9 @@ def_dll_func HeapReAlloc
 def_dll_func HeapFree
 def_dll_func HeapLock
 def_dll_func HeapUnlock
+def_dll_func CreateThread
+def_dll_func CloseHandle
+def_dll_func WaitForMultipleObjects
 dll_func_group_end KFunc
 
 dll_func_group_start UFunc
