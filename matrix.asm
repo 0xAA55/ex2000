@@ -1,4 +1,5 @@
 %include "loaddll.inc"
+%include "pool.inc"
 
 %define MATRIX_ASM 1
 %include "matrix.inc"
@@ -920,6 +921,7 @@ DefFunc _GenPerlinAltitude
 	invoke_cdecl _free, Variable(0)
 	FrameEnd
 	ret
+
 DefFunc _AccumulateAltitude
 	FrameBegin 0, 0, esi, edi
 
@@ -990,3 +992,91 @@ DefFunc _AccumulateAltitude
 	FrameEnd
 	ret
 
+DefFunc _GenPerlinLayerPoolProc
+	FrameBegin 0, 4, ebx, edi
+
+	invoke_cdecl _calloc, FloatMap.size, 1
+	mov edi, eax
+	mov ebx, Param(0)
+	invoke_cdecl _GenPerlinAltitude, eax, [ebx], [ebx + 4], [ebx + 8]
+	mov eax, edi
+	jmp .end
+.end:
+	FrameEnd
+	ret
+
+DefFunc _GenMultiLayerPerlinAltitude
+	FrameBegin 2, 5, ebx, esi, edi
+
+	mov eax, Param(0)
+	bsr ecx, eax
+	cmp eax, 8
+	jae .good_param1
+.fail:
+	int3
+	jmp .fail
+.good_param1:
+	mov edx, eax
+	dec edx
+	test edx, eax
+	jz .param1_fix_done
+	inc ecx
+	xor eax, eax
+	inc eax
+	shl eax, cl
+.param1_fix_done:
+	mov Param(0), eax
+	mov eax, Param(2)
+	dec ecx
+	cmp eax, ecx
+	cmova eax, ecx
+	mov Param(2), eax
+
+	mov eax, 16
+	mul ecx
+	invoke_cdecl _malloc, &[eax + ecx * 4]
+	mov Variable(0), eax
+	mov ebx, eax ; jobs
+	mov ecx, Param(2)
+	lea esi, &[eax + ecx * 4]
+	mov Variable(1), esi
+
+	mov eax, 1
+	mov ecx, Param(2)
+	movss xmm0, Param(1)
+	shl eax, ecx
+	mov edx, 2
+	cvtsi2ss xmm1, eax
+	mov eax, Param(0)
+	divss xmm0, xmm1
+.setjobs1:
+	mulss xmm0, [_2.0f]
+	shr eax, 1
+	mov [esi], eax
+	mov [esi + 4], edx
+	movss [esi + 8], xmm0
+	shl edx, 1
+	mov [ebx], esi
+	add ebx, 4
+	add esi, 16
+	loop .setjobs1
+	mov ebx, ecx
+	inc ebx
+
+	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, 8, Param(2), Variable(0), 0
+	mov edi, eax
+.accumulate:
+	invoke_cdecl _AccumulateAltitude, [edi], [edi + ebx * 4]
+	invoke_cdecl _CleanupFloatMap, [edi + ebx * 4]
+	invoke_cdecl _free, [edi + ebx * 4]
+	inc ebx
+	cmp ebx, Param(2)
+	jb .accumulate
+
+.end:
+	invoke_cdecl _free, Variable(0)
+	mov ebx, [edi]
+	invoke_cdecl _free, edi
+	mov eax, ebx
+	FrameEnd
+	ret
