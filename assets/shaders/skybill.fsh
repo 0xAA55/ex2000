@@ -3,6 +3,7 @@
 uniform mat4 camera;
 uniform float aspect;
 uniform float fovy;
+uniform float time;
 uniform sampler2D noise;
 in vec2 texcoord;
 out vec4 color;
@@ -11,10 +12,17 @@ void main()
 {
 	vec2 uv = texcoord * 2.0 - 1.0;
 	uv.x *= aspect;
-	vec3 position = vec3(uv * fovy, 1.0);
-	position *= mat3(camera);
-	position = normalize(position) * 0.5 + 0.5;
-	color = vec4(position, 1.0);
+	vec3 fragdir = vec3(uv * fovy, 1.0);
+	fragdir *= mat3(camera);
+	fragdir = normalize(fragdir);
+	color = vec4(fragdir * 0.5 + 0.5, 1.0);
 
-	color = vec4(vec3(texture2D(noise, texcoord).r * 0.5 + 0.5), 0.0);
+	if (fragdir.y >= 0.0)
+	{
+		vec2 cloud_uv = fragdir.xz * 0.5 / fragdir.y;
+		float dist = length(cloud_uv);
+		float cloud = texture2D(noise, cloud_uv + time * 0.05).r * 0.5 + 0.5;
+		float fog = 1.0 / max(1.0, dist);
+		color = mix(color, vec4(1.0), cloud * fog * fog * fog);
+	}
 }
