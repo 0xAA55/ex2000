@@ -53,6 +53,7 @@ _BillboardProgramLocations:
 .Aspect resd 1
 .FovY resd 1
 .Noise resd 1
+.Time resd 1
 
 segment .bss
 alignb 16
@@ -249,6 +250,8 @@ DefFunc _SceneInit
 	mov [_BillboardProgramLocations.FovY], eax
 	GetUniformLocation [_DrawBillboardProgram], "noise"
 	mov [_BillboardProgramLocations.Noise], eax
+	GetUniformLocation [_DrawBillboardProgram], "time"
+	mov [_BillboardProgramLocations.Time], eax
 
 	fldpi
 	fidivr word [_FovRatio]
@@ -265,7 +268,7 @@ DefFunc _FakeDwmFlush
 	ret
 
 DefFunc _Scene
-	FrameBegin 0, 4
+	FrameBegin 1, 4
 
 	invoke_cdecl _UpdateTimer, _Timer
 
@@ -302,6 +305,8 @@ DefFunc _Scene
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
+	fld qword [_Timer + Timer.TimerVal]
+	fstp dword Variable(0)
 	invoke_dll_stdcall glViewport, [_ClientRect.l], [_ClientRect.t], [_ClientRect.r], [_ClientRect.b]
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
@@ -313,6 +318,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovY]
+	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], Variable(0)
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
 	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
