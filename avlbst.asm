@@ -45,18 +45,6 @@ DefFunc _AVLNewNode
 	FrameEnd
 	ret
 
-; int AVLMaxInt(int a, int b);
-DefFunc _AVLMaxInt
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	cmp eax, Param(1)
-	jg .a_gt_b
-	mov eax, Param(1)
-.a_gt_b:
-	FrameEnd
-	ret
-
 ; int AVLHeight(AVLBST_Node *n);
 DefFunc _AVLHeight
 	FrameBegin 0, 0
@@ -82,7 +70,8 @@ DefFunc _AVLCalcHeight
 	invoke_cdecl _AVLHeight, [esi + AVLBST_Node.r_child]
 	LoadVariable ecx, 0
 
-	invoke_cdecl _AVLMaxInt, eax, ecx
+	cmp eax, ecx
+	cmovl eax, ecx
 	inc eax
 	mov [esi + AVLBST_Node.height], eax
 
