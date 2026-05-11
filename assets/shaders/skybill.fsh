@@ -7,6 +7,9 @@ uniform float time;
 uniform sampler2D noise;
 uniform vec4 fogcolor = vec4(0.8, 0.9, 1.0, 1.0);
 uniform vec4 skycolor = vec4(0.1, 0.2, 0.8, 1.0);
+uniform vec4 suncolor = vec4(1.0, 0.9, 0.8, 1.0);
+uniform vec3 sunpos = normalize(vec3(1.0, 1.0, 1.0));
+uniform float sunsize = 1000.0;
 in vec2 texcoord;
 out vec4 color;
 
@@ -18,6 +21,7 @@ void main()
 	fragdir *= mat3(camera);
 	fragdir = normalize(fragdir);
 
+	vec4 sun = suncolor * pow(max(dot(fragdir, sunpos), 0.0), sunsize);
 
 	if (fragdir.y >= 0.0)
 	{
@@ -32,4 +36,8 @@ void main()
 	{
 		color = mix(fogcolor, vec4(0.0), -fragdir.y);
 	}
+
+	color += sun;
+
+	color = min(color, vec4(1.0));
 }
