@@ -54,6 +54,10 @@ _BillboardProgramLocations:
 .FovY resd 1
 .Noise resd 1
 .Time resd 1
+global _MinPitch
+_MinPitch resd 1
+global _MaxPitch
+_MaxPitch resd 1
 
 segment .bss
 alignb 16
@@ -213,6 +217,12 @@ DefFunc _SceneInit
 .load_scene:
 	invoke_cdecl _MathInit
 
+	fldpi
+	fdiv dword [_2.0f]
+	fst dword [_MaxPitch]
+	fchs
+	fstp dword [_MinPitch]
+
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 0x3F800000, 8
 	mov ebx, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
@@ -296,6 +306,10 @@ DefFunc _Scene
 	mulps xmm0, xmm3
 	subps xmm2, xmm0
 	movq [_CameraYaw], xmm2
+	movss xmm0, [_CameraPitch]
+	maxss xmm0, [_MinPitch]
+	minss xmm0, [_MaxPitch]
+	movss [_CameraPitch], xmm0
 
 	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
 .after_check_input:
