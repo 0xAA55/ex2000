@@ -44,6 +44,7 @@ struc FloatMap
 endstruc
 
 %ifndef MATRIX_ASM
+extern _2.0f
 extern _F1111
 extern _ZeroVector
 extern _IdentityMatrix
