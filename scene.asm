@@ -43,6 +43,8 @@ global _BoxIndicesBuffer
 _BoxIndicesBuffer resb GlBuffer.size
 global _PerlinNoiseTexture
 _PerlinNoiseTexture resd 1
+global _PerlinNoiseTextureMipLinear
+_PerlinNoiseTextureMipLinear resd 1
 global _Timer
 _Timer resb Timer.size
 global _TempFloatMap
@@ -232,6 +234,14 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTextureMipLinear
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _CleanupFloatMap, ebx
 	invoke_cdecl _free, ebx
@@ -334,7 +344,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovY]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], Variable(0)
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
