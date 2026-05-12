@@ -44,6 +44,9 @@ struc FloatMap
 endstruc
 
 %ifndef MATRIX_ASM
+extern _Pi_P
+extern _Pi_N
+extern _2Pi
 extern _2.0f
 extern _F1111
 extern _ZeroVector

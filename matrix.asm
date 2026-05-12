@@ -22,6 +22,12 @@ import_dll_func ExitProcess
 %define RAND(s) (SEED_OF_RAND(s) & 0x7FFF)
 
 segment .bss
+global _Pi_P
+_Pi_P resd 1
+global _Pi_N
+_Pi_N resd 1
+global _2Pi
+_2Pi resd 1
 global _counter
 _counter resd 1
 global _HaveSSE3
@@ -65,6 +71,15 @@ _W15 dw 15
 segment .text
 DefFunc _MathInit
 	FrameBegin 0, 0, ebx
+
+	fldpi
+	fldpi
+	fadd
+	fstp dword [_2Pi]
+	fldpi
+	fst dword [_Pi_P]
+	fchs
+	fstp dword [_Pi_N]
 
 	mov eax, 0x3F800000
 	mov ecx, 4
