@@ -60,6 +60,12 @@ global _MinPitch
 _MinPitch resd 1
 global _MaxPitch
 _MaxPitch resd 1
+global _Pi_P
+_Pi_P resd 1
+global _Pi_N
+_Pi_N resd 1
+global _2Pi
+_2Pi resd 1
 
 segment .bss
 alignb 16
@@ -220,10 +226,17 @@ DefFunc _SceneInit
 	invoke_cdecl _MathInit
 
 	fldpi
-	fdiv dword [_2.0f]
-	fst dword [_MaxPitch]
+	fldpi
+	fadd
+	fstp dword [_2Pi]
+	fldpi
+	fst dword [_Pi_P]
 	fchs
-	fstp dword [_MinPitch]
+	fst dword [_Pi_N]
+	fdiv dword [_2.0f]
+	fst dword [_MinPitch]
+	fchs
+	fstp dword [_MaxPitch]
 
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 0x3F800000, 8
 	mov ebx, eax
@@ -315,6 +328,14 @@ DefFunc _Scene
 	subps xmm0, xmm1
 	mulps xmm0, xmm3
 	subps xmm2, xmm0
+	comiss xmm2, [_Pi_P]
+	jl .pi_p
+	subss xmm2, [_2Pi]
+.pi_p:
+	comiss xmm2, [_Pi_N]
+	jg .pi_n
+	addss xmm2, [_2Pi]
+.pi_n:
 	movq [_CameraYaw], xmm2
 	movss xmm0, [_CameraPitch]
 	maxss xmm0, [_MinPitch]
