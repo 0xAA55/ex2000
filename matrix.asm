@@ -51,7 +51,6 @@ global _IdentityMatrix
 _IdentityMatrix resb Matrix.size
 
 segment .rdata
-align 16
 global _2.0f
 _2.0f dd 0x40000000
 global _M1.0f
