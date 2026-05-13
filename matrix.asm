@@ -681,19 +681,28 @@ DefFunc _GenPerlinMap2D
 DefFunc _GetXYFloatMap
 	FrameBegin 0, 0, ebx
 
-	xor edx, edx
 	mov ebx, Param(2)
 	mov eax, Param(1)
-	div dword [ebx + FloatMap.border_len]
+	mov ecx, [ebx + FloatMap.border_len]
+	cdq
+	idiv ecx
+	test edx, edx
+	jge .y_non_neg
+	add edx, ecx
+.y_non_neg:
 	mov Param(1), edx
-	xor edx, edx
 	mov eax, Param(0)
-	div dword [ebx + FloatMap.border_len]
+	cdq
+	idiv ecx
+	test edx, edx
+	jge .x_non_neg
+	add edx, ecx
+.x_non_neg:
 	mov Param(0), edx
 	mov eax, Param(1)
-	mul dword [ebx + FloatMap.border_len]
+	mul ecx
 	add eax, Param(0)
-	lea eax, [eax * 4]
+	shl eax, 2
 	mul dword Param(3)
 	add eax, [ebx + FloatMap.data]
 
