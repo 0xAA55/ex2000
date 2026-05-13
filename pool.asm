@@ -123,13 +123,13 @@ DefFunc _PoolRun
 	%undef _JOBS_TODO
 
 DefFunc _PoolThreadProc
-	FrameBegin 0, 1, ebx, esi
+	FrameBegin 0, 2, ebx, esi
 	mov eax, Param(0)
 	mov ebx, [eax]
 	mov esi, [eax + 4]
 	lea eax, [esi * 4]
 	add eax, [ebx + Pool.jobs]
-	invoke_cdecl [ebx + Pool.work_proc], [eax]
+	invoke_cdecl [ebx + Pool.work_proc], [eax], esi
 	lea esi, [esi * 4]
 	add esi, [ebx + Pool.results]
 	mov [esi], eax
