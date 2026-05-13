@@ -992,13 +992,23 @@ DefFunc _AccumulateAltitude
 	FrameEnd
 	ret
 
+struc GenPerlinLayerData
+	.perlin_border_len resd 1
+	.ratio resd 1
+	.amplitude resd 1
+	.size equ $ - GenPerlinLayerData
+endstruc
+
 DefFunc _GenPerlinLayerPoolProc
 	FrameBegin 0, 4, ebx, edi
 
 	invoke_cdecl _calloc, FloatMap.size, 1
 	mov edi, eax
 	mov ebx, Param(0)
-	invoke_cdecl _GenPerlinAltitude, eax, [ebx], [ebx + 4], [ebx + 8]
+	invoke_cdecl _GenPerlinAltitude, eax, \
+		[ebx + GenPerlinLayerData.perlin_border_len], \
+		[ebx + GenPerlinLayerData.ratio], \
+		[ebx + GenPerlinLayerData.amplitude]
 	mov eax, edi
 	jmp .end
 .end:
@@ -1006,7 +1016,8 @@ DefFunc _GenPerlinLayerPoolProc
 	ret
 
 DefFunc _GenMultiLayerPerlinAltitude
-	FrameBegin 2, 5, ebx, esi, edi
+	FrameBegin 1, 5, ebx, esi, edi
+	AssignVars _JOBS
 
 	mov eax, Param(0)
 	bsr ecx, eax
@@ -1028,18 +1039,17 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov Param(0), eax
 	mov eax, Param(2)
 	dec ecx
-	cmp eax, ecx
-	cmova eax, ecx
-	mov Param(2), eax
+	cmp ecx, eax
+	cmova ecx, eax
+	mov Param(2), ecx ; ecx = num_layers = min(bits(eax) - 1, num_layers);
 
-	mov eax, 16
+	mov eax, GenPerlinLayerData.size
 	mul ecx
-	invoke_cdecl _malloc, &[eax + ecx * 4]
-	mov Variable(0), eax
-	mov ebx, eax ; jobs
+	invoke_cdecl _malloc, &[eax + ecx * 4] ; (sizeof GenPerlinLayerData) * num_layers + (sizeof GenPerlinLayerData*) * num_layers
+	mov _JOBS, eax
+	mov ebx, eax ; ebx = jobs
 	mov ecx, Param(2)
-	lea esi, &[eax + ecx * 4]
-	mov Variable(1), esi
+	lea esi, &[eax + ecx * 4] ; esi = ebx + (sizeof GenPerlinLayerData*) * num_layers
 
 	mov eax, 1
 	mov ecx, Param(2)
@@ -1051,19 +1061,19 @@ DefFunc _GenMultiLayerPerlinAltitude
 	divss xmm0, xmm1
 .setjobs1:
 	mulss xmm0, [_2.0f]
-	shr eax, 1
-	mov [esi], eax
-	mov [esi + 4], edx
-	movss [esi + 8], xmm0
-	shl edx, 1
+	shr eax, 1 ; perlin_border_len /= 2
+	mov [esi + GenPerlinLayerData.perlin_border_len], eax
+	mov [esi + GenPerlinLayerData.ratio], edx
+	movss [esi + GenPerlinLayerData.amplitude], xmm0
+	shl edx, 1 ; ratio *= 2
 	mov [ebx], esi
 	add ebx, 4
-	add esi, 16
+	add esi, GenPerlinLayerData.size
 	loop .setjobs1
 	mov ebx, ecx
-	inc ebx
+	inc ebx ; ebx = 1
 
-	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, 8, Param(2), Variable(0), 0
+	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, 8, Param(2), _JOBS, 0
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateAltitude, [edi], [edi + ebx * 4]
@@ -1074,9 +1084,10 @@ DefFunc _GenMultiLayerPerlinAltitude
 	jb .accumulate
 
 .end:
-	invoke_cdecl _free, Variable(0)
+	invoke_cdecl _free, _JOBS
 	mov ebx, [edi]
 	invoke_cdecl _free, edi
 	mov eax, ebx
 	FrameEnd
 	ret
+	%undef _JOBS
