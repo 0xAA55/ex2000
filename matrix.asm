@@ -1117,6 +1117,7 @@ DefFunc _GenMultiLayerPerlinAltitude
 
 DefFunc _GenRadiusMap
 	FrameBegin 2, 1, ebx, esi, edi
+	AssignVars DistSq, Y_Y
 
 	mov eax, Param(0)
 	test eax, eax
@@ -1126,7 +1127,7 @@ DefFunc _GenRadiusMap
 	jmp .bad_param1
 .good_param1:
 	mul eax
-	mov Variable(0), eax
+	mov DistSq, eax
 	shl eax, 2
 	invoke_cdecl _malloc, &[eax * 4 + 4]
 	mov ebx, eax
@@ -1139,37 +1140,46 @@ DefFunc _GenRadiusMap
 .loopy:
 	mov eax, edi
 	mul eax
-	mov Variable(1), eax ; y * y
+	mov Y_Y, eax ; y * y
 	xor eax, eax
+	inc eax
 	mov esi, eax
 .loopx:
 	mov eax, esi
 	mul eax
-	add eax, Variable(1) ; x * x + y * y
-	test eax, eax
-	jz .continue
-	cmp eax, Variable(0)
+	add eax, Y_Y ; x * x + y * y
+	cmp eax, DistSq
 	jg .continue
 
 	mov eax, [ebx]
-	mov [ebx + eax * 4 + 4 + 0x0], si
-	mov [ebx + eax * 4 + 4 + 0x2], di
-	mov [ebx + eax * 4 + 4 + 0x6], di
-	mov [ebx + eax * 4 + 4 + 0x8], si
-	neg esi
-	mov [ebx + eax * 4 + 4 + 0x4], si
-	mov [ebx + eax * 4 + 4 + 0xC], si
-	neg edi
-	mov [ebx + eax * 4 + 4 + 0xA], di
-	mov [ebx + eax * 4 + 4 + 0xE], di
-	add dword[ebx], 4
-	neg esi
-	neg edi
+	mov [ebx + 4 + eax * 4 + 0x0], si
+	mov [ebx + 4 + eax * 4 + 0x2], di
+	inc eax
+	cmp esi, edi
+	jz .continue
+	mov [ebx + 4 + eax * 4 + 0x0], di
+	mov [ebx + 4 + eax * 4 + 0x2], si
+	inc eax
 
 .continue:
+	mov [ebx], eax
+
 	inc esi
-	cmp esi, Param(0)
-	jb .loopx
+	cmp esi, edi
+	jbe .loopx
+
+	xor edx, edx
+	mov [ebx + 4 + eax * 4 + 0x0], di
+	mov [ebx + 4 + eax * 4 + 0x2], edx
+	mov [ebx + 4 + eax * 4 + 0x6], di
+	neg edi
+	mov [ebx + 4 + eax * 4 + 0x8], dx
+	mov [ebx + 4 + eax * 4 + 0xA], di
+	mov [ebx + 4 + eax * 4 + 0xC], di
+	mov [ebx + 4 + eax * 4 + 0xE], dx
+	neg edi
+	add eax, 4
+	mov [ebx], eax
 
 	inc edi
 	cmp edi, Param(0)
@@ -1178,6 +1188,8 @@ DefFunc _GenRadiusMap
 	mov eax, ebx
 	FrameEnd
 	ret
+	%undef DistSq
+	%undef Y_Y
 
 struc FM1DBlurCmn
 	.dst_map resd 1
