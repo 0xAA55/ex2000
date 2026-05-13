@@ -1091,3 +1091,57 @@ DefFunc _GenMultiLayerPerlinAltitude
 	FrameEnd
 	ret
 	%undef _JOBS
+
+DefFunc _GenRadiusMap
+	FrameBegin 2, 1, ebx, esi, edi
+
+	mov eax, Param(0)
+	mul eax
+	mov Variable(0), eax
+	shl eax, 2
+	invoke_cdecl _malloc, &[eax * 4 + 4]
+	mov ebx, eax
+
+	xor eax, eax
+	mov [ebx], eax
+	mov edi, eax
+.loopy:
+	mov eax, edi
+	mul eax
+	mov Variable(1), eax
+	xor eax, eax
+	mov esi, eax
+.loopx:
+	mov eax, esi
+	mul eax
+	add eax, Variable(1)
+	cmp eax, Variable(0)
+	jg .continue
+
+	mov eax, [ebx]
+	mov [ebx + eax * 4 + 4 + 0x0], si
+	mov [ebx + eax * 4 + 4 + 0x2], di
+	mov [ebx + eax * 4 + 4 + 0x6], di
+	mov [ebx + eax * 4 + 4 + 0x8], si
+	neg esi
+	mov [ebx + eax * 4 + 4 + 0x4], si
+	mov [ebx + eax * 4 + 4 + 0xC], si
+	neg edi
+	mov [ebx + eax * 4 + 4 + 0xA], di
+	mov [ebx + eax * 4 + 4 + 0xE], di
+	add dword[ebx], 4
+	neg esi
+	neg edi
+
+.continue:
+	inc esi
+	cmp esi, Param(0)
+	jb .loopx
+
+	inc edi
+	cmp edi, Param(0)
+	jb .loopy
+
+	mov eax, ebx
+	FrameEnd
+	ret

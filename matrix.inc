@@ -114,6 +114,18 @@ extern _AccumulateAltitude
 
 ; FloatMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers);
 extern _GenMultiLayerPerlinAltitude
+
+; typedef struct radmap_s
+; {
+; 	size_t items;
+; 	struct item
+; 	{
+;  		int16_t x, y;
+;  	}[0];
+; } radmap_t, *radmap_p;
+; radmap_p GenRadiusMap(int16_t radius);
+; // The returned pointer should be `free()`d.
+extern _GenRadiusMap
 %endif
 
 
