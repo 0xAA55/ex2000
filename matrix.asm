@@ -1096,6 +1096,12 @@ DefFunc _GenRadiusMap
 	FrameBegin 2, 1, ebx, esi, edi
 
 	mov eax, Param(0)
+	test eax, eax
+	jnz .good_param1
+.bad_param1:
+	int3
+	jmp .bad_param1
+.good_param1:
 	mul eax
 	mov Variable(0), eax
 	shl eax, 2
@@ -1103,18 +1109,22 @@ DefFunc _GenRadiusMap
 	mov ebx, eax
 
 	xor eax, eax
+	mov [ebx + 4], eax
+	inc eax
 	mov [ebx], eax
 	mov edi, eax
 .loopy:
 	mov eax, edi
 	mul eax
-	mov Variable(1), eax
+	mov Variable(1), eax ; y * y
 	xor eax, eax
 	mov esi, eax
 .loopx:
 	mov eax, esi
 	mul eax
-	add eax, Variable(1)
+	add eax, Variable(1) ; x * x + y * y
+	test eax, eax
+	jz .continue
 	cmp eax, Variable(0)
 	jg .continue
 
