@@ -4,6 +4,8 @@
 %define MATRIX_ASM 1
 %include "matrix.inc"
 
+%define FLOATMAP_2N 1
+
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 extern _malloc
@@ -682,6 +684,8 @@ DefFunc _GetXYFloatMap
 	FrameBegin 0, 0, ebx
 
 	mov ebx, Param(2)
+
+%ifndef FLOATMAP_2N
 	mov eax, Param(1)
 	mov ecx, [ebx + FloatMap.border_len]
 	cdq
@@ -702,6 +706,16 @@ DefFunc _GetXYFloatMap
 	mov eax, Param(1)
 	mul ecx
 	add eax, Param(0)
+%else
+	mov ecx, [ebx + FloatMap.border_len]
+	lea edx, [ecx - 1]
+	mov eax, Param(1)
+	mov ecx, Param(0)
+	and eax, edx
+	and ecx, edx
+	mul dword [ebx + FloatMap.border_len]
+	add eax, ecx
+%endif
 	shl eax, 2
 	mul dword Param(3)
 	add eax, [ebx + FloatMap.data]
