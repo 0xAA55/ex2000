@@ -1178,3 +1178,116 @@ DefFunc _GenRadiusMap
 	mov eax, ebx
 	FrameEnd
 	ret
+
+struc FM1DBlurCmn
+	.dst_map resd 1
+	.src_map resd 1
+	.rad_map resd 1
+	.size equ $ - FM1DBlurCmn
+endstruc
+
+DefFunc _FloatMap1DGaussianBlurPoolProc
+	FrameBegin 2, 4, ebx, esi, edi
+	AssignVars _X, _Y
+
+	xor eax, eax
+	mov ecx, Param(1)
+	mov _X, eax
+	mov _Y, ecx
+
+	mov ebx, Param(0)
+	mov esi, [ebx + FM1DBlurCmn.rad_map]
+	cvtsi2ss xmm6, [esi]
+
+.proc_pixels:
+	xor eax, eax
+	mov edi, eax
+	movq xmm5, _X
+	movd xmm7, eax
+	ResetPassReg
+	PrepParam 2, [ebx + FM1DBlurCmn.src_map]
+	PrepParam 3, 1
+.gather_gaussian:
+	movd xmm0, [esi + 4 + edi * 4]
+	pxor xmm1, xmm1
+	pcmpgtw xmm1, xmm0
+	punpcklwd xmm0, xmm1
+	paddd xmm0, xmm5
+	movq CallParam(0), xmm0
+	call _GetXYFloatMap
+	addss xmm7, [eax]
+	inc edi
+	cmp edi, [esi]
+	jb .gather_gaussian
+	divss xmm7, xmm6
+	movq xmm0, _X
+
+	ResetPassReg
+	PrepParam 2, [ebx + FM1DBlurCmn.dst_map]
+	PrepParam 3, 1
+	movq CallParam(0), xmm5
+	call _GetXYFloatMap
+	movss [eax], xmm7
+
+	mov eax, _X
+	inc eax
+	mov _X, eax
+	mov ecx, [ebx + FM1DBlurCmn.src_map]
+	cmp eax, [ecx + FloatMap.border_len]
+	jb .proc_pixels
+
+	FrameEnd
+	ret
+	%undef _X
+	%undef _Y
+
+DefFunc _FloatMap1DGaussianBlur
+	FrameBegin 1, 5, ebx, esi, edi
+	AssignVars _JOBS
+
+	; ebx = src_map
+	; edi = dst_map
+	; esi = cmn_data
+
+	mov ebx, Param(0)
+
+	invoke_cdecl _malloc, FloatMap.size
+	mov edi, eax
+
+	mov eax, [ebx + FloatMap.border_len]
+	mov [edi + FloatMap.border_len], eax
+	mul eax
+	invoke_cdecl _aligned_malloc, &[eax * 4]
+	mov [edi + FloatMap.data], eax
+
+	invoke_cdecl _malloc, FM1DBlurCmn.size
+	mov esi, eax
+
+	invoke_cdecl _GenRadiusMap, Param(1)
+
+	mov [esi + FM1DBlurCmn.dst_map], edi
+	mov [esi + FM1DBlurCmn.src_map], ebx
+	mov [esi + FM1DBlurCmn.rad_map], eax
+
+	mov eax, [ebx + FloatMap.border_len]
+	invoke_cdecl _malloc, &[eax * 4]
+	mov _JOBS, eax
+
+	push edi
+	mov edi, eax
+	mov ecx, [ebx + FloatMap.border_len]
+	mov eax, esi
+	rep stosd
+	pop edi
+
+	invoke_cdecl _PoolRun, _FloatMap1DGaussianBlurPoolProc, 8, [ebx + FloatMap.border_len], _JOBS, 0
+
+	invoke_cdecl _free, eax
+	invoke_cdecl _free, [esi + FM1DBlurCmn.rad_map]
+	invoke_cdecl _free, esi
+	invoke_cdecl _free, _JOBS
+
+	mov eax, edi
+	FrameEnd
+	ret
+	%undef _JOBS

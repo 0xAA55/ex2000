@@ -126,6 +126,9 @@ extern _GenMultiLayerPerlinAltitude
 ; radmap_p GenRadiusMap(int16_t radius);
 ; // The returned pointer should be `free()`d.
 extern _GenRadiusMap
+
+; FloatMap *FloatMap1DGaussianBlur(FloatMap *src, int16_t blur_radius);
+extern _FloatMap1DGaussianBlur
 %endif
 
 
