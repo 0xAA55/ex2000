@@ -195,6 +195,7 @@ DefFunc _SceneLoadShaderProgram
 ;int SceneInit();
 DefFunc _SceneInit
 	FrameBegin 1, 6, ebx
+	AssignVars Location
 
 	PrepParam 0, _Timer
 	call _InitTimer
@@ -256,9 +257,9 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
 	GetAttribLocation [_DrawBillboardProgram], "position"
-	mov Variable(0), eax
-	invoke_dll_stdcall glEnableVertexAttribArray, Variable(0)
-	invoke_dll_stdcall glVertexAttribPointer, Variable(0), 2, GL_BYTE, 0, 2, 0
+	mov Location, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, Location
+	invoke_dll_stdcall glVertexAttribPointer, Location, 2, GL_BYTE, 0, 2, 0
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
@@ -282,6 +283,7 @@ DefFunc _SceneInit
 	mov eax, 1
 	FrameEnd
 	ret
+	%undef Location
 
 DefFunc _FakeDwmFlush
 	xor eax, eax
