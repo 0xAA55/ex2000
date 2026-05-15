@@ -748,22 +748,19 @@ DefFunc _GetXYFloatMap
 	add edx, ecx
 .x_non_neg:
 	mov Param(0), edx
-	mov eax, Param(1)
-	mul ecx
-	add eax, Param(0)
+	mov eax, Param(0)
+	mov ecx, Param(1)
 %else
 	mov ecx, [ebx + FloatMap.border_len]
 	lea edx, [ecx - 1]
-	mov eax, Param(1)
-	mov ecx, Param(0)
+	mov eax, Param(0)
+	mov ecx, Param(1)
 	and eax, edx
 	and ecx, edx
-	mul dword [ebx + FloatMap.border_len]
-	add eax, ecx
 %endif
-	shl eax, 2
-	mul dword Param(3)
-	add eax, [ebx + FloatMap.data]
+	mul dword [ebx + FloatMap.dims]
+	mov ecx, [ebx + FloatMap.row_ptr + ecx * 4]
+	lea eax, [eax * 4 + ecx]
 
 	FrameEnd
 	ret

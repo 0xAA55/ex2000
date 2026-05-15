@@ -107,7 +107,7 @@ extern _SmootherStep
 ; FloatMap *CreatePerlinMap2D(int border_len);
 extern _CreatePerlinMap2D
 
-; float* GetXYFloatMap(int x, int y, FloatMap *map, int dims);
+; float *GetXYFloatMap(int x, int y, FloatMap *map);
 extern _GetXYFloatMap
 
 ; void ConvertPerlinMapToAltitude(FloatMap *out, int ratio, float amplitude, FloatMap *map);
