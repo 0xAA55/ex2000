@@ -40,7 +40,11 @@ endstruc
 struc FloatMap
 .data resd 1
 .border_len resd 1
-.size equ $ - FloatMap
+.num_pixels resd 1
+.dims resd 1
+.head_size equ $ - FloatMap
+.row_ptr:
+endstruc
 endstruc
 
 %ifndef MATRIX_ASM
