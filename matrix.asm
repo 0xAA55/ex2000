@@ -1072,7 +1072,7 @@ DefFunc _GenPerlinLayerPoolProc
 		[ebx + GenPerlinLayerData.perlin_border_len], \
 		[ebx + GenPerlinLayerData.ratio], \
 		[ebx + GenPerlinLayerData.amplitude]
-.end:
+
 	FrameEnd
 	ret
 
