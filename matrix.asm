@@ -651,23 +651,36 @@ DefFunc _SmootherStep
 	FrameEnd
 	ret
 
-DefFunc _GenPerlinMap2D
-	FrameBegin 1, 2, ebx, esi
+DefFunc _CreatePerlinMap2D
+	FrameBegin 0, 2, ebx, esi
 
+	invoke_cdecl _CreateFloatMap, Param(0), 2
+	mov ebx, eax
+
+	mov eax, Param(0)
+	cmp eax, 1
+	jae .blae1
+
+	mov esi, [ebx + FloatMap.data]
+	invoke_dll_cdecl rand
+	shl eax, 1
+	sub eax, 0x7FFF
+	mov [esi], eax
+	fild dword [esi]
+	fidiv dword [_Rand4AndVal]
+	fldpi
+	fmul
+	fsincos
+	fstp dword [esi]
+	fstp dword [esi + 4]
+
+	jmp .end
+.blae1:
 	invoke_cdecl _CreateSeedVector
 	mov esi, eax
 
-	mov ebx, Param(0)
-	mov eax, Param(1)
-	mov [ebx + FloatMap.border_len], eax
-	mul eax
-	cmp eax, 4
-	jae .success
-.success:
-	mov Variable(0), eax
-	invoke_cdecl _aligned_malloc, &[eax * 8], 0x10
-	mov [ebx + FloatMap.data], eax
-	mov ecx, Variable(0)
+	mov eax, [ebx + FloatMap.data]
+	mov ecx, [ebx + FloatMap.num_pixels]
 	shr ecx, 1
 	movaps xmm2, [_F1111]
 	movaps xmm3, [esi]
@@ -708,7 +721,7 @@ DefFunc _GenPerlinMap2D
 	invoke_cdecl _DestroySeedVector, esi
 
 .end:
-	mov eax, [ebx + FloatMap.data]
+	mov eax, ebx
 	FrameEnd
 	ret
 

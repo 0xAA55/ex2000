@@ -104,8 +104,8 @@ extern _DestroyFloatMap
 ; float SmootherStep(float x);
 extern _SmootherStep
 
-; void GenPerlinMap2D(FloatMap *out, int border_len);
-extern _GenPerlinMap2D
+; FloatMap *CreatePerlinMap2D(int border_len);
+extern _CreatePerlinMap2D
 
 ; float* GetXYFloatMap(int x, int y, FloatMap *map, int dims);
 extern _GetXYFloatMap
