@@ -98,8 +98,8 @@ extern _MatrixMultiply
 ; FloatMap *CreateFloatMap(int border_len, int dims);
 extern _CreateFloatMap
 
-; void CleanupFloatMap(FloatMap *map);
-extern _CleanupFloatMap
+; void DestroyFloatMap(FloatMap *map);
+extern _DestroyFloatMap
 
 ; float SmootherStep(float x);
 extern _SmootherStep

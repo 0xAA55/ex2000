@@ -626,13 +626,12 @@ DefFunc _CreateFloatMap
 	FrameEnd
 	ret
 
-DefFunc _CleanupFloatMap
+DefFunc _DestroyFloatMap
 	FrameBegin 0, 1, ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _aligned_free, [ebx + FloatMap.data]
-	xor eax, eax
-	mov [ebx + FloatMap.data], eax
+	invoke_cdecl _free, ebx
 
 	FrameEnd
 	ret
