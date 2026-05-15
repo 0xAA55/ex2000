@@ -127,6 +127,16 @@ extern _GenMultiLayerPerlinAltitude
 ; // The returned pointer should be `free()`d.
 extern _GenRadiusMap
 
+struc FM1DDataCmn
+	.dst_map resd 1
+	.src_map resd 1
+	.userdata resd 1
+	.size equ $ - FM1DDataCmn
+endstruc
+
+; FloatMap *FloatMap1DMTPool(FloatMap *src, void *userdata, int(*work_proc)(FM1DDataCmn *param, size_t index));
+extern _FloatMap1DMTPool
+
 ; FloatMap *FloatMap1DGaussianBlur(FloatMap *src, int16_t blur_radius);
 extern _FloatMap1DGaussianBlur
 %endif
