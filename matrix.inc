@@ -113,7 +113,7 @@ extern _GetXYFloatMap
 ; FloatMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, FloatMap *map);
 extern _ConvertPerlinMapToAltitude
 
-; void GenPerlinAltitude(FloatMap *out, int perlin_border_len, int ratio, float amplitude);
+; FloatMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
 extern _GenPerlinAltitude
 
 ; void AccumulateAltitude(FloatMap *accum_to, FloatMap *src);

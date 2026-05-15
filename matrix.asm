@@ -973,13 +973,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	%undef _DP_00_10_01_11
 
 DefFunc _GenPerlinAltitude
-	FrameBegin 1, 4
-	invoke_cdecl _calloc, FloatMap.size, 1
-	mov Variable(0), eax
-	invoke_cdecl _GenPerlinMap2D, Variable(0), Param(1)
-	invoke_cdecl _ConvertPerlinMapToAltitude, Param(0), Param(2), Param(3), Variable(0)
-	invoke_cdecl _CleanupFloatMap, Variable(0)
-	invoke_cdecl _free, Variable(0)
+	FrameBegin 0, 3, ebx, edi
+	invoke_cdecl _CreatePerlinMap2D, Param(0)
+	mov ebx, eax
+	invoke_cdecl _ConvertPerlinMapToAltitude, Param(1), Param(2), ebx
+	mov edi, eax
+	invoke_cdecl _DestroyFloatMap, ebx
+	mov eax, edi
 	FrameEnd
 	ret
 
