@@ -141,6 +141,26 @@
 	call _LoadFuncGroup
 %endmacro
 
+%macro strcontains 2
+	%push
+	%strlen %$len_str %1
+	%strlen %$len_sub %2
+	%assign %$i 1
+	%assign %$found 0
+	%if %$len_str >= %$len_sub
+		%rep %$len_str - %$len_sub + 1
+			%substr %$part %1 %$i, %$len_sub
+			%ifidn %$part, %2
+				%assign %$found 1
+				%exitrep
+			%endif
+			%assign %$i %$i + 1
+		%endrep
+	%endif
+	%assign result %$found
+	%pop
+%endmacro
+
 %macro invoke_stdcall 1-*
 	%if %0 == 1
 		call %1
@@ -148,8 +168,20 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate -1
+			strcontains %str(%1), "eax"
+			%assign pos_eax result
+			strcontains %str(%1), "ecx"
+			%assign pos_ecx result
+			strcontains %str(%1), "edx"
+			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
+			%elif pos_eax > 0
+				AddRegAvoidForPass eax
+			%elif pos_ecx > 0
+				AddRegAvoidForPass ecx
+			%elif pos_edx > 0
+				AddRegAvoidForPass edx
 			%endif
 		%endrep
 		%rotate -1
@@ -171,8 +203,20 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate -1
+			strcontains %str(%1), "eax"
+			%assign pos_eax result
+			strcontains %str(%1), "ecx"
+			%assign pos_ecx result
+			strcontains %str(%1), "edx"
+			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
+			%elif pos_eax > 0
+				AddRegAvoidForPass eax
+			%elif pos_ecx > 0
+				AddRegAvoidForPass ecx
+			%elif pos_edx > 0
+				AddRegAvoidForPass edx
 			%endif
 		%endrep
 		%rotate -1
@@ -194,8 +238,20 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate 1
+			strcontains %str(%1), "eax"
+			%assign pos_eax result
+			strcontains %str(%1), "ecx"
+			%assign pos_ecx result
+			strcontains %str(%1), "edx"
+			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
+			%elif pos_eax > 0
+				AddRegAvoidForPass eax
+			%elif pos_ecx > 0
+				AddRegAvoidForPass ecx
+			%elif pos_edx > 0
+				AddRegAvoidForPass edx
 			%endif
 		%endrep
 		%rotate 1
@@ -217,8 +273,20 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate 1
+			strcontains %str(%1), "eax"
+			%assign pos_eax result
+			strcontains %str(%1), "ecx"
+			%assign pos_ecx result
+			strcontains %str(%1), "edx"
+			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
+			%elif pos_eax > 0
+				AddRegAvoidForPass eax
+			%elif pos_ecx > 0
+				AddRegAvoidForPass ecx
+			%elif pos_edx > 0
+				AddRegAvoidForPass edx
 			%endif
 		%endrep
 		%rotate 1
