@@ -1065,17 +1065,13 @@ struc GenPerlinLayerData
 endstruc
 
 DefFunc _GenPerlinLayerPoolProc
-	FrameBegin 0, 4, ebx, edi
+	FrameBegin 0, 3, ebx
 
-	invoke_cdecl _calloc, FloatMap.size, 1
-	mov edi, eax
 	mov ebx, Param(0)
-	invoke_cdecl _GenPerlinAltitude, eax, \
+	invoke_cdecl _GenPerlinAltitude, \
 		[ebx + GenPerlinLayerData.perlin_border_len], \
 		[ebx + GenPerlinLayerData.ratio], \
 		[ebx + GenPerlinLayerData.amplitude]
-	mov eax, edi
-	jmp .end
 .end:
 	FrameEnd
 	ret
