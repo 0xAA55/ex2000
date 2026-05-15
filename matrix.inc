@@ -95,6 +95,9 @@ extern _MatrixTranspose
 ; void MatrixMultiply(Matrix *out, Matrix *l, Matrix *r);
 extern _MatrixMultiply
 
+; FloatMap *CreateFloatMap(int border_len, int dims);
+extern _CreateFloatMap
+
 ; void CleanupFloatMap(FloatMap *map);
 extern _CleanupFloatMap
 
