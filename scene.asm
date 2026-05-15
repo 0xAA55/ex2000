@@ -47,8 +47,6 @@ global _PerlinNoiseTextureMipLinear
 _PerlinNoiseTextureMipLinear resd 1
 global _Timer
 _Timer resb Timer.size
-global _TempFloatMap
-_TempFloatMap resb FloatMap.size
 global _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
