@@ -242,8 +242,7 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	invoke_cdecl _CleanupFloatMap, ebx
-	invoke_cdecl _free, ebx
+	invoke_cdecl _DestroyFloatMap, ebx
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
 
