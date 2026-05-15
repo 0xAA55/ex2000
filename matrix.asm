@@ -1228,8 +1228,51 @@ DefFunc _GenRadiusMap
 	%undef DistSq
 	%undef Y_Y
 
-DefFunc _FloatMap1DGaussianBlurPoolProc
-	FrameBegin 2, 4, ebx, esi, edi
+DefFunc _FloatMapMTPool
+	FrameBegin 1, 5, ebx, esi, edi
+	AssignVars _JOBS
+
+	; ebx = src_map
+	; edi = dst_map
+	; esi = cmn_data
+
+	mov ebx, Param(0)
+
+	invoke_cdecl _CreateFloatMap, [ebx + FloatMap.border_len], [ebx + FloatMap.dims]
+	mov edi, eax
+
+	invoke_cdecl _malloc, FMDataCmn.size
+	mov esi, eax
+
+	mov eax, Param(2)
+	mov [esi + FMDataCmn.dst_map], edi
+	mov [esi + FMDataCmn.src_map], ebx
+	mov [esi + FMDataCmn.userdata], eax
+
+	mov eax, [ebx + FloatMap.border_len]
+	invoke_cdecl _malloc, &[eax * 4]
+	mov _JOBS, eax
+
+	push edi
+	mov edi, eax
+	mov ecx, [ebx + FloatMap.border_len]
+	mov eax, esi
+	rep stosd
+	pop edi
+
+	invoke_cdecl _PoolRun, Param(3), Param(1), [ebx + FloatMap.border_len], _JOBS, Param(4)
+
+	invoke_cdecl _free, eax
+	invoke_cdecl _free, esi
+	invoke_cdecl _free, _JOBS
+
+	mov eax, edi
+	FrameEnd
+	ret
+	%undef _JOBS
+
+DefFunc _FloatMapGaussianBlurPoolProc
+	FrameBegin 2, 3, ebx, esi, edi
 	AssignVars _X, _Y
 
 	xor eax, eax
@@ -1238,7 +1281,7 @@ DefFunc _FloatMap1DGaussianBlurPoolProc
 	mov _Y, ecx
 
 	mov ebx, Param(0)
-	mov esi, [ebx + FM1DDataCmn.userdata]
+	mov esi, [ebx + FMDataCmn.userdata]
 	cvtsi2ss xmm6, [esi]
 
 .proc_pixels:
@@ -1247,8 +1290,7 @@ DefFunc _FloatMap1DGaussianBlurPoolProc
 	movq xmm5, _X
 	movd xmm7, eax
 	ResetPassReg
-	PrepParam 2, [ebx + FM1DDataCmn.src_map]
-	PrepParam 3, 1
+	PrepParam 2, [ebx + FMDataCmn.src_map]
 .gather_gaussian:
 	movd xmm0, [esi + 4 + edi * 4]
 	pxor xmm1, xmm1
@@ -1265,8 +1307,7 @@ DefFunc _FloatMap1DGaussianBlurPoolProc
 	movq xmm0, _X
 
 	ResetPassReg
-	PrepParam 2, [ebx + FM1DDataCmn.dst_map]
-	PrepParam 3, 1
+	PrepParam 2, [ebx + FMDataCmn.dst_map]
 	movq CallParam(0), xmm5
 	call _GetXYFloatMap
 	movss [eax], xmm7
@@ -1274,7 +1315,7 @@ DefFunc _FloatMap1DGaussianBlurPoolProc
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	mov ecx, [ebx + FM1DDataCmn.src_map]
+	mov ecx, [ebx + FMDataCmn.src_map]
 	cmp eax, [ecx + FloatMap.border_len]
 	jb .proc_pixels
 
@@ -1283,60 +1324,12 @@ DefFunc _FloatMap1DGaussianBlurPoolProc
 	%undef _X
 	%undef _Y
 
-DefFunc _FloatMap1DMTPool
-	FrameBegin 1, 5, ebx, esi, edi
-	AssignVars _JOBS
-
-	; ebx = src_map
-	; edi = dst_map
-	; esi = cmn_data
-
-	mov ebx, Param(0)
-
-	invoke_cdecl _malloc, FloatMap.size
-	mov edi, eax
-
-	mov eax, [ebx + FloatMap.border_len]
-	mov [edi + FloatMap.border_len], eax
-	mul eax
-	invoke_cdecl _aligned_malloc, &[eax * 4]
-	mov [edi + FloatMap.data], eax
-
-	invoke_cdecl _malloc, FM1DDataCmn.size
-	mov esi, eax
-
-	mov [esi + FM1DDataCmn.dst_map], edi
-	mov [esi + FM1DDataCmn.src_map], ebx
-	mov [esi + FM1DDataCmn.userdata], eax
-
-	mov eax, [ebx + FloatMap.border_len]
-	invoke_cdecl _malloc, &[eax * 4]
-	mov _JOBS, eax
-
-	push edi
-	mov edi, eax
-	mov ecx, [ebx + FloatMap.border_len]
-	mov eax, esi
-	rep stosd
-	pop edi
-
-	invoke_cdecl _PoolRun, Param(2), 8, [ebx + FloatMap.border_len], _JOBS, 0
-
-	invoke_cdecl _free, eax
-	invoke_cdecl _free, esi
-	invoke_cdecl _free, _JOBS
-
-	mov eax, edi
-	FrameEnd
-	ret
-	%undef _JOBS
-
-DefFunc _FloatMap1DGaussianBlur
-	FrameBegin 1, 3, ebx
+DefFunc _FloatMapGaussianBlur
+	FrameBegin 1, 5, ebx
 
 	invoke_cdecl _GenRadiusMap, Param(1)
 	mov Variable(0), eax
-	invoke_cdecl _FloatMap1DMTPool, Param(0), eax, _FloatMap1DGaussianBlurPoolProc
+	invoke_cdecl _FloatMapMTPool, Param(0), 8, eax, _FloatMapGaussianBlurPoolProc, 0
 	mov ebx, eax
 	invoke_cdecl _free, Variable(0)
 	mov eax, ebx

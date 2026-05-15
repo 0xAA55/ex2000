@@ -45,6 +45,12 @@ struc FloatMap
 .head_size equ $ - FloatMap
 .row_ptr:
 endstruc
+
+struc FMDataCmn
+.dst_map resd 1
+.src_map resd 1
+.userdata resd 1
+.size equ $ - FMDataCmn
 endstruc
 
 %ifndef MATRIX_ASM
@@ -134,18 +140,12 @@ extern _GenMultiLayerPerlinAltitude
 ; // The returned pointer should be `free()`d.
 extern _GenRadiusMap
 
-struc FM1DDataCmn
-	.dst_map resd 1
-	.src_map resd 1
-	.userdata resd 1
-	.size equ $ - FM1DDataCmn
-endstruc
 
-; FloatMap *FloatMap1DMTPool(FloatMap *src, void *userdata, int(*work_proc)(FM1DDataCmn *param, size_t index));
-extern _FloatMap1DMTPool
+; FloatMap *FloatMapMTPool(FloatMap *src, int num_workers, void *userdata, int(*work_proc)(FM1DDataCmn *param, size_t index), size_t stack_size);
+extern _FloatMapMTPool
 
-; FloatMap *FloatMap1DGaussianBlur(FloatMap *src, int16_t blur_radius);
-extern _FloatMap1DGaussianBlur
+; FloatMap *FloatMapGaussianBlur(FloatMap *src, int16_t blur_radius);
+extern _FloatMapGaussianBlur
 %endif
 
 
