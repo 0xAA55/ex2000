@@ -1335,3 +1335,39 @@ DefFunc _FloatMapGaussianBlur
 	mov eax, ebx
 	FrameEnd
 	ret
+
+DefFunc _GenDistanceMap
+	FrameBegin 1, 2, ebx, esi, edi
+
+	invoke_cdecl _CreateFloatMap, Param(0), 1
+	mov ebx, eax
+
+	;for (int y = 0; y < r; y++)
+	;{
+	;	for (int x = 0; x < y; x++)
+	;	{
+	;		float d = sqrt(x * x + y * y);
+	;	}
+	;}
+
+
+
+
+	mov eax, ebx
+
+	FrameEnd
+	ret
+
+DefFunc _FloatMapKMapGen
+	FrameBegin 0, 3, ebx, esi
+
+	mov eax, Param(0)
+	invoke_cdecl _GenDistanceMap, [eax + FloatMap.border_len]
+	mov ebx, eax
+
+
+
+	invoke_cdecl _DestroyFloatMap, ebx
+
+	FrameEnd
+	ret
