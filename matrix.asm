@@ -1138,8 +1138,7 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateAltitude, [edi], [edi + ebx * 4]
-	invoke_cdecl _CleanupFloatMap, [edi + ebx * 4]
-	invoke_cdecl _free, [edi + ebx * 4]
+	invoke_cdecl _DestroyFloatMap, [edi + ebx * 4]
 	inc ebx
 	cmp ebx, Param(2)
 	jb .accumulate
