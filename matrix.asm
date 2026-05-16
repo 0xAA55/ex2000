@@ -67,10 +67,6 @@ global _F0123
 _F0123 resd 4
 global _UF0F0
 _UF0F0 resd 4
-global _Scale127_5
-_Scale127_5 resd 4
-global _BMxmm
-_BMxmm resd 4
 global _IdentityMatrix
 _IdentityMatrix resb Matrix.size
 
@@ -119,11 +115,9 @@ DefFunc _MathInit
 .init_math:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
-	mov dword [_Scale127_5 + (ecx - 1) * 4], 0x42FF0000
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
 	mov dword [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
-	mov byte [_BMxmm + (ecx - 1) * 4], 0xFF
 	add edx, 20
 	loop .init_math
 	dec ecx
