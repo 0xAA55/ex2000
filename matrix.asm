@@ -1343,41 +1343,11 @@ DefFunc _GenMultiLayerPerlinAltitude
 	invoke_cdecl _free, edi
 
 	invoke_cdecl _FloatMapGetMaxValue, ebx
+	fdivr dword Param(1)
 	fstp dword _JOBS
 
-	mov eax, [ebx + FloatMap.num_pixels]
-	mul dword[ebx + FloatMap.dims]
-	mov esi, [ebx + FloatMap.data]
-	movss xmm7, Param(1)
-	divss xmm7, _JOBS
-	test al, 0xF
-	mov ecx, eax
-	jz .batch_proc
-.single_proc:
-	movss xmm0, [esi + (ecx - 1) * 4]
-	mulss xmm0, xmm7
-	movss [esi + (ecx - 1) * 4], xmm0
-	jmp .end
-.batch_proc:
-	shr ecx, 4
-	shufps xmm7, xmm7, 0
-.batch_loop:
-	movaps xmm0, [esi + 0x00]
-	movaps xmm1, [esi + 0x10]
-	movaps xmm2, [esi + 0x20]
-	movaps xmm3, [esi + 0x30]
-	mulps xmm0, xmm7
-	mulps xmm1, xmm7
-	mulps xmm2, xmm7
-	mulps xmm3, xmm7
-	movaps [esi + 0x00], xmm0
-	movaps [esi + 0x10], xmm1
-	movaps [esi + 0x20], xmm2
-	movaps [esi + 0x30], xmm3
-	add esi, 0x40
-	loop .batch_loop
+	invoke_cdecl _FloatMapApplyGain, ebx, _JOBS
 
-.end:
 	mov eax, ebx
 	FrameEnd
 	ret
