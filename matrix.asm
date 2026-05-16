@@ -1,9 +1,9 @@
-%include "loaddll.inc"
-%include "pool.inc"
 
 %define MATRIX_ASM 1
 %include "matrix.inc"
 
+%include "loaddll.inc"
+%include "pool.inc"
 %define FLOATMAP_2N 1
 
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
