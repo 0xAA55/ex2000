@@ -71,6 +71,7 @@ extern _B0123
 extern _I0123
 extern _F0123
 extern _UF0F0
+extern _FP5P5P5P5
 extern _ZeroVector
 extern _IdentityMatrix
 
