@@ -53,6 +53,18 @@ struc FMDataCmn
 .size equ $ - FMDataCmn
 endstruc
 
+%ifdef BINARY
+	segment .text
+	%undef MATRIX_ASM
+	%unmacro extern 1-*
+	%macro extern 1-*
+	%rep %0
+		dd %1
+		%rotate 1
+	%endrep
+	%endmacro
+%endif
+
 %ifndef MATRIX_ASM
 extern _Pi_P
 extern _Pi_N
@@ -181,5 +193,14 @@ extern _FloatMapGetMaxValue
 extern _FloatMapKMapGen
 %endif
 
+%ifdef BINARY
+	%unmacro extern 1-*
+	%macro extern 1-*
+	%rep %0
+		%1: dd 0xBAADF00D
+		%rotate 1
+	%endrep
+	%endmacro
+%endif
 
 %endif
