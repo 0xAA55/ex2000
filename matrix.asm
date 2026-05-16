@@ -688,6 +688,55 @@ DefFunc _DestroyFloatMap
 	FrameEnd
 	ret
 
+DefFunc _WarpFloatMap
+	FrameBegin 4, 2, ebx, esi, edi
+	AssignVars _X, _Y, _BM, _RP
+
+	mov ebx, Param(0)
+	invoke_cdecl _CreateFloatMap, [ebx + FloatMap.border_len], [ebx + FloatMap.dims]
+	mov ebx, eax
+	mov edi, [eax + FloatMap.data]
+
+	mov eax, [ebx + FloatMap.border_len]
+	dec eax
+	mov _BM, eax
+
+	xor eax, eax
+	mov _Y, eax
+.loopy:
+	add eax, Param(2)
+	and eax, _BM
+	mov eax, [ebx + FloatMap.row_ptr + eax * 4]
+	mov _RP, eax
+	xor eax, eax
+	mov _X, eax
+.loopx:
+	mov eax, _X
+	add eax, Param(1)
+	and eax, _BM
+	add eax, _RP
+	mov esi, eax
+	mov ecx, [ebx + FloatMap.dims]
+	rep movsd
+
+	mov eax, _X
+	inc eax
+	mov _X, eax
+	cmp eax, [ebx + FloatMap.border_len]
+	jb .loopx
+
+	mov eax, _Y
+	inc eax
+	mov _Y, eax
+	cmp eax, [ebx + FloatMap.border_len]
+	jb .loopy
+
+	mov eax, ebx
+	FrameEnd
+	ret
+	%undef _X
+	%undef _Y
+
 DefFunc _SmootherStep
 	FrameBegin 0, 0
 

@@ -123,6 +123,9 @@ extern _DuplicateFloatMap
 ; void DestroyFloatMap(FloatMap *map);
 extern _DestroyFloatMap
 
+; FloatMap *WarpFloatMap(FloatMap *src, int x, int y);
+extern _WarpFloatMap
+
 ; float SmootherStep(float x);
 extern _SmootherStep
 
