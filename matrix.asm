@@ -1043,10 +1043,10 @@ DefFunc _AccumulateAltitude
 
 	mov esi, Param(1)
 	mov edi, Param(0)
-	mov eax, [esi + FloatMap.border_len]
+	mov eax, [esi + FloatMap.num_pixels]
 	mul dword [esi + FloatMap.dims]
 	mov ecx, eax
-	mov eax, [edi + FloatMap.border_len]
+	mov eax, [edi + FloatMap.num_pixels]
 	mul dword [edi + FloatMap.dims]
 	cmp eax, ecx
 	je .good_size
@@ -1054,10 +1054,9 @@ DefFunc _AccumulateAltitude
 	int3
 	jmp .bad_size
 .good_size:
-	mul dword [esi + FloatMap.border_len]
+	mov ecx, eax
 	mov esi, [esi + FloatMap.data]
 	mov edi, [edi + FloatMap.data]
-	mov ecx, eax
 	xor eax, eax
 	test ecx, 0xF
 	jnz .tail
