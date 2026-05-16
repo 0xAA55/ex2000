@@ -1,16 +1,3 @@
-%ifdef BINARY
-	bits 32
-	segment .text
-	segment .rdata
-	segment .bss
-
-	%define LOADDLL_ASM 1
-	segment .text
-	_addr_of_Kernel32 dd 0xBAADF00D
-	_addr_of_GetProcAddress dd 0xBAADF00D
-	_addr_of_LoadLibraryA dd 0xBAADF00D
-	_addr_of_DebugMsg dd 0xBAADF00D
-%endif
 
 %define MATRIX_ASM 1
 %include "matrix.inc"
@@ -20,28 +7,6 @@
 
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
-%ifdef BINARY
-segment .text
-_addr_of_malloc dd 'mall'
-_addr_of_calloc dd 'call'
-_addr_of_free dd 'free'
-_addr_of_aligned_malloc dd 'amal'
-_addr_of_aligned_free dd 'afre'
-
-_addr_of_memcpy dd 'memc'
-_addr_of_memset dd 'mems'
-_addr_of_rand dd 'rand'
-_addr_of_srand dd 'sran'
-_addr_of_ExitProcess dd 'Exit'
-
-_malloc: jmp [_addr_of_malloc]
-_calloc: jmp [_addr_of_calloc]
-_free: jmp [_addr_of_free]
-_aligned_malloc: jmp [_addr_of_aligned_malloc]
-_aligned_free: jmp [_addr_of_aligned_free]
-_DebugMsg: jmp [_addr_of_DebugMsg]
-
-%else
 extern _malloc
 extern _calloc
 extern _free
@@ -53,7 +18,6 @@ import_dll_func memset
 import_dll_func rand
 import_dll_func srand
 import_dll_func ExitProcess
-%endif
 
 %define SEED_OF_RAND(s) ((0x343fD * (s) + 0x269EC3) & 0xFFFFFFFF)
 %define RAND(s) (SEED_OF_RAND(s) & 0x7FFF)
