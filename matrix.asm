@@ -640,6 +640,13 @@ DefFunc _CreateFloatMap
 	mov ebx, eax
 
 	mov eax, Param(0)
+	lea ecx, [eax - 1]
+	test eax, ecx
+	jz .good
+.bad:
+	int3
+	jmp .bad
+.good:
 	mov [ebx + FloatMap.border_len], eax
 	lea edi, [ebx + FloatMap.row_ptr]
 	mul eax
