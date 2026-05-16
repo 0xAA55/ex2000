@@ -144,6 +144,9 @@ extern _GenPerlinAltitude
 ; void AccumulateFloatMap(FloatMap *accum_to, FloatMap *src);
 extern _AccumulateFloatMap
 
+; void MultiplyFloatMap(FloatMap *mult_to, FloatMap *src);
+extern _MultiplyFloatMap
+
 ; FloatMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers);
 extern _GenMultiLayerPerlinAltitude
 
