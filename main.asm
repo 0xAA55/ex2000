@@ -268,6 +268,12 @@ DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
 
 .proceed:
 	mov eax, Param(0)
+	test eax, eax
+	jnz .good
+.bad:
+	int3
+	jmp .bad
+.good:
 	add eax, Param(1)
 	invoke_cdecl _malloc, eax
 
