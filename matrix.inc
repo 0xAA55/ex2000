@@ -117,7 +117,7 @@ extern _MatrixMultiply
 ; FloatMap *CreateFloatMap(int border_len, int dims);
 extern _CreateFloatMap
 
-; FloatMap *DuplicateFloatMap(FloatMap *map);
+; FloatMap *DuplicateFloatMap(FloatMap *src);
 extern _DuplicateFloatMap
 
 ; void DestroyFloatMap(FloatMap *map);
@@ -135,7 +135,7 @@ extern _CreatePerlinMap2D
 ; float *GetXYFloatMap(int x, int y, FloatMap *map);
 extern _GetXYFloatMap
 
-; FloatMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, FloatMap *map);
+; FloatMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, FloatMap *src);
 extern _ConvertPerlinMapToAltitude
 
 ; FloatMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
