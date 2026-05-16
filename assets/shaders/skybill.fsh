@@ -28,7 +28,7 @@ void main()
 		color = mix(fogcolor, skycolor, fragdir.y);
 		vec2 cloud_uv = fragdir.xz * 0.5 / fragdir.y;
 		float dist = length(cloud_uv);
-		float cloud = texture2D(noise, cloud_uv + time * 0.01).r * 0.5 + 0.5;
+		float cloud = texture2D(noise, cloud_uv + time * 0.01).r;
 		float fog = 1.0 / max(1.0, dist);
 		color = mix(color, vec4(1.0), cloud * fog * fog * fog);
 	}
