@@ -164,6 +164,9 @@ extern _FloatMapMTPool
 ; FloatMap *FloatMapGaussianBlur(FloatMap *src, int16_t blur_radius);
 extern _FloatMapGaussianBlur
 
+; float FloatMapGetMaxValue(FloatMap *src);
+extern _FloatMapGetMaxValue
+
 ; FloatMap *FloatMapKMapGen(FloatMap *src);
 extern _FloatMapKMapGen
 %endif
