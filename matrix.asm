@@ -1413,12 +1413,12 @@ DefFunc _GenDistanceMap
 	jmp .ycontinue
 .vector_process:
 	mov eax, _SV
-	cvtsi2ss xmm6, _SV
 	cvtsi2ss xmm7, _Y
-	shufps xmm6, xmm6, _MM_SHUFFLE(0, 0, 0, 0)
+	cvtsi2ss xmm6, _SV
 	mulss xmm7, xmm7
-	addps xmm6, [_F0123]
+	shufps xmm6, xmm6, _MM_SHUFFLE(0, 0, 0, 0)
 	shufps xmm7, xmm7, _MM_SHUFFLE(0, 0, 0, 0)
+	addps xmm6, [_F0123]
 .loopx:
 	movaps xmm0, xmm6
 	movaps xmm1, xmm6
