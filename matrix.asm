@@ -975,7 +975,6 @@ DefFunc _ConvertPerlinMapToAltitude
 	subss xmm1, xmm0
 	mulss xmm1, [ecx]
 	addss xmm0, xmm1
-	mulss xmm0, Param(1)
 	movss [edx], xmm0
 
 	mov eax, _IX
@@ -1002,10 +1001,56 @@ DefFunc _ConvertPerlinMapToAltitude
 	cmp eax, [esi + FloatMap.border_len]
 	jb .loopy
 
-.end:
 	invoke_cdecl _free, _STEPS
 	invoke_cdecl _aligned_free, _MATRIX
-	mov eax, edi
+
+	mov ebx, edi
+	movaps xmm5, [_FP5P5P5P5]
+	movss xmm7, Param(1)
+	mov esi, [ebx + FloatMap.data]
+	mov eax, [ebx + FloatMap.num_pixels]
+	mul dword [ebx + FloatMap.dims]
+	test al, 0xF
+	jz .batch_proc
+	mov ecx, eax
+.single_proc:
+	movss xmm0, [esi + (ecx - 1) * 4]
+	mulss xmm0, xmm5
+	addss xmm0, xmm5
+	mulss xmm0, xmm7
+	movss [esi + (ecx - 1) * 4], xmm0
+	loop .single_proc
+	jmp .end
+.batch_proc:
+	shr eax, 4
+	mov ecx, eax
+	shufps xmm7, xmm7, 0
+.batch_loop:
+	movaps xmm0, [esi + 0x00]
+	movaps xmm1, [esi + 0x10]
+	movaps xmm2, [esi + 0x20]
+	movaps xmm3, [esi + 0x30]
+	mulps xmm0, xmm5
+	mulps xmm1, xmm5
+	mulps xmm2, xmm5
+	mulps xmm3, xmm5
+	addps xmm0, xmm5
+	addps xmm1, xmm5
+	addps xmm2, xmm5
+	addps xmm3, xmm5
+	mulps xmm0, xmm7
+	mulps xmm1, xmm7
+	mulps xmm2, xmm7
+	mulps xmm3, xmm7
+	movaps [esi + 0x00], xmm0
+	movaps [esi + 0x10], xmm1
+	movaps [esi + 0x20], xmm2
+	movaps [esi + 0x30], xmm3
+	add esi, 0x40
+	loop .batch_loop
+
+.end:
+	mov eax, ebx
 	FrameEnd
 	ret
 	%undef _STEPS
