@@ -87,6 +87,10 @@ global _W10
 _W10 dw 10
 global _W15
 _W15 dw 15
+global _FMAX
+_FMAX dd 0x7F7FFFFF
+global _FMIN
+_FMIN dd 0xFF7FFFFF
 
 segment .text
 DefFunc _MathInit

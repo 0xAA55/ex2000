@@ -58,6 +58,8 @@ extern _Pi_P
 extern _Pi_N
 extern _2Pi
 extern _2.0f
+extern _FMAX
+extern _FMIN
 extern _F1111
 extern _F2222
 extern _F3333
