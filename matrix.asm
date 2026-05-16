@@ -669,6 +669,18 @@ DefFunc _CreateFloatMap
 	FrameEnd
 	ret
 
+DefFunc _DuplicateFloatMap
+	FrameBegin 0, 3, ebx, edi
+	mov ebx, Param(0)
+	invoke_cdecl _CreateFloatMap, [ebx + FloatMap.border_len], [ebx + FloatMap.dims]
+	mov edi, eax
+	mov eax, [ebx + FloatMap.num_pixels]
+	mul dword [ebx + FloatMap.dims]
+	invoke_dll_cdecl memcpy, [edi + FloatMap.data], [ebx + FloatMap.data], &[eax * 4]
+	mov eax, edi
+	FrameEnd
+	ret
+
 DefFunc _DestroyFloatMap
 	FrameBegin 0, 1, ebx
 

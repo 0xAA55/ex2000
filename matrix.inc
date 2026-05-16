@@ -116,6 +116,9 @@ extern _MatrixMultiply
 ; FloatMap *CreateFloatMap(int border_len, int dims);
 extern _CreateFloatMap
 
+; FloatMap *DuplicateFloatMap(FloatMap *map);
+extern _DuplicateFloatMap
+
 ; void DestroyFloatMap(FloatMap *map);
 extern _DestroyFloatMap
 
