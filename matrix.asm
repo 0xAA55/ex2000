@@ -65,8 +65,8 @@ global _I0123
 _I0123 resd 4
 global _F0123
 _F0123 resd 4
-global _0101
-_0101 resd 4
+global _UF0F0
+_UF0F0 resd 4
 global _Scale127_5
 _Scale127_5 resd 4
 global _BMxmm
@@ -123,8 +123,8 @@ DefFunc _MathInit
 	add edx, 20
 	loop .init_math
 	dec ecx
-	mov [_0101], ecx
-	mov [_0101 + 8], ecx
+	mov [_UF0F0], ecx
+	mov [_UF0F0 + 8], ecx
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
 	movaps [_F2222], xmm0
@@ -724,7 +724,7 @@ DefFunc _CreatePerlinMap2D
 	movaps xmm2, [_F1111]
 	movaps xmm3, [esi]
 	movaps xmm4, [_Rand4MulVal]
-	movaps xmm5, [_0101]
+	movaps xmm5, [_UF0F0]
 	movaps xmm6, [_Rand4AddVal]
 	movaps xmm7, [_Rand4AndVal]
 .generate:
