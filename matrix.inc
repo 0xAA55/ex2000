@@ -59,6 +59,15 @@ extern _Pi_N
 extern _2Pi
 extern _2.0f
 extern _F1111
+extern _F2222
+extern _F3333
+extern _F4444
+extern _F8888
+extern _FCCCC
+extern _FHHHH
+extern _B0123
+extern _I0123
+extern _F0123
 extern _ZeroVector
 extern _IdentityMatrix
 

@@ -49,6 +49,22 @@ global _Rand4AndVal
 _Rand4AndVal resd 4
 global _F1111
 _F1111 resd 4
+global _F2222
+_F2222 resd 4
+global _F3333
+_F3333 resd 4
+global _F4444
+_F4444 resd 4
+global _F8888
+_F8888 resd 4
+global _FCCCC
+_FCCCC resd 4
+global _FHHHH
+_FHHHH resd 4
+global _I0123
+_I0123 resd 4
+global _F0123
+_F0123 resd 4
 global _0101
 _0101 resd 4
 global _Scale127_5
@@ -59,6 +75,8 @@ global _IdentityMatrix
 _IdentityMatrix resb Matrix.size
 
 segment .rdata
+global _B0123
+_B0123 db 0, 1, 2, 3
 global _2.0f
 _2.0f dd 0x40000000
 global _M1.0f
@@ -83,6 +101,14 @@ DefFunc _MathInit
 	fchs
 	fstp dword [_Pi_N]
 
+	movd xmm0, [_B0123]
+	pxor xmm1, xmm1
+	punpcklbw xmm0, xmm1
+	punpcklwd xmm0, xmm1
+	movaps [_I0123], xmm0
+	cvtdq2ps xmm0, xmm0
+	movaps [_F0123], xmm0
+
 	mov eax, 0x3F800000
 	mov ecx, 4
 	xor edx, edx
@@ -99,6 +125,19 @@ DefFunc _MathInit
 	dec ecx
 	mov [_0101], ecx
 	mov [_0101 + 8], ecx
+	movaps xmm0, [_F1111]
+	addps xmm0, xmm0
+	movaps [_F2222], xmm0
+	addps xmm0, [_F1111]
+	movaps [_F3333], xmm0
+	addps xmm0, [_F1111]
+	movaps [_F4444], xmm0
+	mulps xmm0, [_F2222]
+	movaps [_F8888], xmm0
+	addps xmm0, [_F4444]
+	movaps [_FCCCC], xmm0
+	addps xmm0, [_F4444]
+	movaps [_FHHHH], xmm0
 
 	xor eax, eax
 	inc eax
