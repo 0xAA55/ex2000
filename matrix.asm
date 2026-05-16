@@ -120,7 +120,7 @@ DefFunc _MathInit
 	mov byte  [_FP5P5P5P5 + (ecx - 1) * 4 + 3], 0x3F
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
-	mov dword [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
+	mov word  [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
 	add edx, 20
 	loop .init_math
 	dec ecx
