@@ -4,7 +4,6 @@
 
 %include "loaddll.inc"
 %include "pool.inc"
-%define FLOATMAP_2N 1
 
 %define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
@@ -831,34 +830,12 @@ DefFunc _GetXYFloatMap
 
 	mov ebx, Param(2)
 
-%ifndef FLOATMAP_2N
-	mov eax, Param(1)
-	mov ecx, [ebx + FloatMap.border_len]
-	cdq
-	idiv ecx
-	test edx, edx
-	jge .y_non_neg
-	add edx, ecx
-.y_non_neg:
-	mov Param(1), edx
-	mov eax, Param(0)
-	cdq
-	idiv ecx
-	test edx, edx
-	jge .x_non_neg
-	add edx, ecx
-.x_non_neg:
-	mov Param(0), edx
-	mov eax, Param(0)
-	mov ecx, Param(1)
-%else
 	mov ecx, [ebx + FloatMap.border_len]
 	lea edx, [ecx - 1]
 	mov eax, Param(0)
 	mov ecx, Param(1)
 	and eax, edx
 	and ecx, edx
-%endif
 	mul dword [ebx + FloatMap.dims]
 	mov ecx, [ebx + FloatMap.row_ptr + ecx * 4]
 	lea eax, [eax * 4 + ecx]
