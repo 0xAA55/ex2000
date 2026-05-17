@@ -3,4 +3,5 @@ ex2000.exe
 .vs
 *.sln
 *.pdb
+*.gdb
 *.o
