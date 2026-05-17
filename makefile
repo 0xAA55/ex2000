@@ -2,7 +2,7 @@
 OBJS=out/main.obj out/timer.obj out/scene.obj out/assets.obj out/avlbst.obj out/pool.obj out/buffer.obj out/shader.obj out/gl33.obj out/loaddll.obj
 LIBS=out/libmath.a
 FILES=out/assets.cab
-LDFLAGS=-Lout --whole-archive --relax --large-address-aware --build-id
+LDFLAGS=-Lout --whole-archive --relax --large-address-aware --build-id -T ex2000.ld
 LDLIBS=-lmath
 
 all: ex2000.exe ex2000.pdb
@@ -30,7 +30,7 @@ out/libmath.a: $(wildcard math/*)
 	if not exist out mkdir out
 	make -C math
 
-ex2000.exe: $(OBJS) $(LIBS) $(FILES)
+ex2000.exe: $(OBJS) $(LIBS) $(FILES) ex2000.ld
 	ld.exe -o $@ -nostdlib -mi386pe -subsystem windows -e _start $(OBJS) $(LDFLAGS) $(LDLIBS)
 ex2000.pdb: ex2000.exe
 	cv2pdb $^
