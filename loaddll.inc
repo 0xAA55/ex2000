@@ -148,20 +148,22 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate -1
-			strcontains %str(%1), "eax"
-			%assign pos_eax result
-			strcontains %str(%1), "ecx"
-			%assign pos_ecx result
-			strcontains %str(%1), "edx"
-			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
-			%elif pos_eax > 0
-				AddRegAvoidForPass eax
-			%elif pos_ecx > 0
-				AddRegAvoidForPass ecx
-			%elif pos_edx > 0
-				AddRegAvoidForPass edx
+			%else
+				%undef pos_eax
+				%undef pos_ecx
+				%undef pos_edx
+				strcontains pos_eax, %str(%1), "eax"
+				strcontains pos_ecx, %str(%1), "ecx"
+				strcontains pos_edx, %str(%1), "edx"
+				%if pos_eax > 0
+					AddRegAvoidForPass eax
+				%elif pos_ecx > 0
+					AddRegAvoidForPass ecx
+				%elif pos_edx > 0
+					AddRegAvoidForPass edx
+				%endif
 			%endif
 		%endrep
 		%rotate -1
@@ -183,20 +185,22 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate -1
-			strcontains %str(%1), "eax"
-			%assign pos_eax result
-			strcontains %str(%1), "ecx"
-			%assign pos_ecx result
-			strcontains %str(%1), "edx"
-			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
-			%elif pos_eax > 0
-				AddRegAvoidForPass eax
-			%elif pos_ecx > 0
-				AddRegAvoidForPass ecx
-			%elif pos_edx > 0
-				AddRegAvoidForPass edx
+			%else
+				%undef pos_eax
+				%undef pos_ecx
+				%undef pos_edx
+				strcontains pos_eax, %str(%1), "eax"
+				strcontains pos_ecx, %str(%1), "ecx"
+				strcontains pos_edx, %str(%1), "edx"
+				%if pos_eax > 0
+					AddRegAvoidForPass eax
+				%elif pos_ecx > 0
+					AddRegAvoidForPass ecx
+				%elif pos_edx > 0
+					AddRegAvoidForPass edx
+				%endif
 			%endif
 		%endrep
 		%rotate -1
@@ -218,20 +222,22 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate 1
-			strcontains %str(%1), "eax"
-			%assign pos_eax result
-			strcontains %str(%1), "ecx"
-			%assign pos_ecx result
-			strcontains %str(%1), "edx"
-			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
-			%elif pos_eax > 0
-				AddRegAvoidForPass eax
-			%elif pos_ecx > 0
-				AddRegAvoidForPass ecx
-			%elif pos_edx > 0
-				AddRegAvoidForPass edx
+			%else
+				%undef pos_eax
+				%undef pos_ecx
+				%undef pos_edx
+				strcontains pos_eax, %str(%1), "eax"
+				strcontains pos_ecx, %str(%1), "ecx"
+				strcontains pos_edx, %str(%1), "edx"
+				%if pos_eax > 0
+					AddRegAvoidForPass eax
+				%elif pos_ecx > 0
+					AddRegAvoidForPass ecx
+				%elif pos_edx > 0
+					AddRegAvoidForPass edx
+				%endif
 			%endif
 		%endrep
 		%rotate 1
@@ -253,20 +259,22 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate 1
-			strcontains %str(%1), "eax"
-			%assign pos_eax result
-			strcontains %str(%1), "ecx"
-			%assign pos_ecx result
-			strcontains %str(%1), "edx"
-			%assign pos_edx result
 			%if IsPassReg(%1)
 				AddRegAvoidForPass %1
-			%elif pos_eax > 0
-				AddRegAvoidForPass eax
-			%elif pos_ecx > 0
-				AddRegAvoidForPass ecx
-			%elif pos_edx > 0
-				AddRegAvoidForPass edx
+			%else
+				%undef pos_eax
+				%undef pos_ecx
+				%undef pos_edx
+				strcontains pos_eax, %str(%1), "eax"
+				strcontains pos_ecx, %str(%1), "ecx"
+				strcontains pos_edx, %str(%1), "edx"
+				%if pos_eax > 0
+					AddRegAvoidForPass eax
+				%elif pos_ecx > 0
+					AddRegAvoidForPass ecx
+				%elif pos_edx > 0
+					AddRegAvoidForPass edx
+				%endif
 			%endif
 		%endrep
 		%rotate 1
