@@ -271,31 +271,6 @@
 		%endif
 		mov CallParam(%1), PassReg
 	%else
-		%if IsPassReg(%2)
-			RemoveRegAvoidForPass %2
-			%define PassReg %2
-			RotatePassReg
-		%else
-			%undef pos_eax
-			%undef pos_ecx
-			%undef pos_edx
-			strcontains pos_eax, %str(%2), "eax"
-			strcontains pos_ecx, %str(%2), "ecx"
-			strcontains pos_edx, %str(%2), "edx"
-			%if pos_eax > 0
-				RemoveRegAvoidForPass eax
-				%define PassReg eax
-				RotatePassReg
-			%elif pos_ecx > 0
-				RemoveRegAvoidForPass ecx
-				%define PassReg ecx
-				RotatePassReg
-			%elif pos_edx > 0
-				RemoveRegAvoidForPass edx
-				%define PassReg edx
-				RotatePassReg
-			%endif
-		%endif
 		mov dword CallParam(%1), %2
 	%endif
 	%defstr LastPassParam %2
@@ -311,31 +286,6 @@
 		lea PassReg, %tok(%substr(%str(%2), 2))
 		push PassReg
 	%else
-		%if IsPassReg(%2)
-			RemoveRegAvoidForPass %2
-			%define PassReg %2
-			RotatePassReg
-		%else
-			%undef pos_eax
-			%undef pos_ecx
-			%undef pos_edx
-			strcontains pos_eax, %str(%2), "eax"
-			strcontains pos_ecx, %str(%2), "ecx"
-			strcontains pos_edx, %str(%2), "edx"
-			%if pos_eax > 0
-				RemoveRegAvoidForPass eax
-				%define PassReg eax
-				RotatePassReg
-			%elif pos_ecx > 0
-				RemoveRegAvoidForPass ecx
-				%define PassReg ecx
-				RotatePassReg
-			%elif pos_edx > 0
-				RemoveRegAvoidForPass edx
-				%define PassReg edx
-				RotatePassReg
-			%endif
-		%endif
 		push %2
 	%endif
 	%undef esp
