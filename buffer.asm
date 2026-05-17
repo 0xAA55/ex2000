@@ -1,6 +1,5 @@
 %include "loaddll.inc"
 %include "gl33.inc"
-
 %include "buffer.inc"
 
 extern _malloc

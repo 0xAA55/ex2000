@@ -1,3 +1,4 @@
+%include "loaddll.inc"
 %include "avlbst.inc"
 
 extern _malloc

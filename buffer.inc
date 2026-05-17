@@ -1,8 +1,6 @@
 %ifndef _BUFFER_INC_
 %define _BUFFER_INC_ 1
 
-%include "frame.inc"
-
 struc GlBuffer
 	.pointer resd 1
 	.num_items resd 1

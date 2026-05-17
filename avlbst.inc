@@ -1,8 +1,6 @@
 %ifndef _AVLBST_INC_
 %define _AVLBST_INC_ 1
 
-%include "loaddll.inc"
-
 struc AVLBST_Node
 .key resd 1
 .l_child resd 1

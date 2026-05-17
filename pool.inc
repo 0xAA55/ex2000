@@ -1,8 +1,6 @@
 %ifndef _POOL_INC_
 %define _POOL_INC_ 1
 
-%include "loaddll.inc"
-
 struc Pool
 .work_proc resd 1
 .num_workers resd 1

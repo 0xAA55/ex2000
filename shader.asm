@@ -1,3 +1,4 @@
+%include "loaddll.inc"
 %include "shader.inc"
 %include "gl33.inc"
 

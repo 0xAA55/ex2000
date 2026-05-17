@@ -1,3 +1,4 @@
+%include "loaddll.inc"
 %include "pool.inc"
 
 %define STILL_ACTIVE 259
