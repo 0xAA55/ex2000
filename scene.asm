@@ -4,7 +4,7 @@
 %include "buffer.inc"
 %include "assets.inc"
 %include "shader.inc"
-%include "matrix.inc"
+%include "math.inc"
 
 extern _hWnd
 extern _hDC
