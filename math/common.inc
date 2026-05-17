@@ -29,6 +29,7 @@ extern _ZeroVector
 extern _Rand4MulVal
 extern _Rand4AddVal
 extern _Rand4AndVal
+extern _F0001
 extern _F1111
 extern _F2222
 extern _F3333

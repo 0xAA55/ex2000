@@ -24,6 +24,8 @@ extern _Rand4AddVal
 _Rand4AddVal resd 4
 extern _Rand4AndVal
 _Rand4AndVal resd 4
+extern _F0001
+_F0001 resd 4
 extern _F1111
 _F1111 resd 4
 extern _F2222
@@ -103,6 +105,7 @@ DefFunc _MathInit
 	dec ecx
 	mov [_UF0F0], ecx
 	mov [_UF0F0 + 8], ecx
+	mov [_F0001 + 12], eax
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
 	movaps [_F2222], xmm0
