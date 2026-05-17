@@ -244,7 +244,7 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _DestroyFloatMap, ebx
 
-	SceneLoadShaderProgram _DrawBillboardProgram, "assets\shaders\skybill.vsh", 0, "assets\shaders\skybill.fsh"
+	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
 
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
 	invoke_cdecl _InitBuffer, _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxVertices.num / 2, _BoxVertices
