@@ -7,6 +7,22 @@ extern _DeInitGL33
 extern _Scene
 extern _SceneInit
 
+import_dll_func ExitProcess
+import_dll_func GetProcessHeap
+import_dll_func LoadIconA
+import_dll_func LoadCursorA
+import_dll_func RegisterClassExA
+import_dll_func CreateWindowExA
+import_dll_func ShowWindow
+import_dll_func UpdateWindow
+import_dll_func PeekMessageA
+import_dll_func TranslateMessage
+import_dll_func DispatchMessageA
+import_dll_func PostQuitMessage
+import_dll_func DefWindowProcA
+import_dll_func GetDC
+import_dll_func ReleaseDC
+
 %define WM_CREATE 0x0001
 %define WM_DESTROY 0x0002
 %define WM_QUIT 0x0012
@@ -56,62 +72,7 @@ _WCEx resb WNDCLASSEX.size
 _ClassAtom resd 1
 _hWnd resd 1
 _hDC resd 1
-_hHeap resd 1
 _MSG resb MSG.size
-
-dll_func_group_start KFunc
-def_dll_func ExitProcess
-def_dll_func QueryPerformanceFrequency
-def_dll_func QueryPerformanceCounter
-def_dll_func GetProcessHeap
-def_dll_func HeapAlloc
-def_dll_func HeapReAlloc
-def_dll_func HeapFree
-def_dll_func HeapLock
-def_dll_func HeapUnlock
-def_dll_func Sleep
-def_dll_func GetTickCount
-def_dll_func CreateThread
-def_dll_func CloseHandle
-def_dll_func WaitForMultipleObjects
-dll_func_group_end KFunc
-
-dll_func_group_start UFunc
-def_dll_func MessageBoxA
-def_dll_func LoadIconA
-def_dll_func LoadCursorA
-def_dll_func RegisterClassExA
-def_dll_func CreateWindowExA
-def_dll_func ShowWindow
-def_dll_func UpdateWindow
-def_dll_func PeekMessageA
-def_dll_func TranslateMessage
-def_dll_func DispatchMessageA
-def_dll_func PostQuitMessage
-def_dll_func DefWindowProcA
-def_dll_func GetDC
-def_dll_func ReleaseDC
-def_dll_func GetWindowRect
-def_dll_func GetClientRect
-def_dll_func GetCursorPos
-def_dll_func SetCursorPos
-def_dll_func ShowCursor
-def_dll_func GetAsyncKeyState
-def_dll_func GetForegroundWindow
-dll_func_group_end UFunc
-
-dll_func_group_start CFunc
-def_dll_func strcpy
-def_dll_func strcat
-def_dll_func strlen
-def_dll_func strcmp
-def_dll_func vsnprintf
-def_dll_func memset
-def_dll_func memcpy
-def_dll_func memmove
-def_dll_func rand
-def_dll_func srand
-dll_func_group_end CFunc
 
 segment .bss
 _LastUFunc:
@@ -120,16 +81,6 @@ segment .text
 DefFunc _start
 	FrameBegin 0, 1
 	invoke_cdecl _InitLoadLibrary
-	def_dll_and_load User32, "user32.dll"
-	def_dll_and_load GDI32, "gdi32.dll"
-	def_dll_and_load MSVCRT, "msvcrt.dll"
-
-	dll_func_group_load Kernel32, KFunc
-	dll_func_group_load User32, UFunc
-	dll_func_group_load MSVCRT, CFunc
-
-	invoke_dll_stdcall GetProcessHeap
-	mov [_hHeap], eax
 
 	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx + WNDCLASSEX.lpfnWndProc], _WndProc@16
@@ -220,81 +171,3 @@ DefFunc _WndProc@16
 .end:
 	FrameEnd
 	ret 16
-
-DefFunc _malloc
-	FrameBegin 0, 0
-	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(0)
-	FrameEnd
-	ret
-
-DefFunc _calloc
-	FrameBegin 0, 0
-
-	mov eax, Param(0)
-	mul dword Param(1)
-	invoke_dll_stdcall HeapAlloc, [_hHeap], 8|4, eax
-
-	FrameEnd
-	ret
-
-DefFunc _realloc
-	FrameBegin 0, 0
-	mov eax, Param(0)
-	test eax, eax
-	jz .ptr_is_null
-	invoke_dll_stdcall HeapReAlloc, [_hHeap], 4, Param(0), Param(1)
-	jmp .end
-.ptr_is_null:
-	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(1)
-.end:
-	FrameEnd
-	ret
-
-DefFunc _free
-	FrameBegin 0, 0
-	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
-	FrameEnd
-	ret
-
-DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
-	FrameBegin 0, 1
-
-	mov eax, Param(1)
-	cmp eax, 8
-	jae .proceed
-	mov al, 8
-	mov Param(1), eax
-
-.proceed:
-	mov eax, Param(0)
-	test eax, eax
-	jnz .good
-.bad:
-	int3
-	jmp .bad
-.good:
-	add eax, Param(1)
-	invoke_cdecl _malloc, eax
-
-	mov edx, eax
-	mov ecx, Param(1)
-	add eax, ecx
-	neg ecx
-	and eax, ecx
-	mov [eax - 4], edx
-
-	FrameEnd
-	ret
-
-DefFunc _aligned_free
-	FrameBegin 0, 1
-
-	mov eax, Param(0)
-	test eax, eax
-	jz .end
-
-	invoke_cdecl _free, [eax - 4]
-
-.end:
-	FrameEnd
-	ret
