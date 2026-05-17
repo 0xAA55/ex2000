@@ -233,6 +233,26 @@
 	%endrep
 %endmacro
 
+%macro strcontains 3
+	%push
+	%strlen %$len_str %2
+	%strlen %$len_sub %3
+	%assign %$i 1
+	%assign %$found 0
+	%if %$len_str >= %$len_sub
+		%rep %$len_str - %$len_sub + 1
+			%substr %$part %2 %$i, %$len_sub
+			%ifidn %$part, %3
+				%assign %$found 1
+				%exitrep
+			%endif
+			%assign %$i %$i + 1
+		%endrep
+	%endif
+	%assign %1 %$found
+	%pop
+%endmacro
+
 %macro PrepParam 2
 	%if %1 >= Frame_NumReservedParams
 		%error Bad param index %1

@@ -141,26 +141,6 @@
 	call _LoadFuncGroup
 %endmacro
 
-%macro strcontains 2
-	%push
-	%strlen %$len_str %1
-	%strlen %$len_sub %2
-	%assign %$i 1
-	%assign %$found 0
-	%if %$len_str >= %$len_sub
-		%rep %$len_str - %$len_sub + 1
-			%substr %$part %1 %$i, %$len_sub
-			%ifidn %$part, %2
-				%assign %$found 1
-				%exitrep
-			%endif
-			%assign %$i %$i + 1
-		%endrep
-	%endif
-	%assign result %$found
-	%pop
-%endmacro
-
 %macro invoke_stdcall 1-*
 	%if %0 == 1
 		call %1
