@@ -692,33 +692,34 @@ DefFunc _DestroyFloatMap
 
 DefFunc _WarpFloatMap
 	FrameBegin 4, 2, ebx, esi, edi
-	AssignVars _X, _Y, _BM, _RP
+	AssignVars _X, _Y, _BITMASK, _ROWPTR
 
-	mov ebx, Param(0)
-	invoke_cdecl _CreateFloatMap, [ebx + FloatMap.border_len], [ebx + FloatMap.dims]
+	mov esi, Param(0)
+	invoke_cdecl _CreateFloatMap, [esi + FloatMap.border_len], [esi + FloatMap.dims]
 	mov ebx, eax
 	mov edi, [eax + FloatMap.data]
 
 	mov eax, [ebx + FloatMap.border_len]
 	dec eax
-	mov _BM, eax
+	mov _BITMASK, eax
 
 	xor eax, eax
 	mov _Y, eax
 .loopy:
 	add eax, Param(2)
-	and eax, _BM
-	mov eax, [ebx + FloatMap.row_ptr + eax * 4]
-	mov _RP, eax
+	and eax, _BITMASK
+	mov esi, Param(0)
+	mov eax, [esi + FloatMap.row_ptr + eax * 4]
+	mov _ROWPTR, eax
 	xor eax, eax
 	mov _X, eax
 .loopx:
-	mov eax, _X
 	add eax, Param(1)
-	and eax, _BM
-	add eax, _RP
-	mov esi, eax
+	and eax, _BITMASK
+	mov esi, _ROWPTR
 	mov ecx, [ebx + FloatMap.dims]
+	mul ecx
+	lea esi, [esi + eax * 4]
 	rep movsd
 
 	mov eax, _X
@@ -738,6 +739,8 @@ DefFunc _WarpFloatMap
 	ret
 	%undef _X
 	%undef _Y
+	%undef _BITMASK
+	%undef _ROWPTR
 
 DefFunc _SmootherStep
 	FrameBegin 0, 0
