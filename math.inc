@@ -179,4 +179,7 @@ extern _FloatMapGetMaxValue
 ; FloatMap *FloatMapKMapGen(FloatMap *src);
 extern _FloatMapKMapGen
 
+; FloatMap *AltitudeToTerrain(FloatMap *src, float height_mod, float size_mod);
+extern _AltitudeToTerrain
+
 %endif
