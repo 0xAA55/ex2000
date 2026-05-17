@@ -16,7 +16,6 @@ struc GlBuffer
 	.size equ $ - GlBuffer
 endstruc
 
-%ifndef BUFFER_ASM
 ; void InitBuffer(GlBuffer *p_buffer, GLenum buffer_type, GLenum buffer_usage, size_t item_size, size_t capacity, void *pointer_to_data_or_null);
 extern _InitBuffer
 
@@ -37,6 +36,5 @@ extern _BufferTrimExcess
 
 ; vooid BufferResize(GlBuffer *p_buffer, size_t new_num_items);
 extern _BufferResize
-%endif
 
 %endif

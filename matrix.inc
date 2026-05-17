@@ -53,7 +53,6 @@ struc FMDataCmn
 .size equ $ - FMDataCmn
 endstruc
 
-%ifndef MATRIX_ASM
 extern _Pi_P
 extern _Pi_N
 extern _2Pi
@@ -179,7 +178,5 @@ extern _FloatMapGetMaxValue
 
 ; FloatMap *FloatMapKMapGen(FloatMap *src);
 extern _FloatMapKMapGen
-%endif
-
 
 %endif

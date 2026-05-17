@@ -1,6 +1,4 @@
 %include "loaddll.inc"
-
-%define TIMER_ASM
 %include "timer.inc"
 
 import_dll_func QueryPerformanceFrequency

@@ -1,5 +1,4 @@
 %include "avlbst.inc"
-%define ASSETS_ASM 1
 %include "assets.inc"
 
 extern _calloc
@@ -61,26 +60,26 @@ endstruc
 %define MAX_CAB_OPEN_TIMES 4
 
 segment .bss
-global _AssetsCabPathName
+extern _AssetsCabPathName
 _AssetsCabPathName resd 1
-global _AssetsTree
+extern _AssetsTree
 _AssetsTree resd 1
-global _AssetsCabFile
+extern _AssetsCabFile
 _AssetsCabFile:
 .file_pointers resd MAX_CAB_OPEN_TIMES
 .is_opened resb MAX_CAB_OPEN_TIMES
-global _AssetsFDIERF
+extern _AssetsFDIERF
 _AssetsFDIERF:
 .oper resd 1
 .type resd 1
 .error resd 1
 
 segment .rdata
-global _AssetsCab
+extern _AssetsCab
 _AssetsCab:
 incbin "out/assets.cab"
 _AssetsCabSize equ $ - _AssetsCab
-global _AssetsCabName
+extern _AssetsCabName
 _AssetsCabName db "assets.cab", 0
 
 segment .text

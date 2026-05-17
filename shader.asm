@@ -1,4 +1,3 @@
-%define SHADER_ASM 1
 %include "shader.inc"
 %include "gl33.inc"
 
@@ -8,7 +7,7 @@ extern _free
 import_dll_func strlen
 
 segment .rdata
-global _ShaderTypes
+extern _ShaderTypes
 _ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
 
 segment .text
@@ -145,10 +144,10 @@ DefFunc _ProgramCreate
 	%undef _FormatBuffer
 
 segment .rdata
-global _ST_Vertex_Shader
-global _ST_Geometry_Shader
-global _ST_Fragment_Shader
-global _ST_Offsets
+extern _ST_Vertex_Shader
+extern _ST_Geometry_Shader
+extern _ST_Fragment_Shader
+extern _ST_Offsets
 _ST_Vertex_Shader db "Vertex", 0
 _ST_Geometry_Shader db "Geometry", 0
 _ST_Fragment_Shader db "Fragment", 0

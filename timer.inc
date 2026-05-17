@@ -9,13 +9,11 @@ struc Timer
 .size equ $ - Timer
 endstruc
 
-%ifndef TIMER_ASM
 extern _GetTimerVal
 extern _InitTimer
 extern _UpdateTimer
 extern _IsTimerPaused
 extern _PauseTimer
 extern _UnpauseTimer
-%endif
 
 %endif

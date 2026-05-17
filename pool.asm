@@ -1,4 +1,3 @@
-%define POOL_ASM 1
 %include "pool.inc"
 
 %define STILL_ACTIVE 259

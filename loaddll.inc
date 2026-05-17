@@ -5,31 +5,31 @@
 
 %macro def_dll 2
 	segment .bss
-	global _addr_of_ %+ %1
+	extern _addr_of_ %+ %1
 	_addr_of_ %+ %1 resd 1
 
 	segment .rdata
-	global _name_of_ %+ %1
+	extern _name_of_ %+ %1
 	_name_of_ %+ %1 db %2, 0
 %endmacro
 
 %macro def_dll_func 1
 	segment .bss
-	global _addr_of_ %+ %1
+	extern _addr_of_ %+ %1
 	_addr_of_ %+ %1 resd 1
 
 	segment .rdata
-	global _name_of_ %+ %1
+	extern _name_of_ %+ %1
 	_name_of_ %+ %1 db %str(%1), 0
 %endmacro
 
 %macro def_dll_func_alias 2
 	segment .bss
-	global _addr_of_ %+ %1
+	extern _addr_of_ %+ %1
 	_addr_of_ %+ %1 resd 1
 
 	segment .rdata
-	global _name_of_ %+ %1
+	extern _name_of_ %+ %1
 	_name_of_ %+ %1 db %2, 0
 %endmacro
 
@@ -120,11 +120,11 @@
 
 %macro dll_func_group_start 1
 	segment .bss
-	global _First %+ %1 %+ Addr
+	extern _First %+ %1 %+ Addr
 	_First %+ %1 %+ Addr:
 
 	segment .rdata
-	global _First %+ %1 %+ Name
+	extern _First %+ %1 %+ Name
 	_First %+ %1 %+ Name:
 %endmacro
 
@@ -327,7 +327,6 @@ segment .text
 	%endif
 %endmacro
 
-%ifndef LOADDLL_ASM
 import_dll Kernel32
 import_dll_func GetProcAddress
 import_dll_func LoadLibraryA
@@ -335,6 +334,5 @@ extern _hInstance
 extern _LoadFuncGroup
 extern _DebugMsg
 extern _snprintf
-%endif
 
 %endif

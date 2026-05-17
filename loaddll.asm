@@ -1,12 +1,11 @@
-%define LOADDLL_ASM 1
 %include "loaddll.inc"
 
 %define NOIAT 1
 
-global _addr_of_Kernel32
-global _addr_of_GetProcAddress
-global _addr_of_LoadLibraryA
-global _hInstance
+extern _addr_of_Kernel32
+extern _addr_of_GetProcAddress
+extern _addr_of_LoadLibraryA
+extern _hInstance
 
 extern _calloc
 extern _hWnd
@@ -123,7 +122,7 @@ DefFunc _NextString
 	ret
 
 segment .bss
-global _DebugMsgBuffer
+extern _DebugMsgBuffer
 _DebugMsgBuffer resd 1
 _DebugMsgBufferSize equ 4096
 

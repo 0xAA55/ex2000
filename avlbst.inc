@@ -12,7 +12,6 @@ struc AVLBST_Node
 .size equ $ - AVLBST_Node
 endstruc
 
-%ifndef AVLBST_ASM
 extern _AVLKeyCopy
 extern _AVLKeyDelete
 
@@ -27,6 +26,5 @@ extern _AVLRemove
 
 ; void AVLClear(AVLBST_Node **ppn, void(*on_free)(void *userdata));
 extern _AVLClear
-%endif
 
 %endif

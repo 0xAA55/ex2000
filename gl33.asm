@@ -48,20 +48,20 @@ struc PIXELFORMATDESCRIPTOR
 endstruc
 
 segment .bss
-global _hGLRC
+extern _hGLRC
 _hGLRC resd 1
 
-global _OpenGL_Vendor
-global _OpenGL_Renderer
-global _OpenGL_Version
-global _OpenGL_Is_ES
-global _OpenGL_Ver_Major
-global _OpenGL_Ver_Minor
-global _OpenGL_Ver_Release
-global _FailReason
-global _OpenGLNullFunctions
-global _FailInfoBuffer
-global _FuncNameBuf
+extern _OpenGL_Vendor
+extern _OpenGL_Renderer
+extern _OpenGL_Version
+extern _OpenGL_Is_ES
+extern _OpenGL_Ver_Major
+extern _OpenGL_Ver_Minor
+extern _OpenGL_Ver_Release
+extern _FailReason
+extern _OpenGLNullFunctions
+extern _FailInfoBuffer
+extern _FuncNameBuf
 _OpenGL_Vendor resd 1
 _OpenGL_Renderer resd 1
 _OpenGL_Version resd 1
@@ -81,7 +81,7 @@ _FuncNameBuf resd 1 ; The buffer to store the decoded function name
 %define PFD_MAIN_PLANE 0
 
 segment .rdata
-global _PFD
+extern _PFD
 _PFD:
 istruc PIXELFORMATDESCRIPTOR
 	at .nSize, dw PIXELFORMATDESCRIPTOR.size
@@ -98,18 +98,18 @@ istruc PIXELFORMATDESCRIPTOR
 	at .iLayerType, db PFD_MAIN_PLANE
 iend
 
-global _ParseFailText
+extern _ParseFailText
 _ParseFailText db "Unable to parse OpenGL version:", 0xd, 0xa, 0
-global _ParseFailBecauseNondigit
-global _ParseFailBecauseDotExpected
-global _ParseFailBecauseUnknown
+extern _ParseFailBecauseNondigit
+extern _ParseFailBecauseDotExpected
+extern _ParseFailBecauseUnknown
 _ParseFailBecauseNondigit db 0xd, 0xa, "Unexpected non-digit", 0
 _ParseFailBecauseDotExpected db 0xd, 0xa, "Dot '.' expected", 0
 _ParseFailBecauseUnknown db 0xd, 0xa, "Unknown error", 0
 
 ; The code table to decode the function names
 ; The order of the strings represents the code
-global _DecodeTableStrings
+extern _DecodeTableStrings
 _DecodeTableStrings:
 .code_01 db "WindowPos", 0
 .code_02 db "Compressed", 0
@@ -201,7 +201,7 @@ _DecodeTableStrings:
 %define LAST_CODE 88
 
 ; Offsets of the strings
-global _DecodeTable
+extern _DecodeTable
 _DecodeTable:
 .code_01_40:
 	%assign CurCode 0x01
@@ -230,7 +230,7 @@ _DecodeTable:
 	%endrep
 	%undef CurCode
 
-global _OpenGL_ES_String
+extern _OpenGL_ES_String
 _OpenGL_ES_String db "OpenGL ES "
 .size equ $ - _OpenGL_ES_String
 
@@ -256,11 +256,11 @@ _FirstNameOfGL32Func:
 
 %macro def_opengl32_func 2-*
 	segment .bss
-	global _addr_of_gl %+ %1
+	extern _addr_of_gl %+ %1
 	_addr_of_gl %+ %1 resd 1
 
 	segment .rdata
-	global _name_of_gl %+ %1
+	extern _name_of_gl %+ %1
 	_name_of_gl %+ %1:
 
 	%rep %0 - 1
@@ -328,11 +328,11 @@ _FirstNameOfGLFunc:
 
 %macro def_opengl_func 2-*
 	segment .bss
-	global _addr_of_gl %+ %1
+	extern _addr_of_gl %+ %1
 	_addr_of_gl %+ %1 resd 1
 
 	segment .rdata
-	global _name_of_gl %+ %1
+	extern _name_of_gl %+ %1
 	_name_of_gl %+ %1:
 	%rep %0 - 1
 		%rotate 1
@@ -817,7 +817,7 @@ DefFunc _DecodeProcName
 	FrameEnd
 	ret
 
-global _isdigit_al
+extern _isdigit_al
 _isdigit_al:
 	mov dword [_FailReason], _ParseFailBecauseNondigit
 	cmp al, '0'

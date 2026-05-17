@@ -1,7 +1,6 @@
 %include "loaddll.inc"
 %include "gl33.inc"
 
-%define BUFFER_ASM
 %include "buffer.inc"
 
 extern _malloc

@@ -31,75 +31,75 @@ import_dll_func strcat
 import_dll_func snprintf
 
 segment .bss
-global _BillboardVerticesBuffer
+extern _BillboardVerticesBuffer
 _BillboardVerticesBuffer resb GlBuffer.size
-global _DrawBillboardVAO
+extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
-global _DrawBillboardProgram
+extern _DrawBillboardProgram
 _DrawBillboardProgram resd 1
-global _BoxVerticesBuffer
+extern _BoxVerticesBuffer
 _BoxVerticesBuffer resb GlBuffer.size
-global _BoxIndicesBuffer
+extern _BoxIndicesBuffer
 _BoxIndicesBuffer resb GlBuffer.size
-global _PerlinNoiseTexture
+extern _PerlinNoiseTexture
 _PerlinNoiseTexture resd 1
-global _PerlinNoiseTextureMipLinear
+extern _PerlinNoiseTextureMipLinear
 _PerlinNoiseTextureMipLinear resd 1
-global _Timer
+extern _Timer
 _Timer resb Timer.size
-global _BillboardProgramLocations
+extern _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
 .Aspect resd 1
 .FovY resd 1
 .Noise resd 1
 .Time resd 1
-global _MinPitch
+extern _MinPitch
 _MinPitch resd 1
-global _MaxPitch
+extern _MaxPitch
 _MaxPitch resd 1
 
 segment .bss
 alignb 16
-global _CameraMatrix
+extern _CameraMatrix
 _CameraMatrix resb Matrix.size
-global _ClientRect
+extern _ClientRect
 _ClientRect:
 .l resd 1
 .t resd 1
 .r resd 1
 .b resd 1
-global _WindowRect
+extern _WindowRect
 _WindowRect:
 .l resd 1
 .t resd 1
 .r resd 1
 .b resd 1
-global _WindowCenter
+extern _WindowCenter
 _WindowCenter:
 .x resd 1
 .y resd 1
-global _CursorPos
+extern _CursorPos
 _CursorPos:
 .x resd 1
 .y resd 1
-global _CameraYaw
+extern _CameraYaw
 _CameraYaw resd 1
-global _CameraPitch
+extern _CameraPitch
 _CameraPitch resd 1
-global _Aspect
+extern _Aspect
 _Aspect resd 1
-global _FovY
+extern _FovY
 _FovY resd 1
 
 segment .rdata
 align 16
-global _point_001
+extern _point_001
 _point_001 dd 0x3a83126f, 0x3a83126f
-global _FovRatio
+extern _FovRatio
 _FovRatio dw 3
 
-global _BillBoardVertices
+extern _BillBoardVertices
 _BillBoardVertices:
 	db 0, 0
 	db 1, 0
@@ -107,7 +107,7 @@ _BillBoardVertices:
 	db 1, 1
 .num equ $ - _BillBoardVertices
 
-global _BoxVertices
+extern _BoxVertices
 _BoxVertices:
 	db -1, -1,  1
 	db  1, -1,  1
@@ -118,7 +118,7 @@ _BoxVertices:
 	db -1,  1, -1
 	db  1,  1, -1
 .num equ $ - _BoxVertices
-global _BoxIndices
+extern _BoxIndices
 _BoxIndices:
 	; Top
 	db 2, 6, 7

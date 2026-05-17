@@ -1,4 +1,3 @@
-%define AVLBST_ASM
 %include "avlbst.inc"
 
 extern _malloc

@@ -1,4 +1,3 @@
-%define MAIN_ASM 1
 %include "loaddll.inc"
 %include "assets.inc"
 
@@ -50,9 +49,9 @@ _ClassName db "EX2000_DemoWindow", 0
 _WindowTitle db "EX2000", 0
 
 segment .bss
-global _hWnd
-global _hDC
-global _MSG
+extern _hWnd
+extern _hDC
+extern _MSG
 _WCEx resb WNDCLASSEX.size
 _ClassAtom resd 1
 _hWnd resd 1

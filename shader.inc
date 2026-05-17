@@ -3,11 +3,7 @@
 
 %include "loaddll.inc"
 
-
-%ifndef SHADER_ASM
 ; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 extern _ProgramCreate
-
-%endif
 
 %endif

@@ -6,7 +6,7 @@
 
 %macro DefFunc 1
 	%define CurFuncName %1
-	global %1
+	extern %1
 	%1:
 %endmacro
 
