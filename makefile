@@ -34,7 +34,7 @@ ex2000.exe: $(OBJS) $(LIBS) $(FILES)
 	ld.exe -o $@ -nostdlib -mi386pe -subsystem windows -e _start $(OBJS) $(LDFLAGS) $(LDLIBS)
 ex2000.pdb: ex2000.exe
 	cv2pdb $^
-	strip --strip-debug --strip-unneeded $^
+	strip $^
 
 clean:
 	del /f /s /q out\\*.obj out\\*.cab out\\*.a *.gdb *.pdb
