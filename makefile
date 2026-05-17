@@ -20,13 +20,14 @@ pool.asm: loaddll.inc pool.inc
 scene.asm: loaddll.inc timer.inc gl33.inc buffer.inc assets.inc shader.inc math.inc
 shader.asm: loaddll.inc shader.inc gl33.inc
 
-out:
-	mkdir out
 out/%.obj: %.asm
+	if not exist out mkdir out
 	nasm -f elf32 -g $^ -o $@
 out/assets.cab: $(wildcard assets/*)
+	if not exist out mkdir out
 	cabarc -r -p -m LZX:21 N $@ assets\\*
 out/libmath.a: $(wildcard math/*)
+	if not exist out mkdir out
 	make -C math
 
 ex2000.exe: $(OBJS) $(LIBS) $(FILES)
