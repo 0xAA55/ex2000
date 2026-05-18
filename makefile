@@ -8,6 +8,12 @@ LDLIBS=-lmath
 all: ex2000.exe ex2000.pdb
 .PHONY: clean
 
+%.inc:
+	copy $@+
+
+%.asm:
+	copy $@+
+
 loaddll.inc: frame.inc
 main.asm: loaddll.inc assets.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
