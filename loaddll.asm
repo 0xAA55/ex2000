@@ -79,7 +79,8 @@ dll_func_group_end CFunc
 
 segment .text
 DefFunc _InitLoadLibrary
-	FrameBegin 0, 0, ebx, esi, edi
+	FrameBegin 1, 0, ebx, esi, edi
+	AssignVars Index
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
 	mov eax, [eax + 0x14]	; EAX = PEB->Ldr.InMemOrder.Flink (Current EXE)
@@ -97,33 +98,36 @@ DefFunc _InitLoadLibrary
 	add edx, ebx			; EDX = PE
 	mov edx, [edx + 0x78]	; EDX = Offset of EAT
 	add edx, ebx			; EDX = EAT
-	mov esi, [edx + 0x20]	; ESI = Offset of Name Table
-	add esi, ebx			; ESI = Name Table
-	mov ecx, [esi - 0x8]
+	mov eax, [edx + 0x20]	; EAX = Offset of Name Table
+	add eax, ebx			; EAX = Name Table
 
+segment .rdata
+	.get_proc_address db 'GetProcAddress', 0
+	.get_proc_address_len equ $ - .get_proc_address
+segment .text
 	; Get index of GetProcAddress
-	xor edi, edi
+	mov dword Index, 0
 .loop_get_func:
-	inc edi
-	lodsd
-	add eax, ebx
-	cmp dword [eax], 'GetP'
-	jnz .loop_get_func
-	cmp dword [eax + 4], 'rocA'
-	jnz .loop_get_func
-	cmp dword [eax + 8], 'ddre'
-	jnz .loop_get_func
-	cmp word [eax + 12], 'ss'
-	jnz .loop_get_func
+	inc dword Index
+	mov esi, [eax]
+	add esi, ebx
+	mov edi, .get_proc_address
+	mov ecx, .get_proc_address_len
+	repz cmpsb
+	jecxz .found
+	add eax, 4
+	jmp .loop_get_func
+.found:
+	mov ecx, Index
 
 	; Get the address of GetProcAddress by the index
 	mov esi, [edx + 0x24]    ; ESI = Offset of Index Table
 	add esi, ebx             ; ESI = Index Table
-	mov di, [esi + edi * 2]  ; CX = Index
-	dec edi
+	mov cx, [esi + ecx * 2]  ; CX = Index
+	dec ecx
 	mov esi, [edx + 0x1c]    ; ESI = Offset of Address Table
 	add esi, ebx             ; ESI = Address Table
-	mov edx, [esi + edi * 4] ; EDX = Pointer
+	mov edx, [esi + ecx * 4] ; EDX = Pointer
 	add edx, ebx             ; EDX = GetProcAddress
 	mov [_addr_of_GetProcAddress], edx
 
@@ -159,6 +163,7 @@ segment .text
 
 	FrameEnd
 	ret
+	%undef Index
 
 DefFunc _LoadFuncGroup
 	push ecx
