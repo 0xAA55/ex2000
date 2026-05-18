@@ -112,6 +112,8 @@ DefFunc _start
 
 	invoke_cdecl _AssetsInit
 	invoke_cdecl _SceneInit
+	test eax, eax
+	jz .exit
 
 .msgloop:
 	invoke_dll_stdcall PeekMessageA, _MSG, 0, 0, 0, PM_REMOVE

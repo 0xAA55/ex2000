@@ -245,6 +245,8 @@ DefFunc _SceneInit
 	invoke_cdecl _DestroyFloatMap, ebx
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
+	test eax, eax
+	jz .end
 
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
 	invoke_cdecl _InitBuffer, _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxVertices.num / 2, _BoxVertices
@@ -276,8 +278,8 @@ DefFunc _SceneInit
 	fcos
 	fstp dword [_FovY]
 
-.end:
 	mov eax, 1
+.end:
 	FrameEnd
 	ret
 	%undef Location
