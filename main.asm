@@ -102,7 +102,7 @@ DefFunc _start
 	mov [_ClassAtom], eax
 
 	invoke_dll_stdcall CreateWindowExA, \
-		0, eax, _WindowTitle, WS_OVERLAPPEDWINDOW, \
+		0, _ClassName, _WindowTitle, WS_OVERLAPPEDWINDOW, \
 		CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, \
 		0, 0, [_hInstance], 0
 	mov [_hWnd], eax
