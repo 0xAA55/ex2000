@@ -44,3 +44,7 @@ ex2000.pdb: ex2000.exe
 
 clean:
 	del /f /s /q out\\*.obj out\\*.cab out\\*.a *.gdb *.pdb
+
+again:
+	make clean
+	make all -j
