@@ -140,7 +140,7 @@ segment .text
 	; Get the address of GetProcAddress by the index
 	mov esi, [edx + 0x24]    ; ESI = Offset of Index Table
 	add esi, ebx             ; ESI = Index Table
-	mov cx, [esi + ecx * 2]  ; CX = Index
+	movzx ecx, word [esi + ecx * 2]  ; CX = Index
 	dec ecx
 	mov esi, [edx + 0x1c]    ; ESI = Offset of Address Table
 	add esi, ebx             ; ESI = Address Table
