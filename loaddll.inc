@@ -155,15 +155,15 @@ segment .text
 	%endif
 %endmacro
 
-%macro snprintf 3-4+
+%macro sprintf 2-3+
 segment .rdata
-	%%format db %3, 0
+	%%format db %2, 0
 
 segment .text
-	%if %0 >= 4
-		invoke_cdecl _snprintf, %1, %2, %%format, %4
+	%if %0 >= 3
+		invoke_cdecl _sprintf, %1, %%format, %3
 	%else
-		invoke_cdecl _snprintf, %1, %2, %%format
+		invoke_cdecl _sprintf, %1, %%format
 	%endif
 %endmacro
 
@@ -173,6 +173,6 @@ import_dll_func LoadLibraryA
 extern _hInstance
 extern _LoadFuncGroup
 extern _DebugMsg
-extern _snprintf
+extern _sprintf
 
 %endif
