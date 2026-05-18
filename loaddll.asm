@@ -195,18 +195,12 @@ segment .text
 
 DefFunc _LoadFuncGroup
 	push ecx
-	push esi
-	push ebx
-	call [_addr_of_GetProcAddress]
+	invoke_dll_stdcall GetProcAddress, ebx, esi
 %ifdef INVOKE_CHECK
 	extern _addr_of_MessageBoxA
 	test eax, eax
 	jnz .success
-	push 0
-	push 0
-	push esi
-	push 0
-	call [_addr_of_MessageBoxA]
+	invoke_dll_stdcall MessageBoxA, 0, esi, 0, 0
 	xor eax, eax
 .success:
 %endif
