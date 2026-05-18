@@ -11,7 +11,7 @@ extern _hHeap
 extern _calloc
 
 import_dll_func MessageBoxA
-import_dll_func vsprintf
+import_dll_func vsnprintf
 
 segment .bss
 _addr_of_LoadLibraryA resd 1
@@ -69,7 +69,7 @@ def_dll_func strcpy
 def_dll_func strcat
 def_dll_func strlen
 def_dll_func strcmp
-def_dll_func vsprintf
+def_dll_func vsnprintf
 def_dll_func memset
 def_dll_func memcpy
 def_dll_func memmove
@@ -208,7 +208,7 @@ DefFunc _DebugMsg
 .proceed_printf:
 
 	lea eax, Param(1)
-	invoke_dll_cdecl vsprintf, [_DebugMsgBuffer], Param(0), eax
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(0), eax
 	invoke_dll_stdcall MessageBoxA, 0, [_DebugMsgBuffer], 0, 0
 
 .end:
@@ -216,11 +216,11 @@ DefFunc _DebugMsg
 	FrameEnd
 	ret
 
-DefFunc _sprintf
-	FrameBegin 0, 3
+DefFunc _snprintf
+	FrameBegin 0, 4
 
-	lea eax, Param(2)
-	invoke_dll_cdecl vsprintf, Param(0), Param(1), eax
+	lea eax, Param(3)
+	invoke_dll_cdecl vsnprintf, Param(0), Param(1), Param(2), eax
 
 .end:
 	FrameEnd
