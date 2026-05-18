@@ -122,13 +122,14 @@ segment .rdata
 	.get_proc_address_len equ $ - .get_proc_address
 segment .text
 	; Get index of GetProcAddress
-	mov dword Index, 0
+	xor ecx, ecx
+	mov Index, ecx
 .loop_get_func:
 	inc dword Index
 	mov esi, [eax]
 	add esi, ebx
 	mov edi, .get_proc_address
-	mov ecx, .get_proc_address_len
+	mov cl, .get_proc_address_len
 	repz cmpsb
 	jecxz .found
 	add eax, 4
