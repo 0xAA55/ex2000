@@ -77,6 +77,22 @@ def_dll_func rand
 def_dll_func srand
 dll_func_group_end CFunc
 
+segment .rdata
+extern _name_of_User32
+extern _name_of_GDI32
+extern _name_of_MSVCRT
+_name_of_User32 db "user32.dll", 0
+_name_of_GDI32  db "gdi32.dll", 0
+_name_of_MSVCRT db "msvcrt.dll", 0
+
+segment .bss
+extern _addr_of_User32
+extern _addr_of_GDI32
+extern _addr_of_MSVCRT
+_addr_of_User32 resd 1
+_addr_of_GDI32  resd 1
+_addr_of_MSVCRT resd 1
+
 segment .text
 DefFunc _InitLoadLibrary
 	FrameBegin 1, 0, ebx, esi, edi
@@ -150,9 +166,20 @@ segment .text
 	mov [_addr_of_Kernel32], eax
 %endif
 
-	def_dll_and_load User32, "user32.dll"
-	def_dll_and_load GDI32, "gdi32.dll"
-	def_dll_and_load MSVCRT, "msvcrt.dll"
+	mov esi, _name_of_User32
+	mov edi, _addr_of_User32
+	mov ecx, 3
+.loop_load_dll:
+	push ecx
+	invoke_dll_stdcall LoadLibraryA, esi
+	stosd
+	call _NextString
+	pop ecx
+	loop .loop_load_dll
+
+	; def_dll_and_load User32, "user32.dll"
+	; def_dll_and_load GDI32,  "gdi32.dll"
+	; def_dll_and_load MSVCRT, "msvcrt.dll"
 
 	dll_func_group_load Kernel32, KFunc
 	dll_func_group_load User32, UFunc
