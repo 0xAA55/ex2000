@@ -16,8 +16,6 @@ _HaveSSE41 resd 1
 
 segment .bss
 alignb 16
-extern _ZeroVector
-_ZeroVector resd 4
 extern _Rand4MulVal
 _Rand4MulVal resd 4
 extern _Rand4AddVal
@@ -46,6 +44,22 @@ extern _F0123
 _F0123 resd 4
 extern _UF0F0
 _UF0F0 resd 4
+extern _UF000
+_UF000 resd 4
+extern _UFF00
+_UFF00 resd 4
+extern _UFFF0
+_UFFF0 resd 4
+extern _UFFFF
+_UFFFF resd 4
+extern _U0FFF
+_U0FFF resd 4
+extern _U00FF
+_U00FF resd 4
+extern _U000F
+_U000F resd 4
+extern _ZeroVector
+_ZeroVector resd 4
 extern _FP5P5P5P5
 _FP5P5P5P5 resd 4
 extern _IdentityMatrix
@@ -103,8 +117,18 @@ DefFunc _MathInit
 	add edx, 20
 	loop .init_math
 	dec ecx
-	mov [_UF0F0], ecx
-	mov [_UF0F0 + 8], ecx
+	mov [_UF000], ecx
+	movaps xmm0, [_UF000]
+	pshufd xmm0, xmm0, _MM_SHUFFLE(1, 0, 1, 0)
+	pshufd xmm1, xmm0, _MM_SHUFFLE(0, 0, 0, 1)
+	pshufd xmm2, xmm0, _MM_SHUFFLE(0, 0, 1, 1)
+	pshufd xmm3, xmm0, _MM_SHUFFLE(0, 1, 1, 1)
+	pshufd xmm4, xmm0, _MM_SHUFFLE(0, 0, 0, 0)
+	movaps [_UF0F0], xmm0
+	movaps [_U0FFF], xmm1
+	movaps [_U00FF], xmm2
+	movaps [_U000F], xmm3
+	movaps [_UFFFF], xmm4
 	mov [_F0001 + 12], eax
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
@@ -119,6 +143,10 @@ DefFunc _MathInit
 	movaps [_FCCCC], xmm0
 	addps xmm0, [_F4444]
 	movaps [_FHHHH], xmm0
+	pxor xmm2, xmm4
+	pxor xmm3, xmm4
+	movaps [_UFF00], xmm2
+	movaps [_UFFF0], xmm3
 
 	xor eax, eax
 	inc eax
