@@ -186,7 +186,25 @@ extern _FloatMapGetMaxValue
 ; FloatMap *FloatMapKMapGen(FloatMap *src);
 extern _FloatMapKMapGen
 
-; FloatMap *AltitudeToTerrain(FloatMap *src, float height_mod, float size_mod);
+struc Vertex
+	.x resd 1
+	.y resd 1
+	.z resd 1
+	.nx resd 1
+	.ny resd 1
+	.nz resd 1
+	.u resd 1
+	.v resd 1
+	.size equ $ - Vertex
+endstruc
+struc SimpleMesh ; All data of a `SimpleMesh` must be `malloc()` once
+	.vertices resd 1
+	.indices resd 1
+	.num_vertices resd 1
+	.num_indices resd 1
+	.size equ $ - SimpleMesh
+endstruc
+; SimpleMesh *AltitudeToTerrain(FloatMap *src, float height_mod, float size_mod);
 extern _AltitudeToTerrain
 
 %endif
