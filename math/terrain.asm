@@ -3,7 +3,7 @@
 
 segment .text
 DefFunc _AltitudeToTerrain
-	FrameBegin 8, 2, ebx, esi, edi
+	FrameBegin 8, 3, ebx, esi, edi
 	AssignVars _X, _Y, _NUM_V, _NUM_I, _CB_V, _BM, _YI, _YI2
 
 	mov esi, Param(0)
@@ -118,7 +118,7 @@ DefFunc _AltitudeToTerrain
 	subss xmm0, [edx]
 	mulss xmm0, xmm5 ;nz
 	movss _T1, xmm0
-	movss _T2, eax
+	mov _T2, eax
 	xor eax, eax
 	mov _X, eax
 .loopx:

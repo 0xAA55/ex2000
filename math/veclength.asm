@@ -25,7 +25,7 @@ DefFunc _VectorLength
 	pshufd xmm0, xmm2, _MM_SHUFFLE(1, 1, 1, 1)
 	addss xmm0, xmm2
 .after_dot:
-	sqrtss xmm0
+	sqrtss xmm0, xmm0
 	movss [edx], xmm0
 
 	FrameEnd
