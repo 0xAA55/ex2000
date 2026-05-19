@@ -19,4 +19,9 @@ import_dll_func rand
 import_dll_func srand
 import_dll_func ExitProcess
 
+extern _counter
+extern _Rand4MulVal
+extern _Rand4AddVal
+extern _Rand4AndVal
+
 %endif

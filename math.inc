@@ -57,6 +57,12 @@ extern _Pi_P
 extern _Pi_N
 extern _2Pi
 extern _2.0f
+extern _M1.0f
+extern _W6
+extern _W10
+extern _W15
+extern _HaveSSE3
+extern _HaveSSE41
 extern _FMAX
 extern _FMIN
 extern _F1111
