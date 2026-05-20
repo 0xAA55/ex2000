@@ -37,10 +37,10 @@ extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
 extern _DrawBillboardProgram
 _DrawBillboardProgram resd 1
-extern _BoxVerticesBuffer
-_BoxVerticesBuffer resb GlBuffer.size
-extern _BoxIndicesBuffer
-_BoxIndicesBuffer resb GlBuffer.size
+extern _TerrainVerticesBuffer
+_TerrainVerticesBuffer resb GlBuffer.size
+extern _TerrainIndicesBuffer
+_TerrainIndicesBuffer resb GlBuffer.size
 extern _PerlinNoiseTexture
 _PerlinNoiseTexture resd 1
 extern _PerlinNoiseTextureMipLinear
@@ -105,43 +105,6 @@ _BillBoardVertices:
 	db 1, 1
 .num equ $ - _BillBoardVertices
 
-extern _BoxVertices
-_BoxVertices:
-	db -1, -1,  1
-	db  1, -1,  1
-	db -1,  1,  1
-	db  1,  1,  1
-	db -1, -1, -1
-	db  1, -1, -1
-	db -1,  1, -1
-	db  1,  1, -1
-.num equ $ - _BoxVertices
-extern _BoxIndices
-_BoxIndices:
-	; Top
-	db 2, 6, 7
-	db 2, 3, 7
-
-	; Bottom
-	db 0, 4, 5
-	db 0, 1, 5
-
-	; Left
-	db 0, 2, 6
-	db 0, 4, 6
-
-	; Right
-	db 1, 3, 7
-	db 1, 5, 7
-
-	; Front
-	db 0, 2, 3
-	db 0, 1, 3
-
-	; Back
-	db 4, 6, 7
-	db 4, 5, 7
-.num equ $ - _BoxIndices
 
 %macro SceneLoadShaderProgram 4
 	segment .rdata
@@ -190,7 +153,7 @@ DefFunc _SceneLoadShaderProgram
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 1, 6, ebx
+	FrameBegin 1, 6, ebx, esi
 	AssignVars Location
 
 	PrepParam 0, _Timer
@@ -249,8 +212,9 @@ DefFunc _SceneInit
 	jz .end
 
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
-	invoke_cdecl _InitBuffer, _BoxVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxVertices.num / 2, _BoxVertices
-	invoke_cdecl _InitBuffer, _BoxIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BoxIndices.num / 2, _BoxIndices
+	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [esi + SimpleMesh.num_vertices], [esi + SimpleMesh.vertices]
+	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [esi + SimpleMesh.num_indices], [esi + SimpleMesh.indices]
+	invoke_cdecl _free, esi
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
