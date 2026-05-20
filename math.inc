@@ -103,6 +103,9 @@ extern _VectorCross
 ; void VectorLength(float *out, Vector *v, int dim);
 extern _VectorLength
 
+; void _VectorDot(float *out, Vector *v1, Vector *v2, int dim);
+extern _VectorDot
+
 ; void VectorNormal(Vector *out, Vector *v, int dim);
 extern _VectorNormal
 
