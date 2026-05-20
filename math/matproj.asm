@@ -11,12 +11,12 @@ DefFunc _MatrixProjection
 	movaps [eax + Matrix.z], xmm0
 	movaps [eax + Matrix.w], xmm0
 
-	mov dword [eax + Matrix.zw], 0x3F800000
+	mov dword [eax + Matrix.zw], __?float32?__(1.0)
 
 	fld dword Param(1)
 	fdiv dword [_2.0f]
 	fsincos
-	fdivp st1, st0
+	fdivp
 	fst dword [eax + Matrix.yy]
 	fdiv dword Param(2)
 	fstp dword [eax + Matrix.xx]
@@ -29,7 +29,7 @@ DefFunc _MatrixProjection
 	movss xmm1, [_ZeroVector]
 	subss xmm1, Param(3)
 	mulss xmm1, xmm0
-	movss [eax + Matrix.wz], xmm0
+	movss [eax + Matrix.wz], xmm1
 
 	FrameEnd
 	ret
