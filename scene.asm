@@ -37,6 +37,8 @@ extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
 extern _DrawBillboardProgram
 _DrawBillboardProgram resd 1
+extern _DrawTerrainProgram
+_DrawTerrainProgram resd 1
 extern _TerrainVerticesBuffer
 _TerrainVerticesBuffer resb GlBuffer.size
 extern _TerrainIndicesBuffer
@@ -212,6 +214,10 @@ DefFunc _SceneInit
 	invoke_cdecl _DestroyFloatMap, ebx
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
+	test eax, eax
+	jz .end
+
+	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
 	test eax, eax
 	jz .end
 
