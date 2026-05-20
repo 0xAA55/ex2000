@@ -201,6 +201,8 @@ DefFunc _SceneInit
 	fcos
 	fstp dword [_FovY]
 
+	mov dword [_CameraPos + Vector.y], __?float32?__(20.0)
+
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, __?float32?__(1.0), 8
 	mov ebx, eax
 	invoke_cdecl _AltitudeToTerrain, ebx, __?float32?__(10.0), __?float32?__(100.0)
