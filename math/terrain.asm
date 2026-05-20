@@ -141,27 +141,27 @@ DefFunc _AltitudeToTerrain
 	lea ecx, [eax + ecx * 4]
 	lea edx, [eax + edx * 4]
 	movss xmm0, [ecx]
-	mulss xmm1, Param(1)
 	subss xmm0, [edx]
-	movss [edi + SimpleVertex.y], xmm1
 	mulss xmm0, xmm5 ;nx
+	mulss xmm1, Param(1)
 
 	movss [edi + SimpleVertex.nx], xmm0
-	mov dword[edi + SimpleVertex.ny], 0x3F800000
-	movss [edi + SimpleVertex.nz], xmm1
+	movss [edi + SimpleVertex.ny], xmm1
+	movss [edi + SimpleVertex.nz], xmm2
 
 	lea eax, [edi + SimpleVertex.nx]
 	invoke_cdecl _VectorNormal, eax, eax, 3
 
 	movq xmm0, _X
 	cvtdq2ps xmm0, xmm0
-	movaps xmm1, xmm0
+	movaps xmm3, xmm0
 	mulps xmm0, xmm4
-	mulps xmm1, xmm6
+	mulps xmm3, xmm6
 	pshufd xmm2, xmm0, _MM_SHUFFLE(1, 1, 1, 1)
 	movss [edi + SimpleVertex.x], xmm0
+	movss [edi + SimpleVertex.y], xmm1
 	movss [edi + SimpleVertex.z], xmm2
-	movq [edi + SimpleVertex.u], xmm1
+	movq [edi + SimpleVertex.u], xmm3
 	add edi, ecx
 
 	mov eax, _X
