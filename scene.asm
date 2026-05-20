@@ -222,8 +222,10 @@ DefFunc _SceneInit
 	fchs
 	fstp dword [_MinPitch]
 
-	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 0x3F800000, 8
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, __?float32?__(1.0), 8
 	mov ebx, eax
+	invoke_cdecl _AltitudeToTerrain, ebx, __?float32?__(10.0), __?float32?__(100.0)
+	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]

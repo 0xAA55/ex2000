@@ -71,9 +71,9 @@ segment .rdata
 extern _B0123
 _B0123 db 0, 1, 2, 3
 extern _2.0f
-_2.0f dd 0x40000000
+_2.0f dd __?float32?__(2.0)
 extern _M1.0f
-_M1.0f dd 0xBF800000
+_M1.0f dd __?float32?__(-1.0)
 extern _W6
 _W6 dw 6
 extern _W10
@@ -106,7 +106,7 @@ DefFunc _MathInit
 	cvtdq2ps xmm0, xmm0
 	movaps [_F0123], xmm0
 
-	mov eax, 0x3F800000
+	mov eax, __?float32?__(1.0)
 	mov ecx, 4
 	xor edx, edx
 .init_math:
