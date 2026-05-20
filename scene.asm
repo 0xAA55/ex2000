@@ -61,8 +61,6 @@ _BillboardProgramLocations:
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
 .MVP resd 1
-.Aspect resd 1
-.FovY resd 1
 .Time resd 1
 .Terrain resd 1
 extern _MinPitch
@@ -286,10 +284,6 @@ DefFunc _SceneInit
 
 	GetUniformLocation [_DrawTerrainProgram], "MVP"
 	mov [_TerrainProgramLocations.MVP], eax
-	GetUniformLocation [_DrawTerrainProgram], "aspect"
-	mov [_TerrainProgramLocations.Aspect], eax
-	GetUniformLocation [_DrawTerrainProgram], "fovy"
-	mov [_TerrainProgramLocations.FovY], eax
 	GetUniformLocation [_DrawBillboardProgram], "time"
 	mov [_TerrainProgramLocations.Time], eax
 	GetUniformLocation [_DrawBillboardProgram], "terrain"
@@ -386,8 +380,6 @@ DefFunc _Scene
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
 	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.MVP], 1, 0, _MVP
-	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Aspect], [_Aspect]
-	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.FovY], [_FovY]
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
