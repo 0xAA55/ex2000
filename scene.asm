@@ -94,8 +94,6 @@ _FovY resd 1
 
 segment .rdata
 align 16
-extern _point_001
-_point_001 dd 0x3a83126f, 0x3a83126f
 extern _FovRatio
 _FovRatio dw 3
 
@@ -309,7 +307,7 @@ DefFunc _Scene
 	paddd xmm1, [_WindowRect.l]
 	movq xmm2, [_CameraYaw]
 	psrld xmm1, 1
-	movq xmm3, [_point_001]
+	movq xmm3, [_point_001_vector]
 	movq [_WindowCenter.x], xmm1
 	cvtdq2ps xmm0, xmm0
 	cvtdq2ps xmm1, xmm1

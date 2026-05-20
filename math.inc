@@ -83,8 +83,9 @@ extern _UFFFF
 extern _U0FFF
 extern _U00FF
 extern _U000F
-extern _FP5P5P5P5
 extern _ZeroVector
+extern _FP5P5P5P5
+extern _point_001_vector
 extern _IdentityMatrix
 
 ; void MathInit();

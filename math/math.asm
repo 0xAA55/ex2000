@@ -62,6 +62,8 @@ extern _ZeroVector
 _ZeroVector resd 4
 extern _FP5P5P5P5
 _FP5P5P5P5 resd 4
+extern _point_001_vector
+_point_001_vector resd 4
 extern _IdentityMatrix
 _IdentityMatrix resb Matrix.size
 
@@ -110,6 +112,7 @@ DefFunc _MathInit
 .init_math:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
+	mov dword [_point_001_vector + (ecx - 1) * 4], __?float32?__(0.001)
 	mov byte  [_FP5P5P5P5 + (ecx - 1) * 4 + 3], 0x3F
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
