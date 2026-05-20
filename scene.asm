@@ -58,6 +58,13 @@ _BillboardProgramLocations:
 .FovY resd 1
 .Noise resd 1
 .Time resd 1
+extern _TerrainProgramLocations
+_TerrainProgramLocations:
+.MVP resd 1
+.Aspect resd 1
+.FovY resd 1
+.Time resd 1
+.Terrain resd 1
 extern _MinPitch
 _MinPitch resd 1
 extern _MaxPitch
@@ -277,6 +284,17 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
+	GetUniformLocation [_DrawTerrainProgram], "MVP"
+	mov [_TerrainProgramLocations.MVP], eax
+	GetUniformLocation [_DrawTerrainProgram], "aspect"
+	mov [_TerrainProgramLocations.Aspect], eax
+	GetUniformLocation [_DrawTerrainProgram], "fovy"
+	mov [_TerrainProgramLocations.FovY], eax
+	GetUniformLocation [_DrawBillboardProgram], "time"
+	mov [_TerrainProgramLocations.Time], eax
+	GetUniformLocation [_DrawBillboardProgram], "terrain"
+	mov [_TerrainProgramLocations.Terrain], eax
+
 	mov eax, 1
 .end:
 	FrameEnd
@@ -350,7 +368,10 @@ DefFunc _Scene
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], __?float32?__(0.1), __?float32?__(1000.0)
 	invoke_cdecl _MatrixMultiply, _MVP, _ProjectionMatrix, _CameraViewMatrix
 
+	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
+
 	invoke_dll_stdcall glUseProgram, [_DrawBillboardProgram]
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovY]
@@ -358,8 +379,22 @@ DefFunc _Scene
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
-	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+
+	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
+
+	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
+	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.MVP], 1, 0, _MVP
+	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Aspect], [_Aspect]
+	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.FovY], [_FovY]
+	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
+	invoke_dll_stdcall glUniform1i, [_TerrainProgramLocations.Terrain], 0
+	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glDrawElements, GL_TRIANGLES, [_TerrainIndicesBuffer + GlBuffer.num_items], GL_UNSIGNED_INT, 0
+	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer + GlBuffer.gl_buffer]
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
