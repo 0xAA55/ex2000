@@ -35,6 +35,8 @@ extern _BillboardVerticesBuffer
 _BillboardVerticesBuffer resb GlBuffer.size
 extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
+extern _DrawTerrainVAO
+_DrawTerrainVAO resd 1
 extern _DrawBillboardProgram
 _DrawBillboardProgram resd 1
 extern _DrawTerrainProgram
@@ -246,6 +248,24 @@ DefFunc _SceneInit
 	mov [_BillboardProgramLocations.Noise], eax
 	GetUniformLocation [_DrawBillboardProgram], "time"
 	mov [_BillboardProgramLocations.Time], eax
+
+	invoke_dll_stdcall glGenVertexArrays, 1, _DrawTerrainVAO
+	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_TerrainVerticesBuffer + GlBuffer.gl_buffer]
+	GetAttribLocation [_DrawTerrainProgram], "position"
+	mov Location, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, Location
+	invoke_dll_stdcall glVertexAttribPointer, Location, 3, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.position
+	GetAttribLocation [_DrawTerrainProgram], "normal"
+	mov Location, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, Location
+	invoke_dll_stdcall glVertexAttribPointer, Location, 3, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.normal
+	GetAttribLocation [_DrawTerrainProgram], "uv"
+	mov Location, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, Location
+	invoke_dll_stdcall glVertexAttribPointer, Location, 2, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.uv
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
+	invoke_dll_stdcall glBindVertexArray, 0
 
 	mov eax, 1
 .end:
