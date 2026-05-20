@@ -25,7 +25,7 @@ DefFunc _AltitudeToTerrain
 	mov eax, [esi + FloatMap.num_pixels]
 	mul ecx
 	mov _NUM_I, eax
-	mov eax, Vertex.size
+	mov eax, SimpleVertex.size
 	mul dword _NUM_V
 	mov _CB_V, eax ;cbVertices
 	mov ecx, _NUM_I

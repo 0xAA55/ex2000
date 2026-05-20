@@ -193,7 +193,7 @@ extern _FloatMapGetMaxValue
 ; FloatMap *FloatMapKMapGen(FloatMap *src);
 extern _FloatMapKMapGen
 
-struc Vertex
+struc SimpleVertex
 	.x resd 1
 	.y resd 1
 	.z resd 1
@@ -202,7 +202,7 @@ struc Vertex
 	.nz resd 1
 	.u resd 1
 	.v resd 1
-	.size equ $ - Vertex
+	.size equ $ - SimpleVertex
 endstruc
 struc SimpleMesh ; All data of a `SimpleMesh` must be `malloc()` once
 	.vertices resd 1
