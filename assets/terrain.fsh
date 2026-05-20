@@ -1,7 +1,5 @@
 #version 330
 
-uniform float aspect;
-uniform float fovy;
 uniform float time;
 uniform vec4 fogcolor = vec4(0.8, 0.9, 1.0, 1.0);
 uniform vec4 suncolor = vec4(1.0, 0.9, 0.8, 1.0);
