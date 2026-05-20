@@ -288,11 +288,15 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	GetUniformLocation [_DrawTerrainProgram], "MVP"
-	mov [_TerrainProgramLocations.MVP], eax
-	GetUniformLocation [_DrawBillboardProgram], "time"
+	GetUniformLocation [_DrawTerrainProgram], "model"
+	mov [_TerrainProgramLocations.Model], eax
+	GetUniformLocation [_DrawTerrainProgram], "view"
+	mov [_TerrainProgramLocations.View], eax
+	GetUniformLocation [_DrawTerrainProgram], "proj"
+	mov [_TerrainProgramLocations.Projection], eax
+	GetUniformLocation [_DrawTerrainProgram], "time"
 	mov [_TerrainProgramLocations.Time], eax
-	GetUniformLocation [_DrawBillboardProgram], "terrain"
+	GetUniformLocation [_DrawTerrainProgram], "terrain"
 	mov [_TerrainProgramLocations.Terrain], eax
 
 	mov eax, 1
@@ -366,7 +370,6 @@ DefFunc _Scene
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], __?float32?__(0.1), __?float32?__(1000.0)
-	invoke_cdecl _MatrixMultiply, _MVP, _ProjectionMatrix, _CameraViewMatrix
 
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
@@ -385,7 +388,9 @@ DefFunc _Scene
 
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.MVP], 1, 0, _MVP
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Model], 1, 0, _IdentityMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.View], 1, 0, _CameraViewMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Projection], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
