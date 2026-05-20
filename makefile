@@ -43,7 +43,7 @@ ex2000.pdb: ex2000.exe
 	strip $^
 
 clean:
-	del /f /s /q out\\*.obj out\\*.cab out\\*.a *.gdb *.pdb
+	del /f /s /q out\\*.obj out\\*.cab out\\*.a *.gdb *.pdb ex2000.exe
 
 again:
 	make clean
