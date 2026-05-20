@@ -194,15 +194,18 @@ extern _FloatMapGetMaxValue
 extern _FloatMapKMapGen
 
 struc SimpleVertex
+.position:
 	.x resd 1
 	.y resd 1
 	.z resd 1
+.normal:
 	.nx resd 1
 	.ny resd 1
 	.nz resd 1
+.uv:
 	.u resd 1
 	.v resd 1
-	.size equ $ - SimpleVertex
+.size equ $ - SimpleVertex
 endstruc
 struc SimpleMesh ; All data of a `SimpleMesh` must be `malloc()` once
 	.vertices resd 1
