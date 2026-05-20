@@ -110,7 +110,6 @@ extern _FovY
 _FovY resd 1
 
 segment .rdata
-align 16
 extern _FovRatio
 _FovRatio dw 3
 
