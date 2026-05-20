@@ -105,7 +105,6 @@ _BillBoardVertices:
 	db 1, 1
 .num equ $ - _BillBoardVertices
 
-
 %macro SceneLoadShaderProgram 4
 	segment .rdata
 	%%VSAssetsPath db %2, 0
@@ -254,6 +253,7 @@ DefFunc _FakeDwmFlush
 
 DefFunc _Scene
 	FrameBegin 1, 4
+	AssignVars TimerValue
 
 	invoke_cdecl _UpdateTimer, _Timer
 
@@ -303,7 +303,7 @@ DefFunc _Scene
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
 	fld qword [_Timer + Timer.TimerVal]
-	fstp dword Variable(0)
+	fstp dword TimerValue
 	invoke_dll_stdcall glViewport, [_ClientRect.l], [_ClientRect.t], [_ClientRect.r], [_ClientRect.b]
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
@@ -315,7 +315,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovY]
-	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], Variable(0)
+	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], TimerValue
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
@@ -335,6 +335,7 @@ DefFunc _Scene
 .end:
 	FrameEnd
 	ret
+	%undef TimerValue
 
 DefFunc _SwapBuffers
 	FrameBegin 0, 0
