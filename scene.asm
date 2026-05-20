@@ -108,10 +108,14 @@ extern _Aspect
 _Aspect resd 1
 extern _FovY
 _FovY resd 1
+extern _FovYCos
+_FovYCos resd 1
 
 segment .rdata
-extern _FovRatio
-_FovRatio dw 3
+extern _FovDegree
+_FovDegree dw 60
+extern _PiDegree
+_PiDegree dw 180
 
 extern _BillBoardVertices
 _BillBoardVertices:
@@ -200,10 +204,13 @@ DefFunc _SceneInit
 	fchs
 	fstp dword [_MinPitch]
 
+	fild word [_FovDegree]
+	fidiv word [_PiDegree]
 	fldpi
-	fidivr word [_FovRatio]
+	fmul
+	fst dword [_FovY]
 	fcos
-	fstp dword [_FovY]
+	fstp dword [_FovYCos]
 
 	mov dword [_CameraPos + Vector.y], __?float32?__(20.0)
 
