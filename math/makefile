@@ -1,4 +1,4 @@
-OBJS=../out/math.obj ../out/seedvec.obj ../out/vecnormal.obj ../out/veclength.obj ../out/veccross.obj ../out/vecmultmat.obj ../out/matmult.obj ../out/mateuler.obj ../out/matteuler.obj ../out/matveuler.obj ../out/mattranspose.obj ../out/matproj.obj ../out/floatmap.obj ../out/floatmapgain.obj ../out/floatmapmax.obj ../out/multfloatmap.obj ../out/warpfmap.obj ../out/floatmappool.obj ../out/rmap.obj ../out/dmap.obj ../out/floatmapgaussianblur.obj ../out/sstep.obj ../out/perlin.obj ../out/kmap.obj ../out/terrain.obj
+OBJS=../out/math.obj ../out/seedvec.obj ../out/vecnormal.obj ../out/vecdot.obj ../out/veclength.obj ../out/veccross.obj ../out/vecmultmat.obj ../out/matmult.obj ../out/mateuler.obj ../out/matteuler.obj ../out/matveuler.obj ../out/mattranspose.obj ../out/matproj.obj ../out/floatmap.obj ../out/floatmapgain.obj ../out/floatmapmax.obj ../out/multfloatmap.obj ../out/warpfmap.obj ../out/floatmappool.obj ../out/rmap.obj ../out/dmap.obj ../out/floatmapgaussianblur.obj ../out/sstep.obj ../out/perlin.obj ../out/kmap.obj ../out/terrain.obj
 
 %.inc:
 	copy $@+
@@ -30,6 +30,7 @@ seedvec.asm: common.inc
 sstep.asm: common.inc
 terrain.asm: common.inc
 veccross.asm: common.inc
+vecdot.asm: common.inc
 veclength.asm: common.inc
 vecmultmat.asm: common.inc
 vecnormal.asm: common.inc
