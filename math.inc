@@ -65,6 +65,10 @@ extern _HaveSSE3
 extern _HaveSSE41
 extern _FMAX
 extern _FMIN
+extern _F0001
+extern _FPMPM
+extern _FMMMM
+extern _FMPMP
 extern _F1111
 extern _F2222
 extern _F3333
