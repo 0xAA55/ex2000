@@ -24,6 +24,12 @@ extern _Rand4AndVal
 _Rand4AndVal resd 4
 extern _F0001
 _F0001 resd 4
+extern _FPMPM
+_FPMPM resd 4
+extern _FMPMP
+_FMPMP resd 4
+extern _FMMMM
+_FMMMM resd 4
 extern _F1111
 _F1111 resd 4
 extern _F2222
@@ -112,6 +118,7 @@ DefFunc _MathInit
 .init_math:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
+	mov [_FPMPM + (ecx - 1) * 4], eax
 	mov dword [_point_001_vector + (ecx - 1) * 4], __?float32?__(0.001)
 	mov byte  [_FP5P5P5P5 + (ecx - 1) * 4 + 3], 0x3F
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
@@ -119,6 +126,17 @@ DefFunc _MathInit
 	mov word  [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
 	add edx, 20
 	loop .init_math
+	mov eax, ecx
+	mov al, 1
+	shl eax, 31
+	or [_FPMPM + 0x4], eax
+	or [_FPMPM + 0xC], eax
+	movaps xmm0, [_ZeroVector]
+	movaps xmm1, [_ZeroVector]
+	subps xmm0, [_F1111]
+	subps xmm1, [_FPMPM]
+	movaps [_FMMMM], xmm0
+	movaps [_FPMPM], xmm1
 	dec ecx
 	mov [_UF000], ecx
 	movaps xmm0, [_UF000]
