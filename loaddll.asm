@@ -10,9 +10,6 @@ extern _hHeap
 
 extern _calloc
 
-import_dll_func MessageBoxA
-import_dll_func vsnprintf
-
 segment .bss
 _addr_of_LoadLibraryA resd 1
 _addr_of_Kernel32 resd 1
