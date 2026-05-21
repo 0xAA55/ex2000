@@ -80,6 +80,8 @@ extern _2.0f
 _2.0f dd __?float32?__(2.0)
 extern _M1.0f
 _M1.0f dd __?float32?__(-1.0)
+extern _M2.0f
+_M2.0f dd __?float32?__(-2.0)
 extern _W6
 _W6 dw 6
 extern _W10

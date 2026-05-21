@@ -90,6 +90,7 @@ extern _Pi_N
 extern _2Pi
 extern _2.0f
 extern _M1.0f
+extern _M2.0f
 extern _W6
 extern _W10
 extern _W15
