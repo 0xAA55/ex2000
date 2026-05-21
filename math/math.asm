@@ -192,3 +192,40 @@ DefFunc _MathInit
 .end:
 	FrameEnd
 	ret
+
+DefFunc _FMatrix2DMatrix
+	FrameBegin 0, 0, ebx, esi
+
+	mov esi, Param(1)
+	mov edi, Param(0)
+
+	movaps xmm0, [esi + Matrix.x]
+	movaps xmm1, [esi + Matrix.y]
+	movaps xmm2, [esi + Matrix.z]
+	movaps xmm3, [esi + Matrix.w]
+
+	movhlps xmm4, xmm0
+	movhlps xmm5, xmm1
+	movhlps xmm6, xmm2
+	movhlps xmm7, xmm3
+
+	cvtps2pd xmm0, xmm0
+	cvtps2pd xmm1, xmm1
+	cvtps2pd xmm2, xmm2
+	cvtps2pd xmm3, xmm3
+	cvtps2pd xmm4, xmm4
+	cvtps2pd xmm5, xmm5
+	cvtps2pd xmm6, xmm6
+	cvtps2pd xmm7, xmm7
+
+	movaps [edi + DMatrix.xx], xmm0
+	movaps [edi + DMatrix.xz], xmm4
+	movaps [edi + DMatrix.yx], xmm1
+	movaps [edi + DMatrix.yz], xmm5
+	movaps [edi + DMatrix.zx], xmm2
+	movaps [edi + DMatrix.zz], xmm6
+	movaps [edi + DMatrix.wx], xmm3
+	movaps [edi + DMatrix.wz], xmm7
+
+	FrameEnd
+	ret
