@@ -81,6 +81,7 @@ segment .text
 DefFunc _start
 	FrameBegin 0, 1
 	invoke_cdecl _InitLoadLibrary
+	invoke_cdecl _AssetsInit
 
 	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx + WNDCLASSEX.lpfnWndProc], _WndProc@16
@@ -110,7 +111,6 @@ DefFunc _start
 	invoke_dll_stdcall ShowWindow, [_hWnd], 1
 	invoke_dll_stdcall UpdateWindow, [_hWnd]
 
-	invoke_cdecl _AssetsInit
 	invoke_cdecl _SceneInit
 	test eax, eax
 	jz .exit
