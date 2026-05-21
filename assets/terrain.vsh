@@ -15,5 +15,5 @@ void main()
 {
 	texcoord = uv;
 	frag_normal = normal;
-	gl_Position = proj * view * model * vec4(position, 1.0);
+	gl_Position = vec4(position, 1.0) * model * view * proj;
 }
