@@ -1,6 +1,9 @@
 %include "common.inc"
 
+%define _EULER_DEBUG 1
+
 segment .text
+%ifndef _EULER_DEBUG
 DefFunc _MatrixViewEuler
 	FrameBegin 10, 0
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, CYCP, SYSP, SYCP, CYSP
@@ -140,3 +143,25 @@ DefFunc _MatrixViewEuler
 	%undef SYCPSR_M_CYSP
 	%undef CYSPSR_M_SYCP
 	%undef SYSPSR_P_CYCP
+%else
+DefFunc _MatrixViewEuler
+	FrameBegin 0x14, 4, ebx, esi
+
+	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
+	mov esi, eax
+	mov ebx, Param(0)
+
+	invoke_cdecl _MatrixRotationEuler, esi, Param(2), Param(3), Param(4)
+	invoke_cdecl _MatrixTranspose, ebx, esi
+	invoke_cdecl _VectorDot, &[ebx + Matrix.wx], &[esi + Matrix.x], Param(1), 3
+	invoke_cdecl _VectorDot, &[ebx + Matrix.wy], &[esi + Matrix.y], Param(1), 3
+	invoke_cdecl _VectorDot, &[ebx + Matrix.wz], &[esi + Matrix.z], Param(1), 3
+	mov eax, 0x80000000
+	xor [ebx + Matrix.wx], eax
+	xor [ebx + Matrix.wy], eax
+	xor [ebx + Matrix.wz], eax
+	invoke_cdecl _aligned_free, esi
+
+	FrameEnd
+	ret
+%endif

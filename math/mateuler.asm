@@ -1,6 +1,9 @@
 %include "common.inc"
 
+%define _EULER_DEBUG 1
+
 segment .text
+%ifndef _EULER_DEBUG
 DefFunc _MatrixRotationEuler
 	FrameBegin 8, 0
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPSR, _SPSR
@@ -93,3 +96,92 @@ DefFunc _MatrixRotationEuler
 	%undef _SR
 	%undef _CPSR
 	%undef _SPSR
+%else
+DefFunc _MakeIdentity
+	movaps xmm0, [_IdentityMatrix + Matrix.x]
+	movaps xmm1, [_IdentityMatrix + Matrix.y]
+	movaps xmm2, [_IdentityMatrix + Matrix.z]
+	movaps xmm3, [_IdentityMatrix + Matrix.w]
+	movaps [ebx + Matrix.x], xmm0
+	movaps [ebx + Matrix.y], xmm1
+	movaps [ebx + Matrix.z], xmm2
+	movaps [ebx + Matrix.w], xmm3
+	ret
+
+DefFunc _MatrixRotationX
+	FrameBegin 0, 0, ebx
+
+	mov ebx, Param(0)
+	call _MakeIdentity
+
+	fld dword Param(1)
+	fsincos
+	fst dword [ebx + Matrix.yy]
+	fstp dword [ebx + Matrix.zz]
+	fst dword [ebx + Matrix.yz]
+	fchs
+	fstp dword [ebx + Matrix.zy]
+
+	FrameEnd
+	ret
+
+DefFunc _MatrixRotationY
+	FrameBegin 0, 0, ebx
+
+	mov ebx, Param(0)
+	call _MakeIdentity
+
+	fld dword Param(1)
+	fsincos
+	fst dword [ebx + Matrix.xx]
+	fstp dword [ebx + Matrix.zz]
+	fst dword [ebx + Matrix.zx]
+	fchs
+	fstp dword [ebx + Matrix.xz]
+
+	FrameEnd
+	ret
+
+DefFunc _MatrixRotationZ
+	FrameBegin 0, 0, ebx
+
+	mov ebx, Param(0)
+	call _MakeIdentity
+
+	fld dword Param(1)
+	fsincos
+	fst dword [ebx + Matrix.xx]
+	fstp dword [ebx + Matrix.yy]
+	fst dword [ebx + Matrix.xy]
+	fchs
+	fstp dword [ebx + Matrix.yx]
+
+	FrameEnd
+	ret
+
+DefFunc _MatrixRotationEuler
+	FrameBegin 4, 3
+	AssignVars YM, PM, RM, RPM
+
+	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
+	mov YM, eax
+	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
+	mov PM, eax
+	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
+	mov RM, eax
+	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
+	mov RPM, eax
+	invoke_cdecl _MatrixRotationZ, RM, Param(3)
+	invoke_cdecl _MatrixRotationX, PM, Param(2)
+	invoke_cdecl _MatrixRotationY, YM, Param(1)
+	invoke_cdecl _MatrixMultiply, RPM, RM, PM
+	invoke_cdecl _MatrixMultiply, Param(0), YM, RPM
+	invoke_cdecl _aligned_free, YM
+	invoke_cdecl _aligned_free, PM
+	invoke_cdecl _aligned_free, RM
+	invoke_cdecl _aligned_free, RPM
+
+	FrameEnd
+	ret
+
+%endif
