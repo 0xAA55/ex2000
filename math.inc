@@ -130,6 +130,9 @@ extern _MathInit
 ; void FMatrix2DMatrix(DMatrix *out, Matrix *m);
 extern _FMatrix2DMatrix
 
+; void DebugMatrix(int x, int y, Matrix *m);
+extern _DebugMatrix
+
 ; int128_t *CreateSeedVector()
 extern _CreateSeedVector
 
