@@ -160,26 +160,19 @@ DefFunc _MatrixRotationZ
 	ret
 
 DefFunc _MatrixRotationEuler
-	FrameBegin 4, 3
-	AssignVars YM, PM, RM, RPM
+	FrameBegin 0x44, 3, ebx
 
-	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
-	mov YM, eax
-	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
-	mov PM, eax
-	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
-	mov RM, eax
-	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
-	mov RPM, eax
+	lea ebx, Variable(4)
+	and ebx, 0xFFFFFFF0
+	%define YM   ebx
+	%define PM   &[ebx + Matrix.size * 1]
+	%define RM   &[ebx + Matrix.size * 2]
+	%define RPM  &[ebx + Matrix.size * 3]
 	invoke_cdecl _MatrixRotationZ, RM, Param(3)
 	invoke_cdecl _MatrixRotationX, PM, Param(2)
 	invoke_cdecl _MatrixRotationY, YM, Param(1)
 	invoke_cdecl _MatrixMultiply, RPM, RM, PM
 	invoke_cdecl _MatrixMultiply, Param(0), YM, RPM
-	invoke_cdecl _aligned_free, YM
-	invoke_cdecl _aligned_free, PM
-	invoke_cdecl _aligned_free, RM
-	invoke_cdecl _aligned_free, RPM
 
 	FrameEnd
 	ret

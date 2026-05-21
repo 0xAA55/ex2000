@@ -147,8 +147,8 @@ DefFunc _MatrixViewEuler
 DefFunc _MatrixViewEuler
 	FrameBegin 0x14, 4, ebx, esi
 
-	invoke_cdecl _aligned_malloc, Matrix.size, 0x10
-	mov esi, eax
+	lea esi, Variable(4)
+	and esi, 0xFFFFFFF0
 	mov ebx, Param(0)
 
 	invoke_cdecl _MatrixRotationEuler, esi, Param(2), Param(3), Param(4)
@@ -160,7 +160,6 @@ DefFunc _MatrixViewEuler
 	xor [ebx + Matrix.wx], eax
 	xor [ebx + Matrix.wy], eax
 	xor [ebx + Matrix.wz], eax
-	invoke_cdecl _aligned_free, esi
 
 	FrameEnd
 	ret
