@@ -60,7 +60,9 @@ _BillboardProgramLocations:
 .Time resd 1
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
-.MVP resd 1
+.Model resd 1
+.View resd 1
+.Proj resd 1
 .Time resd 1
 .Terrain resd 1
 extern _MinPitch
