@@ -184,9 +184,84 @@ segment .text
 import_dll Kernel32
 import_dll_func GetProcAddress
 import_dll_func LoadLibraryA
+
 extern _hInstance
+extern _hDCDesktop
+
 extern _LoadFuncGroup
-extern _DebugMsg
+extern _DebugMsg ;void DebugMsg(const char *format, ...);
+extern _DebugShow ;void DebugShow(int x, int y, const char *format, ...);
+extern _DebugShowV ;void DebugShowV(int x, int y, const char *format, void *ap);
 extern _snprintf
+extern _malloc
+extern _calloc
+extern _realloc
+extern _free
+extern _aligned_malloc
+extern _aligned_free
+
+import_dll_func QueryPerformanceFrequency
+import_dll_func QueryPerformanceCounter
+import_dll_func GetProcessHeap
+import_dll_func HeapAlloc
+import_dll_func HeapReAlloc
+import_dll_func HeapFree
+import_dll_func HeapLock
+import_dll_func HeapUnlock
+import_dll_func Sleep
+import_dll_func GetTickCount
+import_dll_func CreateThread
+import_dll_func CloseHandle
+import_dll_func WaitForMultipleObjects
+
+import_dll_func MessageBoxA
+import_dll_func DrawTextA
+import_dll_func LoadIconA
+import_dll_func LoadCursorA
+import_dll_func RegisterClassExA
+import_dll_func CreateWindowExA
+import_dll_func ShowWindow
+import_dll_func UpdateWindow
+import_dll_func PeekMessageA
+import_dll_func TranslateMessage
+import_dll_func DispatchMessageA
+import_dll_func PostQuitMessage
+import_dll_func DefWindowProcA
+import_dll_func GetDC
+import_dll_func ReleaseDC
+import_dll_func GetWindowRect
+import_dll_func GetClientRect
+import_dll_func GetCursorPos
+import_dll_func SetCursorPos
+import_dll_func ShowCursor
+import_dll_func GetAsyncKeyState
+import_dll_func GetForegroundWindow
+
+import_dll_func strcpy
+import_dll_func strcat
+import_dll_func strlen
+import_dll_func strcmp
+import_dll_func vsnprintf
+import_dll_func memset
+import_dll_func memcpy
+import_dll_func memmove
+import_dll_func rand
+import_dll_func srand
+
+%define DT_TOP                      0x00000000
+%define DT_LEFT                     0x00000000
+%define DT_CENTER                   0x00000001
+%define DT_RIGHT                    0x00000002
+%define DT_VCENTER                  0x00000004
+%define DT_BOTTOM                   0x00000008
+%define DT_WORDBREAK                0x00000010
+%define DT_SINGLELINE               0x00000020
+%define DT_EXPANDTABS               0x00000040
+%define DT_TABSTOP                  0x00000080
+%define DT_NOCLIP                   0x00000100
+%define DT_EXTERNALLEADING          0x00000200
+%define DT_CALCRECT                 0x00000400
+%define DT_NOPREFIX                 0x00000800
+%define DT_INTERNAL                 0x00001000
 
 %endif
