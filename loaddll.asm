@@ -16,6 +16,7 @@ _addr_of_Kernel32 resd 1
 _addr_of_GetProcAddress resd 1
 _hInstance resd 1
 _hHeap resd 1
+_hDCDesktop resd 1
 
 segment .rdata
 _name_of_LoadLibraryA db "LoadLibraryA", 0
@@ -39,6 +40,7 @@ dll_func_group_end KFunc
 
 dll_func_group_start UFunc
 def_dll_func MessageBoxA
+def_dll_func DrawTextA
 def_dll_func LoadIconA
 def_dll_func LoadCursorA
 def_dll_func RegisterClassExA
@@ -175,16 +177,15 @@ segment .text
 	pop ecx
 	loop .loop_load_dll
 
-	; def_dll_and_load User32, "user32.dll"
-	; def_dll_and_load GDI32,  "gdi32.dll"
-	; def_dll_and_load MSVCRT, "msvcrt.dll"
-
 	dll_func_group_load Kernel32, KFunc
 	dll_func_group_load User32, UFunc
 	dll_func_group_load MSVCRT, CFunc
 
 	invoke_dll_stdcall GetProcessHeap
 	mov [_hHeap], eax
+
+	invoke_dll_stdcall GetDC, 0
+	mov [_hDCDesktop], eax
 
 	FrameEnd
 	ret
@@ -217,23 +218,67 @@ segment .bss
 extern _DebugMsgBuffer
 _DebugMsgBuffer resd 1
 _DebugMsgBufferSize equ 4096
+_DebugShowRect resd 4
 
 segment .text
-DefFunc _DebugMsg
-	FrameBegin 0, 4
-
+DefFunc _InitDbg
+	FrameBegin 0, 2
 	mov eax, [_DebugMsgBuffer]
 	test eax, eax
 	jnz .proceed_printf
 	invoke_cdecl _calloc, _DebugMsgBufferSize, 1
 	mov [_DebugMsgBuffer], eax
-	test eax, eax
-	jz .end
 .proceed_printf:
+	FrameEnd
+	ret
+
+DefFunc _DebugMsg
+	FrameBegin 0, 4
+	call _InitDbg
 
 	lea eax, Param(1)
 	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(0), eax
 	invoke_dll_stdcall MessageBoxA, 0, [_DebugMsgBuffer], 0, 0
+
+.end:
+	xor eax, eax
+	FrameEnd
+	ret
+
+DefFunc _DebugShow
+	FrameBegin 0, 4
+	call _InitDbg
+
+	movq xmm0, Param(0)
+	movq [_DebugShowRect], xmm0
+	mov eax, 1024
+	movd xmm1, eax
+	shufps xmm1, xmm1, 0
+	paddd xmm0, xmm1
+	movq [_DebugShowRect + 8], xmm0
+
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), &Param(3)
+	invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
+
+.end:
+	xor eax, eax
+	FrameEnd
+	ret
+
+DefFunc _DebugShowV
+	FrameBegin 0, 4
+	call _InitDbg
+
+	movq xmm0, Param(0)
+	movq [_DebugShowRect], xmm0
+	mov eax, 1024
+	movd xmm1, eax
+	shufps xmm1, xmm1, 0
+	paddd xmm0, xmm1
+	movq [_DebugShowRect + 8], xmm0
+
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), Param(3)
+	invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
 
 .end:
 	xor eax, eax

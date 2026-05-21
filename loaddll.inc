@@ -155,6 +155,20 @@ segment .text
 	%endif
 %endmacro
 
+%macro debug_show 3-4+
+segment .rdata
+	%%format db %3, 0
+
+segment .text
+	%if %0 >= 4
+		invoke_stdcall _DebugShow, %1, %2, %%format, %4
+		add esp, (3 + %count(%4)) * 4
+	%else
+		invoke_stdcall _DebugShow, %1, %2, %%format
+		add esp, 12
+	%endif
+%endmacro
+
 %macro snprintf 3-4+
 segment .rdata
 	%%format db %3, 0
