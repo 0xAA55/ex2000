@@ -310,7 +310,7 @@ segment .text
 	GetUniformLocation [_DrawTerrainProgram], "view"
 	mov [_TerrainProgramLocations.View], eax
 	GetUniformLocation [_DrawTerrainProgram], "proj"
-	mov [_TerrainProgramLocations.Projection], eax
+	mov [_TerrainProgramLocations.Proj], eax
 	GetUniformLocation [_DrawTerrainProgram], "time"
 	mov [_TerrainProgramLocations.Time], eax
 	GetUniformLocation [_DrawTerrainProgram], "terrain"
@@ -407,7 +407,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
 	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Model], 1, 0, _IdentityMatrix
 	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.View], 1, 0, _CameraViewMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Projection], 1, 0, _ProjectionMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Proj], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
