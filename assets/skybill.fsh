@@ -17,9 +17,7 @@ void main()
 {
 	vec2 uv = texcoord * 2.0 - 1.0;
 	uv.x *= aspect;
-	vec3 fragdir = vec3(uv * fovy, 1.0);
-	fragdir *= mat3(camera);
-	fragdir = normalize(fragdir);
+	vec3 fragdir = normalize(vec3(uv * fovy, -1.0) * mat3(camera));
 
 	vec4 sun = suncolor * pow(max(dot(fragdir, sunpos), 0.0), sunsize);
 
