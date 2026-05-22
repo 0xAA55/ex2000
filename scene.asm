@@ -60,9 +60,7 @@ _BillboardProgramLocations:
 .Time resd 1
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
-.Model resd 1
-.View resd 1
-.Proj resd 1
+.Transform resd 1
 .Time resd 1
 .Terrain resd 1
 extern _MinPitch
@@ -72,14 +70,14 @@ _MaxPitch resd 1
 
 segment .bss
 alignb 16
+extern _TransformMatrix
+_TransformMatrix resb Matrix.size
 extern _CameraMatrix
 _CameraMatrix resb Matrix.size
 extern _CameraViewMatrix
 _CameraViewMatrix resb Matrix.size
 extern _ProjectionMatrix
 _ProjectionMatrix resb Matrix.size
-extern _MVP
-_MVP resb Matrix.size
 extern _CameraPos
 _CameraPos resd 4
 extern _ClientRect
@@ -307,12 +305,8 @@ segment .text
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	GetUniformLocation [_DrawTerrainProgram], "model"
-	mov [_TerrainProgramLocations.Model], eax
-	GetUniformLocation [_DrawTerrainProgram], "view"
-	mov [_TerrainProgramLocations.View], eax
-	GetUniformLocation [_DrawTerrainProgram], "proj"
-	mov [_TerrainProgramLocations.Proj], eax
+	GetUniformLocation [_DrawTerrainProgram], "transform"
+	mov [_TerrainProgramLocations.Transform], eax
 	GetUniformLocation [_DrawTerrainProgram], "time"
 	mov [_TerrainProgramLocations.Time], eax
 	GetUniformLocation [_DrawTerrainProgram], "terrain"
@@ -394,6 +388,8 @@ DefFunc _Scene
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], __?float32?__(0.1), __?float32?__(1000.0)
+	invoke_cdecl _MatrixMultiply, _TransformMatrix, _CameraViewMatrix, _ProjectionMatrix
+
 
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
@@ -412,9 +408,7 @@ DefFunc _Scene
 
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Model], 1, 0, _IdentityMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.View], 1, 0, _CameraViewMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Proj], 1, 0, _ProjectionMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Transform], 1, 1, _TransformMatrix
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]

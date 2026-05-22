@@ -1,8 +1,6 @@
 #version 330
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 transform;
 
 in vec3 position;
 in vec3 normal;
@@ -15,5 +13,5 @@ void main()
 {
 	texcoord = uv;
 	frag_normal = normal;
-	gl_Position = vec4(position, 1.0) * model * view * proj;
+	gl_Position = vec4(position, 1.0) * transform;
 }
