@@ -23,6 +23,14 @@ DefFunc _MatrixProjection
 	fmul dword Param(2)
 	fstp dword [eax + Matrix.yy]
 
+	;W = tan(fovy)
+	;H = W * Aspect
+	;Depth = Far - Near
+	;W, 0, 0, 0
+	;0, H, 0, 0
+	;0, 0, -Far / Depth, -1
+	;0, 0, -2 * Near * Far / Depth, 0
+
 	movss xmm0, xmm7
 	movss xmm3, xmm7
 	mulss xmm2, xmm6
@@ -33,8 +41,8 @@ DefFunc _MatrixProjection
 	movss xmm7, xmm7
 	divss xmm2, xmm3
 	movss [eax + Matrix.zz], xmm0
-	movss [eax + Matrix.zw], xmm2
-	movss [eax + Matrix.wz], xmm1
+	movss [eax + Matrix.zw], xmm1
+	movss [eax + Matrix.wz], xmm2
 
 	FrameEnd
 	ret
