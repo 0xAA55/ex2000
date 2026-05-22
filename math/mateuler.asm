@@ -1,6 +1,6 @@
 %include "common.inc"
 
-%define _EULER_DEBUG 1
+; %define _EULER_DEBUG 1
 
 segment .text
 %ifndef _EULER_DEBUG
