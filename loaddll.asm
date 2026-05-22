@@ -56,6 +56,7 @@ def_dll_func GetDC
 def_dll_func ReleaseDC
 def_dll_func GetWindowRect
 def_dll_func GetClientRect
+def_dll_func ClientToScreen
 def_dll_func GetCursorPos
 def_dll_func SetCursorPos
 def_dll_func ShowCursor

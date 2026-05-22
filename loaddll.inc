@@ -231,6 +231,7 @@ import_dll_func GetDC
 import_dll_func ReleaseDC
 import_dll_func GetWindowRect
 import_dll_func GetClientRect
+import_dll_func ClientToScreen
 import_dll_func GetCursorPos
 import_dll_func SetCursorPos
 import_dll_func ShowCursor

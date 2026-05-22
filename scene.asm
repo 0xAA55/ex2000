@@ -335,7 +335,12 @@ DefFunc _Scene
 	invoke_cdecl _UpdateTimer, _Timer
 
 	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
-	invoke_dll_stdcall GetWindowRect, [_hWnd], _WindowRect
+	movq xmm0, [_ClientRect.l]
+	movq xmm1, [_ClientRect.r]
+	movq [_WindowRect.l], xmm0
+	movq [_WindowRect.r], xmm1
+	invoke_dll_stdcall ClientToScreen, [_hWnd], _WindowRect.l
+	invoke_dll_stdcall ClientToScreen, [_hWnd], _WindowRect.r
 	invoke_dll_stdcall GetCursorPos, _CursorPos
 
 	invoke_dll_stdcall GetForegroundWindow
