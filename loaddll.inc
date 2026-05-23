@@ -3,6 +3,8 @@
 
 %include "frame.inc"
 
+%define NULL 0
+
 %macro def_dll 2
 	segment .bss
 	extern _addr_of_ %+ %1
