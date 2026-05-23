@@ -70,6 +70,8 @@ _MaxPitch resd 1
 
 segment .bss
 alignb 16
+extern _ModelMatrix
+_ModelMatrix resb Matrix.size
 extern _TransformMatrix
 _TransformMatrix resb Matrix.size
 extern _CameraMatrix
