@@ -81,7 +81,7 @@ _CameraViewMatrix resb Matrix.size
 extern _ProjectionMatrix
 _ProjectionMatrix resb Matrix.size
 extern _CameraPos
-_CameraPos resd 4
+_CameraPos resb Vector.size
 extern _ClientRect
 _ClientRect:
 .l resd 1
