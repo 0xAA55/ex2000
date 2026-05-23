@@ -4,21 +4,23 @@
 
 segment .text
 DefFunc _MatrixViewEuler
-	FrameBegin 0x14, 4, ebx, esi
+	FrameBegin 0x18, 4, ebx, esi, edi
 
+	mov edi, Param(0)
 	lea esi, Variable(4)
 	and esi, 0xFFFFFFF0
-	mov ebx, Param(0)
+	lea ebx, [esi + Matrix.size]
 
-	invoke_cdecl _MatrixRotationEuler, esi, Param(2), Param(3), Param(4)
-	invoke_cdecl _VectorDot, &[ebx + Matrix.xw], &[esi + Matrix.x], Param(1), 3
-	invoke_cdecl _VectorDot, &[ebx + Matrix.yw], &[esi + Matrix.y], Param(1), 3
-	invoke_cdecl _VectorDot, &[ebx + Matrix.zw], &[esi + Matrix.z], Param(1), 3
-	mov eax, 0x80000000
-	xor [ebx + Matrix.xw], eax
-	xor [ebx + Matrix.yw], eax
-	xor [ebx + Matrix.zw], eax
-	invoke_cdecl _MatrixTranspose, ebx, esi
+	mov eax, Param(1)
+	movups xmm0, [eax]
+	mulps xmm0, [_FMMMM]
+	movaps [ebx], xmm0
+
+	invoke_cdecl _MatrixRotationEuler, edi, Param(2), Param(3), Param(4)
+	invoke_cdecl _MatrixTranspose, esi, edi
+	invoke_cdecl _VectorDot, &[edi + Matrix.wx], &[esi + Matrix.x], ebx, 3
+	invoke_cdecl _VectorDot, &[edi + Matrix.wy], &[esi + Matrix.y], ebx, 3
+	invoke_cdecl _VectorDot, &[edi + Matrix.wz], &[esi + Matrix.z], ebx, 3
 
 	FrameEnd
 	ret
