@@ -14,7 +14,7 @@ DefFunc _MatrixProjection
 	movss xmm6, Param(3)
 	movss xmm7, Param(4)
 	movss xmm1, [_M1.0f]
-	movss xmm2, [_M2.0f]
+	movss xmm2, [_2.0f]
 
 	fld dword Param(1)
 	fsincos
@@ -32,13 +32,11 @@ DefFunc _MatrixProjection
 	;0, 0, -2 * Near * Far / Depth, 0
 
 	movss xmm0, xmm7
-	movss xmm3, xmm7
+	movss xmm3, xmm6
 	mulss xmm2, xmm6
-	mulss xmm0, xmm1
-	subss xmm3, xmm6 ; Depth
+	subss xmm3, xmm7 ; -Depth
 	mulss xmm2, xmm7
 	divss xmm0, xmm3
-	movss xmm7, xmm7
 	divss xmm2, xmm3
 	movss [eax + Matrix.zz], xmm0
 	movss [eax + Matrix.zw], xmm1
