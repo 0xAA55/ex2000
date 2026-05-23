@@ -158,8 +158,8 @@ extern _VectorMultMatrix
 ; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
 
-; void MatrixTransformPositionEuler(Matrix *out, Vector *pos, float yaw, float pitch, float roll);
-extern _MatrixTransformPositionEuler
+; void MatrixEulerTranslated(Matrix *out, Vector *pos, float yaw, float pitch, float roll);
+extern _MatrixEulerTranslated
 
 ; void MatrixViewEuler(Matrix *out, Vector *eye, float yaw, float pitch, float roll);
 extern _MatrixViewEuler
