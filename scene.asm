@@ -357,13 +357,15 @@ DefFunc _Scene
 	cvtdq2ps xmm1, xmm1
 	subps xmm0, xmm1
 	mulps xmm0, xmm3
-	subps xmm2, xmm0
-	comiss xmm2, [_Pi_P]
-	jl .pi_p
+	addps xmm2, xmm0
+	movd eax, xmm2
+	cmp eax, [_Pi_P]
+	jle .pi_p
 	subss xmm2, [_2Pi]
+	movd eax, xmm2
 .pi_p:
-	comiss xmm2, [_Pi_N]
-	jg .pi_n
+	cmp eax, [_Pi_N]
+	jge .pi_n
 	addss xmm2, [_2Pi]
 .pi_n:
 	movq [_CameraYaw], xmm2
