@@ -22,8 +22,6 @@ extern _Rand4AddVal
 _Rand4AddVal resd 4
 extern _Rand4AndVal
 _Rand4AndVal resd 4
-extern _F0001
-_F0001 resd 4
 extern _FPMPM
 _FPMPM resd 4
 extern _FMPMP
@@ -71,7 +69,15 @@ _FP5P5P5P5 resd 4
 extern _point_001_vector
 _point_001_vector resd 4
 extern _IdentityMatrix
-_IdentityMatrix resb Matrix.size
+_IdentityMatrix:
+extern _F1000
+extern _F0100
+extern _F0010
+extern _F0001
+_F1000 resd 4
+_F0100 resd 4
+_F0010 resd 4
+_F0001 resd 4
 
 segment .rdata
 extern _B0123
@@ -152,7 +158,6 @@ DefFunc _MathInit
 	movaps [_U00FF], xmm2
 	movaps [_U000F], xmm3
 	movaps [_UFFFF], xmm4
-	mov [_F0001 + 12], eax
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
 	movaps [_F2222], xmm0
