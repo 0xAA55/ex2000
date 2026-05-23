@@ -350,7 +350,7 @@ DefFunc _Scene
 	movq xmm0, [_CursorPos]
 	paddd xmm1, [_WindowRect.l]
 	movq xmm2, [_CameraYaw]
-	psrld xmm1, 1
+	psrad xmm1, 1
 	movq xmm3, [_point_001_vector]
 	movq [_WindowCenter.x], xmm1
 	cvtdq2ps xmm0, xmm0
