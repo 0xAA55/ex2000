@@ -474,16 +474,20 @@ DefFunc _GenMultiLayerPerlinAltitude
 	jb .accumulate
 
 	invoke_cdecl _free, _JOBS
+
+	%define _GAIN %[_JOBS]
+	%undef _JOBS
+
 	mov ebx, [edi]
 	invoke_cdecl _free, edi
 
 	invoke_cdecl _FloatMapGetMaxValue, ebx
 	fdivr dword Param(1)
-	fstp dword _JOBS
+	fstp dword _GAIN
 
-	invoke_cdecl _FloatMapApplyGain, ebx, _JOBS
+	invoke_cdecl _FloatMapApplyGain, ebx, _GAIN
 
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _JOBS
+	%undef _GAIN
