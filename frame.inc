@@ -194,18 +194,10 @@
 %endmacro
 
 %macro ResetPassReg 0
-	%ifdef PassReg
-		%undef PassReg
-	%endif
-	%ifdef PassRegUsed
-		%undef PassRegUsed
-	%endif
-	%ifdef PassRegAvoid
-		%undef PassRegAvoid
-	%endif
-	%ifdef LastPassParam
-		%undef LastPassParam
-	%endif
+	%undef PassReg
+	%undef PassRegUsed
+	%undef PassRegAvoid
+	%undef LastPassParam
 	%defstr LastPassParam
 %endmacro
 
@@ -217,13 +209,10 @@
 		%ifndef PassReg
 			%define PassReg eax
 		%elif PassReg == eax
-			%undef PassReg
 			%define PassReg ecx
 		%elif PassReg == ecx
-			%undef PassReg
 			%define PassReg edx
 		%else
-			%undef PassReg
 			%define PassReg eax
 		%endif
 		%if !IsRegAvoidForPass(PassReg)
