@@ -157,6 +157,20 @@ segment .text
 	%endif
 %endmacro
 
+%macro debug_printf 1-2+
+segment .rdata
+	%%format db %1, 0
+
+segment .text
+	%if %0 >= 2
+		invoke_dll_stdcall printf, %%format, %2
+		add esp, (1 + %count(%2)) * 4
+	%else
+		invoke_dll_stdcall printf, %%format
+		add esp, 4
+	%endif
+%endmacro
+
 %macro debug_show 3-4+
 %ifndef _DEBUG
 	%error `_DEBUG` not defined.
@@ -250,6 +264,7 @@ import_dll_func strcpy
 import_dll_func strcat
 import_dll_func strlen
 import_dll_func strcmp
+import_dll_func printf
 import_dll_func vsnprintf
 import_dll_func memset
 import_dll_func memcpy

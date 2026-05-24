@@ -69,6 +69,7 @@ def_dll_func strcpy
 def_dll_func strcat
 def_dll_func strlen
 def_dll_func strcmp
+def_dll_func printf
 def_dll_func_alias vsnprintf, "_vsnprintf"
 def_dll_func memset
 def_dll_func memcpy
