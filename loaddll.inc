@@ -236,6 +236,7 @@ import_dll_func GetTickCount
 import_dll_func CreateThread
 import_dll_func CloseHandle
 import_dll_func WaitForMultipleObjects
+import_dll_func VirtualProtect
 
 import_dll_func MessageBoxA
 import_dll_func DrawTextA

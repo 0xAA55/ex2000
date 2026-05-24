@@ -36,6 +36,7 @@ def_dll_func GetTickCount
 def_dll_func CreateThread
 def_dll_func CloseHandle
 def_dll_func WaitForMultipleObjects
+def_dll_func VirtualProtect
 dll_func_group_end KFunc
 
 dll_func_group_start UFunc
