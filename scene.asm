@@ -245,25 +245,8 @@ DefFunc _SceneInit
 	jz .end
 
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
-segment .rdata
-.test_mesh:
-	dd .vertices
-	dd .indices
-	dd 4
-	dd 6
-.vertices:
-	dd -2.0, -1.0, -2.0, -1.0, 0.0, -1.0, 0.0, 0.0
-	dd -2.0, -1.0,  2.0, -1.0, 0.0,  1.0, 1.0, 0.0
-	dd  2.0, -1.0, -2.0,  1.0, 0.0, -1.0, 0.0, 1.0
-	dd  2.0, -1.0,  2.0,  1.0, 0.0,  1.0, 1.0, 1.0
-.indices:
-	dd 0, 1, 2, 1, 3, 2
-segment .text
-	push esi
-	mov esi, .test_mesh
 	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [esi + SimpleMesh.num_vertices], [esi + SimpleMesh.vertices]
 	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [esi + SimpleMesh.num_indices], [esi + SimpleMesh.indices]
-	pop esi
 	invoke_cdecl _free, esi
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
