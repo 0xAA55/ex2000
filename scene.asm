@@ -407,6 +407,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
+	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_LINE
 
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
@@ -421,6 +422,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
+	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_FILL
 .skip_frame:
 	invoke_cdecl _SwapBuffers
 	xor eax, eax
