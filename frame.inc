@@ -233,7 +233,7 @@
 	%endrep
 %endmacro
 
-%macro strcontains 3
+%macro StrContains 3
 	%push
 	%strlen %$len_str %2
 	%strlen %$len_sub %3
@@ -291,6 +291,28 @@
 	%undef esp
 %endmacro
 
+%macro PickOutRegToAvoid 1
+	%if IsPassReg(%1)
+		AddRegAvoidForPass %1
+	%else
+		%undef pos_eax
+		%undef pos_ecx
+		%undef pos_edx
+		StrContains pos_eax, %str(%1), "eax"
+		StrContains pos_ecx, %str(%1), "ecx"
+		StrContains pos_edx, %str(%1), "edx"
+		%if pos_eax > 0
+			AddRegAvoidForPass eax
+		%endif
+		%if pos_ecx > 0
+			AddRegAvoidForPass ecx
+		%endif
+		%if pos_edx > 0
+			AddRegAvoidForPass edx
+		%endif
+	%endif
+%endmacro
+
 %macro invoke_stdcall 1-*
 	%if %0 == 1
 		call %1
@@ -298,23 +320,7 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate -1
-			%if IsPassReg(%1)
-				AddRegAvoidForPass %1
-			%else
-				%undef pos_eax
-				%undef pos_ecx
-				%undef pos_edx
-				strcontains pos_eax, %str(%1), "eax"
-				strcontains pos_ecx, %str(%1), "ecx"
-				strcontains pos_edx, %str(%1), "edx"
-				%if pos_eax > 0
-					AddRegAvoidForPass eax
-				%elif pos_ecx > 0
-					AddRegAvoidForPass ecx
-				%elif pos_edx > 0
-					AddRegAvoidForPass edx
-				%endif
-			%endif
+			PickOutRegToAvoid %1
 		%endrep
 		%rotate -1
 		%assign StdCallParamIndex 0
@@ -328,40 +334,11 @@
 	%endif
 %endmacro
 
-%macro invoke_dll_stdcall 1-*
+%macro invoke_dll_stdcall 1-2+
 	%if %0 == 1
-		invoke_dll_func %1
+		invoke_stdcall [_addr_of_ %+ %1]
 	%else
-		ResetPassReg
-		%rep %0 - 1
-			%rotate -1
-			%if IsPassReg(%1)
-				AddRegAvoidForPass %1
-			%else
-				%undef pos_eax
-				%undef pos_ecx
-				%undef pos_edx
-				strcontains pos_eax, %str(%1), "eax"
-				strcontains pos_ecx, %str(%1), "ecx"
-				strcontains pos_edx, %str(%1), "edx"
-				%if pos_eax > 0
-					AddRegAvoidForPass eax
-				%elif pos_ecx > 0
-					AddRegAvoidForPass ecx
-				%elif pos_edx > 0
-					AddRegAvoidForPass edx
-				%endif
-			%endif
-		%endrep
-		%rotate -1
-		%assign StdCallParamIndex 0
-		%rep %0 - 1
-			%rotate -1
-			PrepStdCallParam StdCallParamIndex, %1
-			%assign StdCallParamIndex StdCallParamIndex + 1
-		%endrep
-		%rotate -1
-		invoke_dll_func %1
+		invoke_stdcall [_addr_of_ %+ %1], %2
 	%endif
 %endmacro
 
@@ -372,23 +349,7 @@
 		ResetPassReg
 		%rep %0 - 1
 			%rotate 1
-			%if IsPassReg(%1)
-				AddRegAvoidForPass %1
-			%else
-				%undef pos_eax
-				%undef pos_ecx
-				%undef pos_edx
-				strcontains pos_eax, %str(%1), "eax"
-				strcontains pos_ecx, %str(%1), "ecx"
-				strcontains pos_edx, %str(%1), "edx"
-				%if pos_eax > 0
-					AddRegAvoidForPass eax
-				%elif pos_ecx > 0
-					AddRegAvoidForPass ecx
-				%elif pos_edx > 0
-					AddRegAvoidForPass edx
-				%endif
-			%endif
+			PickOutRegToAvoid %1
 		%endrep
 		%rotate 1
 		%assign CDeclParamIndex 0
@@ -402,40 +363,11 @@
 	%endif
 %endmacro
 
-%macro invoke_dll_cdecl 1-*
+%macro invoke_dll_cdecl 1-2+
 	%if %0 == 1
-		invoke_dll_func %1
+		invoke_cdecl [_addr_of_ %+ %1]
 	%else
-		ResetPassReg
-		%rep %0 - 1
-			%rotate 1
-			%if IsPassReg(%1)
-				AddRegAvoidForPass %1
-			%else
-				%undef pos_eax
-				%undef pos_ecx
-				%undef pos_edx
-				strcontains pos_eax, %str(%1), "eax"
-				strcontains pos_ecx, %str(%1), "ecx"
-				strcontains pos_edx, %str(%1), "edx"
-				%if pos_eax > 0
-					AddRegAvoidForPass eax
-				%elif pos_ecx > 0
-					AddRegAvoidForPass ecx
-				%elif pos_edx > 0
-					AddRegAvoidForPass edx
-				%endif
-			%endif
-		%endrep
-		%rotate 1
-		%assign CDeclParamIndex 0
-		%rep %0 - 1
-			%rotate 1
-			PrepParam CDeclParamIndex, %1
-			%assign CDeclParamIndex CDeclParamIndex + 1
-		%endrep
-		%rotate 1
-		invoke_dll_func %1
+		invoke_cdecl [_addr_of_ %+ %1], %2
 	%endif
 %endmacro
 
