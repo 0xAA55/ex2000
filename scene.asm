@@ -388,10 +388,11 @@ DefFunc _Scene
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
+	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], __?float32?__(0.1), __?float32?__(1000.0)
-	invoke_cdecl _MatrixMultiply, _TransformMatrix, _CameraViewMatrix, _ProjectionMatrix
-
+	invoke_cdecl _MatrixMultiply, _TransformMatrix, _ModelMatrix, _CameraViewMatrix
+	invoke_cdecl _MatrixMultiplyTo, _TransformMatrix, _ProjectionMatrix
 
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
