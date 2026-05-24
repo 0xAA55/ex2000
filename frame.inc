@@ -20,12 +20,10 @@
 		mov ebp, esp
 	%endif
 	%if %0 > 2
-		%define Frame_SavedRegs %3
+		%xdefine Frame_SavedRegs %3
 		FrameSaveRegs Frame_SavedRegs
 	%else
-		%ifdef Frame_SavedRegs
-			%undef Frame_SavedRegs
-		%endif
+		%undef Frame_SavedRegs
 	%endif
 	%if Frame_NumLocals != 0
 		sub esp, Frame_NumLocals * 4
@@ -157,72 +155,7 @@
 	%endif
 %endmacro
 
-%define IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
-%define IsRegUsedForPass(reg) (%substr(PassRegUsed, 1, 3) == %str(reg) || %substr(PassRegUsed, 4, 3) == %str(reg) || %substr(PassRegUsed, 7, 3) == %str(reg))
-%define IsRegAvoidForPass(reg) (%substr(PassRegAvoid, 1, 3) == %str(reg) || %substr(PassRegAvoid, 4, 3) == %str(reg) || %substr(PassRegAvoid, 7, 3) == %str(reg))
-%define IsNoRegAvailableForPass (IsRegAvoidForPass(eax) && IsRegAvoidForPass(ecx) && IsRegAvoidForPass(edx))
-
-%macro AddRegUsedForPass 1
-	%ifndef PassRegUsed
-		%define PassRegUsed %str(%1)
-	%elif (IsRegUsedForPass(eax) && %1 != eax) || (IsRegUsedForPass(ecx) && %1 != ecx) || (IsRegUsedForPass(edx) && %1 != edx)
-		%define PassRegUsed %strcat(PassRegUsed, %str(%1))
-	%endif
-%endmacro
-
-%macro AddRegAvoidForPass 1
-	%ifndef PassRegAvoid
-		%define PassRegAvoid %str(%1)
-	%elif (IsRegAvoidForPass(eax) && %1 != eax) || (IsRegAvoidForPass(ecx) && %1 != ecx) || (IsRegAvoidForPass(edx) && %1 != edx)
-		%define PassRegAvoid %strcat(PassRegAvoid, %str(%1))
-	%endif
-%endmacro
-
-%macro RemoveRegAvoidForPass 1
-	%ifdef PassRegAvoid
-		%if %substr(PassRegAvoid, 1, 3) == %str(%1)
-			%substr PassRegAvoid PassRegAvoid 4
-		%elif %substr(PassRegAvoid, 4, 3) == %str(%1)
-			%define PassRegAvoid %strcat(%substr(PassRegAvoid, 1, 3), %substr(PassRegAvoid, 7))
-		%elif %substr(PassRegAvoid, 7, 3) == %str(%1)
-			%substr PassRegAvoid PassRegAvoid 1, 6
-		%endif
-		%if %strlen(PassRegAvoid) == 0
-			%undef PassRegAvoid
-		%endif
-	%endif
-%endmacro
-
-%macro ResetPassReg 0
-	%undef PassReg
-	%undef PassRegUsed
-	%undef PassRegAvoid
-	%undef LastPassParam
-	%defstr LastPassParam
-%endmacro
-
-%macro RotatePassReg 0
-	%if IsNoRegAvailableForPass
-		%error No registers available to store address reference parameters to pass
-	%endif
-	%rep 4
-		%ifndef PassReg
-			%define PassReg eax
-		%elif PassReg == eax
-			%define PassReg ecx
-		%elif PassReg == ecx
-			%define PassReg edx
-		%else
-			%define PassReg eax
-		%endif
-		%if !IsRegAvoidForPass(PassReg)
-			AddRegUsedForPass PassReg
-			%exitrep
-		%endif
-	%endrep
-%endmacro
-
-%macro StrContains 3
+%macro __StrContains 3
 	%push
 	%strlen %$len_str %2
 	%strlen %$len_sub %3
@@ -242,62 +175,204 @@
 	%pop
 %endmacro
 
-%macro PrepParam 2
+%define __IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
+
+%macro __IsRegUsedForPass 2
+	__StrContains %1, __PassRegUsed, %str(%2)
+%endmacro
+
+%macro __IsPassRegAllUsed 1
+	%undef __EAX_USED
+	%undef __ECX_USED
+	%undef __EDX_USED
+	%undef __EAX_AVOID
+	%undef __ECX_AVOID
+	%undef __EDX_AVOID
+	__StrContains __EAX_USED, __PassRegUsed, "eax"
+	__StrContains __ECX_USED, __PassRegUsed, "ecx"
+	__StrContains __EDX_USED, __PassRegUsed, "edx"
+	__StrContains __EAX_AVOID, __PassRegAvoid, "eax"
+	__StrContains __ECX_AVOID, __PassRegAvoid, "ecx"
+	__StrContains __EDX_AVOID, __PassRegAvoid, "edx"
+	%if	(__EAX_AVOID == 0 && __EAX_USED == 0) || \
+		(__ECX_AVOID == 0 && __ECX_USED == 0) || \
+		(__EDX_AVOID == 0 && __EDX_USED == 0)
+		%define %1 0
+	%else
+		%define %1 1
+	%endif
+%endmacro
+
+%macro __IsRegAvoidForPass 2
+	__StrContains %1, __PassRegAvoid, %str(%2)
+%endmacro
+
+%macro __AddRegUsedForPass 1
+	%undef __RegSearchPos
+	__IsRegUsedForPass __RegSearchPos, %str(%1)
+	%if __RegSearchPos == 0
+		%strcat __PassRegUsed __PassRegUsed, %str(%1)
+	%endif
+%endmacro
+
+%macro __AddRegAvoidForPass 1
+	%undef __RegSearchPos
+	__IsRegAvoidForPass __RegSearchPos, %str(%1)
+	%if __RegSearchPos == 0
+		%strcat __PassRegAvoid __PassRegAvoid, %str(%1)
+	%endif
+%endmacro
+
+%macro __ResetPassReg 0
+	%undef __PassReg
+	%undef __PassRegUsed
+	%undef __PassRegAvoid
+	%undef __LastPassParam
+	%define __PassReg
+	%defstr __PassRegUsed
+	%defstr __PassRegAvoid
+	%define __LastPassParam
+	%assign __StdCallEspBias 0
+%endmacro
+
+%macro __FlushPassArgs 0
+	%ifdef __1_load
+		__1_load
+	%endif
+	%ifdef __2_load
+		__2_load
+	%endif
+	%ifdef __3_load
+		__3_load
+	%endif
+	%ifdef __1_prep
+		__1_prep
+		%if %isidn(%substr(%str(__1_prep), 1, 4), 'push')
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
+		%endif
+	%endif
+	%ifdef __2_prep
+		__2_prep
+		%if %isidn(%substr(%str(__2_prep), 1, 4), 'push')
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
+		%endif
+	%endif
+	%ifdef __3_prep
+		__3_prep
+		%if %isidn(%substr(%str(__3_prep), 1, 4), 'push')
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
+		%endif
+	%endif
+	%undef __1_load
+	%undef __2_load
+	%undef __3_load
+	%undef __1_prep
+	%undef __2_prep
+	%undef __3_prep
+%endmacro
+
+%macro __RotatePassReg 4
+	%rep 4
+		%undef __UseLastReg
+		%if %isidn(__LastPassParam, %4)
+			%define __UseLastReg 1
+		%else
+			%if %isidn(__PassReg, eax)
+				%define __PassReg ecx
+			%elif %isidn(__PassReg, ecx)
+				%define __PassReg edx
+			%else
+				%define __PassReg eax
+			%endif
+		%endif
+		%undef __IsAvoid
+		__IsRegAvoidForPass __IsAvoid, __PassReg
+		%if __IsAvoid == 0
+			__AddRegUsedForPass __PassReg
+			%if %strlen(__PassRegUsed) <= 3
+				%ifndef __UseLastReg
+					%xdefine __1_load %1 __PassReg, %2
+				%endif
+				%if %isidn(%3, push)
+					%xdefine __1_prep push __PassReg
+				%else
+					%xdefine __1_prep mov %3, __PassReg
+				%endif
+			%elif %strlen(__PassRegUsed) <= 6
+				%ifndef __UseLastReg
+					%xdefine __2_load %1 __PassReg, %2
+				%endif
+				%if %isidn(%3, push)
+					%xdefine __2_prep push __PassReg
+				%else
+					%xdefine __2_prep mov %3, __PassReg
+				%endif
+			%else
+				%ifndef __UseLastReg
+					%xdefine __3_load %1 __PassReg, %2
+				%endif
+				%if %isidn(%3, push)
+					%xdefine __3_prep push __PassReg
+				%else
+					%xdefine __3_prep mov %3, __PassReg
+				%endif
+			%endif
+			%undef __ALL_USED
+			__IsPassRegAllUsed __ALL_USED
+			%if __ALL_USED != 0
+				__FlushPassArgs
+				%defstr __PassRegUsed
+			%endif
+			%exitmacro
+		%endif
+	%endrep
+	%error No registers available to store address reference parameters to pass
+%endmacro
+
+%macro __PrepParam 2
 	%if %1 >= Frame_NumReservedParams
 		%error Bad param index %1
 		%exitmacro
 	%endif
 	%if %substr(%str(%2), 1, 1) == "&"
-		%ifnidn %str(%2), LastPassParam
-			RotatePassReg
-			lea PassReg, %tok(%substr(%str(%2), 2))
-		%endif
-		mov CallParam(%1), PassReg
+		__RotatePassReg lea, %tok(%substr(%str(%2), 2)), CallParam(%1), %2
 	%elif %substr(%str(%2), 1, 1) == "["
-		%ifnidn %str(%2), LastPassParam
-			RotatePassReg
-			mov PassReg, %2
-		%endif
-		mov CallParam(%1), PassReg
+		__RotatePassReg mov, %2, CallParam(%1), %2
 	%else
 		mov dword CallParam(%1), %2
 	%endif
-	%defstr LastPassParam %2
+	%xdefine __LastPassParam %2
 %endmacro
 
-%macro PrepStdCallParam 2
-	%ifdef esP
-		%error 'esP' had been defined to esP.
-	%endif
-	%define esp (esP + (%1) * 4)
+%macro __PrepStdCallParam 2
 	%if %substr(%str(%2), 1, 1) == "&"
-		RotatePassReg
-		lea PassReg, %tok(%substr(%str(%2), 2))
-		push PassReg
+		__RotatePassReg lea, %tok(%substr(%str(%2), 2)), push, %2
 	%else
+		__FlushPassArgs
 		push %2
+		%assign __StdCallEspBias (__StdCallEspBias + 4)
 	%endif
-	%undef esp
+	%xdefine __LastPassParam %2
 %endmacro
 
-%macro PickOutRegToAvoid 1
-	%if IsPassReg(%1)
-		AddRegAvoidForPass %1
+%macro __PickOutRegToAvoid 1
+	%if __IsPassReg(%1)
+		__AddRegAvoidForPass %1
 	%else
-		%undef pos_eax
-		%undef pos_ecx
-		%undef pos_edx
-		StrContains pos_eax, %str(%1), "eax"
-		StrContains pos_ecx, %str(%1), "ecx"
-		StrContains pos_edx, %str(%1), "edx"
-		%if pos_eax > 0
-			AddRegAvoidForPass eax
+		%undef __pos_eax
+		%undef __pos_ecx
+		%undef __pos_edx
+		__StrContains __pos_eax, %str(%1), "eax"
+		__StrContains __pos_ecx, %str(%1), "ecx"
+		__StrContains __pos_edx, %str(%1), "edx"
+		%if __pos_eax > 0
+			__AddRegAvoidForPass eax
 		%endif
-		%if pos_ecx > 0
-			AddRegAvoidForPass ecx
+		%if __pos_ecx > 0
+			__AddRegAvoidForPass ecx
 		%endif
-		%if pos_edx > 0
-			AddRegAvoidForPass edx
+		%if __pos_edx > 0
+			__AddRegAvoidForPass edx
 		%endif
 	%endif
 %endmacro
@@ -306,20 +381,27 @@
 	%if %0 == 1
 		call %1
 	%else
-		ResetPassReg
+		%ifdef esP
+			%undef esP
+			%error Preserved keyword `esP` was defined to something.
+		%endif
+		__ResetPassReg
+		%define esp (esP + __StdCallEspBias)
 		%rep %0 - 1
 			%rotate -1
-			PickOutRegToAvoid %1
+			__PickOutRegToAvoid %1
 		%endrep
 		%rotate -1
-		%assign StdCallParamIndex 0
+		%assign __StdCallParamIndex 0
 		%rep %0 - 1
 			%rotate -1
-			PrepStdCallParam StdCallParamIndex, %1
-			%assign StdCallParamIndex StdCallParamIndex + 1
+			__PrepStdCallParam __StdCallParamIndex, %1
+			%assign __StdCallParamIndex __StdCallParamIndex + 1
 		%endrep
 		%rotate -1
+		__FlushPassArgs
 		call %1
+		%undef esp
 	%endif
 %endmacro
 
@@ -335,19 +417,22 @@
 	%if %0 == 1
 		call %1
 	%else
-		ResetPassReg
+		__ResetPassReg
 		%rep %0 - 1
 			%rotate 1
-			PickOutRegToAvoid %1
+			__PickOutRegToAvoid %1
 		%endrep
 		%rotate 1
-		%assign CDeclParamIndex 0
+		%assign __CDeclParamIndex 0
 		%rep %0 - 1
 			%rotate 1
-			PrepParam CDeclParamIndex, %1
-			%assign CDeclParamIndex CDeclParamIndex + 1
+			%if !%isidn(%1, _)
+				__PrepParam __CDeclParamIndex, %1
+			%endif
+			%assign __CDeclParamIndex __CDeclParamIndex + 1
 		%endrep
 		%rotate 1
+		__FlushPassArgs
 		call %1
 	%endif
 %endmacro
