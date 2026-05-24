@@ -215,7 +215,7 @@ DefFunc _SceneInit
 
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, __?float32?__(1.0), 8
 	mov ebx, eax
-	invoke_cdecl _AltitudeToTerrain, ebx, __?float32?__(10.0), __?float32?__(100.0)
+	invoke_cdecl _AltitudeToTerrain, ebx, __?float32?__(100.0), __?float32?__(200.0)
 	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
@@ -369,6 +369,8 @@ DefFunc _Scene
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 
+	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
+
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
@@ -406,6 +408,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUseProgram, 0
 
 	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_FILL
+
 .skip_frame:
 	invoke_cdecl _SwapBuffers
 	xor eax, eax
