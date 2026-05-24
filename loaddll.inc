@@ -222,6 +222,7 @@ extern _free
 extern _aligned_malloc
 extern _aligned_free
 
+import_dll_func ExitProcess
 import_dll_func QueryPerformanceFrequency
 import_dll_func QueryPerformanceCounter
 import_dll_func GetProcessHeap
@@ -287,5 +288,19 @@ import_dll_func srand
 %define DT_CALCRECT                 0x00000400
 %define DT_NOPREFIX                 0x00000800
 %define DT_INTERNAL                 0x00001000
+
+%define PAGE_NOACCESS           0x01
+%define PAGE_READONLY           0x02
+%define PAGE_READWRITE          0x04
+
+%define WM_CREATE 0x0001
+%define WM_DESTROY 0x0002
+%define WM_QUIT 0x0012
+
+%define WS_OVERLAPPEDWINDOW (0x00000000 | 0x00C00000 | 0x00080000 | 0x00040000 | 0x00020000 | 0x00010000)
+
+%define CW_USEDEFAULT 0x80000000
+
+%define PM_REMOVE 1
 
 %endif

@@ -7,32 +7,6 @@ extern _DeInitGL33
 extern _Scene
 extern _SceneInit
 
-import_dll_func ExitProcess
-import_dll_func GetProcessHeap
-import_dll_func LoadIconA
-import_dll_func LoadCursorA
-import_dll_func RegisterClassExA
-import_dll_func CreateWindowExA
-import_dll_func ShowWindow
-import_dll_func UpdateWindow
-import_dll_func PeekMessageA
-import_dll_func TranslateMessage
-import_dll_func DispatchMessageA
-import_dll_func PostQuitMessage
-import_dll_func DefWindowProcA
-import_dll_func GetDC
-import_dll_func ReleaseDC
-
-%define WM_CREATE 0x0001
-%define WM_DESTROY 0x0002
-%define WM_QUIT 0x0012
-
-%define WS_OVERLAPPEDWINDOW (0x00000000 | 0x00C00000 | 0x00080000 | 0x00040000 | 0x00020000 | 0x00010000)
-
-%define CW_USEDEFAULT 0x80000000
-
-%define PM_REMOVE 1
-
 struc WNDCLASSEX
 	.cbSize resd 1
 	.style resd 1
