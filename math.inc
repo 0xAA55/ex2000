@@ -244,8 +244,6 @@ extern _FloatMapGaussianBlur
 ; float FloatMapGetMaxValue(FloatMap *src);
 extern _FloatMapGetMaxValue
 
-; FloatMap *FloatMapKMapGen(FloatMap *src);
-extern _FloatMapKMapGen
 
 struc SimpleVertex
 .position:
