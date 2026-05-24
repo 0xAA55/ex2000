@@ -1,5 +1,6 @@
 out/
 ex2000.exe
+ex2000d.exe
 .vs
 *.sln
 *.pdb
