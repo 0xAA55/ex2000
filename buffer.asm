@@ -72,8 +72,7 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	inc eax
 	jmp .end
 .failexit:
-	PrepParam 0, esi
-	call _DeInitBuffer
+	invoke_cdecl _DeInitBuffer, esi
 
 	xor eax, eax
 .end:

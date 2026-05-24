@@ -19,8 +19,6 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	mov edi, eax
 	movq xmm5, _X
 	movd xmm7, eax
-	ResetPassReg
-	PrepParam 2, [ebx + FMDataCmn.src_map]
 .gather_gaussian:
 	movd xmm0, [esi + 4 + edi * 4]
 	pxor xmm1, xmm1
@@ -28,7 +26,7 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	punpcklwd xmm0, xmm1
 	paddd xmm0, xmm5
 	movq CallParam(0), xmm0
-	call _GetXYFloatMap
+	invoke_cdecl _GetXYFloatMap, _, _, [ebx + FMDataCmn.src_map]
 	addss xmm7, [eax]
 	inc edi
 	cmp edi, [esi]
@@ -36,10 +34,8 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	divss xmm7, xmm6
 	movq xmm0, _X
 
-	ResetPassReg
-	PrepParam 2, [ebx + FMDataCmn.dst_map]
 	movq CallParam(0), xmm5
-	call _GetXYFloatMap
+	invoke_cdecl _GetXYFloatMap, _, _, [ebx + FMDataCmn.dst_map]
 	movss [eax], xmm7
 
 	mov eax, _X

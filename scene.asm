@@ -177,8 +177,7 @@ DefFunc _SceneInit
 	FrameBegin 1, 6, ebx, esi
 	AssignVars Location
 
-	PrepParam 0, _Timer
-	call _InitTimer
+	invoke_cdecl _InitTimer, _Timer
 
 	mov eax, [_addr_of_wglSwapInterval]
 	test eax, eax
