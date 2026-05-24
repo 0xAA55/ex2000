@@ -1,6 +1,6 @@
 @echo off
 
 set PATH=%~dp0tools;%PATH%
-call make -j
+call make -j %*
 
 pause
