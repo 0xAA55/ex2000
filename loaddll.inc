@@ -158,6 +158,10 @@ segment .text
 %endmacro
 
 %macro debug_show 3-4+
+%ifndef _DEBUG
+	%error `_DEBUG` not defined.
+	%exitmacro
+%endif
 segment .rdata
 	%%format db %3, 0
 
@@ -192,8 +196,10 @@ extern _hDCDesktop
 
 extern _LoadFuncGroup
 extern _DebugMsg ;void DebugMsg(const char *format, ...);
-extern _DebugShow ;void DebugShow(int x, int y, const char *format, ...);
-extern _DebugShowV ;void DebugShowV(int x, int y, const char *format, void *ap);
+%ifdef _DEBUG
+	extern _DebugShow ;void DebugShow(int x, int y, const char *format, ...);
+	extern _DebugShowV ;void DebugShowV(int x, int y, const char *format, void *ap);
+%endif
 extern _snprintf
 extern _malloc
 extern _calloc

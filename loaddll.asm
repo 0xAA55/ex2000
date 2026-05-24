@@ -266,25 +266,27 @@ DefFunc _DebugShow
 	FrameEnd
 	ret
 
-DefFunc _DebugShowV
-	FrameBegin 0, 4
-	call _InitDbg
+%ifdef _DEBUG
+	DefFunc _DebugShowV
+		FrameBegin 0, 4
+		call _InitDbg
 
-	movq xmm0, Param(0)
-	movq [_DebugShowRect], xmm0
-	mov eax, 1024
-	movd xmm1, eax
-	shufps xmm1, xmm1, 0
-	paddd xmm0, xmm1
-	movq [_DebugShowRect + 8], xmm0
+		movq xmm0, Param(0)
+		movq [_DebugShowRect], xmm0
+		mov eax, 1024
+		movd xmm1, eax
+		shufps xmm1, xmm1, 0
+		paddd xmm0, xmm1
+		movq [_DebugShowRect + 8], xmm0
 
-	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), Param(3)
-	invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
+		invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), Param(3)
+		invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
 
-.end:
-	xor eax, eax
-	FrameEnd
-	ret
+	.end:
+		xor eax, eax
+		FrameEnd
+		ret
+%endif
 
 DefFunc _snprintf
 	FrameBegin 0, 4

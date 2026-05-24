@@ -12,14 +12,6 @@ struc Vector
 	.size equ $ - Vector
 endstruc
 
-struc DVector
-	.x resq 1
-	.y resq 1
-	.z resq 1
-	.w resq 1
-	.size equ $ - Vector
-endstruc
-
 ; Must be 16-byte aligned
 struc Matrix
 .x:
@@ -43,6 +35,14 @@ struc Matrix
 	.wz resd 1
 	.ww resd 1
 	.size equ $ - Matrix
+endstruc
+
+struc DVector
+	.x resq 1
+	.y resq 1
+	.z resq 1
+	.w resq 1
+	.size equ $ - Vector
 endstruc
 
 struc DMatrix
@@ -134,8 +134,10 @@ extern _MathInit
 ; void FMatrix2DMatrix(DMatrix *out, Matrix *m);
 extern _FMatrix2DMatrix
 
-; void DebugMatrix(int x, int y, Matrix *m);
-extern _DebugMatrix
+%ifdef _DEBUG
+	; void DebugMatrix(int x, int y, Matrix *m);
+	extern _DebugMatrix
+%endif
 
 ; int128_t *CreateSeedVector()
 extern _CreateSeedVector
