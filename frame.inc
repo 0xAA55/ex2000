@@ -175,6 +175,60 @@
 	%pop
 %endmacro
 
+%macro IsFloatStr 2
+	%xdefine %%src %2
+	%strlen %%len %%src
+	%assign %%i 0
+	%define %1 1
+	%rep %%len
+		%assign %%i %%i + 1
+		%xdefine %%c %substr(%%src, %%i, 1)
+		%xdefine %%t %tok(%%c)
+		%if !%isnum(%%t)
+			%ifidni %%c, 'e'
+				%ifndef %%exp
+					%define %%exp
+				%else
+					%define %1 0
+					%exitmacro
+				%endif
+			%elifidn %%c, '.'
+				%ifdef %%exp
+					%define %1 0
+				%elifndef %%dot
+					%define %%dot
+				%else
+					%define %1 0
+					%exitmacro
+				%endif
+			%else
+				%define %1 0
+				%exitmacro
+			%endif
+		%else
+			%ifdef %%exp
+				%define %%dgt_after_exp
+			%endif
+		%endif
+	%endrep
+	%ifndef %%dot
+		%define %1 0
+	%endif
+	%if %isdef(%%exp) && %isndef(%%dgt_after_exp)
+		%define %1 0
+	%endif
+%endmacro
+
+%macro IsFloatF 2
+	%defstr %%src %2
+	%strlen %%len %%src
+	%ifidni %substr(%%src, %%len), 'f'
+		IsFloatStr %1, %substr(%%src, 1, -2)
+	%else
+		%define %1 0
+	%endif
+%endmacro
+
 %define __IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
 
 %macro __IsRegUsedForPass 2
