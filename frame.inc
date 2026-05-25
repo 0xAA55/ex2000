@@ -387,22 +387,65 @@
 		%error Bad param index %1
 		%exitmacro
 	%endif
-	%if %substr(%str(%2), 1, 1) == "&"
-		__RotatePassReg lea, %tok(%substr(%str(%2), 2)), CallParam(%1), %2
-	%elif %substr(%str(%2), 1, 1) == "["
-		__RotatePassReg mov, %2, CallParam(%1), %2
+	%xdefine %%Param %2
+	%defstr %%ParamStr %%Param
+	%strlen %%ParamStrLen %%ParamStr
+	%assign __NumParamsPassed 1
+	%if %substr(%%ParamStr, 1, 1) == "&"
+		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
+		__RotatePassReg lea, %%Param, CallParam(%1), %tok(%%ParamStr)
+	%elif %substr(%%ParamStr, 1, 1) == "["
+		__RotatePassReg mov, %%Param, CallParam(%1), %%Param
+	%elif %substr(%%ParamStr, 1, 3) == "xmm"
+		%undef __XmmParamStr
+		StripAfterAndDot __XmmParamStr, %%ParamStr
+		%xdefine __XmmParam %tok(__XmmParamStr)
+		%if %substr(%%ParamStr, %%ParamStrLen -1) == ".x"
+			movss CallParam(%1), __XmmParam
+		%elif %substr(%%ParamStr, %%ParamStrLen -2) == ".xy"
+			%assign __NumParamsPassed 2
+			movq CallParam(%1), __XmmParam
+		%elif %substr(%%ParamStr, %%ParamStrLen -4) == ".xyzw"
+			%assign __NumParamsPassed 4
+			movdqu CallParam(%1), __XmmParam
+		%else
+			%error Unknown param %%ParamStr
+		%endif
 	%else
-		mov dword CallParam(%1), %2
+		mov dword CallParam(%1), %%Param
 	%endif
 	%xdefine __LastPassParam %2
 %endmacro
 
 %macro __PrepStdCallParam 2
-	%if %substr(%str(%2), 1, 1) == "&"
-		__RotatePassReg lea, %tok(%substr(%str(%2), 2)), push, %2
+	%xdefine %%Param %2
+	%defstr %%ParamStr %%Param
+	%strlen %%ParamStrLen %%ParamStr
+	%assign __NumParamsPassed 1
+	%if %substr(%%ParamStr, 1, 1) == "&"
+		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
+		__RotatePassReg lea, %%Param, push, %%Param
+	%elif %substr(%%ParamStr, 1, 3) == "xmm"
+		%undef __XmmParamStr
+		StripAfterAndDot __XmmParamStr, %%ParamStr
+		%xdefine __XmmParam %tok(__XmmParamStr)
+		%if %substr(%%ParamStr, %%ParamStrLen -1) == ".x"
+			sub esp, 4
+			movss [esp], __XmmParam
+		%elif %substr(%%ParamStr, %%ParamStrLen -2) == ".xy"
+			%assign __NumParamsPassed 2
+			sub esp, 8
+			movq [esp], __XmmParam
+		%elif %substr(%%ParamStr, %%ParamStrLen -4) == ".xyzw"
+			%assign __NumParamsPassed 4
+			sub esp, 16
+			movdqu [esp], __XmmParam
+		%else
+			%error Unknown param %%ParamStr
+		%endif
 	%else
 		__FlushPassArgs
-		push %2
+		push %%Param
 		%assign __StdCallEspBias (__StdCallEspBias + 4)
 	%endif
 	%xdefine __LastPassParam %2
@@ -449,7 +492,7 @@
 		%rep %0 - 1
 			%rotate -1
 			__PrepStdCallParam __StdCallParamIndex, %1
-			%assign __StdCallParamIndex __StdCallParamIndex + 1
+			%assign __StdCallParamIndex __StdCallParamIndex + __NumParamsPassed
 		%endrep
 		%rotate -1
 		__FlushPassArgs
@@ -482,7 +525,7 @@
 			%if !%isidn(%1, _)
 				__PrepParam __CDeclParamIndex, %1
 			%endif
-			%assign __CDeclParamIndex __CDeclParamIndex + 1
+			%assign __CDeclParamIndex __CDeclParamIndex + __NumParamsPassed
 		%endrep
 		%rotate 1
 		__FlushPassArgs
