@@ -301,19 +301,19 @@
 	%endif
 	%ifdef __1_prep
 		__1_prep
-		%if %isidn(%substr(%str(__1_prep), 1, 4), 'push')
+		%ifidn %substr(%str(__1_prep), 1, 4), 'push'
 			%assign __StdCallEspBias (__StdCallEspBias + 4)
 		%endif
 	%endif
 	%ifdef __2_prep
 		__2_prep
-		%if %isidn(%substr(%str(__2_prep), 1, 4), 'push')
+		%ifidn %substr(%str(__2_prep), 1, 4), 'push'
 			%assign __StdCallEspBias (__StdCallEspBias + 4)
 		%endif
 	%endif
 	%ifdef __3_prep
 		__3_prep
-		%if %isidn(%substr(%str(__3_prep), 1, 4), 'push')
+		%ifidn %substr(%str(__3_prep), 1, 4), 'push'
 			%assign __StdCallEspBias (__StdCallEspBias + 4)
 		%endif
 	%endif
@@ -328,12 +328,12 @@
 %macro __RotatePassReg 4
 	%rep 4
 		%undef __UseLastReg
-		%if %isidn(__LastPassParam, %4)
+		%ifidn __LastPassParam, %4
 			%define __UseLastReg 1
 		%else
-			%if %isidn(__PassReg, eax)
+			%ifidn __PassReg, eax
 				%define __PassReg ecx
-			%elif %isidn(__PassReg, ecx)
+			%elifidn __PassReg, ecx
 				%define __PassReg edx
 			%else
 				%define __PassReg eax
@@ -347,7 +347,7 @@
 				%ifndef __UseLastReg
 					%xdefine __1_load %1 __PassReg, %2
 				%endif
-				%if %isidn(%3, push)
+				%ifidn %3, push
 					%xdefine __1_prep push __PassReg
 				%else
 					%xdefine __1_prep mov %3, __PassReg
@@ -356,7 +356,7 @@
 				%ifndef __UseLastReg
 					%xdefine __2_load %1 __PassReg, %2
 				%endif
-				%if %isidn(%3, push)
+				%ifidn %3, push
 					%xdefine __2_prep push __PassReg
 				%else
 					%xdefine __2_prep mov %3, __PassReg
@@ -365,7 +365,7 @@
 				%ifndef __UseLastReg
 					%xdefine __3_load %1 __PassReg, %2
 				%endif
-				%if %isidn(%3, push)
+				%ifidn %3, push
 					%xdefine __3_prep push __PassReg
 				%else
 					%xdefine __3_prep mov %3, __PassReg
