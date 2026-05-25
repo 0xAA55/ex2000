@@ -415,6 +415,25 @@
 		%else
 			%error Unknown param %%ParamStr
 		%endif
+	%elif %substr(%%ParamStr, 1, 3) == "qw "
+		%xdefine %%Param %tok(%substr(%%ParamStr, 4))
+		%defstr %%ParamStr %%Param
+		%strlen %%ParamStrLen %%ParamStr
+		%assign __NumParamsPassed 2
+		%if %substr(%%ParamStr, 1, 1) == "["
+			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
+			%xdefine %%Inner %tok(%%InnerStr)
+			__RotatePassReg mov, [%%Inner + 0], CallParam(%1 + 0), [%%Inner + 0]
+			__RotatePassReg mov, [%%Inner + 4], CallParam(%1 + 1), [%%Inner + 4]
+		%elif %substr(%%ParamStr, 1, 2) == "&["
+			%xdefine %%InnerStr %substr(%%ParamStr, 3, -2)
+			%xdefine %%Inner %tok(%%InnerStr)
+			__RotatePassReg lea, [%%Inner + 0], CallParam(%1 + 0), [%%Inner + 0]
+			__RotatePassReg lea, [%%Inner + 4], CallParam(%1 + 1), [%%Inner + 4]
+		%else
+			__RotatePassReg mov, (%%Param) & 0xFFFFFFFF, CallParam(%1 + 0), (%%Param) & 0xFFFFFFFF
+			__RotatePassReg mov, (%%Param) >> 32, CallParam(%1 + 1), (%%Param) >> 32
+		%endif
 	%elif __IsFloatF
 		mov dword CallParam(%1), __?float32?__(%tok(%substr(%%ParamStr, 1, -2)))
 	%elif __IsFloatD
@@ -438,7 +457,7 @@
 	IsFloatStr __IsFloatD, %%ParamStr
 	%if %substr(%%ParamStr, 1, 1) == "&"
 		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
-		__RotatePassReg lea, %%Param, push, %%Param
+		__RotatePassReg lea, %%Param, push, %%%tok(%%ParamStr)
 	%elif %substr(%%ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
 		StripAfterAndDot __XmmParamStr, %%ParamStr
@@ -456,6 +475,31 @@
 			movdqu [esp], __XmmParam
 		%else
 			%error Unknown param %%ParamStr
+		%endif
+	%elif %substr(%%ParamStr, 1, 3) == "qw "
+		%xdefine %%Param %tok(%substr(%%ParamStr, 4))
+		%defstr %%ParamStr %%Param
+		%strlen %%ParamStrLen %%ParamStr
+		%assign __NumParamsPassed 2
+		%if %substr(%%ParamStr, 1, 1) == "["
+			__FlushPassArgs
+			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
+			%xdefine %%Inner %tok(%%InnerStr)
+			push [%%Inner + 4]
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
+			push [%%Inner + 0]
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
+		%elif %substr(%%ParamStr, 1, 2) == "&["
+			%xdefine %%InnerStr %substr(%%ParamStr, 3, -2)
+			%xdefine %%Inner %tok(%%InnerStr)
+			__RotatePassReg lea, [%%Inner + 4], push, [%%Inner + 4]
+			__RotatePassReg lea, [%%Inner + 0], push, [%%Inner + 0]
+		%else
+			__FlushPassArgs
+			push (%%Param) >> 32
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
+			push (%%Param) & 0xFFFFFFFF
+			%assign __StdCallEspBias (__StdCallEspBias + 4)
 		%endif
 	%elif __IsFloatF
 		__FlushPassArgs
