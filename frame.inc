@@ -73,18 +73,8 @@
 
 %macro FrameSaveRegs 1-*
 	%rep %0
-		%if %substr(%str(%1), 1, 3) == "xmm"
-			sub esp, 16
-			movups [esp], %1
-			%assign Frame_NumSavedRegs Frame_NumSavedRegs + 4
-		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
-			sub esp, 4
-			movups [esp], %tok(%substr(%str(%1), 4))
-			%assign Frame_NumSavedRegs Frame_NumSavedRegs + 1
-		%else
-			push %1
-			%assign Frame_NumSavedRegs Frame_NumSavedRegs + 1
-		%endif
+		push %1
+		%assign Frame_NumSavedRegs Frame_NumSavedRegs + 1
 		%rotate 1
 	%endrep
 %endmacro
@@ -92,18 +82,8 @@
 %macro FrameStoreRegs 1-*
 	%rep %0
 		%rotate -1
-		%if %substr(%str(%1), 1, 3) == "xmm"
-			movups %1, [esp]
-			add esp, 16
-			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 4
-		%elif %substr(%str(%1), 1, 6) == "ss_xmm"
-			movss %tok(%substr(%str(%1), 4)), [esp]
-			add esp, 4
-			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
-		%else
-			pop %1
-			%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
-		%endif
+		pop %1
+		%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
 	%endrep
 %endmacro
 
