@@ -391,6 +391,10 @@
 	%defstr %%ParamStr %%Param
 	%strlen %%ParamStrLen %%ParamStr
 	%assign __NumParamsPassed 1
+	%undef __IsFloatF
+	%undef __IsFloatD
+	IsFloatF __IsFloatF, %%Param
+	IsFloatStr __IsFloatD, %%ParamStr
 	%if %substr(%%ParamStr, 1, 1) == "&"
 		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
 		__RotatePassReg lea, %%Param, CallParam(%1), %tok(%%ParamStr)
@@ -411,6 +415,12 @@
 		%else
 			%error Unknown param %%ParamStr
 		%endif
+	%elif __IsFloatF
+		mov dword CallParam(%1), __?float32?__(%tok(%substr(%%ParamStr, 1, -2)))
+	%elif __IsFloatD
+		%assign __NumParamsPassed 2
+		mov dword CallParam(%1 + 0), (__?float64?__(%%Param) & 0xFFFFFFFF)
+		mov dword CallParam(%1 + 1), (__?float64?__(%%Param) >> 32)
 	%else
 		mov dword CallParam(%1), %%Param
 	%endif
@@ -422,6 +432,10 @@
 	%defstr %%ParamStr %%Param
 	%strlen %%ParamStrLen %%ParamStr
 	%assign __NumParamsPassed 1
+	%undef __IsFloatF
+	%undef __IsFloatD
+	IsFloatF __IsFloatF, %%Param
+	IsFloatStr __IsFloatD, %%ParamStr
 	%if %substr(%%ParamStr, 1, 1) == "&"
 		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
 		__RotatePassReg lea, %%Param, push, %%Param
@@ -443,6 +457,17 @@
 		%else
 			%error Unknown param %%ParamStr
 		%endif
+	%elif __IsFloatF
+		__FlushPassArgs
+		push __?float32?__(%tok(%substr(%%ParamStr, 1, -2)))
+		%assign __StdCallEspBias (__StdCallEspBias + 4)
+	%elif __IsFloatD
+		__FlushPassArgs
+		%assign __NumParamsPassed 2
+		push (__?float64?__(%%Param) & 0xFFFFFFFF)
+		%assign __StdCallEspBias (__StdCallEspBias + 4)
+		push (__?float64?__(%%Param) >> 32)
+		%assign __StdCallEspBias (__StdCallEspBias + 4)
 	%else
 		__FlushPassArgs
 		push %%Param
