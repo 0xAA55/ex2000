@@ -213,6 +213,21 @@
 	%endif
 %endmacro
 
+%macro StripAfterAndDot 2
+	%xdefine %%src %2
+	%strlen %%len %%src
+	%assign %%i 0
+	%defstr %1
+	%rep %%len
+		%assign %%i %%i + 1
+		%xdefine %%c %substr(%%src, %%i, 1)
+		%ifidn %%c, '.'
+			%exitrep
+		%endif
+		%strcat %1 %1, %%c
+	%endrep
+%endmacro
+
 %define __IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
 
 %macro __IsRegUsedForPass 2
