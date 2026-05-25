@@ -73,7 +73,7 @@ DefFunc _AltitudeToTerrain
 	paddd xmm0, xmm4 ;xi + yi * w, xi1 + yi * w, xi + yi1 * w, xi1 + yi1 * w
 	pshufd xmm1, xmm0, _MM_SHUFFLE(2, 3, 1, 2)
 	movq [edi + 0], xmm0
-	movups [edi + 8], xmm1
+	movdqu [edi + 8], xmm1
 	add edi, 6 * 4
 
 	mov eax, _X

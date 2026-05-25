@@ -116,7 +116,7 @@ DefFunc _MathInit
 	pxor xmm1, xmm1
 	punpcklbw xmm0, xmm1
 	punpcklwd xmm0, xmm1
-	movaps [_I0123], xmm0
+	movdqa [_I0123], xmm0
 	cvtdq2ps xmm0, xmm0
 	movaps [_F0123], xmm0
 
@@ -147,17 +147,17 @@ DefFunc _MathInit
 	movaps [_FPMPM], xmm1
 	dec ecx
 	mov [_UF000], ecx
-	movaps xmm0, [_UF000]
+	movdqa xmm0, [_UF000]
 	pshufd xmm0, xmm0, _MM_SHUFFLE(1, 0, 1, 0)
 	pshufd xmm1, xmm0, _MM_SHUFFLE(0, 0, 0, 1)
 	pshufd xmm2, xmm0, _MM_SHUFFLE(0, 0, 1, 1)
 	pshufd xmm3, xmm0, _MM_SHUFFLE(0, 1, 1, 1)
 	pshufd xmm4, xmm0, _MM_SHUFFLE(0, 0, 0, 0)
-	movaps [_UF0F0], xmm0
-	movaps [_U0FFF], xmm1
-	movaps [_U00FF], xmm2
-	movaps [_U000F], xmm3
-	movaps [_UFFFF], xmm4
+	movdqa [_UF0F0], xmm0
+	movdqa [_U0FFF], xmm1
+	movdqa [_U00FF], xmm2
+	movdqa [_U000F], xmm3
+	movdqa [_UFFFF], xmm4
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
 	movaps [_F2222], xmm0
@@ -173,8 +173,8 @@ DefFunc _MathInit
 	movaps [_FHHHH], xmm0
 	pxor xmm2, xmm4
 	pxor xmm3, xmm4
-	movaps [_UFF00], xmm2
-	movaps [_UFFF0], xmm3
+	movdqa [_UFF00], xmm2
+	movdqa [_UFFF0], xmm3
 
 	xor eax, eax
 	inc eax

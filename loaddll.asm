@@ -256,7 +256,7 @@ DefFunc _DebugShow
 	movq [_DebugShowRect], xmm0
 	mov eax, 1024
 	movd xmm1, eax
-	shufps xmm1, xmm1, 0
+	pshufd xmm1, xmm1, 0
 	paddd xmm0, xmm1
 	movq [_DebugShowRect + 8], xmm0
 
@@ -277,7 +277,7 @@ DefFunc _DebugShow
 		movq [_DebugShowRect], xmm0
 		mov eax, 1024
 		movd xmm1, eax
-		shufps xmm1, xmm1, 0
+		pshufd xmm1, xmm1, 0
 		paddd xmm0, xmm1
 		movq [_DebugShowRect + 8], xmm0
 

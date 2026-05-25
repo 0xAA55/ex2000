@@ -13,7 +13,7 @@ DefFunc _VectorNormal
 
 	movss xmm2, Variable(0)
 	movups xmm0, [edx]
-	pshufd xmm2, xmm2, 0
+	shufps xmm2, xmm2, 0
 	movups xmm1, [eax]
 	pand xmm0, [_U0FFF + ecx]
 	pand xmm1, [_UF000 + ecx]
