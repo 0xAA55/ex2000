@@ -464,9 +464,9 @@
 	%elif __IsFloatD
 		__FlushPassArgs
 		%assign __NumParamsPassed 2
-		push (__?float64?__(%%Param) & 0xFFFFFFFF)
-		%assign __StdCallEspBias (__StdCallEspBias + 4)
 		push (__?float64?__(%%Param) >> 32)
+		%assign __StdCallEspBias (__StdCallEspBias + 4)
+		push (__?float64?__(%%Param) & 0xFFFFFFFF)
 		%assign __StdCallEspBias (__StdCallEspBias + 4)
 	%else
 		__FlushPassArgs
