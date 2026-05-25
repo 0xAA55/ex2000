@@ -163,6 +163,10 @@
 	%rep %%len
 		%assign %%i %%i + 1
 		%xdefine %%c %substr(%%src, %%i, 1)
+		%if %isidn(%%c, '"') || %isidn(%%c, "'")
+			%define %1 0
+			%exitmacro
+		%endif
 		%xdefine %%t %tok(%%c)
 		%if !%isnum(%%t)
 			%ifidni %%c, 'e'
