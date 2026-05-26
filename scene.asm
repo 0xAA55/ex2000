@@ -213,9 +213,9 @@ DefFunc _SceneInit
 	fcos
 	fstp dword [_FovYCos]
 
-	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, __?float32?__(1.0), 8
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 8
 	mov ebx, eax
-	invoke_cdecl _AltitudeToTerrain, ebx, __?float32?__(100.0), __?float32?__(200.0)
+	invoke_cdecl _AltitudeToTerrain, ebx, 100.0f, 200.0f
 	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
@@ -374,7 +374,7 @@ DefFunc _Scene
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
-	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], __?float32?__(0.1), __?float32?__(1000.0)
+	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 1000.0f
 	invoke_cdecl _MatrixMultiply, _TransformMatrix, _ModelMatrix, _CameraViewMatrix
 	invoke_cdecl _MatrixMultiplyTo, _TransformMatrix, _ProjectionMatrix
 
