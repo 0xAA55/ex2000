@@ -244,6 +244,8 @@ extern _FloatMapGaussianBlur
 ; float FloatMapGetMaxValue(FloatMap *src);
 extern _FloatMapGetMaxValue
 
+; void FloatMapBlt(FloatMap *dst, int dst_x, int dst_y, int dst_w, int dst_h, FloatMap *src, int src_x, int src_y, void *userdata, void (*line_proc)(float *dst, const float *src, size_t num_pixels, void *userdata));
+extern _FloatMapBlt
 
 struc SimpleVertex
 .position:
