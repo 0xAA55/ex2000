@@ -150,11 +150,10 @@ segment .rdata
 segment .text
 	%if %0 >= 2
 		invoke_stdcall _DebugMsg, %%format, %2
-		add esp, (1 + %count(%2)) * 4
 	%else
 		invoke_stdcall _DebugMsg, %%format
-		add esp, 4
 	%endif
+	add esp, __StdCallParamIndex * 4
 %endmacro
 
 %macro debug_printf 1-2+
@@ -164,11 +163,10 @@ segment .rdata
 segment .text
 	%if %0 >= 2
 		invoke_dll_stdcall printf, %%format, %2
-		add esp, (1 + %count(%2)) * 4
 	%else
 		invoke_dll_stdcall printf, %%format
-		add esp, 4
 	%endif
+	add esp, __StdCallParamIndex * 4
 %endmacro
 
 %macro debug_show 3-4+
@@ -182,11 +180,10 @@ segment .rdata
 segment .text
 	%if %0 >= 4
 		invoke_stdcall _DebugShow, %1, %2, %%format, %4
-		add esp, (3 + %count(%4)) * 4
 	%else
 		invoke_stdcall _DebugShow, %1, %2, %%format
-		add esp, 12
 	%endif
+	add esp, __StdCallParamIndex * 4
 %endmacro
 
 %macro snprintf 3-4+
