@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _GenDistanceMap
 	FrameBegin 3, 2, ebx, edi
 	AssignVars _Y, _SV, _EV

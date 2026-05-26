@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _FloatMapApplyGain
 	FrameBegin 0, 0, ebx, esi
 

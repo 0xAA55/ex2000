@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _WarpFloatMap
 	FrameBegin 4, 2, ebx, esi, edi
 	AssignVars _X, _Y, _BITMASK, _ROWPTR

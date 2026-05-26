@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _CreateFloatMap
 	FrameBegin 1, 2, ebx, edi
 

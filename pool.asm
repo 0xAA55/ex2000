@@ -12,7 +12,6 @@ import_dll_func CreateThread
 import_dll_func CloseHandle
 import_dll_func WaitForMultipleObjects
 
-segment .text
 DefFunc _PoolRun
 	FrameBegin 2, 2, ebx, esi, edi
 	AssignVars _NUM_WORKERS, _JOBS_TODO

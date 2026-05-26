@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _VectorCross
 	FrameBegin 0, 0
 

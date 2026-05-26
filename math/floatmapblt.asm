@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _FloatMapBlt
 	FrameBegin 8, 4, ebx, esi, edi
 	AssignVars _DX, _DY, _DW, _DH, _DR, _DB, _SX, _SY

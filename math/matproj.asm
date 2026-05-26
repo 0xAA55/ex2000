@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _MatrixProjection
 	FrameBegin 0, 0
 

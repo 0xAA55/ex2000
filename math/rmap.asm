@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _GenRadiusMap
 	FrameBegin 2, 1, ebx, esi, edi
 	AssignVars DistSq, Y_Y

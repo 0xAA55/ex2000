@@ -99,7 +99,6 @@ _FMAX dd 0x7F7FFFFF
 extern _FMIN
 _FMIN dd 0xFF7FFFFF
 
-segment .text
 DefFunc _MathInit
 	FrameBegin 0, 0, ebx
 

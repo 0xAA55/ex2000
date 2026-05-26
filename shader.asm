@@ -11,7 +11,6 @@ segment .rdata
 extern _ShaderTypes
 _ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
 
-segment .text
 ; int ShaderCreate(int program, int shader_type, char *shader_code, char **pp_out_infolog)
 DefFunc _ShaderCreate
 	FrameBegin 5, 2
@@ -101,7 +100,8 @@ DefFunc _ProgramCreate
 	jmp .bad_end
 .skip_shader:
 	mov ecx, _ECX_Home
-	loop .add_shaders
+	dec ecx
+	jnz .add_shaders
 
 	invoke_dll_stdcall glLinkProgram, _PRG
 	invoke_dll_stdcall glGetProgramiv, _PRG, GL_LINK_STATUS, &_LinkStatus

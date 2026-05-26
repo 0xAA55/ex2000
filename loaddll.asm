@@ -95,7 +95,6 @@ _addr_of_User32 resd 1
 _addr_of_GDI32  resd 1
 _addr_of_MSVCRT resd 1
 
-segment .text
 DefFunc _InitLoadLibrary
 	FrameBegin 1, 0, ebx, esi, edi
 	AssignVars Index
@@ -119,10 +118,6 @@ DefFunc _InitLoadLibrary
 	mov eax, [edx + 0x20]	; EAX = Offset of Name Table
 	add eax, ebx			; EAX = Name Table
 
-segment .rdata
-	.get_proc_address db 'GetProcAddress', 0
-	.get_proc_address_len equ $ - .get_proc_address
-segment .text
 	; Get index of GetProcAddress
 	xor ecx, ecx
 	mov Index, ecx
@@ -156,9 +151,6 @@ segment .text
 	call edx	; GetProcAddress
 	mov [_addr_of_LoadLibraryA], eax
 %else
-segment .rdata
-.name_of_Kernel32 db "kernel32.dll", 0
-segment .text
 	extern __imp__GetProcAddress@8
 	extern __imp__LoadLibraryA@4
 	mov eax, [__imp__GetProcAddress@8]
@@ -194,6 +186,14 @@ segment .text
 	ret
 	%undef Index
 
+segment .rdata
+	.get_proc_address db 'GetProcAddress', 0
+	.get_proc_address_len equ $ - .get_proc_address
+
+%ifndef NOIAT
+	.name_of_Kernel32 db "kernel32.dll", 0
+%endif
+
 DefFunc _LoadFuncGroup
 	push ecx
 	invoke_dll_stdcall GetProcAddress, ebx, esi
@@ -223,7 +223,6 @@ _DebugMsgBuffer resd 1
 _DebugMsgBufferSize equ 4096
 _DebugShowRect resd 4
 
-segment .text
 DefFunc _InitDbg
 	FrameBegin 0, 2
 	mov eax, [_DebugMsgBuffer]

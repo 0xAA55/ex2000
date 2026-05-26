@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _MultiplyFloatMap
 	FrameBegin 0, 0, esi, edi
 

@@ -755,7 +755,6 @@ def_opengl_func SecondaryColorP3uiv, "(5P3u", 0x22
 segment .bss
 _LastGLFunc:
 
-segment .text
 DefFunc _DecodeProcName
 	FrameBegin 1, 0, esi, edi
 

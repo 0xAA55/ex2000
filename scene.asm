@@ -128,32 +128,31 @@ _BillBoardVertices:
 .num equ $ - _BillBoardVertices
 
 %macro SceneLoadShaderProgram 4
-	segment .rdata
+	[segment .rdata]
 	%%VSAssetsPath db %2, 0
 	%%GSAssetsPath db %3, 0
 	%%FSAssetsPath db %4, 0
 
-	segment .text
+	__SECT__
 	invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
 %endmacro
 
 %macro GetAttribLocation 2+
-	segment .rdata
+	[segment .rdata]
 	%%AttribName db %2, 0
 
-	segment .text
+	__SECT__
 	invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
 %endmacro
 
 %macro GetUniformLocation 2+
-	segment .rdata
+	[segment .rdata]
 	%%UniformName db %2, 0
 
-	segment .text
+	__SECT__
 	invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
 %endmacro
 
-segment .text
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 DefFunc _SceneLoadShaderProgram
 	FrameBegin 3, 3, esi

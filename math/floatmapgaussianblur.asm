@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _FloatMapGaussianBlurPoolProc
 	FrameBegin 2, 3, ebx, esi, edi
 	AssignVars _X, _Y

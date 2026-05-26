@@ -2,7 +2,6 @@
 
 ; %define _EULER_DEBUG 1
 
-segment .text
 %ifndef _EULER_DEBUG
 DefFunc _MatrixRotationEuler
 	FrameBegin 8, 0

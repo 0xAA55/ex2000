@@ -8,7 +8,6 @@ segment .bss
 _PerfFreq resq 1
 _SysTimerVal resq 1
 
-segment .text
 DefFunc _GetSysTimerVal
 	push _PerfFreq
 	invoke_dll_func QueryPerformanceFrequency

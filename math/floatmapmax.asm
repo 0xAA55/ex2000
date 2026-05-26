@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _FloatMapGetMaxValue
 	FrameBegin 0, 3, ebx
 

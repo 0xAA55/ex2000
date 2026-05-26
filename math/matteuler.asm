@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _MatrixEulerTranslated
 	FrameBegin 0, 4, edi
 

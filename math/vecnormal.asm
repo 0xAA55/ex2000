@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _VectorNormal
 	FrameBegin 1, 3
 

@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _MatrixMultiply
 	FrameBegin 0, 3, esi, edi
 

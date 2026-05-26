@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _BatchMax
 	FrameBegin 1, 3, ebx, esi, edi
 	AssignVars _RET

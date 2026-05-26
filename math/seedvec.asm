@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _CreateSeedVector
 	FrameBegin 0, 2, ebx
 

@@ -1,8 +1,5 @@
 %include "common.inc"
 
-%define _EULER_DEBUG 1
-
-segment .text
 DefFunc _MatrixViewEuler
 	FrameBegin 0x18, 4, ebx, esi, edi
 

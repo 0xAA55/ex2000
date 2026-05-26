@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _VectorLength
 	FrameBegin 0, 4, ebx
 

@@ -1,6 +1,5 @@
 %include "common.inc"
 
-segment .text
 DefFunc _FloatMapMTPool
 	FrameBegin 1, 5, ebx, esi, edi
 	AssignVars _JOBS
