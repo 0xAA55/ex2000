@@ -2,8 +2,8 @@
 OBJS=out/main.obj out/timer.obj out/scene.obj out/assets.obj out/avlbst.obj out/pool.obj out/buffer.obj out/shader.obj out/gl33.obj out/loaddll.obj
 LIBS=out/libmath.a
 FILES=out/assets.cab
-LDFLAGS=-Lout --whole-archive --relax --large-address-aware --build-id -T ex2000.ld
-LDLIBS=-lmath
+LDFLAGS=-Lout --relax --large-address-aware --build-id -T ex2000.ld
+LDLIBS=--whole-archive -lmath
 
 all: ex2000.exe ex2000d.exe
 debug: ex2000d.exe
