@@ -39,11 +39,11 @@ out/libmath.a: $(wildcard math/*)
 	make -C math
 
 ex2000.exe: $(OBJS) $(LIBS) $(FILES) ex2000.ld
-	ld.exe -o $@ -nostdlib -mi386pe -subsystem windows -e _start $(OBJS) $(LDFLAGS) $(LDLIBS)
+	ld.exe -o $@ -nostdlib -mi386pe -subsystem windows $(OBJS) $(LDFLAGS) $(LDLIBS)
 	objcopy --only-keep-debug $@ ex2000.gdb
 	strip $@
 ex2000d.exe: $(OBJS) $(LIBS) $(FILES) ex2000.ld
-	ld.exe -o $@ -nostdlib -mi386pe -e _start $(OBJS) $(LDFLAGS) $(LDLIBS)
+	ld.exe -o $@ -nostdlib -mi386pe $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 clean:
 	del /f /s /q out\\*.obj out\\*.cab out\\*.a *.gdb *.pdb ex2000.exe ex2000d.exe
