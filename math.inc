@@ -3,6 +3,9 @@
 
 %include "loaddll.inc"
 
+%define FLT_MAX 0x7F7FFFFF
+%define FLT_MIN 0xFF7FFFFF
+
 ; Must be 16-byte aligned
 struc Vector
 	.x resd 1
@@ -138,6 +141,12 @@ extern _FMatrix2DMatrix
 	; void DebugMatrix(int x, int y, Matrix *m);
 	extern _DebugMatrix
 %endif
+
+; void BatchAdd(float *dst, float *src, size_t num_floats);
+extern _BatchAdd
+
+; float BatchMax(float *data, size_t num_floats);
+extern _BatchMax
 
 ; int128_t *CreateSeedVector()
 extern _CreateSeedVector
