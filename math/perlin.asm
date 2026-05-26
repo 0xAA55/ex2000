@@ -105,7 +105,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	fst dword _RECIPROCAL
 	mov ebx, _MATRIX
 	mov eax, _RECIPROCAL
-	movaps xmm0, [_ZeroVector]
+	pxor xmm0, xmm0
 	movaps xmm1, [_F1111]
 	mov edx, 0x3F800000
 	mov ecx, 4

@@ -139,8 +139,8 @@ DefFunc _MathInit
 	shl eax, 31
 	or [_FPMPM + 0x4], eax
 	or [_FPMPM + 0xC], eax
-	movaps xmm0, [_ZeroVector]
-	movaps xmm1, [_ZeroVector]
+	pxor xmm0, xmm0
+	pxor xmm1, xmm1
 	subps xmm0, [_F1111]
 	subps xmm1, [_FPMPM]
 	movaps [_FMMMM], xmm0
