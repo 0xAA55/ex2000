@@ -6,33 +6,39 @@
 %define NULL 0
 
 %macro def_dll 2
-	segment .bss
+	[segment .bss]
 	extern _addr_of_ %+ %1
 	_addr_of_ %+ %1 resd 1
 
-	segment .rdata
+	[segment .rdata]
 	extern _name_of_ %+ %1
 	_name_of_ %+ %1 db %2, 0
+
+	__SECT__
 %endmacro
 
 %macro def_dll_func 1
-	segment .bss
+	[segment .bss]
 	extern _addr_of_ %+ %1
 	_addr_of_ %+ %1 resd 1
 
-	segment .rdata
+	[segment .rdata]
 	extern _name_of_ %+ %1
 	_name_of_ %+ %1 db %str(%1), 0
+
+	__SECT__
 %endmacro
 
 %macro def_dll_func_alias 2
-	segment .bss
+	[segment .bss]
 	extern _addr_of_ %+ %1
 	_addr_of_ %+ %1 resd 1
 
-	segment .rdata
+	[segment .rdata]
 	extern _name_of_ %+ %1
 	_name_of_ %+ %1 db %2, 0
+
+	__SECT__
 %endmacro
 
 %macro load_dll 1
@@ -40,10 +46,10 @@
 	call [_addr_of_LoadLibraryA]
 	mov [_addr_of_ %+ %1], eax
 	%ifdef INVOKE_CHECK
-		segment .rdata
+		[segment .rdata]
 		%%dllfail db %str(CurFuncName), ": On load dll `", %str(%1), "`: failed", 0
 
-		segment .text
+		__SECT__
 		test eax, eax
 		jnz %%success
 		extern _addr_of_MessageBoxA
@@ -75,10 +81,10 @@
 		mov eax, [_addr_of_ %+ %1]
 		test eax, eax
 		jnz %%success
-		segment .rdata
+		[segment .rdata]
 		%%func_name db %str(CurFuncName), ": On call `", %str(%1), "`: NULL function pointer", 0
 
-		segment .text
+		__SECT__
 		extern _addr_of_MessageBoxA
 		push 0
 		push 0
@@ -96,19 +102,16 @@
 
 %macro def_dll_and_load 2
 	def_dll %1, %2
-	segment .text
 	load_dll %1
 %endmacro
 
 %macro def_dll_func_and_load 2
 	def_dll_func %2
-	segment .text
 	load_dll_func %1, %2
 %endmacro
 
 %macro def_dll_func_and_load_alias 3
 	def_dll_func_alias %2, %3
-	segment .text
 	load_dll_func %1, %2
 %endmacro
 
@@ -121,11 +124,11 @@
 %endmacro
 
 %macro dll_func_group_start 1
-	segment .bss
+	[segment .bss]
 	extern _First %+ %1 %+ Addr
 	_First %+ %1 %+ Addr:
 
-	segment .rdata
+	[segment .rdata]
 	extern _First %+ %1 %+ Name
 	_First %+ %1 %+ Name:
 %endmacro
@@ -144,10 +147,10 @@
 %endmacro
 
 %macro debug_msg 1-2+
-segment .rdata
+	[segment .rdata]
 	%%format db %1, 0
 
-segment .text
+	__SECT__
 	%if %0 >= 2
 		invoke_stdcall _DebugMsg, %%format, %2
 	%else
@@ -157,10 +160,10 @@ segment .text
 %endmacro
 
 %macro debug_printf 1-2+
-segment .rdata
+	[segment .rdata]
 	%%format db %1, 0
 
-segment .text
+	__SECT__
 	%if %0 >= 2
 		invoke_dll_stdcall printf, %%format, %2
 	%else
@@ -170,14 +173,14 @@ segment .text
 %endmacro
 
 %macro debug_show 3-4+
-%ifndef _DEBUG
-	%error `_DEBUG` not defined.
-	%exitmacro
-%endif
-segment .rdata
+	%ifndef _DEBUG
+		%error `_DEBUG` not defined.
+		%exitmacro
+	%endif
+	[segment .rdata]
 	%%format db %3, 0
 
-segment .text
+	__SECT__
 	%if %0 >= 4
 		invoke_stdcall _DebugShow, %1, %2, %%format, %4
 	%else
@@ -187,10 +190,10 @@ segment .text
 %endmacro
 
 %macro snprintf 3-4+
-segment .rdata
+	[segment .rdata]
 	%%format db %3, 0
 
-segment .text
+	__SECT__
 	%if %0 >= 4
 		invoke_cdecl _snprintf, %1, %2, %%format, %4
 	%else

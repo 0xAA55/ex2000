@@ -5,8 +5,9 @@
 ; %define INVOKE_CHECK
 
 %macro DefFunc 1
-	%define CurFuncName %1
-	extern %1
+	%xdefine CurFuncName %1
+	segment .text. %+ %1
+	extern %1:function
 	%1:
 %endmacro
 

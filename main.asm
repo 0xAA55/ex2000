@@ -51,11 +51,19 @@ _MSG resb MSG.size
 segment .bss
 _LastUFunc:
 
-segment .text
-DefFunc _start
-	FrameBegin 0, 1
+segment .init
+global _entry
+_entry:
+	FrameBegin 0, 2
 	invoke_cdecl _InitLoadLibrary
 	invoke_cdecl _AssetsInit
+	invoke_cdecl _main
+	FrameEnd
+	invoke_dll_stdcall ExitProcess, eax
+	ret
+
+DefFunc _main
+	FrameBegin 0, 1
 
 	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx + WNDCLASSEX.lpfnWndProc], _WndProc@16
@@ -110,7 +118,6 @@ DefFunc _start
 
 .exit:
 	FrameEnd
-	invoke_dll_stdcall ExitProcess, 0
 	ret
 
 DefFunc _WndProc@16
