@@ -79,8 +79,18 @@ DefFunc _AssetsInitLoadDll
 	FrameEnd
 	ret
 
+DefFunc _AssetsDestroyFileStruct
+	FrameBegin 0, 1, ebx
+
+	mov ebx, Param(0)
+	invoke_cdecl _free, [ebx + FileStruct.data]
+	invoke_cdecl _free, ebx
+
+	FrameEnd
+	ret
+
 DefFunc _AssetsFnOpen
-	FrameBegin 0, 3, esi
+	FrameBegin 0, 4, esi
 
 	invoke_dll_cdecl strcmp, Param(0), _AssetsCabName
 	test eax, eax
@@ -94,7 +104,7 @@ DefFunc _AssetsFnOpen
 	mov esi, eax
 	mov [esi + FileStruct.opened], eax
 
-	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi
+	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi, _AssetsDestroyFileStruct
 	mov eax, esi
 	jmp .end
 .found:
