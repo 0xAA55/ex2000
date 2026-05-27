@@ -98,25 +98,39 @@ DefFunc _main
 	jz .exit
 
 .msgloop:
-	invoke_dll_stdcall PeekMessageA, _MSG, 0, 0, 0, PM_REMOVE
+	invoke_cdecl _DoEvents
 	test eax, eax
-	jnz .proc_message
+	jz .exit
 
 	invoke_cdecl _Scene
 	test eax, eax
 	jz .exit
+
 	jmp .msgloop
-.proc_message:
+.exit:
+	xor eax, eax
+	FrameEnd
+	ret
+
+DefFunc _DoEvents
+	FrameBegin 0, 0
+
+	invoke_dll_stdcall PeekMessageA, _MSG, 0, 0, 0, PM_REMOVE
+	test eax, eax
+	jz .finish
 
 	cmp dword [_MSG + MSG.message], WM_QUIT
-	je .exit
+	je .quit
 
 	invoke_dll_stdcall TranslateMessage, _MSG
 	invoke_dll_stdcall DispatchMessageA, _MSG
 
-	jmp .msgloop
-
-.exit:
+.finish:
+	mov al, 1
+	jmp .end
+.quit:
+	xor eax, eax
+.end
 	FrameEnd
 	ret
 
