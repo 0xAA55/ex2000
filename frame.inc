@@ -214,7 +214,7 @@
 	%endif
 %endmacro
 
-%macro StripAfterAndDot 2
+%macro StripStringFromDot 2
 	%xdefine %%src %2
 	%strlen %%len %%src
 	%assign %%i 0
@@ -403,7 +403,7 @@
 		__RotatePassReg mov, %%Param, CallParam(%1), %%Param
 	%elif %substr(%%ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
-		StripAfterAndDot __XmmParamStr, %%ParamStr
+		StripStringFromDot __XmmParamStr, %%ParamStr
 		%xdefine __XmmParam %tok(__XmmParamStr)
 		%if %substr(%%ParamStr, %%ParamStrLen -1) == ".x"
 			movss CallParam(%1), __XmmParam
@@ -461,7 +461,7 @@
 		__RotatePassReg lea, %%Param, push, %%%tok(%%ParamStr)
 	%elif %substr(%%ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
-		StripAfterAndDot __XmmParamStr, %%ParamStr
+		StripStringFromDot __XmmParamStr, %%ParamStr
 		%xdefine __XmmParam %tok(__XmmParamStr)
 		%if %substr(%%ParamStr, %%ParamStrLen -1) == ".x"
 			sub esp, 4
