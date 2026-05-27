@@ -22,8 +22,15 @@ DefFunc _CreateFloatMap
 	mov [ebx + FloatMap.num_pixels], eax
 	mov [ebx + FloatMap.dims], ecx
 	mul ecx
-	invoke_cdecl _aligned_malloc, &[eax * 4], 16
+	mov [ebx + FloatMap.num_floats], eax
+	shl eax, 2
+	mov [ebx + FloatMap.num_bytes], eax
+	invoke_cdecl _aligned_malloc, eax, 16
 	mov [ebx + FloatMap.data], eax
+
+	mov eax, [ebx + FloatMap.dims]
+	shl eax, 2
+	mov [ebx + FloatMap.bytes_per_pixel], eax
 
 	mov ecx, [ebx + FloatMap.border_len]
 	lea eax, [ecx * 4]

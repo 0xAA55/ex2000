@@ -76,6 +76,9 @@ struc FloatMap
 .data resd 1
 .border_len resd 1
 .num_pixels resd 1
+.num_floats resd 1
+.num_bytes resd 1
+.bytes_per_pixel resd 1
 .dims resd 1
 .head_size equ $ - FloatMap
 .row_ptr:
