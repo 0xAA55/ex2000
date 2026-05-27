@@ -1,15 +1,6 @@
 %include "loaddll.inc"
 %include "avlbst.inc"
 
-extern _malloc
-extern _calloc
-extern _free
-
-import_dll_func strlen
-import_dll_func strcpy
-import_dll_func strcmp
-import_dll_func memcpy
-
 ;char *AVLKeyCopy(char *key);
 DefFunc _AVLKeyCopy
 	FrameBegin 0, 2
