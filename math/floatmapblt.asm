@@ -96,13 +96,11 @@ DefFunc _FloatMapBlt
 	movq _DW, xmm2
 
 	mov eax, _DX
-	mul dword [edi + FloatMap.dims]
-	shl eax, 2
+	mul dword [edi + FloatMap.bytes_per_pixel]
 	mov _DX, eax
 
 	mov eax, _SX
-	mul dword [esi + FloatMap.dims]
-	shl eax, 2
+	mul dword [esi + FloatMap.bytes_per_pixel]
 	mov _SX, eax
 
 	xor eax, eax

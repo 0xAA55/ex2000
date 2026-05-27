@@ -4,8 +4,7 @@ DefFunc _FloatMapGetMaxValue
 	FrameBegin 0, 3, ebx
 
 	mov ebx, Param(0)
-	mov eax, [ebx + FloatMap.num_pixels]
-	mul dword [ebx + FloatMap.dims]
+	mov eax, [ebx + FloatMap.num_floats]
 	test eax, eax
 	jnz .good
 .bad:

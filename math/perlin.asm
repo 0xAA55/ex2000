@@ -265,8 +265,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	movaps xmm5, [_FP5P5P5P5]
 	movss xmm7, Param(1)
 	mov esi, [ebx + FloatMap.data]
-	mov eax, [ebx + FloatMap.num_pixels]
-	mul dword [ebx + FloatMap.dims]
+	mov eax, [ebx + FloatMap.num_floats]
 	test al, 0xF
 	jz .batch_proc
 	mov ecx, eax
@@ -342,11 +341,8 @@ DefFunc _AccumulateFloatMap
 
 	mov esi, Param(1)
 	mov edi, Param(0)
-	mov eax, [esi + FloatMap.num_pixels]
-	mul dword [esi + FloatMap.dims]
-	mov ecx, eax
-	mov eax, [edi + FloatMap.num_pixels]
-	mul dword [edi + FloatMap.dims]
+	mov ecx, [esi + FloatMap.num_floats]
+	mov eax, [edi + FloatMap.num_floats]
 	cmp eax, ecx
 	je .good_size
 .bad_size:

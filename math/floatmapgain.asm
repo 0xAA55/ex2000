@@ -5,8 +5,7 @@ DefFunc _FloatMapApplyGain
 
 	mov ebx, Param(0)
 
-	mov eax, [ebx + FloatMap.num_pixels]
-	mul dword[ebx + FloatMap.dims]
+	mov eax, [ebx + FloatMap.num_floats]
 	mov esi, [ebx + FloatMap.data]
 	movss xmm7, Param(1)
 	test al, 0xF

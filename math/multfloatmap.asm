@@ -3,13 +3,10 @@
 DefFunc _MultiplyFloatMap
 	FrameBegin 0, 0, esi, edi
 
-	mov esi, Param(1)
 	mov edi, Param(0)
-	mov eax, [esi + FloatMap.num_pixels]
-	mul dword [esi + FloatMap.dims]
-	mov ecx, eax
-	mov eax, [edi + FloatMap.num_pixels]
-	mul dword [edi + FloatMap.dims]
+	mov esi, Param(1)
+	mov eax, [edi + FloatMap.num_floats]
+	mov ecx, [esi + FloatMap.num_floats]
 	cmp eax, ecx
 	je .good_size
 .bad_size:
