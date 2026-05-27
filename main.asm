@@ -1,5 +1,6 @@
 %include "loaddll.inc"
 %include "assets.inc"
+%include "math.inc"
 
 extern _InitLoadLibrary
 extern _InitGL33
@@ -55,13 +56,16 @@ _LastUFunc:
 segment .init
 global _entry
 _entry:
-	FrameBegin 0, 2
+	FrameBegin 0, 2, ebx
 	invoke_cdecl _InitLoadLibrary
+	invoke_cdecl _MathInit
 	invoke_cdecl _AssetsInit
 	invoke_cdecl _main
+	mov ebx, eax
 	invoke_cdecl _AssetsDestroy
+	invoke_cdecl _MathDeInit
+	invoke_dll_stdcall ExitProcess, ebx
 	FrameEnd
-	invoke_dll_stdcall ExitProcess, eax
 	ret
 
 DefFunc _main
@@ -132,7 +136,7 @@ DefFunc _DoEvents
 	jmp .end
 .quit:
 	xor eax, eax
-.end
+.end:
 	FrameEnd
 	ret
 
