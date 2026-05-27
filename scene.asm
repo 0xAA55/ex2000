@@ -308,6 +308,7 @@ DefFunc _Scene
 	AssignVars TimerValue
 
 	invoke_cdecl _UpdateTimer, _Timer
+	fstp st0
 
 	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
 	movq xmm0, [_ClientRect.l]
