@@ -51,9 +51,12 @@ DefFunc _DestroyFloatMap
 	FrameBegin 0, 1, ebx
 
 	mov ebx, Param(0)
+	test ebx, ebx
+	jz .end
 	invoke_cdecl _aligned_free, [ebx + FloatMap.data]
 	invoke_cdecl _free, ebx
 
+.end:
 	FrameEnd
 	ret
 
