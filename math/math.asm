@@ -102,6 +102,26 @@ _FMIN dd 0xFF7FFFFF
 DefFunc _MathInit
 	FrameBegin 0, 0, ebx
 
+	xor eax, eax
+	inc eax
+	cpuid
+	test edx, (1 << 26)
+	jz .no_sse2
+	test ecx, (1 << 0)
+	jz .no_sse3
+	mov byte [_HaveSSE3], 1
+.no_sse3:
+	test ecx, (1 << 19)
+	jz .no_sse41
+	mov byte [_HaveSSE41], 1
+	jmp .no_sse41
+
+.no_sse2:
+	debug_msg "SSE2 is needed for the program to run."
+	invoke_dll_stdcall ExitProcess, 1
+
+.no_sse41:
+
 	fldpi
 	fldpi
 	fadd
@@ -122,7 +142,7 @@ DefFunc _MathInit
 	mov eax, __?float32?__(1.0)
 	mov ecx, 4
 	xor edx, edx
-.init_math:
+.init_math_loop:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
 	mov [_FPMPM + (ecx - 1) * 4], eax
@@ -132,7 +152,7 @@ DefFunc _MathInit
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
 	mov word  [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
 	add edx, 20
-	loop .init_math
+	loop .init_math_loop
 	mov eax, ecx
 	mov al, 1
 	shl eax, 31
@@ -174,27 +194,6 @@ DefFunc _MathInit
 	pxor xmm3, xmm4
 	movdqa [_UFF00], xmm2
 	movdqa [_UFFF0], xmm3
-
-	xor eax, eax
-	inc eax
-	cpuid
-	test edx, (1 << 26)
-	jz .no_sse2
-	test ecx, (1 << 0)
-	jz .no_sse3
-	mov byte [_HaveSSE3], 1
-.no_sse3:
-	test ecx, (1 << 19)
-	jz .no_sse41
-	mov byte [_HaveSSE41], 1
-
-	jmp .end
-
-.no_sse2:
-	debug_msg "SSE2 is needed for the program to run."
-	invoke_dll_stdcall ExitProcess, 1
-
-.no_sse41:
 .end:
 	FrameEnd
 	ret
