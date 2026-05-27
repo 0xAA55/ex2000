@@ -1,20 +1,11 @@
 %include "loaddll.inc"
 %include "gl33.inc"
-
-import_dll GDI32
-import_dll_func strcpy
-import_dll_func strcat
-import_dll_func strlen
-import_dll_func MessageBoxA
+%include "assets.inc"
 
 extern _NextString
 
 extern _hWnd
 extern _hDC
-
-extern _malloc
-extern _realloc
-extern _free
 
 struc PIXELFORMATDESCRIPTOR
 	.nSize: resw 1
@@ -106,129 +97,6 @@ _ParseFailBecauseNondigit db 0xd, 0xa, "Unexpected non-digit", 0
 _ParseFailBecauseDotExpected db 0xd, 0xa, "Dot '.' expected", 0
 _ParseFailBecauseUnknown db 0xd, 0xa, "Unknown error", 0
 
-; The code table to decode the function names
-; The order of the strings represents the code
-extern _DecodeTableStrings
-_DecodeTableStrings:
-.code_01 db "WindowPos", 0
-.code_02 db "Compressed", 0
-.code_03 db "Multisample", 0
-.code_04 db "FragData", 0
-.code_05 db "Location", 0
-.code_06 db "Clear", 0
-.code_07 db "Renderbuffer", 0
-.code_08 db "Enable", 0
-.code_09 db "Disable", 0
-.code_0a db "Begin", 0
-.code_0b db "End", 0
-.code_0c db "Instanced", 0
-.code_0d db "Range", 0
-.code_0e db "Base", 0
-.code_0f db "Mask", 0
-.code_10 db "Func", 0
-.code_11 db "Blend", 0
-.code_12 db "Separate", 0
-.code_13 db "Data", 0
-.code_14 db "Sub", 0
-.code_15 db "Copy", 0
-.code_16 db "Op", 0
-.code_17 db "Object", 0
-.code_18 db "Is", 0
-.code_19 db "Attach", 0
-.code_1a db "TransformFeedback", 0
-.code_1b db "Map", 0
-.code_1c db "ConditionalRender", 0
-.code_1d db "Depth", 0
-.code_1e db "Pixel", 0
-.code_1f db "Block", 0
-.code_20 db "Sync", 0
-.code_21 db "Bind", 0
-.code_22 db "iv", 0
-.code_23 db "Matrix", 0
-.code_24 db "Image", 0
-.code_25 db "Transpose", 0
-.code_26 db "Texture", 0
-.code_27 db "fv", 0
-.code_28 db "Secondary", 0
-.code_29 db "Active", 0
-.code_2a db "Vertex", 0
-.code_2b db "Tex", 0
-.code_2c db "TexCoord", 0
-.code_2d db "ing", 0
-.code_2e db "Point", 0
-.code_2f db "Delete", 0
-.code_30 db "Queries", 0
-.code_31 db "1", 0
-.code_32 db "2", 0
-.code_33 db "3", 0
-.code_34 db "4", 0
-.code_35 db "Color", 0
-.code_36 db "6", 0
-.code_37 db "Framebuffer", 0
-.code_38 db "Gen", 0
-.code_39 db "Coord", 0
-.code_3a db "Sampler", 0
-.code_3b db "ui", 0
-.code_3c db "Get", 0
-.code_3d db "Uniform", 0
-.code_3e db "Query", 0
-.code_3f db "Parameter", 0
-.code_40 db "Attrib", 0
-
-.code_5b db "Buffer", 0
-.code_5c db "Flush", 0
-.code_5d db "Element", 0
-.code_5e db "Multi", 0
-.code_5f db "_", 0
-.code_60 db "Pointer", 0
-
-.code_7b db "Array", 0
-.code_7c db "Varying", 0
-.code_7d db "Draw", 0
-.code_7e db "Program", 0
-.code_7f db "Stencil", 0
-.code_80 db "Shader", 0
-.code_81 db "Location", 0
-.code_82 db "Integer", 0
-.code_83 db "Equation", 0
-.code_84 db "Normal", 0
-.code_85 db "Fog", 0
-.code_86 db "InfoLog", 0
-.code_87 db "dv", 0
-.code_88 db "Index", 0
-
-%define LAST_CODE 88
-
-; Offsets of the strings
-extern _DecodeTable
-_DecodeTable:
-.code_01_40:
-	%assign CurCode 0x01
-	%rep 0x10 - CurCode
-		dw _DecodeTableStrings.code_ %+ 0 %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
-		%assign CurCode CurCode + 1
-	%endrep
-	%assign CurCode 0x10
-	%rep (0x40) + 1 - CurCode
-		dw _DecodeTableStrings.code_ %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
-		%assign CurCode CurCode + 1
-	%endrep
-
-.code_5b_60:
-	%assign CurCode 0x5b
-	%rep (0x60) + 1 - CurCode
-		dw _DecodeTableStrings.code_ %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
-		%assign CurCode CurCode + 1
-	%endrep
-
-.code_7b_ %+ LAST_CODE:
-	%assign CurCode 0x7B
-	%rep (0x %+ LAST_CODE) + 1 - CurCode
-		dw _DecodeTableStrings.code_ %+ %tok(%substr(%hex(CurCode), 3)) - _DecodeTableStrings
-		%assign CurCode CurCode + 1
-	%endrep
-	%undef CurCode
-
 extern _OpenGL_ES_String
 _OpenGL_ES_String db "OpenGL ES "
 .size equ $ - _OpenGL_ES_String
@@ -239,584 +107,467 @@ _TheseFunc db "These functions are unavailable.", 0
 
 def_dll_func_alias wglSwapInterval, "wglSwapIntervalEXT"
 
-dll_func_group_start WGLFunc
-def_dll_func wglGetProcAddress
-def_dll_func wglCreateContext
-def_dll_func wglDeleteContext
-def_dll_func wglMakeCurrent
-def_dll_func wglSwapBuffers
+dll_func_group_start_without_name WGLFunc
+def_dll_func_addr wglGetProcAddress
+def_dll_func_addr wglCreateContext
+def_dll_func_addr wglDeleteContext
+def_dll_func_addr wglMakeCurrent
+def_dll_func_addr wglSwapBuffers
+def_dll_func_addr glCullFace
+def_dll_func_addr glFrontFace
+def_dll_func_addr glHint
+def_dll_func_addr glLineWidth
+def_dll_func_addr glPointSize
+def_dll_func_addr glPolygonMode
+def_dll_func_addr glScissor
+def_dll_func_addr glTexParameterf
+def_dll_func_addr glTexParameterfv
+def_dll_func_addr glTexParameteri
+def_dll_func_addr glTexParameteriv
+def_dll_func_addr glTexImage1D
+def_dll_func_addr glTexImage2D
+def_dll_func_addr glDrawBuffer
+def_dll_func_addr glClear
+def_dll_func_addr glClearColor
+def_dll_func_addr glClearStencil
+def_dll_func_addr glClearDepth
+def_dll_func_addr glStencilMask
+def_dll_func_addr glColorMask
+def_dll_func_addr glDepthMask
+def_dll_func_addr glDisable
+def_dll_func_addr glEnable
+def_dll_func_addr glFinish
+def_dll_func_addr glFlush
+def_dll_func_addr glBlendFunc
+def_dll_func_addr glLogicOp
+def_dll_func_addr glStencilFunc
+def_dll_func_addr glStencilOp
+def_dll_func_addr glDepthFunc
+def_dll_func_addr glPixelStoref
+def_dll_func_addr glPixelStorei
+def_dll_func_addr glReadBuffer
+def_dll_func_addr glReadPixels
+def_dll_func_addr glGetBooleanv
+def_dll_func_addr glGetDoublev
+def_dll_func_addr glGetError
+def_dll_func_addr glGetFloatv
+def_dll_func_addr glGetIntegerv
+def_dll_func_addr glGetString
+def_dll_func_addr glGetTexImage
+def_dll_func_addr glGetTexParameterfv
+def_dll_func_addr glGetTexParameteriv
+def_dll_func_addr glGetTexLevelParameterfv
+def_dll_func_addr glGetTexLevelParameteriv
+def_dll_func_addr glIsEnabled
+def_dll_func_addr glDepthRange
+def_dll_func_addr glViewport
 dll_func_group_end WGLFunc
 
-segment .bss ; Store the function pointer list
-_FirstGL32Func:
+dll_func_group_start_without_name GL33Func
+def_dll_func_addr glDrawArrays
+def_dll_func_addr glDrawElements
+def_dll_func_addr glGetPointerv
+def_dll_func_addr glPolygonOffset
+def_dll_func_addr glCopyTexImage1D
+def_dll_func_addr glCopyTexImage2D
+def_dll_func_addr glCopyTexSubImage1D
+def_dll_func_addr glCopyTexSubImage2D
+def_dll_func_addr glTexSubImage1D
+def_dll_func_addr glTexSubImage2D
+def_dll_func_addr glBindTexture
+def_dll_func_addr glDeleteTextures
+def_dll_func_addr glGenTextures
+def_dll_func_addr glDrawRangeElements
+def_dll_func_addr glTexImage3D
+def_dll_func_addr glTexSubImage3D
+def_dll_func_addr glCopyTexSubImage3D
+def_dll_func_addr glActiveTexture
+def_dll_func_addr glSampleCoverage
+def_dll_func_addr glCompressedTexImage3D
+def_dll_func_addr glCompressedTexImage2D
+def_dll_func_addr glCompressedTexImage1D
+def_dll_func_addr glCompressedTexSubImage3D
+def_dll_func_addr glCompressedTexSubImage2D
+def_dll_func_addr glCompressedTexSubImage1D
+def_dll_func_addr glGetCompressedTexImage
+def_dll_func_addr glClientActiveTexture
+def_dll_func_addr glMultiTexCoord1d
+def_dll_func_addr glMultiTexCoord1dv
+def_dll_func_addr glMultiTexCoord1f
+def_dll_func_addr glMultiTexCoord1fv
+def_dll_func_addr glMultiTexCoord1i
+def_dll_func_addr glMultiTexCoord1iv
+def_dll_func_addr glMultiTexCoord1s
+def_dll_func_addr glMultiTexCoord1sv
+def_dll_func_addr glMultiTexCoord2d
+def_dll_func_addr glMultiTexCoord2dv
+def_dll_func_addr glMultiTexCoord2f
+def_dll_func_addr glMultiTexCoord2fv
+def_dll_func_addr glMultiTexCoord2i
+def_dll_func_addr glMultiTexCoord2iv
+def_dll_func_addr glMultiTexCoord2s
+def_dll_func_addr glMultiTexCoord2sv
+def_dll_func_addr glMultiTexCoord3d
+def_dll_func_addr glMultiTexCoord3dv
+def_dll_func_addr glMultiTexCoord3f
+def_dll_func_addr glMultiTexCoord3fv
+def_dll_func_addr glMultiTexCoord3i
+def_dll_func_addr glMultiTexCoord3iv
+def_dll_func_addr glMultiTexCoord3s
+def_dll_func_addr glMultiTexCoord3sv
+def_dll_func_addr glMultiTexCoord4d
+def_dll_func_addr glMultiTexCoord4dv
+def_dll_func_addr glMultiTexCoord4f
+def_dll_func_addr glMultiTexCoord4fv
+def_dll_func_addr glMultiTexCoord4i
+def_dll_func_addr glMultiTexCoord4iv
+def_dll_func_addr glMultiTexCoord4s
+def_dll_func_addr glMultiTexCoord4sv
+def_dll_func_addr glLoadTransposeMatrixf
+def_dll_func_addr glLoadTransposeMatrixd
+def_dll_func_addr glMultTransposeMatrixf
+def_dll_func_addr glMultTransposeMatrixd
+def_dll_func_addr glBlendFuncSeparate
+def_dll_func_addr glMultiDrawArrays
+def_dll_func_addr glMultiDrawElements
+def_dll_func_addr glPointParameterf
+def_dll_func_addr glPointParameterfv
+def_dll_func_addr glPointParameteri
+def_dll_func_addr glPointParameteriv
+def_dll_func_addr glFogCoordf
+def_dll_func_addr glFogCoordfv
+def_dll_func_addr glFogCoordd
+def_dll_func_addr glFogCoorddv
+def_dll_func_addr glFogCoordPointer
+def_dll_func_addr glSecondaryColor3b
+def_dll_func_addr glSecondaryColor3bv
+def_dll_func_addr glSecondaryColor3d
+def_dll_func_addr glSecondaryColor3dv
+def_dll_func_addr glSecondaryColor3f
+def_dll_func_addr glSecondaryColor3fv
+def_dll_func_addr glSecondaryColor3i
+def_dll_func_addr glSecondaryColor3iv
+def_dll_func_addr glSecondaryColor3s
+def_dll_func_addr glSecondaryColor3sv
+def_dll_func_addr glSecondaryColor3ub
+def_dll_func_addr glSecondaryColor3ubv
+def_dll_func_addr glSecondaryColor3ui
+def_dll_func_addr glSecondaryColor3uiv
+def_dll_func_addr glSecondaryColor3us
+def_dll_func_addr glSecondaryColor3usv
+def_dll_func_addr glSecondaryColorPointer
+def_dll_func_addr glWindowPos2d
+def_dll_func_addr glWindowPos2dv
+def_dll_func_addr glWindowPos2f
+def_dll_func_addr glWindowPos2fv
+def_dll_func_addr glWindowPos2i
+def_dll_func_addr glWindowPos2iv
+def_dll_func_addr glWindowPos2s
+def_dll_func_addr glWindowPos2sv
+def_dll_func_addr glWindowPos3d
+def_dll_func_addr glWindowPos3dv
+def_dll_func_addr glWindowPos3f
+def_dll_func_addr glWindowPos3fv
+def_dll_func_addr glWindowPos3i
+def_dll_func_addr glWindowPos3iv
+def_dll_func_addr glWindowPos3s
+def_dll_func_addr glWindowPos3sv
+def_dll_func_addr glBlendColor
+def_dll_func_addr glBlendEquation
+def_dll_func_addr glGenQueries
+def_dll_func_addr glDeleteQueries
+def_dll_func_addr glIsQuery
+def_dll_func_addr glBeginQuery
+def_dll_func_addr glEndQuery
+def_dll_func_addr glGetQueryiv
+def_dll_func_addr glGetQueryObjectiv
+def_dll_func_addr glGetQueryObjectuiv
+def_dll_func_addr glBindBuffer
+def_dll_func_addr glDeleteBuffers
+def_dll_func_addr glGenBuffers
+def_dll_func_addr glIsBuffer
+def_dll_func_addr glBufferData
+def_dll_func_addr glBufferSubData
+def_dll_func_addr glGetBufferSubData
+def_dll_func_addr glMapBuffer
+def_dll_func_addr glUnmapBuffer
+def_dll_func_addr glGetBufferParameteriv
+def_dll_func_addr glGetBufferPointerv
+def_dll_func_addr glBlendEquationSeparate
+def_dll_func_addr glDrawBuffers
+def_dll_func_addr glStencilOpSeparate
+def_dll_func_addr glStencilFuncSeparate
+def_dll_func_addr glStencilMaskSeparate
+def_dll_func_addr glAttachShader
+def_dll_func_addr glBindAttribLocation
+def_dll_func_addr glCompileShader
+def_dll_func_addr glCreateProgram
+def_dll_func_addr glCreateShader
+def_dll_func_addr glDeleteProgram
+def_dll_func_addr glDeleteShader
+def_dll_func_addr glDetachShader
+def_dll_func_addr glDisableVertexAttribArray
+def_dll_func_addr glEnableVertexAttribArray
+def_dll_func_addr glGetActiveAttrib
+def_dll_func_addr glGetActiveUniform
+def_dll_func_addr glGetAttachedShaders
+def_dll_func_addr glGetAttribLocation
+def_dll_func_addr glGetProgramiv
+def_dll_func_addr glGetProgramInfoLog
+def_dll_func_addr glGetShaderiv
+def_dll_func_addr glGetShaderInfoLog
+def_dll_func_addr glGetShaderSource
+def_dll_func_addr glGetUniformLocation
+def_dll_func_addr glGetUniformfv
+def_dll_func_addr glGetUniformiv
+def_dll_func_addr glGetVertexAttribdv
+def_dll_func_addr glGetVertexAttribfv
+def_dll_func_addr glGetVertexAttribiv
+def_dll_func_addr glGetVertexAttribPointerv
+def_dll_func_addr glIsProgram
+def_dll_func_addr glIsShader
+def_dll_func_addr glLinkProgram
+def_dll_func_addr glShaderSource
+def_dll_func_addr glUseProgram
+def_dll_func_addr glUniform1f
+def_dll_func_addr glUniform2f
+def_dll_func_addr glUniform3f
+def_dll_func_addr glUniform4f
+def_dll_func_addr glUniform1i
+def_dll_func_addr glUniform2i
+def_dll_func_addr glUniform3i
+def_dll_func_addr glUniform4i
+def_dll_func_addr glUniform1fv
+def_dll_func_addr glUniform2fv
+def_dll_func_addr glUniform3fv
+def_dll_func_addr glUniform4fv
+def_dll_func_addr glUniform1iv
+def_dll_func_addr glUniform2iv
+def_dll_func_addr glUniform3iv
+def_dll_func_addr glUniform4iv
+def_dll_func_addr glUniformMatrix2fv
+def_dll_func_addr glUniformMatrix3fv
+def_dll_func_addr glUniformMatrix4fv
+def_dll_func_addr glValidateProgram
+def_dll_func_addr glVertexAttrib1d
+def_dll_func_addr glVertexAttrib1dv
+def_dll_func_addr glVertexAttrib1f
+def_dll_func_addr glVertexAttrib1fv
+def_dll_func_addr glVertexAttrib1s
+def_dll_func_addr glVertexAttrib1sv
+def_dll_func_addr glVertexAttrib2d
+def_dll_func_addr glVertexAttrib2dv
+def_dll_func_addr glVertexAttrib2f
+def_dll_func_addr glVertexAttrib2fv
+def_dll_func_addr glVertexAttrib2s
+def_dll_func_addr glVertexAttrib2sv
+def_dll_func_addr glVertexAttrib3d
+def_dll_func_addr glVertexAttrib3dv
+def_dll_func_addr glVertexAttrib3f
+def_dll_func_addr glVertexAttrib3fv
+def_dll_func_addr glVertexAttrib3s
+def_dll_func_addr glVertexAttrib3sv
+def_dll_func_addr glVertexAttrib4Nbv
+def_dll_func_addr glVertexAttrib4Niv
+def_dll_func_addr glVertexAttrib4Nsv
+def_dll_func_addr glVertexAttrib4Nub
+def_dll_func_addr glVertexAttrib4Nubv
+def_dll_func_addr glVertexAttrib4Nuiv
+def_dll_func_addr glVertexAttrib4Nusv
+def_dll_func_addr glVertexAttrib4bv
+def_dll_func_addr glVertexAttrib4d
+def_dll_func_addr glVertexAttrib4dv
+def_dll_func_addr glVertexAttrib4f
+def_dll_func_addr glVertexAttrib4fv
+def_dll_func_addr glVertexAttrib4iv
+def_dll_func_addr glVertexAttrib4s
+def_dll_func_addr glVertexAttrib4sv
+def_dll_func_addr glVertexAttrib4ubv
+def_dll_func_addr glVertexAttrib4uiv
+def_dll_func_addr glVertexAttrib4usv
+def_dll_func_addr glVertexAttribPointer
+def_dll_func_addr glUniformMatrix2x3fv
+def_dll_func_addr glUniformMatrix3x2fv
+def_dll_func_addr glUniformMatrix2x4fv
+def_dll_func_addr glUniformMatrix4x2fv
+def_dll_func_addr glUniformMatrix3x4fv
+def_dll_func_addr glUniformMatrix4x3fv
+def_dll_func_addr glColorMaski
+def_dll_func_addr glGetBooleani_v
+def_dll_func_addr glGetIntegeri_v
+def_dll_func_addr glEnablei
+def_dll_func_addr glDisablei
+def_dll_func_addr glIsEnabledi
+def_dll_func_addr glBeginTransformFeedback
+def_dll_func_addr glEndTransformFeedback
+def_dll_func_addr glBindBufferRange
+def_dll_func_addr glBindBufferBase
+def_dll_func_addr glTransformFeedbackVaryings
+def_dll_func_addr glGetTransformFeedbackVarying
+def_dll_func_addr glClampColor
+def_dll_func_addr glBeginConditionalRender
+def_dll_func_addr glEndConditionalRender
+def_dll_func_addr glVertexAttribIPointer
+def_dll_func_addr glGetVertexAttribIiv
+def_dll_func_addr glGetVertexAttribIuiv
+def_dll_func_addr glVertexAttribI1i
+def_dll_func_addr glVertexAttribI2i
+def_dll_func_addr glVertexAttribI3i
+def_dll_func_addr glVertexAttribI4i
+def_dll_func_addr glVertexAttribI1ui
+def_dll_func_addr glVertexAttribI2ui
+def_dll_func_addr glVertexAttribI3ui
+def_dll_func_addr glVertexAttribI4ui
+def_dll_func_addr glVertexAttribI1iv
+def_dll_func_addr glVertexAttribI2iv
+def_dll_func_addr glVertexAttribI3iv
+def_dll_func_addr glVertexAttribI4iv
+def_dll_func_addr glVertexAttribI1uiv
+def_dll_func_addr glVertexAttribI2uiv
+def_dll_func_addr glVertexAttribI3uiv
+def_dll_func_addr glVertexAttribI4uiv
+def_dll_func_addr glVertexAttribI4bv
+def_dll_func_addr glVertexAttribI4sv
+def_dll_func_addr glVertexAttribI4ubv
+def_dll_func_addr glVertexAttribI4usv
+def_dll_func_addr glGetUniformuiv
+def_dll_func_addr glBindFragDataLocation
+def_dll_func_addr glGetFragDataLocation
+def_dll_func_addr glUniform1ui
+def_dll_func_addr glUniform2ui
+def_dll_func_addr glUniform3ui
+def_dll_func_addr glUniform4ui
+def_dll_func_addr glUniform1uiv
+def_dll_func_addr glUniform2uiv
+def_dll_func_addr glUniform3uiv
+def_dll_func_addr glUniform4uiv
+def_dll_func_addr glTexParameterIiv
+def_dll_func_addr glTexParameterIuiv
+def_dll_func_addr glGetTexParameterIiv
+def_dll_func_addr glGetTexParameterIuiv
+def_dll_func_addr glClearBufferiv
+def_dll_func_addr glClearBufferuiv
+def_dll_func_addr glClearBufferfv
+def_dll_func_addr glClearBufferfi
+def_dll_func_addr glGetStringi
+def_dll_func_addr glIsRenderbuffer
+def_dll_func_addr glBindRenderbuffer
+def_dll_func_addr glDeleteRenderbuffers
+def_dll_func_addr glGenRenderbuffers
+def_dll_func_addr glRenderbufferStorage
+def_dll_func_addr glGetRenderbufferParameteriv
+def_dll_func_addr glIsFramebuffer
+def_dll_func_addr glBindFramebuffer
+def_dll_func_addr glDeleteFramebuffers
+def_dll_func_addr glGenFramebuffers
+def_dll_func_addr glCheckFramebufferStatus
+def_dll_func_addr glFramebufferTexture1D
+def_dll_func_addr glFramebufferTexture2D
+def_dll_func_addr glFramebufferTexture3D
+def_dll_func_addr glFramebufferRenderbuffer
+def_dll_func_addr glGetFramebufferAttachmentParameteriv
+def_dll_func_addr glGenerateMipmap
+def_dll_func_addr glBlitFramebuffer
+def_dll_func_addr glRenderbufferStorageMultisample
+def_dll_func_addr glFramebufferTextureLayer
+def_dll_func_addr glMapBufferRange
+def_dll_func_addr glFlushMappedBufferRange
+def_dll_func_addr glBindVertexArray
+def_dll_func_addr glDeleteVertexArrays
+def_dll_func_addr glGenVertexArrays
+def_dll_func_addr glIsVertexArray
+def_dll_func_addr glDrawArraysInstanced
+def_dll_func_addr glDrawElementsInstanced
+def_dll_func_addr glTexBuffer
+def_dll_func_addr glPrimitiveRestartIndex
+def_dll_func_addr glCopyBufferSubData
+def_dll_func_addr glGetUniformIndices
+def_dll_func_addr glGetActiveUniformsiv
+def_dll_func_addr glGetActiveUniformName
+def_dll_func_addr glGetUniformBlockIndex
+def_dll_func_addr glGetActiveUniformBlockiv
+def_dll_func_addr glGetActiveUniformBlockName
+def_dll_func_addr glUniformBlockBinding
+def_dll_func_addr glDrawElementsBaseVertex
+def_dll_func_addr glDrawRangeElementsBaseVertex
+def_dll_func_addr glDrawElementsInstancedBaseVertex
+def_dll_func_addr glMultiDrawElementsBaseVertex
+def_dll_func_addr glProvokingVertex
+def_dll_func_addr glFenceSync
+def_dll_func_addr glIsSync
+def_dll_func_addr glDeleteSync
+def_dll_func_addr glClientWaitSync
+def_dll_func_addr glWaitSync
+def_dll_func_addr glGetInteger64v
+def_dll_func_addr glGetSynciv
+def_dll_func_addr glGetInteger64i_v
+def_dll_func_addr glGetBufferParameteri64v
+def_dll_func_addr glFramebufferTexture
+def_dll_func_addr glTexImage2DMultisample
+def_dll_func_addr glTexImage3DMultisample
+def_dll_func_addr glGetMultisamplefv
+def_dll_func_addr glSampleMaski
+def_dll_func_addr glBindFragDataLocationIndexed
+def_dll_func_addr glGetFragDataIndex
+def_dll_func_addr glGenSamplers
+def_dll_func_addr glDeleteSamplers
+def_dll_func_addr glIsSampler
+def_dll_func_addr glBindSampler
+def_dll_func_addr glSamplerParameteri
+def_dll_func_addr glSamplerParameteriv
+def_dll_func_addr glSamplerParameterf
+def_dll_func_addr glSamplerParameterfv
+def_dll_func_addr glSamplerParameterIiv
+def_dll_func_addr glSamplerParameterIuiv
+def_dll_func_addr glGetSamplerParameteriv
+def_dll_func_addr glGetSamplerParameterIiv
+def_dll_func_addr glGetSamplerParameterfv
+def_dll_func_addr glGetSamplerParameterIuiv
+def_dll_func_addr glQueryCounter
+def_dll_func_addr glGetQueryObjecti64v
+def_dll_func_addr glGetQueryObjectui64v
+def_dll_func_addr glVertexAttribDivisor
+def_dll_func_addr glVertexAttribP1ui
+def_dll_func_addr glVertexAttribP1uiv
+def_dll_func_addr glVertexAttribP2ui
+def_dll_func_addr glVertexAttribP2uiv
+def_dll_func_addr glVertexAttribP3ui
+def_dll_func_addr glVertexAttribP3uiv
+def_dll_func_addr glVertexAttribP4ui
+def_dll_func_addr glVertexAttribP4uiv
+def_dll_func_addr glVertexP2ui
+def_dll_func_addr glVertexP2uiv
+def_dll_func_addr glVertexP3ui
+def_dll_func_addr glVertexP3uiv
+def_dll_func_addr glVertexP4ui
+def_dll_func_addr glVertexP4uiv
+def_dll_func_addr glTexCoordP1ui
+def_dll_func_addr glTexCoordP1uiv
+def_dll_func_addr glTexCoordP2ui
+def_dll_func_addr glTexCoordP2uiv
+def_dll_func_addr glTexCoordP3ui
+def_dll_func_addr glTexCoordP3uiv
+def_dll_func_addr glTexCoordP4ui
+def_dll_func_addr glTexCoordP4uiv
+def_dll_func_addr glMultiTexCoordP1ui
+def_dll_func_addr glMultiTexCoordP1uiv
+def_dll_func_addr glMultiTexCoordP2ui
+def_dll_func_addr glMultiTexCoordP2uiv
+def_dll_func_addr glMultiTexCoordP3ui
+def_dll_func_addr glMultiTexCoordP3uiv
+def_dll_func_addr glMultiTexCoordP4ui
+def_dll_func_addr glMultiTexCoordP4uiv
+def_dll_func_addr glNormalP3ui
+def_dll_func_addr glNormalP3uiv
+def_dll_func_addr glColorP3ui
+def_dll_func_addr glColorP3uiv
+def_dll_func_addr glColorP4ui
+def_dll_func_addr glColorP4uiv
+def_dll_func_addr glSecondaryColorP3ui
+def_dll_func_addr glSecondaryColorP3uiv
+dll_func_group_end GL33Func
 
-segment .rdata ; Store the function name list
-_FirstNameOfGL32Func:
-
-%macro def_opengl32_func 2-*
-	segment .bss
-	extern _addr_of_gl %+ %1
-	_addr_of_gl %+ %1 resd 1
-
-	segment .rdata
-	extern _name_of_gl %+ %1
-	_name_of_gl %+ %1:
-
-	%rep %0 - 1
-		%rotate 1
-		db %1
-	%endrep
-	db 0
-%endmacro
-
-def_opengl32_func CullFace, "CullFace"
-def_opengl32_func FrontFace, "FrontFace"
-def_opengl32_func Hint, "Hint"
-def_opengl32_func LineWidth, "LineWidth"
-def_opengl32_func PointSize, ".Size"
-def_opengl32_func PolygonMode, "PolygonMode"
-def_opengl32_func Scissor, "Scissor"
-def_opengl32_func TexParameterf, "+?f"
-def_opengl32_func TexParameterfv, "+?", 0x27
-def_opengl32_func TexParameteri, "+?i"
-def_opengl32_func TexParameteriv, "+?", 0x22
-def_opengl32_func TexImage1D, "+$1D"
-def_opengl32_func TexImage2D, "+$2D"
-def_opengl32_func DrawBuffer, "}["
-def_opengl32_func Clear, 0x06
-def_opengl32_func ClearColor, 0x06, "5"
-def_opengl32_func ClearStencil, 0x06, 0x7F
-def_opengl32_func ClearDepth, 0x06, 0x1D
-def_opengl32_func StencilMask, 0x7F, 0x0F
-def_opengl32_func ColorMask, "5", 0x0F
-def_opengl32_func DepthMask, 0x1D, 0x0F
-def_opengl32_func Disable, 0x09
-def_opengl32_func Enable, 0x08
-def_opengl32_func Finish, "Finish"
-def_opengl32_func Flush, 0x5C
-def_opengl32_func BlendFunc, 0x11, 0x10
-def_opengl32_func LogicOp, "Logic", 0x16
-def_opengl32_func StencilFunc, 0x7F, 0x10
-def_opengl32_func StencilOp, 0x7F, 0x16
-def_opengl32_func DepthFunc, 0x1D, 0x10
-def_opengl32_func PixelStoref, 0x1E, "Storef"
-def_opengl32_func PixelStorei, 0x1E, "Storei"
-def_opengl32_func ReadBuffer, "Read["
-def_opengl32_func ReadPixels, "Read", 0x1E, "s"
-def_opengl32_func GetBooleanv, "<Booleanv"
-def_opengl32_func GetDoublev, "<Doublev"
-def_opengl32_func GetError, "<Error"
-def_opengl32_func GetFloatv, "<Floatv"
-def_opengl32_func GetIntegerv, "<", 0x82, "v"
-def_opengl32_func GetString, "<Str-"
-def_opengl32_func GetTexImage, "<+$"
-def_opengl32_func GetTexParameterfv, "<+?", 0x27
-def_opengl32_func GetTexParameteriv, "<+?", 0x22
-def_opengl32_func GetTexLevelParameterfv, "<+Level?", 0x27
-def_opengl32_func GetTexLevelParameteriv, "<+Level?", 0x22
-def_opengl32_func IsEnabled, 0x18, 0x08, "d"
-def_opengl32_func DepthRange, 0x1D, 0x0D
-def_opengl32_func Viewport, "Viewport"
-
-segment .bss
-_LastGL32Func:
-_FirstGLFunc: ; Store the function pointer list
-
-segment .rdata ; Store the function name list
-_FirstNameOfGLFunc:
-
-%macro def_opengl_func 2-*
-	segment .bss
-	extern _addr_of_gl %+ %1
-	_addr_of_gl %+ %1 resd 1
-
-	segment .rdata
-	extern _name_of_gl %+ %1
-	_name_of_gl %+ %1:
-	%rep %0 - 1
-		%rotate 1
-		db %1
-	%endrep
-	db 0
-%endmacro
-
-def_opengl_func DrawArrays, "}{s"
-def_opengl_func DrawElements, "}]s"
-def_opengl_func GetPointerv, "<`v"
-def_opengl_func PolygonOffset, "PolygonOffset"
-def_opengl_func CopyTexImage1D, 0x15, "+$1D"
-def_opengl_func CopyTexImage2D, 0x15, "+$2D"
-def_opengl_func CopyTexSubImage1D, 0x15, "+", 0x14, "$1D"
-def_opengl_func CopyTexSubImage2D, 0x15, "+", 0x14, "$2D"
-def_opengl_func TexSubImage1D, "+", 0x14, "$1D"
-def_opengl_func TexSubImage2D, "+", 0x14, "$2D"
-def_opengl_func BindTexture, "!&"
-def_opengl_func DeleteTextures, "/&s"
-def_opengl_func GenTextures, "8&s"
-
-def_opengl_func DrawRangeElements, "}", 0x0D, "]s"
-def_opengl_func TexImage3D, "+$3D"
-def_opengl_func TexSubImage3D, "+", 0x14, "$3D"
-def_opengl_func CopyTexSubImage3D, 0x15, "+", 0x14, "$3D"
-
-def_opengl_func ActiveTexture, ")&"
-def_opengl_func SampleCoverage, "SampleCoverage"
-def_opengl_func CompressedTexImage3D, 0x02, "+$3D"
-def_opengl_func CompressedTexImage2D, 0x02, "+$2D"
-def_opengl_func CompressedTexImage1D, 0x02, "+$1D"
-def_opengl_func CompressedTexSubImage3D, 0x02, "+", 0x14, "$3D"
-def_opengl_func CompressedTexSubImage2D, 0x02, "+", 0x14, "$2D"
-def_opengl_func CompressedTexSubImage1D, 0x02, "+", 0x14, "$1D"
-def_opengl_func GetCompressedTexImage, "<", 0x02, "+$"
-def_opengl_func ClientActiveTexture, "Client)&"
-def_opengl_func MultiTexCoord1d, "^,1d"
-def_opengl_func MultiTexCoord1dv, "^,1", 0x87
-def_opengl_func MultiTexCoord1f, "^,1f"
-def_opengl_func MultiTexCoord1fv, "^,1", 0x27
-def_opengl_func MultiTexCoord1i, "^,1i"
-def_opengl_func MultiTexCoord1iv, "^,1", 0x22
-def_opengl_func MultiTexCoord1s, "^,1s"
-def_opengl_func MultiTexCoord1sv, "^,1sv"
-def_opengl_func MultiTexCoord2d, "^,2d"
-def_opengl_func MultiTexCoord2dv, "^,2", 0x87
-def_opengl_func MultiTexCoord2f, "^,2f"
-def_opengl_func MultiTexCoord2fv, "^,2", 0x27
-def_opengl_func MultiTexCoord2i, "^,2i"
-def_opengl_func MultiTexCoord2iv, "^,2", 0x22
-def_opengl_func MultiTexCoord2s, "^,2s"
-def_opengl_func MultiTexCoord2sv, "^,2sv"
-def_opengl_func MultiTexCoord3d, "^,3d"
-def_opengl_func MultiTexCoord3dv, "^,3", 0x87
-def_opengl_func MultiTexCoord3f, "^,3f"
-def_opengl_func MultiTexCoord3fv, "^,3", 0x27
-def_opengl_func MultiTexCoord3i, "^,3i"
-def_opengl_func MultiTexCoord3iv, "^,3", 0x22
-def_opengl_func MultiTexCoord3s, "^,3s"
-def_opengl_func MultiTexCoord3sv, "^,3sv"
-def_opengl_func MultiTexCoord4d, "^,4d"
-def_opengl_func MultiTexCoord4dv, "^,4", 0x87
-def_opengl_func MultiTexCoord4f, "^,4f"
-def_opengl_func MultiTexCoord4fv, "^,4", 0x27
-def_opengl_func MultiTexCoord4i, "^,4i"
-def_opengl_func MultiTexCoord4iv, "^,4", 0x22
-def_opengl_func MultiTexCoord4s, "^,4s"
-def_opengl_func MultiTexCoord4sv, "^,4sv"
-def_opengl_func LoadTransposeMatrixf, "Load%#f"
-def_opengl_func LoadTransposeMatrixd, "Load%#d"
-def_opengl_func MultTransposeMatrixf, "Mult%#f"
-def_opengl_func MultTransposeMatrixd, "Mult%#d"
-
-def_opengl_func BlendFuncSeparate, 0x11, 0x10, 0x12
-def_opengl_func MultiDrawArrays, "^}{s"
-def_opengl_func MultiDrawElements, "^}]s"
-def_opengl_func PointParameterf, ".?f"
-def_opengl_func PointParameterfv, ".?", 0x27
-def_opengl_func PointParameteri, ".?i"
-def_opengl_func PointParameteriv, ".?", 0x22
-def_opengl_func FogCoordf, 0x85, "9f"
-def_opengl_func FogCoordfv, 0x85, "9", 0x27
-def_opengl_func FogCoordd, 0x85, "9d"
-def_opengl_func FogCoorddv, 0x85, "9", 0x87
-def_opengl_func FogCoordPointer, 0x85, "9`"
-def_opengl_func SecondaryColor3b, "(53b"
-def_opengl_func SecondaryColor3bv, "(53bv"
-def_opengl_func SecondaryColor3d, "(53d"
-def_opengl_func SecondaryColor3dv, "(53", 0x87
-def_opengl_func SecondaryColor3f, "(53f"
-def_opengl_func SecondaryColor3fv, "(53", 0x27
-def_opengl_func SecondaryColor3i, "(53i"
-def_opengl_func SecondaryColor3iv, "(53", 0x22
-def_opengl_func SecondaryColor3s, "(53s"
-def_opengl_func SecondaryColor3sv, "(53sv"
-def_opengl_func SecondaryColor3ub, "(53ub"
-def_opengl_func SecondaryColor3ubv, "(53ubv"
-def_opengl_func SecondaryColor3ui, "(53;"
-def_opengl_func SecondaryColor3uiv, "(53u", 0x22
-def_opengl_func SecondaryColor3us, "(53us"
-def_opengl_func SecondaryColor3usv, "(53usv"
-def_opengl_func SecondaryColorPointer, "(5`"
-def_opengl_func WindowPos2d, 0x01, "2d"
-def_opengl_func WindowPos2dv, 0x01, "2", 0x87
-def_opengl_func WindowPos2f, 0x01, "2f"
-def_opengl_func WindowPos2fv, 0x01, "2", 0x27
-def_opengl_func WindowPos2i, 0x01, "2i"
-def_opengl_func WindowPos2iv, 0x01, "2", 0x22
-def_opengl_func WindowPos2s, 0x01, "2s"
-def_opengl_func WindowPos2sv, 0x01, "2sv"
-def_opengl_func WindowPos3d, 0x01, "3d"
-def_opengl_func WindowPos3dv, 0x01, "3", 0x87
-def_opengl_func WindowPos3f, 0x01, "3f"
-def_opengl_func WindowPos3fv, 0x01, "3", 0x27
-def_opengl_func WindowPos3i, 0x01, "3i"
-def_opengl_func WindowPos3iv, 0x01, "3", 0x22
-def_opengl_func WindowPos3s, 0x01, "3s"
-def_opengl_func WindowPos3sv, 0x01, "3sv"
-def_opengl_func BlendColor, 0x11, "5"
-def_opengl_func BlendEquation, 0x11, 0x83
-
-def_opengl_func GenQueries, "80"
-def_opengl_func DeleteQueries, "/0"
-def_opengl_func IsQuery, 0x18, ">"
-def_opengl_func BeginQuery, 0x0A, ">"
-def_opengl_func EndQuery, 0x0B, ">"
-def_opengl_func GetQueryiv, "<>", 0x22
-def_opengl_func GetQueryObjectiv, "<>", 0x17, 0x22
-def_opengl_func GetQueryObjectuiv, "<>", 0x17, "u", 0x22
-def_opengl_func BindBuffer, "!["
-def_opengl_func DeleteBuffers, "/[s"
-def_opengl_func GenBuffers, "8[s"
-def_opengl_func IsBuffer, 0x18, "["
-def_opengl_func BufferData, "[", 0x13
-def_opengl_func BufferSubData, "[", 0x14, 0x13
-def_opengl_func GetBufferSubData, "<[", 0x14, 0x13
-def_opengl_func MapBuffer, 0x1B, "["
-def_opengl_func UnmapBuffer, "Unmap["
-def_opengl_func GetBufferParameteriv, "<[?", 0x22
-def_opengl_func GetBufferPointerv, "<[`v"
-
-def_opengl_func BlendEquationSeparate, 0x11, 0x83, 0x12
-def_opengl_func DrawBuffers, "}[s"
-def_opengl_func StencilOpSeparate, 0x7F, 0x16, 0x12
-def_opengl_func StencilFuncSeparate, 0x7F, 0x10, 0x12
-def_opengl_func StencilMaskSeparate, 0x7F, 0x0F, 0x12
-def_opengl_func AttachShader, 0x19, 0x80
-def_opengl_func BindAttribLocation, "!@", 0x81
-def_opengl_func CompileShader, "Compile", 0x80
-def_opengl_func CreateProgram, "Create~"
-def_opengl_func CreateShader, "Create", 0x80
-def_opengl_func DeleteProgram, "/~"
-def_opengl_func DeleteShader, "/", 0x80
-def_opengl_func DetachShader, "Detach", 0x80
-def_opengl_func DisableVertexAttribArray, 0x09, "*@{"
-def_opengl_func EnableVertexAttribArray, 0x08, "*@{"
-def_opengl_func GetActiveAttrib, "<)@"
-def_opengl_func GetActiveUniform, "<)="
-def_opengl_func GetAttachedShaders, "<", 0x19, "ed", 0x80, "s"
-def_opengl_func GetAttribLocation, "<@", 0x81
-def_opengl_func GetProgramiv, "<~", 0x22
-def_opengl_func GetProgramInfoLog, "<~", 0x86
-def_opengl_func GetShaderiv, "<", 0x80, 0x22
-def_opengl_func GetShaderInfoLog, "<", 0x80, 0x86
-def_opengl_func GetShaderSource, "<", 0x80, "Source"
-def_opengl_func GetUniformLocation, "<=", 0x81
-def_opengl_func GetUniformfv, "<=", 0x27
-def_opengl_func GetUniformiv, "<=", 0x22
-def_opengl_func GetVertexAttribdv, "<*@", 0x87
-def_opengl_func GetVertexAttribfv, "<*@", 0x27
-def_opengl_func GetVertexAttribiv, "<*@", 0x22
-def_opengl_func GetVertexAttribPointerv, "<*@`v"
-def_opengl_func IsProgram, 0x18, "~"
-def_opengl_func IsShader, 0x18, 0x80
-def_opengl_func LinkProgram, "Link~"
-def_opengl_func ShaderSource, 0x80, "Source"
-def_opengl_func UseProgram, "Use~"
-def_opengl_func Uniform1f, "=1f"
-def_opengl_func Uniform2f, "=2f"
-def_opengl_func Uniform3f, "=3f"
-def_opengl_func Uniform4f, "=4f"
-def_opengl_func Uniform1i, "=1i"
-def_opengl_func Uniform2i, "=2i"
-def_opengl_func Uniform3i, "=3i"
-def_opengl_func Uniform4i, "=4i"
-def_opengl_func Uniform1fv, "=1", 0x27
-def_opengl_func Uniform2fv, "=2", 0x27
-def_opengl_func Uniform3fv, "=3", 0x27
-def_opengl_func Uniform4fv, "=4", 0x27
-def_opengl_func Uniform1iv, "=1", 0x22
-def_opengl_func Uniform2iv, "=2", 0x22
-def_opengl_func Uniform3iv, "=3", 0x22
-def_opengl_func Uniform4iv, "=4", 0x22
-def_opengl_func UniformMatrix2fv, "=#2", 0x27
-def_opengl_func UniformMatrix3fv, "=#3", 0x27
-def_opengl_func UniformMatrix4fv, "=#4", 0x27
-def_opengl_func ValidateProgram, "Validate~"
-def_opengl_func VertexAttrib1d, "*@1d"
-def_opengl_func VertexAttrib1dv, "*@1", 0x87
-def_opengl_func VertexAttrib1f, "*@1f"
-def_opengl_func VertexAttrib1fv, "*@1", 0x27
-def_opengl_func VertexAttrib1s, "*@1s"
-def_opengl_func VertexAttrib1sv, "*@1sv"
-def_opengl_func VertexAttrib2d, "*@2d"
-def_opengl_func VertexAttrib2dv, "*@2", 0x87
-def_opengl_func VertexAttrib2f, "*@2f"
-def_opengl_func VertexAttrib2fv, "*@2", 0x27
-def_opengl_func VertexAttrib2s, "*@2s"
-def_opengl_func VertexAttrib2sv, "*@2sv"
-def_opengl_func VertexAttrib3d, "*@3d"
-def_opengl_func VertexAttrib3dv, "*@3", 0x87
-def_opengl_func VertexAttrib3f, "*@3f"
-def_opengl_func VertexAttrib3fv, "*@3", 0x27
-def_opengl_func VertexAttrib3s, "*@3s"
-def_opengl_func VertexAttrib3sv, "*@3sv"
-def_opengl_func VertexAttrib4Nbv, "*@4Nbv"
-def_opengl_func VertexAttrib4Niv, "*@4N", 0x22
-def_opengl_func VertexAttrib4Nsv, "*@4Nsv"
-def_opengl_func VertexAttrib4Nub, "*@4Nub"
-def_opengl_func VertexAttrib4Nubv, "*@4Nubv"
-def_opengl_func VertexAttrib4Nuiv, "*@4Nu", 0x22
-def_opengl_func VertexAttrib4Nusv, "*@4Nusv"
-def_opengl_func VertexAttrib4bv, "*@4bv"
-def_opengl_func VertexAttrib4d, "*@4d"
-def_opengl_func VertexAttrib4dv, "*@4", 0x87
-def_opengl_func VertexAttrib4f, "*@4f"
-def_opengl_func VertexAttrib4fv, "*@4", 0x27
-def_opengl_func VertexAttrib4iv, "*@4", 0x22
-def_opengl_func VertexAttrib4s, "*@4s"
-def_opengl_func VertexAttrib4sv, "*@4sv"
-def_opengl_func VertexAttrib4ubv, "*@4ubv"
-def_opengl_func VertexAttrib4uiv, "*@4u", 0x22
-def_opengl_func VertexAttrib4usv, "*@4usv"
-def_opengl_func VertexAttribPointer, "*@`"
-
-def_opengl_func UniformMatrix2x3fv, "=#2x3", 0x27
-def_opengl_func UniformMatrix3x2fv, "=#3x2", 0x27
-def_opengl_func UniformMatrix2x4fv, "=#2x4", 0x27
-def_opengl_func UniformMatrix4x2fv, "=#4x2", 0x27
-def_opengl_func UniformMatrix3x4fv, "=#3x4", 0x27
-def_opengl_func UniformMatrix4x3fv, "=#4x3", 0x27
-
-def_opengl_func ColorMaski, "5", 0x0F, "i"
-def_opengl_func GetBooleani_v, "<Booleani_v"
-def_opengl_func GetIntegeri_v, "<", 0x82, "i_v"
-def_opengl_func Enablei, 0x08, "i"
-def_opengl_func Disablei, 0x09, "i"
-def_opengl_func IsEnabledi, 0x18, 0x08, "di"
-def_opengl_func BeginTransformFeedback, 0x0A, 0x1A
-def_opengl_func EndTransformFeedback, 0x0B, 0x1A
-def_opengl_func BindBufferRange, "![", 0x0D
-def_opengl_func BindBufferBase, "![", 0x0E
-def_opengl_func TransformFeedbackVaryings, 0x1A, "|s"
-def_opengl_func GetTransformFeedbackVarying, "<", 0x1A, "|"
-def_opengl_func ClampColor, "Clamp5"
-def_opengl_func BeginConditionalRender, 0x0A, 0x1C
-def_opengl_func EndConditionalRender, 0x0B, 0x1C
-def_opengl_func VertexAttribIPointer, "*@I`"
-def_opengl_func GetVertexAttribIiv, "<*@I", 0x22
-def_opengl_func GetVertexAttribIuiv, "<*@Iu", 0x22
-def_opengl_func VertexAttribI1i, "*@I1i"
-def_opengl_func VertexAttribI2i, "*@I2i"
-def_opengl_func VertexAttribI3i, "*@I3i"
-def_opengl_func VertexAttribI4i, "*@I4i"
-def_opengl_func VertexAttribI1ui, "*@I1;"
-def_opengl_func VertexAttribI2ui, "*@I2;"
-def_opengl_func VertexAttribI3ui, "*@I3;"
-def_opengl_func VertexAttribI4ui, "*@I4;"
-def_opengl_func VertexAttribI1iv, "*@I1", 0x22
-def_opengl_func VertexAttribI2iv, "*@I2", 0x22
-def_opengl_func VertexAttribI3iv, "*@I3", 0x22
-def_opengl_func VertexAttribI4iv, "*@I4", 0x22
-def_opengl_func VertexAttribI1uiv, "*@I1u", 0x22
-def_opengl_func VertexAttribI2uiv, "*@I2u", 0x22
-def_opengl_func VertexAttribI3uiv, "*@I3u", 0x22
-def_opengl_func VertexAttribI4uiv, "*@I4u", 0x22
-def_opengl_func VertexAttribI4bv, "*@I4bv"
-def_opengl_func VertexAttribI4sv, "*@I4sv"
-def_opengl_func VertexAttribI4ubv, "*@I4ubv"
-def_opengl_func VertexAttribI4usv, "*@I4usv"
-def_opengl_func GetUniformuiv, "<=u", 0x22
-def_opengl_func BindFragDataLocation, "!", 0x04, 0x81
-def_opengl_func GetFragDataLocation, "<", 0x04, 0x81
-def_opengl_func Uniform1ui, "=1;"
-def_opengl_func Uniform2ui, "=2;"
-def_opengl_func Uniform3ui, "=3;"
-def_opengl_func Uniform4ui, "=4;"
-def_opengl_func Uniform1uiv, "=1u", 0x22
-def_opengl_func Uniform2uiv, "=2u", 0x22
-def_opengl_func Uniform3uiv, "=3u", 0x22
-def_opengl_func Uniform4uiv, "=4u", 0x22
-def_opengl_func TexParameterIiv, "+?I", 0x22
-def_opengl_func TexParameterIuiv, "+?Iu", 0x22
-def_opengl_func GetTexParameterIiv, "<+?I", 0x22
-def_opengl_func GetTexParameterIuiv, "<+?Iu", 0x22
-def_opengl_func ClearBufferiv, 0x06, "[", 0x22
-def_opengl_func ClearBufferuiv, 0x06, "[u", 0x22
-def_opengl_func ClearBufferfv, 0x06, "[", 0x27
-def_opengl_func ClearBufferfi, 0x06, "[fi"
-def_opengl_func GetStringi, "<Str-i"
-def_opengl_func IsRenderbuffer, 0x18, 0x07
-def_opengl_func BindRenderbuffer, "!", 0x07
-def_opengl_func DeleteRenderbuffers, "/", 0x07, "s"
-def_opengl_func GenRenderbuffers, "8", 0x07, "s"
-def_opengl_func RenderbufferStorage, 0x07, "Storage"
-def_opengl_func GetRenderbufferParameteriv, "<", 0x07, "?", 0x22
-def_opengl_func IsFramebuffer, 0x18, "7"
-def_opengl_func BindFramebuffer, "!7"
-def_opengl_func DeleteFramebuffers, "/7s"
-def_opengl_func GenFramebuffers, "87s"
-def_opengl_func CheckFramebufferStatus, "Check7Status"
-def_opengl_func FramebufferTexture1D, "7&1D"
-def_opengl_func FramebufferTexture2D, "7&2D"
-def_opengl_func FramebufferTexture3D, "7&3D"
-def_opengl_func FramebufferRenderbuffer, "7", 0x07
-def_opengl_func GetFramebufferAttachmentParameteriv, "<7", 0x19, "ment?", 0x22
-def_opengl_func GenerateMipmap, "8erateMipmap"
-def_opengl_func BlitFramebuffer, "Blit7"
-def_opengl_func RenderbufferStorageMultisample, 0x07, "Storage", 0x03
-def_opengl_func FramebufferTextureLayer, "7&Layer"
-def_opengl_func MapBufferRange, 0x1B, "[", 0x0D
-def_opengl_func FlushMappedBufferRange, 0x5C, 0x1B, "ped[", 0x0D
-def_opengl_func BindVertexArray, "!*{"
-def_opengl_func DeleteVertexArrays, "/*{s"
-def_opengl_func GenVertexArrays, "8*{s"
-def_opengl_func IsVertexArray, 0x18, "*{"
-
-def_opengl_func DrawArraysInstanced, "}{s", 0x0C
-def_opengl_func DrawElementsInstanced, "}]s", 0x0C
-def_opengl_func TexBuffer, "+["
-def_opengl_func PrimitiveRestartIndex, "Primit", 0x22, "eRestart", 0x88
-def_opengl_func CopyBufferSubData, 0x15, "[", 0x14, 0x13
-def_opengl_func GetUniformIndices, "<=Indices"
-def_opengl_func GetActiveUniformsiv, "<)=s", 0x22
-def_opengl_func GetActiveUniformName, "<)=Name"
-def_opengl_func GetUniformBlockIndex, "<=", 0x1F, 0x88
-def_opengl_func GetActiveUniformBlockiv, "<)=", 0x1F, 0x22
-def_opengl_func GetActiveUniformBlockName, "<)=", 0x1F, "Name"
-def_opengl_func UniformBlockBinding, "=", 0x1F, "!-"
-
-def_opengl_func DrawElementsBaseVertex, "}]s", 0x0E, "*"
-def_opengl_func DrawRangeElementsBaseVertex, "}", 0x0D, "]s", 0x0E, "*"
-def_opengl_func DrawElementsInstancedBaseVertex, "}]s", 0x0C, 0x0E, "*"
-def_opengl_func MultiDrawElementsBaseVertex, "^}]s", 0x0E, "*"
-def_opengl_func ProvokingVertex, "Provok-*"
-def_opengl_func FenceSync, "Fence", 0x20
-def_opengl_func IsSync, 0x18, 0x20
-def_opengl_func DeleteSync, "/", 0x20
-def_opengl_func ClientWaitSync, "ClientWait", 0x20
-def_opengl_func WaitSync, "Wait", 0x20
-def_opengl_func GetInteger64v, "<", 0x82, "64v"
-def_opengl_func GetSynciv, "<", 0x20, 0x22
-def_opengl_func GetInteger64i_v, "<", 0x82, "64i_v"
-def_opengl_func GetBufferParameteri64v, "<[?i64v"
-def_opengl_func FramebufferTexture, "7&"
-def_opengl_func TexImage2DMultisample, "+$2D", 0x03
-def_opengl_func TexImage3DMultisample, "+$3D", 0x03
-def_opengl_func GetMultisamplefv, "<", 0x03, 0x27
-def_opengl_func SampleMaski, "Sample", 0x0F, "i"
-
-def_opengl_func BindFragDataLocationIndexed, "!", 0x04, 0x81, 0x88, "ed"
-def_opengl_func GetFragDataIndex, "<", 0x04, 0x88
-def_opengl_func GenSamplers, "8:s"
-def_opengl_func DeleteSamplers, "/:s"
-def_opengl_func IsSampler, 0x18, ":"
-def_opengl_func BindSampler, "!:"
-def_opengl_func SamplerParameteri, ":?i"
-def_opengl_func SamplerParameteriv, ":?", 0x22
-def_opengl_func SamplerParameterf, ":?f"
-def_opengl_func SamplerParameterfv, ":?", 0x27
-def_opengl_func SamplerParameterIiv, ":?I", 0x22
-def_opengl_func SamplerParameterIuiv, ":?Iu", 0x22
-def_opengl_func GetSamplerParameteriv, "<:?", 0x22
-def_opengl_func GetSamplerParameterIiv, "<:?I", 0x22
-def_opengl_func GetSamplerParameterfv, "<:?", 0x27
-def_opengl_func GetSamplerParameterIuiv, "<:?Iu", 0x22
-def_opengl_func QueryCounter, ">Counter"
-def_opengl_func GetQueryObjecti64v, "<>", 0x17, "i64v"
-def_opengl_func GetQueryObjectui64v, "<>", 0x17, ";64v"
-def_opengl_func VertexAttribDivisor, "*@D", 0x22, "isor"
-def_opengl_func VertexAttribP1ui, "*@P1;"
-def_opengl_func VertexAttribP1uiv, "*@P1u", 0x22
-def_opengl_func VertexAttribP2ui, "*@P2;"
-def_opengl_func VertexAttribP2uiv, "*@P2u", 0x22
-def_opengl_func VertexAttribP3ui, "*@P3;"
-def_opengl_func VertexAttribP3uiv, "*@P3u", 0x22
-def_opengl_func VertexAttribP4ui, "*@P4;"
-def_opengl_func VertexAttribP4uiv, "*@P4u", 0x22
-def_opengl_func VertexP2ui, "*P2;"
-def_opengl_func VertexP2uiv, "*P2u", 0x22
-def_opengl_func VertexP3ui, "*P3;"
-def_opengl_func VertexP3uiv, "*P3u", 0x22
-def_opengl_func VertexP4ui, "*P4;"
-def_opengl_func VertexP4uiv, "*P4u", 0x22
-def_opengl_func TexCoordP1ui, ",P1;"
-def_opengl_func TexCoordP1uiv, ",P1u", 0x22
-def_opengl_func TexCoordP2ui, ",P2;"
-def_opengl_func TexCoordP2uiv, ",P2u", 0x22
-def_opengl_func TexCoordP3ui, ",P3;"
-def_opengl_func TexCoordP3uiv, ",P3u", 0x22
-def_opengl_func TexCoordP4ui, ",P4;"
-def_opengl_func TexCoordP4uiv, ",P4u", 0x22
-def_opengl_func MultiTexCoordP1ui, "^,P1;"
-def_opengl_func MultiTexCoordP1uiv, "^,P1u", 0x22
-def_opengl_func MultiTexCoordP2ui, "^,P2;"
-def_opengl_func MultiTexCoordP2uiv, "^,P2u", 0x22
-def_opengl_func MultiTexCoordP3ui, "^,P3;"
-def_opengl_func MultiTexCoordP3uiv, "^,P3u", 0x22
-def_opengl_func MultiTexCoordP4ui, "^,P4;"
-def_opengl_func MultiTexCoordP4uiv, "^,P4u", 0x22
-def_opengl_func NormalP3ui, 0x84, "P3;"
-def_opengl_func NormalP3uiv, 0x84, "P3u", 0x22
-def_opengl_func ColorP3ui, "5P3;"
-def_opengl_func ColorP3uiv, "5P3u", 0x22
-def_opengl_func ColorP4ui, "5P4;"
-def_opengl_func ColorP4uiv, "5P4u", 0x22
-def_opengl_func SecondaryColorP3ui, "(5P3;"
-def_opengl_func SecondaryColorP3uiv, "(5P3u", 0x22
-
-segment .bss
-_LastGLFunc:
-
-DefFunc _DecodeProcName
-	FrameBegin 1, 0, esi, edi
-
-	mov edx, [_FuncNameBuf]
-	mov word[edx], 'gl' ; Add prefix
-
-	mov esi, Param(0)
-	lea edi, [edx + 2]
-
-.decode_loop:
-	xor eax, eax
-	lodsb
-	test al, al ; Check NUL
-	jz .end
-	cmp al, 0x40
-	jbe .code_01_40 ; Part 1
-	cmp al, 0x5B
-	jb .movechar ; ABCDEFG...
-	cmp al, 0x60
-	jbe .code_5b_60 ; Part 2
-	cmp al, 0x7B
-	jb .movechar ; abcdefg...
-	cmp al, 0x %+ LAST_CODE
-	jbe .code_7b_ %+ LAST_CODE ; Part 3
-
-.movechar:
-	stosb ; No need to decode
-	jmp .decode_loop
-.code_01_40: ; Part 1
-	push esi
-	dec al ; Start from 1
-	movzx esi, word[_DecodeTable.code_01_40 + eax * 2]
-	jmp .decode
-.code_5b_60: ; Part 2
-	push esi
-	sub al, 0x5B
-	movzx esi, word[_DecodeTable.code_5b_60 + eax * 2]
-	jmp .decode
-.code_7b_ %+ LAST_CODE: ; Part 3
-	push esi
-	sub al, 0x7B
-	movzx esi, word[_DecodeTable.code_7b_ %+ LAST_CODE + eax * 2]
-.decode:
-	add esi, _DecodeTableStrings ; Add up offset
-.copy_loop:
-	lodsb
-	test al, al
-	jz .decode_end
-	stosb
-	jmp .copy_loop
-.decode_end:
-	pop esi
-	jmp .decode_loop
-
-.end:
-	stosb ; Trail 0
-
-	FrameEnd
-	ret
-
-extern _isdigit_al
-_isdigit_al:
+DefFunc _isdigit_al
 	mov dword [_FailReason], _ParseFailBecauseNondigit
 	cmp al, '0'
 	jb .parse_fail
@@ -850,31 +601,22 @@ DefFunc _CheckOpenGLProcAddress
 	FrameEnd
 	ret
 
-DefFunc _GetGL32ProcAddress ; Using Kernel32.dll `GetProcAddress`
-	FrameBegin 0, 1
-	invoke_cdecl _DecodeProcName, Param(0)
-	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
-	invoke_cdecl _CheckOpenGLProcAddress, eax
-	FrameEnd
-	ret
-
 DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
-	FrameBegin 0, 1
-	invoke_cdecl _DecodeProcName, Param(0)
+	FrameBegin 0, 2
+	invoke_dll_cdecl strcpy, [_FuncNameBuf], Param(0)
 	invoke_dll_stdcall wglGetProcAddress, [_FuncNameBuf]
 	invoke_cdecl _CheckOpenGLProcAddress, eax
 	FrameEnd
 	ret
 
 DefFunc _InitGL33
-	FrameBegin 1, 2, esi, edi
+	FrameBegin 2, 4, esi, edi
+	AssignVars EcxHome, AssetLength
 
 	def_dll_func_and_load GDI32, ChoosePixelFormat
 	def_dll_func_and_load GDI32, SetPixelFormat
 
-	def_dll_and_load OpenGL32, "opengl32.dll"
-
-	dll_func_group_load OpenGL32, WGLFunc
+	LoadFuncsFromAssets _FirstWGLFuncAddr, [_addr_of_OpenGL32], 'assets\WGLFUNC', (_LastWGLFuncAddr - _FirstWGLFuncAddr) / 4
 
 	invoke_cdecl _malloc, 4096
 	mov [_OpenGLNullFunctions], eax
@@ -887,17 +629,6 @@ DefFunc _InitGL33
 	invoke_cdecl _malloc, 1024
 	mov [_FuncNameBuf], eax
 	mov [eax], 0
-
-	mov ecx, (_LastGL32Func - _FirstGL32Func) / 4
-	mov esi, _FirstNameOfGL32Func
-	mov edi, _FirstGL32Func
-.loop_init_gl32:
-	StoreVariable 0, ecx
-	invoke_cdecl _GetGL32ProcAddress, esi
-	stosd
-	call _NextString
-	LoadVariable ecx, 0
-	loop .loop_init_gl32
 
 	invoke_dll_stdcall wglGetProcAddress, _name_of_wglSwapInterval
 	mov [_addr_of_wglSwapInterval], eax
@@ -964,15 +695,17 @@ DefFunc _InitGL33
 	mov [_OpenGL_Ver_Release], eax
 
 .version_parsed:
-	mov ecx, (_LastGLFunc - _FirstGLFunc) / 4
-	mov esi, _FirstNameOfGLFunc
-	mov edi, _FirstGLFunc
+	AssetsQuery 'assets\GL33FUNC', &AssetLength
+	mov esi, eax
+	invoke_cdecl _NLtoNUL, eax, AssetLength
+	mov ecx, (_LastGL33FuncAddr - _FirstGL33FuncAddr) / 4
+	mov edi, _FirstGL33FuncAddr
 .loop_init_gl:
-	StoreVariable 0, ecx
+	mov EcxHome, ecx
 	invoke_cdecl _GetGLProcAddress, esi
 	stosd
 	call _NextString
-	LoadVariable ecx, 0
+	mov ecx, EcxHome
 	loop .loop_init_gl
 
 	invoke_dll_cdecl strlen, [_OpenGLNullFunctions]
