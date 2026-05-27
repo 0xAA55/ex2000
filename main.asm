@@ -3,6 +3,7 @@
 %include "math.inc"
 
 extern _InitLoadLibrary
+extern _InitDelayedLoadFunc
 extern _InitGL33
 extern _DeInitGL33
 extern _Scene
@@ -58,12 +59,13 @@ global _entry
 _entry:
 	FrameBegin 0, 2, ebx
 	invoke_cdecl _InitLoadLibrary
-	invoke_cdecl _MathInit
 	invoke_cdecl _AssetsInit
+	invoke_cdecl _InitDelayedLoadFunc
+	invoke_cdecl _MathInit
 	invoke_cdecl _main
 	mov ebx, eax
-	invoke_cdecl _AssetsDestroy
 	invoke_cdecl _MathDeInit
+	invoke_cdecl _AssetsDestroy
 	invoke_dll_stdcall ExitProcess, ebx
 	FrameEnd
 	ret

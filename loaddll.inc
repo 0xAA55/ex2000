@@ -29,6 +29,14 @@
 	__SECT__
 %endmacro
 
+%macro def_dll_func_addr 1
+	[segment .bss]
+	extern _addr_of_ %+ %1
+	_addr_of_ %+ %1 resd 1
+
+	__SECT__
+%endmacro
+
 %macro def_dll_func_alias 2
 	[segment .bss]
 	extern _addr_of_ %+ %1
@@ -133,6 +141,12 @@
 	_First %+ %1 %+ Name:
 %endmacro
 
+%macro dll_func_group_start_without_name 1
+	[segment .bss]
+	extern _First %+ %1 %+ Addr
+	_First %+ %1 %+ Addr:
+%endmacro
+
 %macro dll_func_group_end 1
 	segment .bss
 	_Last %+ %1 %+ Addr:
@@ -140,6 +154,14 @@
 
 %macro dll_func_group_load 2
 	mov esi, _First %+ %2 %+ Name
+	mov edi, _First %+ %2 %+ Addr
+	mov ecx, (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
+	mov ebx, [_addr_of_ %+ %1]
+	call _LoadFuncGroup
+%endmacro
+
+%macro dll_func_group_load_alter_name 3
+	mov esi, %3
 	mov edi, _First %+ %2 %+ Addr
 	mov ecx, (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
 	mov ebx, [_addr_of_ %+ %1]
@@ -206,9 +228,23 @@ import_dll_func GetProcAddress
 import_dll_func LoadLibraryA
 
 extern _hInstance
+
+%ifdef _DEBUG
 extern _hDCDesktop
+%endif
 
 extern _LoadFuncGroup
+
+;void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
+extern _LoadFuncsFromAssets
+%macro LoadFuncsFromAssets 4
+	[segment .rdata]
+	%%AssetName db %3, 0
+
+	__SECT__
+	invoke_cdecl _LoadFuncsFromAssets, %1, %2, %%AssetName, %4
+%endmacro
+
 extern _DebugMsg ;void DebugMsg(const char *format, ...);
 %ifdef _DEBUG
 	extern _DebugShow ;void DebugShow(int x, int y, const char *format, ...);
@@ -222,6 +258,13 @@ extern _free
 extern _aligned_malloc
 extern _aligned_free
 
+extern _NLtoNUL
+
+import_dll User32
+import_dll GDI32
+import_dll MSVCRT
+import_dll OpenGL32
+
 import_dll_func ExitProcess
 import_dll_func QueryPerformanceFrequency
 import_dll_func QueryPerformanceCounter
@@ -229,8 +272,6 @@ import_dll_func GetProcessHeap
 import_dll_func HeapAlloc
 import_dll_func HeapReAlloc
 import_dll_func HeapFree
-import_dll_func HeapLock
-import_dll_func HeapUnlock
 import_dll_func Sleep
 import_dll_func GetTickCount
 import_dll_func CreateThread

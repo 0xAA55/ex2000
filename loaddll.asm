@@ -1,4 +1,5 @@
 %include "loaddll.inc"
+%include "assets.inc"
 
 %define NOIAT 1
 
@@ -16,54 +17,60 @@ _addr_of_Kernel32 resd 1
 _addr_of_GetProcAddress resd 1
 _hInstance resd 1
 _hHeap resd 1
+%ifdef _DEBUG
 _hDCDesktop resd 1
+%endif
 
 segment .rdata
 _name_of_LoadLibraryA db "LoadLibraryA", 0
 
 dll_func_group_start KFunc
 def_dll_func ExitProcess
-def_dll_func QueryPerformanceFrequency
-def_dll_func QueryPerformanceCounter
 def_dll_func GetProcessHeap
 def_dll_func HeapAlloc
 def_dll_func HeapReAlloc
 def_dll_func HeapFree
-def_dll_func HeapLock
-def_dll_func HeapUnlock
-def_dll_func Sleep
-def_dll_func GetTickCount
-def_dll_func CreateThread
-def_dll_func CloseHandle
-def_dll_func WaitForMultipleObjects
-def_dll_func VirtualProtect
 dll_func_group_end KFunc
+
+dll_func_group_start_without_name KFunc_DelayedLoad
+def_dll_func_addr QueryPerformanceFrequency
+def_dll_func_addr QueryPerformanceCounter
+def_dll_func_addr Sleep
+def_dll_func_addr GetTickCount
+def_dll_func_addr CreateThread
+def_dll_func_addr CloseHandle
+def_dll_func_addr WaitForMultipleObjects
+def_dll_func_addr VirtualProtect
+dll_func_group_end KFunc_DelayedLoad
 
 dll_func_group_start UFunc
 def_dll_func MessageBoxA
-def_dll_func DrawTextA
-def_dll_func LoadIconA
-def_dll_func LoadCursorA
-def_dll_func RegisterClassExA
-def_dll_func CreateWindowExA
-def_dll_func ShowWindow
-def_dll_func UpdateWindow
-def_dll_func PeekMessageA
-def_dll_func TranslateMessage
-def_dll_func DispatchMessageA
-def_dll_func PostQuitMessage
-def_dll_func DefWindowProcA
-def_dll_func GetDC
-def_dll_func ReleaseDC
-def_dll_func GetWindowRect
-def_dll_func GetClientRect
-def_dll_func ClientToScreen
-def_dll_func GetCursorPos
-def_dll_func SetCursorPos
-def_dll_func ShowCursor
-def_dll_func GetAsyncKeyState
-def_dll_func GetForegroundWindow
 dll_func_group_end UFunc
+
+dll_func_group_start_without_name UFunc_DelayedLoad
+def_dll_func_addr DrawTextA
+def_dll_func_addr LoadIconA
+def_dll_func_addr LoadCursorA
+def_dll_func_addr RegisterClassExA
+def_dll_func_addr CreateWindowExA
+def_dll_func_addr ShowWindow
+def_dll_func_addr UpdateWindow
+def_dll_func_addr PeekMessageA
+def_dll_func_addr TranslateMessage
+def_dll_func_addr DispatchMessageA
+def_dll_func_addr PostQuitMessage
+def_dll_func_addr DefWindowProcA
+def_dll_func_addr GetDC
+def_dll_func_addr ReleaseDC
+def_dll_func_addr GetWindowRect
+def_dll_func_addr GetClientRect
+def_dll_func_addr ClientToScreen
+def_dll_func_addr GetCursorPos
+def_dll_func_addr SetCursorPos
+def_dll_func_addr ShowCursor
+def_dll_func_addr GetAsyncKeyState
+def_dll_func_addr GetForegroundWindow
+dll_func_group_end UFunc_DelayedLoad
 
 dll_func_group_start CFunc
 def_dll_func strcpy
@@ -83,17 +90,21 @@ segment .rdata
 extern _name_of_User32
 extern _name_of_GDI32
 extern _name_of_MSVCRT
-_name_of_User32 db "user32.dll", 0
-_name_of_GDI32  db "gdi32.dll", 0
-_name_of_MSVCRT db "msvcrt.dll", 0
+extern _name_of_OpenGL32
+_name_of_User32   db "user32.dll", 0
+_name_of_GDI32    db "gdi32.dll", 0
+_name_of_MSVCRT   db "msvcrt.dll", 0
+_name_of_OpenGL32 db "opengl32.dll", 0
 
 segment .bss
 extern _addr_of_User32
 extern _addr_of_GDI32
 extern _addr_of_MSVCRT
-_addr_of_User32 resd 1
-_addr_of_GDI32  resd 1
-_addr_of_MSVCRT resd 1
+extern _addr_of_OpenGL32
+_addr_of_User32   resd 1
+_addr_of_GDI32    resd 1
+_addr_of_MSVCRT   resd 1
+_addr_of_OpenGL32 resd 1
 
 DefFunc _InitLoadLibrary
 	FrameBegin 1, 0, ebx, esi, edi
@@ -163,7 +174,7 @@ DefFunc _InitLoadLibrary
 
 	mov esi, _name_of_User32
 	mov edi, _addr_of_User32
-	mov ecx, 3
+	mov ecx, 4
 .loop_load_dll:
 	push ecx
 	invoke_dll_stdcall LoadLibraryA, esi
@@ -178,9 +189,6 @@ DefFunc _InitLoadLibrary
 
 	invoke_dll_stdcall GetProcessHeap
 	mov [_hHeap], eax
-
-	invoke_dll_stdcall GetDC, 0
-	mov [_hDCDesktop], eax
 
 	FrameEnd
 	ret
@@ -217,6 +225,59 @@ DefFunc _NextString
 	jnz _NextString
 	ret
 
+DefFunc _NLtoNUL
+	FrameBegin 0, 0, esi, edi
+
+	mov esi, Param(0)
+	mov ecx, Param(1)
+	mov edi, esi
+	xor edx, edx
+.proc:
+	lodsb
+	cmp al, `\n`
+	cmovz eax, edx
+	stosb
+	loop .proc
+
+	FrameEnd
+	ret
+
+; void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
+DefFunc _LoadFuncsFromAssets
+	FrameBegin 1, 2, ebx, esi, edi
+	AssignVars SizeOfNames
+
+	mov edi, Param(0)
+	mov ebx, Param(1)
+	invoke_cdecl _AssetsQuery, Param(2), &SizeOfNames
+	mov esi, eax
+	invoke_cdecl _NLtoNUL, esi, SizeOfNames
+
+	mov ecx, Param(3)
+	call _LoadFuncGroup
+
+	FrameEnd
+	ret
+	%undef SizeOfNames
+
+DefFunc _InitDelayedLoadFunc
+	FrameBegin 4, 2
+	AssignVars NameOfKFuncs, NameOfUFuncs, SizeOfKFuncs, SizeOfUFuncs
+
+	AssetsQuery 'assets\KFUNC', &SizeOfKFuncs
+	mov NameOfKFuncs, eax
+	AssetsQuery 'assets\UFUNC', &SizeOfUFuncs
+	mov NameOfUFuncs, eax
+
+	invoke_cdecl _NLtoNUL, NameOfKFuncs, SizeOfKFuncs
+	invoke_cdecl _NLtoNUL, NameOfUFuncs, SizeOfUFuncs
+
+	dll_func_group_load_alter_name Kernel32, KFunc_DelayedLoad, NameOfKFuncs
+	dll_func_group_load_alter_name User32, UFunc_DelayedLoad, NameOfUFuncs
+
+	FrameEnd
+	ret
+
 segment .bss
 extern _DebugMsgBuffer
 _DebugMsgBuffer resd 1
@@ -227,10 +288,16 @@ DefFunc _InitDbg
 	FrameBegin 0, 2
 	mov eax, [_DebugMsgBuffer]
 	test eax, eax
-	jnz .proceed_printf
+	jnz .end
 	invoke_cdecl _calloc, _DebugMsgBufferSize, 1
 	mov [_DebugMsgBuffer], eax
-.proceed_printf:
+%ifdef _DEBUG
+	cmp dword[_hDCDesktop], 0
+	jnz .end
+	invoke_dll_stdcall GetDC, 0
+	mov [_hDCDesktop], eax
+%endif
+.end:
 	FrameEnd
 	ret
 
@@ -247,6 +314,7 @@ DefFunc _DebugMsg
 	FrameEnd
 	ret
 
+%ifdef _DEBUG
 DefFunc _DebugShow
 	FrameBegin 0, 4
 	call _InitDbg
@@ -267,26 +335,25 @@ DefFunc _DebugShow
 	FrameEnd
 	ret
 
-%ifdef _DEBUG
-	DefFunc _DebugShowV
-		FrameBegin 0, 4
-		call _InitDbg
+DefFunc _DebugShowV
+	FrameBegin 0, 4
+	call _InitDbg
 
-		movq xmm0, Param(0)
-		movq [_DebugShowRect], xmm0
-		mov eax, 1024
-		movd xmm1, eax
-		pshufd xmm1, xmm1, 0
-		paddd xmm0, xmm1
-		movq [_DebugShowRect + 8], xmm0
+	movq xmm0, Param(0)
+	movq [_DebugShowRect], xmm0
+	mov eax, 1024
+	movd xmm1, eax
+	pshufd xmm1, xmm1, 0
+	paddd xmm0, xmm1
+	movq [_DebugShowRect + 8], xmm0
 
-		invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), Param(3)
-		invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), Param(3)
+	invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
 
-	.end:
-		xor eax, eax
-		FrameEnd
-		ret
+.end:
+	xor eax, eax
+	FrameEnd
+	ret
 %endif
 
 DefFunc _snprintf

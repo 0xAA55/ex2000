@@ -17,11 +17,11 @@ release: ex2000.exe
 	copy $@+
 
 loaddll.inc: frame.inc
-main.asm: loaddll.inc assets.inc
+main.asm: loaddll.inc assets.inc math.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
 timer.asm: loaddll.inc timer.inc
 avlbst.asm: loaddll.inc avlbst.inc
-loaddll.asm: loaddll.inc
+loaddll.asm: loaddll.inc assets.inc
 buffer.asm: loaddll.inc buffer.inc gl33.inc
 gl33.asm: loaddll.inc gl33.inc
 pool.asm: loaddll.inc pool.inc
