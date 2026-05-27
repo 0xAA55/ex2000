@@ -3,5 +3,6 @@
 
 extern _AssetsInit ; int AssetsInit();
 extern _AssetsQuery ; void *AssetsQuery(char *key, int *size);
+extern _AssetsDestroy ; void AssetsDestroy();
 
 %endif

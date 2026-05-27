@@ -290,6 +290,21 @@ DefFunc _FakeDwmFlush
 	xor eax, eax
 	ret
 
+DefFunc _SceneUnload
+	FrameBegin 0, 5, ebx
+
+	xor ebx, ebx
+
+	invoke_cdecl _DestroyFloatMap, [_TerrainBitmap]
+	invoke_cdecl _DeInitBuffer, _TerrainVerticesBuffer
+	invoke_cdecl _DeInitBuffer, _TerrainIndicesBuffer
+	invoke_cdecl _DeInitBuffer, _BillboardVerticesBuffer
+
+	mov [_TerrainBitmap], ebx
+
+	FrameEnd
+	ret
+
 DefFunc _Scene
 	FrameBegin 1, 5
 	AssignVars TimerValue

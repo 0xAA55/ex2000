@@ -513,3 +513,9 @@ DefFunc _AssetsQuery
 .end:
 	FrameEnd
 	ret
+
+DefFunc _AssetsDestroy
+	FrameBegin 0, 1
+	invoke_cdecl _AVLClear, _AssetsTree
+	FrameEnd
+	ret

@@ -6,6 +6,7 @@ extern _InitGL33
 extern _DeInitGL33
 extern _Scene
 extern _SceneInit
+extern _SceneUnload
 
 struc WNDCLASSEX
 	.cbSize resd 1
@@ -58,6 +59,7 @@ _entry:
 	invoke_cdecl _InitLoadLibrary
 	invoke_cdecl _AssetsInit
 	invoke_cdecl _main
+	invoke_cdecl _AssetsDestroy
 	FrameEnd
 	invoke_dll_stdcall ExitProcess, eax
 	ret
@@ -155,6 +157,7 @@ DefFunc _WndProc@16
 	cmp dword Param(1), WM_DESTROY
 	jnz .other_than_WM_DESTROY
 
+	invoke_cdecl _SceneUnload
 	invoke_cdecl _DeInitGL33
 
 	invoke_dll_stdcall ReleaseDC, [_hWnd], [_hDC]
