@@ -173,7 +173,7 @@ DefFunc _SceneLoadShaderProgram
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 1, 6, ebx, esi
+	FrameBegin 1, 6, ebx, esi, edi
 	AssignVars Location
 
 	invoke_cdecl _InitTimer, _Timer
@@ -214,7 +214,10 @@ DefFunc _SceneInit
 
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 8
 	mov ebx, eax
-	invoke_cdecl _AltitudeToTerrain, ebx, 100.0f, 200.0f
+	invoke_cdecl _DuplicateFloatMap, ebx
+	mov edi, eax
+	invoke_cdecl _FloatMapClamp, edi, 1.0f, 0.2f
+	invoke_cdecl _AltitudeToTerrain, edi, 100.0f, 200.0f
 	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
@@ -233,6 +236,7 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _DestroyFloatMap, ebx
+	invoke_cdecl _DestroyFloatMap, edi
 
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
 	test eax, eax
