@@ -1,17 +1,6 @@
 %include "loaddll.inc"
 %include "pool.inc"
 
-%define STILL_ACTIVE 259
-
-extern _calloc
-extern _malloc
-extern _realloc
-extern _free
-
-import_dll_func CreateThread
-import_dll_func CloseHandle
-import_dll_func WaitForMultipleObjects
-
 DefFunc _PoolRun
 	FrameBegin 2, 2, ebx, esi, edi
 	AssignVars _NUM_WORKERS, _JOBS_TODO
