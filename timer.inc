@@ -9,11 +9,24 @@ struc Timer
 .size equ $ - Timer
 endstruc
 
-extern _GetTimerVal
+; double GetSysTimerVal();
+
+; void InitTimer(Timer *t);
 extern _InitTimer
+
+; double GetTimerVal(const Timer *t);
+extern _GetTimerVal
+
+; double UpdateTimer(Timer *t);
 extern _UpdateTimer
+
+; int IsTimerPaused(const Timer *t);
 extern _IsTimerPaused
+
+; void PauseTimer(Timer *t);
 extern _PauseTimer
+
+; void PauseTimer(Timer *t);
 extern _UnpauseTimer
 
 %endif
