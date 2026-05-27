@@ -75,7 +75,7 @@ SECTIONS
   .rdata BLOCK(__section_alignment__) :
   {
     *(.rdata)
-             *(SORT(.rdata$*))
+    *(SORT(.rdata$*))
     . = ALIGN(4);
     __rt_psrelocs_start = .;
     KEEP(*(.rdata_runtime_pseudo_reloc))
