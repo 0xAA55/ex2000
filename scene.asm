@@ -216,7 +216,7 @@ DefFunc _SceneInit
 	mov ebx, eax
 	invoke_cdecl _DuplicateFloatMap, ebx
 	mov edi, eax
-	invoke_cdecl _FloatMapClamp, edi, 1.0f, 0.2f
+	invoke_cdecl _FloatMapClamp, edi, 1.0f, 0.75f
 	invoke_cdecl _AltitudeToTerrain, edi, 100.0f, 200.0f
 	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
