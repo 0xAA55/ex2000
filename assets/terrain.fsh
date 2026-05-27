@@ -13,7 +13,7 @@ out vec4 color;
 
 void main()
 {
-	// color = vec4(texture2D(terrain, texcoord).r);
-	vec3 normal = normalize(frag_normal);
-	color = vec4(normal * 0.5 + 0.5, 1.0);
+	color = vec4(texture2D(terrain, texcoord).r);
+	// vec3 normal = normalize(frag_normal);
+	// color = vec4(normal * 0.5 + 0.5, 1.0);
 }
