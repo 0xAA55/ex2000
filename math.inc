@@ -137,6 +137,9 @@ extern _IdentityMatrix
 ; void MathInit();
 extern _MathInit
 
+; void MathDeInit();
+extern _MathDeInit
+
 ; void FMatrix2DMatrix(DMatrix *out, Matrix *m);
 extern _FMatrix2DMatrix
 

@@ -199,6 +199,11 @@ DefFunc _MathInit
 	FrameEnd
 	ret
 
+DefFunc _MathDeInit
+	FrameBegin 0, 0
+	FrameEnd
+	ret
+
 DefFunc _FMatrix2DMatrix
 	FrameBegin 0, 0, ebx, esi
 
