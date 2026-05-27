@@ -100,6 +100,7 @@ DefFunc _DeInitBuffer
 	invoke_dll_stdcall glDeleteBuffers, 1, eax
 
 .end:
+	xor eax, eax
 	mov ecx, GlBuffer.size / 4
 	rep stosd
 
