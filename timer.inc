@@ -29,4 +29,22 @@ extern _PauseTimer
 ; void PauseTimer(Timer *t);
 extern _UnpauseTimer
 
+%macro PerfStart 1
+	[segment .bss]
+	extern %1
+	%1:
+		.StartTime resq 1
+		.PausedTime resq 1
+		.TimerVal resq 1
+		.IsPaused resd 1
+
+	__SECT__
+	invoke_cdecl _InitTimer, %1
+%endmacro
+
+%macro PerfStop 1
+	invoke_cdecl _PauseTimer, %1
+	invoke_cdecl _UpdateTimer, %1
+%endmacro
+
 %endif
