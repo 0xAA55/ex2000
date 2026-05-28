@@ -6,14 +6,6 @@ DefFunc _CreateSeedVector
 	invoke_cdecl _aligned_malloc, 16, 16
 	mov ebx, eax
 
-	mov eax, 1
-	lock xadd [_counter], eax
-	mov [esp], eax
-	fild dword [esp]
-	fsincos
-	fadd
-	fstp dword [esp]
-	call [_addr_of_srand]
 	invoke_dll_cdecl rand
 	mov [ebx], eax
 

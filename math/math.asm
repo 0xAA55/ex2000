@@ -7,8 +7,6 @@ extern _Pi_N
 _Pi_N resd 1
 extern _2Pi
 _2Pi resd 1
-extern _counter
-_counter resd 1
 extern _HaveSSE3
 _HaveSSE3 resd 1
 extern _HaveSSE41
