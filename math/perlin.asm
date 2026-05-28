@@ -383,6 +383,7 @@ DefFunc _AccumulateFloatMap
 	ret
 
 struc GenPerlinLayerData
+	.job_index resd 1
 	.perlin_border_len resd 1
 	.ratio resd 1
 	.amplitude resd 1
@@ -393,6 +394,7 @@ DefFunc _GenPerlinLayerPoolProc
 	FrameBegin 0, 3, ebx
 
 	mov ebx, Param(0)
+	invoke_dll_cdecl srand, [ebx + GenPerlinLayerData.job_index]
 	invoke_cdecl _GenPerlinAltitude, \
 		[ebx + GenPerlinLayerData.perlin_border_len], \
 		[ebx + GenPerlinLayerData.ratio], \
@@ -448,6 +450,7 @@ DefFunc _GenMultiLayerPerlinAltitude
 .setjobs1:
 	mulss xmm0, [_2.0f]
 	shr eax, 1 ; perlin_border_len /= 2
+	mov [esi + GenPerlinLayerData.job_index], ecx
 	mov [esi + GenPerlinLayerData.perlin_border_len], eax
 	mov [esi + GenPerlinLayerData.ratio], edx
 	movss [esi + GenPerlinLayerData.amplitude], xmm0
