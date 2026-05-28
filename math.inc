@@ -154,11 +154,8 @@ extern _BatchAdd
 ; float BatchMax(float *data, size_t num_floats);
 extern _BatchMax
 
-; int128_t *CreateSeedVector()
+; void CreateSeedVector(int128_t *)
 extern _CreateSeedVector
-
-; void DestroySeedVector(int128_t *sv)
-extern _DestroySeedVector
 
 ; void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross

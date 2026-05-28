@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _CreatePerlinMap2D
-	FrameBegin 0, 2, ebx, esi
+	FrameBegin 8, 2, ebx, esi
 
 	invoke_cdecl _CreateFloatMap, Param(0), 2
 	mov ebx, eax
@@ -25,8 +25,9 @@ DefFunc _CreatePerlinMap2D
 
 	jmp .end
 .blae1:
-	invoke_cdecl _CreateSeedVector
-	mov esi, eax
+	lea esi, Variable(0)
+	and esi, 0xFFFFFFF0
+	invoke_cdecl _CreateSeedVector, esi
 
 	mov eax, [ebx + FloatMap.data]
 	mov ecx, [ebx + FloatMap.num_pixels]
@@ -66,8 +67,6 @@ DefFunc _CreatePerlinMap2D
 
 	add eax, 0x10
 	loop .generate
-
-	invoke_cdecl _DestroySeedVector, esi
 
 .end:
 	mov eax, ebx

@@ -3,8 +3,7 @@
 DefFunc _CreateSeedVector
 	FrameBegin 0, 2, ebx
 
-	invoke_cdecl _aligned_malloc, 16, 16
-	mov ebx, eax
+	mov ebx, Param(0)
 
 	invoke_dll_cdecl rand
 	mov [ebx], eax
@@ -25,13 +24,5 @@ DefFunc _CreateSeedVector
 	fstp dword [ebx + 12]
 
 	mov eax, ebx
-	FrameEnd
-	ret
-
-DefFunc _DestroySeedVector
-	FrameBegin 0, 1
-
-	invoke_cdecl _aligned_free, Param(0)
-
 	FrameEnd
 	ret
