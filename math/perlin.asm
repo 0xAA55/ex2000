@@ -105,14 +105,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _RECIPROCAL
 	pxor xmm0, xmm0
 	movaps xmm1, [_F1111]
-	mov edx, 0x3F800000
 	mov ecx, 4
 	movaps [_UV1M], xmm0
 	movaps [_UV2M], xmm1
 .init_uv:
 	mov [_UV1 + (ecx - 1) * 4], eax
 	loop .init_uv
-	mov [_UV1M + Vector.z], edx
+	mov dword[_UV1M + Vector.z], 0x3F800000
 	mov [_UV2M + Vector.x], ecx
 
 	mov ebx, _STEPS
