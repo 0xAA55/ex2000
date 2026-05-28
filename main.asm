@@ -1,6 +1,7 @@
 %include "loaddll.inc"
 %include "assets.inc"
 %include "math.inc"
+%include "tls.inc"
 
 extern _InitLoadLibrary
 extern _InitDelayedLoadFunc
@@ -61,9 +62,13 @@ _entry:
 	invoke_cdecl _InitLoadLibrary
 	invoke_cdecl _AssetsInit
 	invoke_cdecl _InitDelayedLoadFunc
+	invoke_cdecl _TlsInit
 	invoke_cdecl _MathInit
+	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
 	invoke_cdecl _main
 	mov ebx, eax
+	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_FINI
+	invoke_cdecl _TlsDeInit
 	invoke_cdecl _MathDeInit
 	invoke_cdecl _AssetsDestroy
 	invoke_dll_stdcall ExitProcess, ebx

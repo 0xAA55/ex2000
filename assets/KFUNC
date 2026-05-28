@@ -6,3 +6,7 @@ CreateThread
 CloseHandle
 WaitForMultipleObjects
 VirtualProtect
+TlsAlloc
+TlsGetValue
+TlsSetValue
+TlsFree

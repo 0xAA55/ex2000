@@ -1,5 +1,5 @@
 
-OBJS=out/main.obj out/timer.obj out/scene.obj out/assets.obj out/avlbst.obj out/pool.obj out/buffer.obj out/shader.obj out/gl33.obj out/loaddll.obj
+OBJS=out/main.obj out/timer.obj out/scene.obj out/assets.obj out/avlbst.obj out/tls.obj out/pool.obj out/buffer.obj out/shader.obj out/gl33.obj out/loaddll.obj
 LIBS=out/libmath.a
 FILES=out/assets.cab
 LDFLAGS=-Lout --relax --large-address-aware --build-id -T ex2000.ld
@@ -17,8 +17,9 @@ release: ex2000.exe
 	copy $@+
 
 loaddll.inc: frame.inc
-main.asm: loaddll.inc assets.inc math.inc
+main.asm: loaddll.inc assets.inc math.inc tls.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
+tls.asm: loaddll.inc tls.inc
 timer.asm: loaddll.inc timer.inc
 avlbst.asm: loaddll.inc avlbst.inc
 loaddll.asm: loaddll.inc assets.inc

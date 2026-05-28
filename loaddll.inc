@@ -278,6 +278,10 @@ import_dll_func CreateThread
 import_dll_func CloseHandle
 import_dll_func WaitForMultipleObjects
 import_dll_func VirtualProtect
+import_dll_func TlsAlloc
+import_dll_func TlsGetValue
+import_dll_func TlsSetValue
+import_dll_func TlsFree
 
 import_dll_func MessageBoxA
 import_dll_func DrawTextA

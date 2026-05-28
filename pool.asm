@@ -1,5 +1,6 @@
 %include "loaddll.inc"
 %include "pool.inc"
+%include "tls.inc"
 
 DefFunc _PoolRun
 	FrameBegin 2, 2, ebx, esi, edi
@@ -112,6 +113,7 @@ DefFunc _PoolRun
 
 DefFunc _PoolThreadProc
 	FrameBegin 0, 2, ebx, esi
+	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
 	mov eax, Param(0)
 	mov ebx, [eax]
 	mov esi, [eax + 4]
@@ -120,7 +122,8 @@ DefFunc _PoolThreadProc
 	invoke_cdecl [ebx + Pool.work_proc], [eax], esi
 	lea esi, [esi * 4]
 	add esi, [ebx + Pool.results]
-	mov [esi], eax
+	mov [esi], eax ; Here stores the return value of `work_proc()`
+	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_FINI
 	xor eax, eax
 	FrameEnd
 	ret 4
