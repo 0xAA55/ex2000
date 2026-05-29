@@ -195,7 +195,6 @@ DefFunc _SceneInit
 .no_dwmflush:
 	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
-	invoke_cdecl _MathInit
 
 	fldpi
 	fdiv dword [_2.0f]
