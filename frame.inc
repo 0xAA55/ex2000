@@ -6,8 +6,8 @@
 
 %macro DefFunc 1
 	%xdefine CurFuncName %1
-	segment .text. %+ %1
-	extern %1:function
+	segment .text
+	extern %1:
 	%1:
 %endmacro
 

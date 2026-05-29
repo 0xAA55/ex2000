@@ -43,6 +43,6 @@ vecnormal.asm: common.inc
 warpfmap.asm: common.inc
 
 ../out/%.obj: %.asm
-	nasm -I.. -f elf32 -g $^ -o $@
-../out/libmath.a: $(OBJS)
-	ar -srcu $@ $^
+	nasm -I.. -f win32 -g $^ -o $@
+../out/math.lib: $(OBJS)
+	lib /NOLOGO /OUT:$@ /NODEFAULTLIB $^
