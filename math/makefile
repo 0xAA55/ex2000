@@ -6,7 +6,7 @@ OBJS=../out/math.obj ../out/seedvec.obj ../out/batchadd.obj ../out/batchmax.obj 
 %.asm:
 	copy $@+
 
-all: ../out/libmath.a
+all: ../out/math.lib
 common.inc: ../math.inc ../pool.inc
 dmap.asm: common.inc
 batchadd.asm: common.inc

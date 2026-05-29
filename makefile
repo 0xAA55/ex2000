@@ -35,13 +35,13 @@ out/assets.cab: $(wildcard assets/*)
 	cabarc -r -p -m LZX:21 N $@ assets\\*
 out/math.lib: $(wildcard math/*)
 	if not exist out mkdir out
-	make -C math ../$@
+	make -C math
 
 ex2000.exe: $(OBJS) $(LIBS) $(FILES) out/stub.bin
-	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /INCREMENTAL:no /LARGEADDRESSAWARE /LIBPATH:out /LIBPATH:lib /MACHINE:X86 /OPT:REF /OUT:$@ /DEBUG /STUB:out\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(LIBS)
+	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /INCREMENTAL:no /LARGEADDRESSAWARE /LIBPATH:out /LIBPATH:lib /MACHINE:X86 /OPT:REF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(LIBS)
 
 clean:
-	del /f /s /q out\\*.obj out\\*.cab out\\*.a *.gdb *.pdb ex2000.exe
+	del /f /s /q out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb ex2000.exe
 
 again:
 	make clean
