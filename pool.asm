@@ -61,7 +61,7 @@ DefFunc _PoolRun
 	jae .fail
 	xor esi, esi
 .loop_close_handles:
-	invoke_dll_stdcall CloseHandle, &[edi + esi * 4]
+	invoke_dll_stdcall CloseHandle, [edi + esi * 4]
 	inc esi
 	cmp esi, [ebx + Pool.num_workers]
 	jb .loop_close_handles
