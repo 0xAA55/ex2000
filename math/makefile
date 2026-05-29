@@ -1,4 +1,4 @@
-OBJS=../out/math.obj ../out/seedvec.obj ../out/batchadd.obj ../out/batchmax.obj ../out/vecnormal.obj ../out/vecdot.obj ../out/veclength.obj ../out/veccross.obj ../out/vecmultmat.obj ../out/matmult.obj ../out/mateuler.obj ../out/matteuler.obj ../out/matveuler.obj ../out/mattranspose.obj ../out/matproj.obj ../out/floatmap.obj ../out/floatmapclamp.obj ../out/floatmapblt.obj ../out/floatmapdup.obj ../out/floatmapgain.obj ../out/floatmapmax.obj ../out/multfloatmap.obj ../out/warpfmap.obj ../out/floatmappool.obj ../out/rmap.obj ../out/dmap.obj ../out/floatmapgaussianblur.obj ../out/sstep.obj ../out/perlin.obj ../out/terrain.obj
+OBJS=../out/math.obj ../out/seedvec.obj ../out/batchadd.obj ../out/batchmax.obj ../out/batchcurve.obj ../out/vecnormal.obj ../out/vecdot.obj ../out/veclength.obj ../out/veccross.obj ../out/vecmultmat.obj ../out/matmult.obj ../out/mateuler.obj ../out/matteuler.obj ../out/matveuler.obj ../out/mattranspose.obj ../out/matproj.obj ../out/floatmap.obj ../out/floatmapclamp.obj ../out/floatmapblt.obj ../out/floatmapdup.obj ../out/floatmapgain.obj ../out/floatmapmax.obj ../out/multfloatmap.obj ../out/warpfmap.obj ../out/floatmappool.obj ../out/rmap.obj ../out/dmap.obj ../out/floatmapgaussianblur.obj ../out/sstep.obj ../out/perlin.obj ../out/terrain.obj
 
 %.inc:
 	copy $@+
@@ -11,6 +11,7 @@ common.inc: ../math.inc ../pool.inc
 dmap.asm: common.inc
 batchadd.asm: common.inc
 batchmax.asm: common.inc
+batchcurve.asm: common.inc
 floatmap.asm: common.inc
 floatmapclamp.asm: common.inc
 floatmapdup.asm: common.inc

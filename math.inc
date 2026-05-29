@@ -154,6 +154,18 @@ extern _BatchAdd
 ; float BatchMax(float *data, size_t num_floats);
 extern _BatchMax
 
+struc CurvePoint
+.volume resd 1
+.weight resd 1
+endstruc
+; typedef struct CurvePoints_s
+; {
+; 	float volume;
+; 	float weight;
+; } CurvePoints_t, *CurvePoints_p;
+; void BatchCurve(float *data, size_t num_data, CurvePoints_p curve, size_t num_curve_points);
+extern _BatchCurve
+
 ; void CreateSeedVector(int128_t *)
 extern _CreateSeedVector
 
