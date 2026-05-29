@@ -2,6 +2,16 @@
 %include "pool.inc"
 %include "tls.inc"
 
+struc Pool
+.work_proc resd 1
+.num_workers resd 1
+.workers resd 1
+.worker_params resd 1
+.jobs resd 1
+.results resd 1
+.size equ $ - Pool
+endstruc
+
 DefFunc _PoolRun
 	FrameBegin 2, 2, ebx, esi, edi
 	AssignVars _NUM_WORKERS, _JOBS_TODO
