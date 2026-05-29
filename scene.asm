@@ -215,8 +215,7 @@ DefFunc _SceneInit
 	mov ebx, eax
 	invoke_cdecl _DuplicateFloatMap, ebx
 	mov [_TerrainBitmap], eax
-	invoke_cdecl _BatchCurve, [eax + FloatMap.data], [eax + FloatMap.num_pixels], _TerrainCurvePoints, 3
-	;invoke_cdecl _FloatMapClamp, [_TerrainBitmap], 1.0f, 0.7f
+	invoke_cdecl _FloatMapCurve, eax, _TerrainCurvePoints, 3
 	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 250.0f
 	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
