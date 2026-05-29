@@ -84,13 +84,6 @@ struc FloatMap
 .row_ptr:
 endstruc
 
-struc FMDataCmn
-.dst_map resd 1
-.src_map resd 1
-.userdata resd 1
-.size equ $ - FMDataCmn
-endstruc
-
 extern _Pi_P
 extern _Pi_N
 extern _2Pi
@@ -259,7 +252,19 @@ extern _GenRadiusMap
 ; FloatMap *GenDistanceMap(int size);
 extern _GenDistanceMap
 
-; FloatMap *FloatMapMTPool(FloatMap *src, int num_workers, void *userdata, int(*work_proc)(FM1DDataCmn *param, size_t index), size_t stack_size);
+struc FMDataCmn
+.dst_map resd 1
+.src_map resd 1
+.userdata resd 1
+.size equ $ - FMDataCmn
+endstruc
+
+; FloatMap *FloatMapMTPool(
+; 	FloatMap *src,
+; 	int num_workers,
+; 	void *userdata,
+; 	int(*work_proc)(FMDataCmn *param, size_t index),
+; 	size_t stack_size);
 extern _FloatMapMTPool
 
 ; FloatMap *FloatMapGaussianBlur(FloatMap *src, int16_t blur_radius);
@@ -271,7 +276,20 @@ extern _FloatMapGetMaxValue
 ; void FloatMapClamp(FloatMap *map, float max, float min);
 extern _FloatMapClamp
 
-; void FloatMapBlt(FloatMap *dst, int dst_x, int dst_y, int dst_w, int dst_h, FloatMap *src, int src_x, int src_y, void *userdata, void (*line_proc)(float *dst, const float *src, size_t num_pixels, void *userdata));
+; void FloatMapBlt(
+; 	FloatMap *dst,
+; 	int dst_x, int dst_y,
+; 	int dst_w, int dst_h,
+; 	FloatMap *src,
+; 	int src_x, int src_y,
+; 	void *userdata,
+; 	void (*line_proc)(
+; 		float *dst,
+; 		const float *src,
+; 		size_t num_pixels,
+; 		void *userdata
+; 	)
+; );
 extern _FloatMapBlt
 
 struc SimpleVertex
