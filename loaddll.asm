@@ -265,19 +265,18 @@ DefFunc _LoadFuncsFromAssets
 	%undef SizeOfNames
 
 DefFunc _InitDelayedLoadFunc
-	FrameBegin 4, 2
-	AssignVars NameOfKFuncs, NameOfUFuncs, SizeOfKFuncs, SizeOfUFuncs
+	FrameBegin 1, 2, ebx
+	AssignVars SizeOfFuncs
 
-	AssetsQuery 'assets\KFUNC', &SizeOfKFuncs
-	mov NameOfKFuncs, eax
-	AssetsQuery 'assets\UFUNC', &SizeOfUFuncs
-	mov NameOfUFuncs, eax
+	AssetsQuery 'assets\KFUNC', &SizeOfFuncs
+	mov ebx, eax
+	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	dll_func_group_load_alter_name Kernel32, KFunc_DelayedLoad, ebx
 
-	invoke_cdecl _NLtoNUL, NameOfKFuncs, SizeOfKFuncs
-	invoke_cdecl _NLtoNUL, NameOfUFuncs, SizeOfUFuncs
-
-	dll_func_group_load_alter_name Kernel32, KFunc_DelayedLoad, NameOfKFuncs
-	dll_func_group_load_alter_name User32, UFunc_DelayedLoad, NameOfUFuncs
+	AssetsQuery 'assets\UFUNC', &SizeOfFuncs
+	mov ebx, eax
+	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	dll_func_group_load_alter_name User32, UFunc_DelayedLoad, ebx
 
 	FrameEnd
 	ret
