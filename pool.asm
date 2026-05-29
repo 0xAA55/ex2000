@@ -3,108 +3,69 @@
 %include "tls.inc"
 
 struc Pool
-.work_proc resd 1
-.num_workers resd 1
-.workers resd 1
-.worker_params resd 1
-.jobs resd 1
-.results resd 1
-.size equ $ - Pool
+	.cur_job_index resd 1
+	.num_workers resd 1
+	.num_jobs resd 1
+	.work_proc resd 1
+	.jobs resd 1
+	.results resd 1
+	.worker_handles resd 1
+	.size equ $ - Pool
 endstruc
 
 DefFunc _PoolRun
-	FrameBegin 2, 2, ebx, esi, edi
-	AssignVars _NUM_WORKERS, _JOBS_TODO
+	FrameBegin 0, 2, ebx, esi, edi
 
-	invoke_cdecl _calloc, 1, Pool.size
+	invoke_cdecl _aligned_malloc, Pool.size, 32
 	mov ebx, eax
-	test eax, eax
-	jz .end
 
-	mov eax, Param(1)
-	cmp eax, 64
-	ja .wrong_call
+	xor eax, eax
+	mov edi, ebx
+	mov ecx, Pool.size / 4
+	rep stosd
+
+	mov eax, Param(1) ;num_workers
+	mov ecx, Param(2) ;num_jobs
+	cmp eax, ecx
+	cmova eax, ecx
 	mov [ebx + Pool.num_workers], eax
 
 	invoke_cdecl _malloc, &[eax * 4]
-	mov [ebx + Pool.workers], eax
-	test eax, eax
-	jz .end
+	mov [ebx + Pool.worker_handles], eax
 
-	mov eax, Param(2)
-	invoke_cdecl _malloc, &[eax * 8]
-	mov [ebx + Pool.worker_params], eax
-	test eax, eax
-	jz .end
+	mov eax, Param(2) ;num_jobs
+	mov [ebx + Pool.num_jobs], eax
 
-	mov eax, Param(2)
-	invoke_cdecl _calloc, 4, eax
+	invoke_cdecl _malloc, &[eax * 4]
 	mov [ebx + Pool.results], eax
-	test eax, eax
-	jz .end
 
 	mov eax, Param(0)
 	mov ecx, Param(3)
 	mov [ebx + Pool.work_proc], eax
 	mov [ebx + Pool.jobs], ecx
 
-	mov eax, Param(2)
-	mov ecx, Param(1)
-	sub eax, ecx
-	mov _NUM_WORKERS, ecx
-	jae .jobs_ae_workers
-	mov eax, Param(2)
-	mov _NUM_WORKERS, eax
-	xor eax, eax
-.jobs_ae_workers:
-	mov _JOBS_TODO, eax
-	mov eax, [ebx + Pool.worker_params]
-	xor edx, edx
-	mov esi, edx
-	mov edi, eax
-	mov ecx, Param(2)
-.fill_params:
-	mov [eax], ebx
-	mov [eax + 4], edx
-	inc edx
-	add eax, 8
-	loop .fill_params
-.kick_start:
-	invoke_dll_stdcall CreateThread, 0, Param(4), _PoolThreadProc, &[edi + esi * 8], 0, 0
-	lea edx, [esi * 4]
-	add edx, [ebx + Pool.workers]
+	xor esi, esi
+	mov edi, [ebx + Pool.worker_handles]
+.start:
+	invoke_dll_stdcall CreateThread, 0, Param(4), _PoolThreadProc, ebx, 0, 0
+	test eax, eax
+	jz .fail
+	lea edx, [edi + esi * 4]
 	mov [edx], eax
 	inc esi
-	cmp esi, _NUM_WORKERS
-	jb .kick_start
+	cmp esi, [ebx + Pool.num_workers]
+	jb .start
 .work:
-	invoke_dll_stdcall WaitForMultipleObjects, _NUM_WORKERS, [ebx + Pool.workers], 0, 0xFFFFFFFF
-	cmp eax, 64
+	invoke_dll_stdcall WaitForMultipleObjects, [ebx + Pool.num_workers], [ebx + Pool.worker_handles], 1, 0xFFFFFFFF
+	cmp eax, [ebx + Pool.num_workers]
 	jae .fail
-	mov edi, eax
-	mov edx, [ebx + Pool.workers]
-	invoke_dll_stdcall CloseHandle, [eax * 4 + edx]
-	cmp esi, Param(2)
-	jb .more_jobs
-	lea eax, [edi * 4]
-	add eax, [ebx + Pool.workers]
-	mov ecx, _NUM_WORKERS
-	dec ecx
-	jz .end
-	mov _NUM_WORKERS, ecx
-	lea ecx, [ecx * 4]
-	add ecx, [ebx + Pool.workers]
-	mov edx, [ecx]
-	mov [eax], edx
-	jmp .work
-.more_jobs:
-	mov eax, [ebx + Pool.worker_params]
-	invoke_dll_stdcall CreateThread, 0, Param(4), _PoolThreadProc, &[eax + esi * 8], 0, 0
-	lea ecx, [edi * 4]
-	add ecx, [ebx + Pool.workers]
-	mov [ecx], eax
+	xor esi, esi
+.loop_close_handles:
+	invoke_dll_stdcall CloseHandle, &[edi + esi * 4]
 	inc esi
-	jmp .work
+	cmp esi, [ebx + Pool.num_workers]
+	jb .loop_close_handles
+	jmp .end
 .wrong_call:
 .fail:
 	int3
@@ -112,27 +73,29 @@ DefFunc _PoolRun
 
 .end:
 	mov esi, [ebx + Pool.results]
-	invoke_cdecl _free, [ebx + Pool.worker_params]
-	invoke_cdecl _free, [ebx + Pool.workers]
-	invoke_cdecl _free, ebx
+	invoke_cdecl _free, [ebx + Pool.worker_handles]
+	invoke_cdecl _aligned_free, ebx
 	mov eax, esi
 	FrameEnd
 	ret
-	%undef _NUM_WORKERS
-	%undef _JOBS_TODO
 
 DefFunc _PoolThreadProc
 	FrameBegin 0, 2, ebx, esi
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
-	mov eax, Param(0)
-	mov ebx, [eax]
-	mov esi, [eax + 4]
+	mov ebx, Param(0)
+.find_next_job:
+	invoke_dll_stdcall InterlockedIncrement, &[ebx + Pool.cur_job_index]
+	lea esi, [eax - 1]
+	cmp esi, [ebx + Pool.num_jobs]
+	jae .quit
 	lea eax, [esi * 4]
 	add eax, [ebx + Pool.jobs]
 	invoke_cdecl [ebx + Pool.work_proc], [eax], esi
-	lea esi, [esi * 4]
-	add esi, [ebx + Pool.results]
-	mov [esi], eax ; Here stores the return value of `work_proc()`
+	lea edx, [esi * 4]
+	add edx, [ebx + Pool.results]
+	mov [edx], eax ; Here stores the return value of `work_proc()`
+	jmp .find_next_job
+.quit:
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_FINI
 	xor eax, eax
 	FrameEnd
