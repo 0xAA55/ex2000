@@ -55,9 +55,7 @@ _MSG resb MSG.size
 segment .bss
 _LastUFunc:
 
-segment .init
-global _entry
-_entry:
+DefFunc _entry
 	FrameBegin 0, 2, ebx
 	invoke_cdecl _InitLoadLibrary
 	invoke_cdecl _AssetsInit
