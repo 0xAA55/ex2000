@@ -292,6 +292,9 @@ extern _FloatMapClamp
 ; );
 extern _FloatMapBlt
 
+; void FloatMapCurve(FloatMap *map, CurvePoints_p curve, size_t num_curve_points);
+extern _FloatMapCurve
+
 struc SimpleVertex
 .position:
 	.x resd 1
