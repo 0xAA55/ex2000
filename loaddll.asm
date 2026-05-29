@@ -90,25 +90,54 @@ def_dll_func rand
 def_dll_func srand
 dll_func_group_end CFunc
 
+dll_func_group_start_without_name WFunc_DelayedLoad
+def_dll_func_addr waveOutBreakLoop
+def_dll_func_addr waveOutClose
+def_dll_func_addr waveOutGetDevCaps
+def_dll_func_addr waveOutGetErrorText
+def_dll_func_addr waveOutGetID
+def_dll_func_addr waveOutGetNumDevs
+def_dll_func_addr waveOutGetPitch
+def_dll_func_addr waveOutGetPlaybackRate
+def_dll_func_addr waveOutGetPosition
+def_dll_func_addr waveOutGetVolume
+def_dll_func_addr waveOutMessage
+def_dll_func_addr waveOutOpen
+def_dll_func_addr waveOutPause
+def_dll_func_addr waveOutPrepareHeader
+def_dll_func_addr waveOutProc
+def_dll_func_addr waveOutReset
+def_dll_func_addr waveOutRestart
+def_dll_func_addr waveOutSetPitch
+def_dll_func_addr waveOutSetPlaybackRate
+def_dll_func_addr waveOutSetVolume
+def_dll_func_addr waveOutUnprepareHeader
+def_dll_func_addr waveOutWrite
+dll_func_group_end WFunc_DelayedLoad
+
 segment .rdata
 extern _name_of_User32
 extern _name_of_GDI32
 extern _name_of_MSVCRT
 extern _name_of_OpenGL32
+extern _name_of_WinMM
 _name_of_User32   db "user32.dll", 0
 _name_of_GDI32    db "gdi32.dll", 0
 _name_of_MSVCRT   db "msvcrt.dll", 0
 _name_of_OpenGL32 db "opengl32.dll", 0
+_name_of_WinMM    db "winmm.dll", 0
 
 segment .bss
 extern _addr_of_User32
 extern _addr_of_GDI32
 extern _addr_of_MSVCRT
 extern _addr_of_OpenGL32
+extern _addr_of_WinMM
 _addr_of_User32   resd 1
 _addr_of_GDI32    resd 1
 _addr_of_MSVCRT   resd 1
 _addr_of_OpenGL32 resd 1
+_addr_of_WinMM    resd 1
 
 DefFunc _InitLoadLibrary
 	FrameBegin 1, 0, ebx, esi, edi
@@ -178,7 +207,7 @@ DefFunc _InitLoadLibrary
 
 	mov esi, _name_of_User32
 	mov edi, _addr_of_User32
-	mov ecx, 4
+	mov ecx, 5
 .loop_load_dll:
 	push ecx
 	invoke_dll_stdcall LoadLibraryA, esi
@@ -277,6 +306,11 @@ DefFunc _InitDelayedLoadFunc
 	mov ebx, eax
 	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
 	dll_func_group_load_alter_name User32, UFunc_DelayedLoad, ebx
+
+	AssetsQuery 'assets\WFUNC', &SizeOfFuncs
+	mov ebx, eax
+	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	dll_func_group_load_alter_name WinMM, WFunc_DelayedLoad, ebx
 
 	FrameEnd
 	ret
