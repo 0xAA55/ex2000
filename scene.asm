@@ -210,7 +210,7 @@ DefFunc _SceneInit
 	fcos
 	fstp dword [_FovYCos]
 
-	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 8
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 2048, 1.0f, 8
 	mov ebx, eax
 	invoke_cdecl _DuplicateFloatMap, ebx
 	mov [_TerrainBitmap], eax
