@@ -1,5 +1,9 @@
 %include "common.inc"
 
+segment .bss
+extern _PerlinNumWorkers
+_PerlinNumWorkers resd 1
+
 DefFunc _CreatePerlinMap2D
 	FrameBegin 8, 2, ebx, esi
 
@@ -460,7 +464,13 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov ebx, ecx
 	inc ebx ; ebx = 1
 
-	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, 8, Param(2), _JOBS, 0
+	mov eax, [_PerlinNumWorkers]
+	mov ecx, 8
+	test eax, eax
+	cmovz eax, ecx
+	mov [_PerlinNumWorkers], eax
+
+	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, [_PerlinNumWorkers], Param(2), _JOBS, 0
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]
