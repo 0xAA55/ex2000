@@ -282,6 +282,9 @@ import_dll_func TlsAlloc
 import_dll_func TlsGetValue
 import_dll_func TlsSetValue
 import_dll_func TlsFree
+import_dll_func InterlockedIncrement
+import_dll_func InterlockedDecrement
+import_dll_func InterlockedExchange
 
 import_dll_func MessageBoxA
 import_dll_func DrawTextA

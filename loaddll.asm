@@ -45,6 +45,9 @@ def_dll_func_addr TlsAlloc
 def_dll_func_addr TlsGetValue
 def_dll_func_addr TlsSetValue
 def_dll_func_addr TlsFree
+def_dll_func_addr InterlockedIncrement
+def_dll_func_addr InterlockedDecrement
+def_dll_func_addr InterlockedExchange
 dll_func_group_end KFunc_DelayedLoad
 
 dll_func_group_start UFunc

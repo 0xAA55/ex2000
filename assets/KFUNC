@@ -10,3 +10,6 @@ TlsAlloc
 TlsGetValue
 TlsSetValue
 TlsFree
+InterlockedIncrement
+InterlockedDecrement
+InterlockedExchange
