@@ -98,6 +98,21 @@ extern _FovYCos
 _FovYCos resd 1
 
 segment .rdata
+extern _TerrainCurvePoints
+_TerrainCurvePoints:
+istruc CurvePoint
+	at .volume, dd 0.6
+	at .weight, dd 0.1
+iend
+istruc CurvePoint
+	at .volume, dd 0.1
+	at .weight, dd 0.6
+iend
+istruc CurvePoint
+	at .volume, dd 0.3
+	at .weight, dd 0.3
+iend
+
 extern _FovDegree
 _FovDegree dw 60
 extern _PiDegree
@@ -200,7 +215,8 @@ DefFunc _SceneInit
 	mov ebx, eax
 	invoke_cdecl _DuplicateFloatMap, ebx
 	mov [_TerrainBitmap], eax
-	invoke_cdecl _FloatMapClamp, [_TerrainBitmap], 1.0f, 0.7f
+	invoke_cdecl _BatchCurve, [eax + FloatMap.data], [eax + FloatMap.num_pixels], _TerrainCurvePoints, 3
+	;invoke_cdecl _FloatMapClamp, [_TerrainBitmap], 1.0f, 0.7f
 	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 250.0f
 	mov esi, eax
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
