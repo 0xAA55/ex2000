@@ -29,7 +29,7 @@ DefFunc _CreatePerlinMap2D
 
 	jmp .end
 .blae1:
-	lea esi, Variable(0)
+	lea esi, Variable(4)
 	and esi, 0xFFFFFFF0
 	invoke_cdecl _CreateSeedVector, esi
 
