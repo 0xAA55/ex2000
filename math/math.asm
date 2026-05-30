@@ -166,15 +166,15 @@ DefFunc _MathInit
 	mov [_UF000], ecx
 	movdqa xmm0, [_UF000]
 	pshufd xmm0, xmm0, _MM_SHUFFLE(1, 0, 1, 0)
-	pshufd xmm1, xmm0, _MM_SHUFFLE(0, 0, 0, 1)
-	pshufd xmm2, xmm0, _MM_SHUFFLE(0, 0, 1, 1)
-	pshufd xmm3, xmm0, _MM_SHUFFLE(0, 1, 1, 1)
-	pshufd xmm4, xmm0, _MM_SHUFFLE(0, 0, 0, 0)
+	pshufd xmm1, xmm0, _MM_SHUFFLE(0, 0, 0, 0)
+	pshufd xmm2, xmm0, _MM_SHUFFLE(0, 0, 0, 1)
+	pshufd xmm3, xmm0, _MM_SHUFFLE(0, 0, 1, 1)
+	pshufd xmm4, xmm0, _MM_SHUFFLE(0, 1, 1, 1)
 	movdqa [_UF0F0], xmm0
-	movdqa [_U0FFF], xmm1
-	movdqa [_U00FF], xmm2
-	movdqa [_U000F], xmm3
-	movdqa [_UFFFF], xmm4
+	movdqa [_UFFFF], xmm1
+	movdqa [_U0FFF], xmm2
+	movdqa [_U00FF], xmm3
+	movdqa [_U000F], xmm4
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
 	movaps [_F2222], xmm0
