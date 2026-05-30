@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\math">
+      <UniqueIdentifier>{b1aba9ec-8e4a-451b-bdfa-1cb35facf4ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\math">
+      <UniqueIdentifier>{b84eb25e-f312-48e6-82b4-2370b983705d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\assets.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\avlbst.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\buffer.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\gl33.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\loaddll.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\main.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\pool.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\scene.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\shader.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\stub.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\timer.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\tls.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\assets.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\avlbst.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\buffer.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\frame.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\gl33.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\loaddll.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\math.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\pool.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\shader.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\timer.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\tls.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\math\batchadd.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\batchcurve.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\batchmax.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\dmap.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmap.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapblt.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapclamp.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapcurve.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapdup.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapgain.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapgaussianblur.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmapmax.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\floatmappool.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\mateuler.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\math.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\matmult.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\matproj.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\matteuler.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\mattranspose.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\matveuler.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\multfloatmap.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\perlin.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\rmap.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\seedvec.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\sstep.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\terrain.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\veccross.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\vecdot.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\veclength.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\vecmultmat.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\vecnormal.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\warpfmap.asm">
+      <Filter>源文件\math</Filter>
+    </None>
+    <None Include="..\math\common.inc">
+      <Filter>头文件\math</Filter>
+    </None>
+  </ItemGroup>
+</Project>

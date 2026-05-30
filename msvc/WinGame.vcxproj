@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <ProjectGuid>{24096FD7-061C-147D-9000-A4A6895D737D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeBuildCommandLine>make -j</NMakeBuildCommandLine>
+    <NMakeOutput>ex2000.exe</NMakeOutput>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <OutDir>$(SolutionDir)</OutDir>
+    <IntDir>$(SolutionDir)out\$(Configuration)</IntDir>
+    <ExecutablePath>$(SolutionDir)tools;$(ExecutablePath)</ExecutablePath>
+    <NMakeReBuildCommandLine>make again</NMakeReBuildCommandLine>
+    <IncludePath>$(SolutionDir);$(SolutionDir)math;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)out;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeBuildCommandLine>make -j</NMakeBuildCommandLine>
+    <NMakeOutput>ex2000.exe</NMakeOutput>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <OutDir>$(SolutionDir)</OutDir>
+    <IntDir>$(SolutionDir)out\$(Configuration)</IntDir>
+    <ExecutablePath>$(SolutionDir)tools;$(ExecutablePath)</ExecutablePath>
+    <NMakeReBuildCommandLine>make again</NMakeReBuildCommandLine>
+    <IncludePath>$(SolutionDir);$(SolutionDir)math;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(SolutionDir)out;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeBuildCommandLine>build</NMakeBuildCommandLine>
+    <NMakeOutput>ex2000.exe</NMakeOutput>
+    <NMakeCleanCommandLine>clean</NMakeCleanCommandLine>
+    <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeBuildCommandLine>build</NMakeBuildCommandLine>
+    <NMakeOutput>ex2000.exe</NMakeOutput>
+    <NMakeCleanCommandLine>clean</NMakeCleanCommandLine>
+    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\assets.asm" />
+    <None Include="..\assets.inc" />
+    <None Include="..\avlbst.asm" />
+    <None Include="..\avlbst.inc" />
+    <None Include="..\buffer.asm" />
+    <None Include="..\buffer.inc" />
+    <None Include="..\frame.inc" />
+    <None Include="..\gl33.asm" />
+    <None Include="..\gl33.inc" />
+    <None Include="..\loaddll.asm" />
+    <None Include="..\loaddll.inc" />
+    <None Include="..\main.asm" />
+    <None Include="..\math.inc" />
+    <None Include="..\math\batchadd.asm" />
+    <None Include="..\math\batchcurve.asm" />
+    <None Include="..\math\batchmax.asm" />
+    <None Include="..\math\common.inc" />
+    <None Include="..\math\dmap.asm" />
+    <None Include="..\math\floatmap.asm" />
+    <None Include="..\math\floatmapblt.asm" />
+    <None Include="..\math\floatmapclamp.asm" />
+    <None Include="..\math\floatmapcurve.asm" />
+    <None Include="..\math\floatmapdup.asm" />
+    <None Include="..\math\floatmapgain.asm" />
+    <None Include="..\math\floatmapgaussianblur.asm" />
+    <None Include="..\math\floatmapmax.asm" />
+    <None Include="..\math\floatmappool.asm" />
+    <None Include="..\math\mateuler.asm" />
+    <None Include="..\math\math.asm" />
+    <None Include="..\math\matmult.asm" />
+    <None Include="..\math\matproj.asm" />
+    <None Include="..\math\matteuler.asm" />
+    <None Include="..\math\mattranspose.asm" />
+    <None Include="..\math\matveuler.asm" />
+    <None Include="..\math\multfloatmap.asm" />
+    <None Include="..\math\perlin.asm" />
+    <None Include="..\math\rmap.asm" />
+    <None Include="..\math\seedvec.asm" />
+    <None Include="..\math\sstep.asm" />
+    <None Include="..\math\terrain.asm" />
+    <None Include="..\math\veccross.asm" />
+    <None Include="..\math\vecdot.asm" />
+    <None Include="..\math\veclength.asm" />
+    <None Include="..\math\vecmultmat.asm" />
+    <None Include="..\math\vecnormal.asm" />
+    <None Include="..\math\warpfmap.asm" />
+    <None Include="..\pool.asm" />
+    <None Include="..\pool.inc" />
+    <None Include="..\scene.asm" />
+    <None Include="..\shader.asm" />
+    <None Include="..\shader.inc" />
+    <None Include="..\stub.asm" />
+    <None Include="..\timer.asm" />
+    <None Include="..\timer.inc" />
+    <None Include="..\tls.asm" />
+    <None Include="..\tls.inc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
