@@ -45,3 +45,6 @@ clean:
 again:
 	make clean
 	make all -j
+
+run: ex2000.exe
+	ex2000.exe
