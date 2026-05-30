@@ -22,6 +22,9 @@ _DrawBillboardVAO resd 1
 extern _DrawTerrainVAO
 _DrawTerrainVAO resd 1
 
+extern _DrawProgressProgram
+_DrawProgressProgram resd 1
+
 extern _DrawBillboardProgram
 _DrawBillboardProgram resd 1
 
@@ -43,6 +46,10 @@ _PerlinNoiseTextureMipLinear resd 1
 extern _Timer
 _Timer resb Timer.size
 
+extern _ProgressProgramLocations
+_ProgressProgramLocations:
+.Progress resd 1
+
 extern _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
@@ -62,6 +69,9 @@ _MinPitch resd 1
 
 extern _MaxPitch
 _MaxPitch resd 1
+
+extern _NoiseBitmap
+_NoiseBitmap resd 1
 
 extern _TerrainBitmap
 _TerrainBitmap resd 1
@@ -87,6 +97,7 @@ _FovY resd 1
 extern _FovYCos
 _FovYCos resd 1
 
+segment .bss
 alignb 16
 extern _ModelMatrix
 _ModelMatrix resb Matrix.size
@@ -205,8 +216,7 @@ DefFunc _SceneLoadShaderProgram
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 1, 6, ebx, esi
-	AssignVars Location
+	FrameBegin 0, 6, ebx, esi
 
 	invoke_cdecl _InitTimer, _Timer
 
@@ -243,13 +253,66 @@ DefFunc _SceneInit
 	fcos
 	fstp dword [_FovYCos]
 
+	SceneLoadShaderProgram _DrawProgressProgram, "assets\loading.vsh", 0, "assets\loading.fsh"
+	test eax, eax
+	jz .end
+
+	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
+
+	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
+	GetAttribLocation [_DrawProgressProgram], "position"
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
+	invoke_dll_stdcall glBindVertexArray, 0
+
+	GetUniformLocation [_DrawProgressProgram], "progress"
+	mov [_ProgressProgramLocations.Progress], eax
+
+	xor eax, eax
+	mov [_Scene_Loading_Progress], eax
+	mov al, 1
+.end:
+	FrameEnd
+	ret
+
+DefFunc _FakeDwmFlush
+	xor eax, eax
+	ret
+
+DefFunc _SceneLoad00
+	FrameBegin 0, 3
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 2048, 1.0f, 8
-	mov ebx, eax
-	invoke_cdecl _DuplicateFloatMap, ebx
+	mov [_NoiseBitmap], eax
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad01
+	FrameBegin 0, 1
+	invoke_cdecl _DuplicateFloatMap, [_NoiseBitmap]
 	mov [_TerrainBitmap], eax
-	invoke_cdecl _FloatMapCurve, eax, _TerrainCurvePoints, 3
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad02
+	FrameBegin 0, 3
+	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, 3
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad03
+	FrameBegin 0, 3
 	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 250.0f
-	mov esi, eax
+	mov [_TerrainMesh], eax
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad04
+	FrameBegin 0, 0, ebx
+	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]
@@ -257,6 +320,13 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad05
+	FrameBegin 0, 1, ebx
+	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]
@@ -267,28 +337,28 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _DestroyFloatMap, ebx
+	xor eax, eax
+	mov [_NoiseBitmap], eax
+	FrameEnd
+	ret
 
+DefFunc _SceneLoad06
+	FrameBegin 0, 4
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
+	mov ecx, [_Scene_Loading_Progress]
+	xor edx, edx
+	dec edx
 	test eax, eax
+	cmovz ecx, edx
+	mov [_Scene_Loading_Progress], ecx
 	jz .end
 
-	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
-	test eax, eax
-	jz .end
-
-	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
-	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [esi + SimpleMesh.num_vertices], [esi + SimpleMesh.vertices]
-	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [esi + SimpleMesh.num_indices], [esi + SimpleMesh.indices]
-	invoke_cdecl _free, esi
-
-	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
 	GetAttribLocation [_DrawBillboardProgram], "position"
-	mov Location, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, Location
-	invoke_dll_stdcall glVertexAttribPointer, Location, 2, GL_BYTE, 0, 2, 0
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
 	GetUniformLocation [_DrawBillboardProgram], "camera"
@@ -302,21 +372,46 @@ DefFunc _SceneInit
 	GetUniformLocation [_DrawBillboardProgram], "time"
 	mov [_BillboardProgramLocations.Time], eax
 
+.end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad07
+	FrameBegin 0, 6, ebx
+	mov ebx, [_TerrainMesh]
+	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [ebx + SimpleMesh.num_vertices], [ebx + SimpleMesh.vertices]
+	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [ebx + SimpleMesh.num_indices], [ebx + SimpleMesh.indices]
+	invoke_cdecl _free, ebx
+	xor eax, eax
+	mov [_TerrainMesh], 0
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad08
+	FrameBegin 0, 4, edi
+	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
+	mov ecx, [_Scene_Loading_Progress]
+	xor edx, edx
+	dec edx
+	test eax, eax
+	cmovz ecx, edx
+	mov [_Scene_Loading_Progress], ecx
+	jz .end
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawTerrainVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_TerrainVerticesBuffer + GlBuffer.gl_buffer]
 	GetAttribLocation [_DrawTerrainProgram], "position"
-	mov Location, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, Location
-	invoke_dll_stdcall glVertexAttribPointer, Location, 3, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.position
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 3, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.position
 	GetAttribLocation [_DrawTerrainProgram], "normal"
-	mov Location, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, Location
-	invoke_dll_stdcall glVertexAttribPointer, Location, 3, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.normal
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 3, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.normal
 	GetAttribLocation [_DrawTerrainProgram], "uv"
-	mov Location, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, Location
-	invoke_dll_stdcall glVertexAttribPointer, Location, 2, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.uv
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.uv
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
@@ -326,16 +421,57 @@ DefFunc _SceneInit
 	mov [_TerrainProgramLocations.Time], eax
 	GetUniformLocation [_DrawTerrainProgram], "terrain"
 	mov [_TerrainProgramLocations.Terrain], eax
-
-	mov eax, 1
 .end:
 	FrameEnd
 	ret
-	%undef Location
 
-DefFunc _FakeDwmFlush
-	xor eax, eax
+DefFunc _SceneLoad09
+	FrameBegin 0, 0
+	FrameEnd
 	ret
+
+DefFunc _SceneLoad0A
+	FrameBegin 0, 0
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad0B
+	FrameBegin 0, 0
+	FrameEnd
+	ret
+
+DefFunc _SceneLoadProgressive
+	FrameBegin 0, 0, ebx
+
+	mov ebx, [_Scene_Loading_Progress]
+	cmp ebx, 0
+	jl .end
+	cmp ebx, _NumItemsToLoad
+	jge .end
+.load:
+	invoke_cdecl [.load_sequence + ebx * 4]
+	inc ebx
+	mov [_Scene_Loading_Progress], ebx
+.end:
+	mov eax, [_Scene_Loading_Progress]
+	FrameEnd
+	ret
+segment .rdata
+.load_sequence:
+	dd _SceneLoad00
+	dd _SceneLoad01
+	dd _SceneLoad02
+	dd _SceneLoad03
+	dd _SceneLoad04
+	dd _SceneLoad05
+	dd _SceneLoad06
+	dd _SceneLoad07
+	dd _SceneLoad08
+	dd _SceneLoad09
+	dd _SceneLoad0A
+	dd _SceneLoad0B
+extern _NumItemsToLoad
+_NumItemsToLoad equ ($ - .load_sequence) / 4
 
 DefFunc _SceneUnload
 	FrameBegin 0, 5, ebx
@@ -353,7 +489,7 @@ DefFunc _SceneUnload
 	ret
 
 DefFunc _Scene
-	FrameBegin 4, 5
+	FrameBegin 4, 5, ebx
 	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32
 
 	fld qword [_Timer + Timer.TimerVal]
@@ -376,6 +512,8 @@ DefFunc _Scene
 	invoke_dll_stdcall GetForegroundWindow
 	cmp eax, [_hWnd]
 	jnz .after_check_input
+	cmp dword[_Scene_Loading_Progress], _NumItemsToLoad
+	jl .after_check_input
 	invoke_dll_stdcall GetAsyncKeyState, 0x1B
 	test eax, eax
 	jnz .quit
@@ -412,7 +550,7 @@ DefFunc _Scene
 .after_check_input:
 	mov eax, [_ClientRect.b]
 	cmp eax, [_ClientRect.t]
-	jbe .skip_frame
+	jbe .end_of_frame
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
@@ -421,7 +559,35 @@ DefFunc _Scene
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 
-	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
+	invoke_cdecl _SceneLoadProgressive
+	mov ebx, _NumItemsToLoad
+	cmp eax, ebx
+	jz .loaded
+
+	cmp eax, 0
+	jl .quit
+
+	invoke_dll_stdcall glUseProgram, [_DrawProgressProgram]
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	cvtsi2ss xmm0, [_Scene_Loading_Progress]
+	cvtsi2ss xmm1, ebx
+	divss xmm0, xmm1
+	invoke_dll_stdcall glUniform1f, [_ProgressProgramLocations.Progress], xmm0.x
+	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+
+	jmp .end_of_frame
+.loaded:
+	fld dword TimerValue32
+	fsincos
+	fmul dword [_100.0f]
+	fstp dword [_CameraPos + Vector.x]
+	fmul dword [_100.0f]
+	fstp dword [_CameraPos + Vector.z]
+	fld dword TimerValue32
+	fmul dword [_2.0f]
+	fsin
+	fmul dword [_100.0f]
+	fstp dword [_CameraPos + Vector.y]
 
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
@@ -442,6 +608,8 @@ DefFunc _Scene
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	invoke_dll_stdcall glBindVertexArray, 0
+	invoke_dll_stdcall glUseProgram, 0
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_LINE
@@ -461,7 +629,7 @@ DefFunc _Scene
 
 	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_FILL
 
-.skip_frame:
+.end_of_frame:
 	invoke_cdecl _SwapBuffers
 	xor eax, eax
 	inc eax
