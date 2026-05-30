@@ -15,24 +15,34 @@ def_dll_func DwmFlush
 segment .bss
 extern _BillboardVerticesBuffer
 _BillboardVerticesBuffer resb GlBuffer.size
+
 extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
+
 extern _DrawTerrainVAO
 _DrawTerrainVAO resd 1
+
 extern _DrawBillboardProgram
 _DrawBillboardProgram resd 1
+
 extern _DrawTerrainProgram
 _DrawTerrainProgram resd 1
+
 extern _TerrainVerticesBuffer
 _TerrainVerticesBuffer resb GlBuffer.size
+
 extern _TerrainIndicesBuffer
 _TerrainIndicesBuffer resb GlBuffer.size
+
 extern _PerlinNoiseTexture
 _PerlinNoiseTexture resd 1
+
 extern _PerlinNoiseTextureMipLinear
 _PerlinNoiseTextureMipLinear resd 1
+
 extern _Timer
 _Timer resb Timer.size
+
 extern _BillboardProgramLocations
 _BillboardProgramLocations:
 .CameraMatrix resd 1
@@ -40,30 +50,59 @@ _BillboardProgramLocations:
 .FovY resd 1
 .Noise resd 1
 .Time resd 1
+
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
 .Transform resd 1
 .Time resd 1
 .Terrain resd 1
+
 extern _MinPitch
 _MinPitch resd 1
+
 extern _MaxPitch
 _MaxPitch resd 1
+
 extern _TerrainBitmap
 _TerrainBitmap resd 1
 
-segment .bss
+extern _TerrainMesh
+_TerrainMesh resd 1
+
+extern _Scene_Loading_Progress
+_Scene_Loading_Progress resd 1
+
+extern _CameraYaw
+_CameraYaw resd 1
+
+extern _CameraPitch
+_CameraPitch resd 1
+
+extern _Aspect
+_Aspect resd 1
+
+extern _FovY
+_FovY resd 1
+
+extern _FovYCos
+_FovYCos resd 1
+
 alignb 16
 extern _ModelMatrix
 _ModelMatrix resb Matrix.size
+
 extern _TransformMatrix
 _TransformMatrix resb Matrix.size
+
 extern _CameraMatrix
 _CameraMatrix resb Matrix.size
+
 extern _CameraViewMatrix
 _CameraViewMatrix resb Matrix.size
+
 extern _ProjectionMatrix
 _ProjectionMatrix resb Matrix.size
+
 extern _CameraPos
 _CameraPos resb Vector.size
 
@@ -73,30 +112,23 @@ _ClientRect:
 .t resd 1
 .r resd 1
 .b resd 1
+
 extern _WindowRect
 _WindowRect:
 .l resd 1
 .t resd 1
 .r resd 1
 .b resd 1
+
 extern _WindowCenter
 _WindowCenter:
 .x resd 1
 .y resd 1
+
 extern _CursorPos
 _CursorPos:
 .x resd 1
 .y resd 1
-extern _CameraYaw
-_CameraYaw resd 1
-extern _CameraPitch
-_CameraPitch resd 1
-extern _Aspect
-_Aspect resd 1
-extern _FovY
-_FovY resd 1
-extern _FovYCos
-_FovYCos resd 1
 
 segment .rdata
 extern _TerrainCurvePoints
