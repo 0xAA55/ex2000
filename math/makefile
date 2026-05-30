@@ -1,4 +1,6 @@
-OBJS=../out/math.obj ../out/seedvec.obj ../out/batchadd.obj ../out/batchmax.obj ../out/batchcurve.obj ../out/vecnormal.obj ../out/vecdot.obj ../out/veclength.obj ../out/veccross.obj ../out/vecmultmat.obj ../out/matmult.obj ../out/mateuler.obj ../out/matteuler.obj ../out/matveuler.obj ../out/mattranspose.obj ../out/matproj.obj ../out/floatmap.obj ../out/floatmapclamp.obj ../out/floatmapcurve.obj ../out/floatmapblt.obj ../out/floatmapdup.obj ../out/floatmapgain.obj ../out/floatmapmax.obj ../out/multfloatmap.obj ../out/warpfmap.obj ../out/floatmappool.obj ../out/rmap.obj ../out/dmap.obj ../out/floatmapgaussianblur.obj ../out/sstep.obj ../out/perlin.obj ../out/terrain.obj
+OBJ_DIR=../out
+SRCS=$(wildcard *.asm)
+OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
 
 %.inc:
 	copy $@+
@@ -42,7 +44,8 @@ vecmultmat.asm: common.inc
 vecnormal.asm: common.inc
 warpfmap.asm: common.inc
 
-../out/%.obj: %.asm
+$(OBJ_DIR)/%.obj: %.asm
+	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	nasm -I.. -f win32 -g $^ -o $@
-../out/math.lib: $(OBJS)
+$(OBJ_DIR)/math.lib: $(OBJS)
 	lib /NOLOGO /OUT:$@ /NODEFAULTLIB $^
