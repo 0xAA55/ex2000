@@ -81,11 +81,11 @@ segment .rdata
 extern _B0123
 _B0123 db 0, 1, 2, 3
 extern _2.0f
-_2.0f dd __?float32?__(2.0)
+_2.0f dd 2.0
 extern _M1.0f
-_M1.0f dd __?float32?__(-1.0)
+_M1.0f dd -1.0
 extern _M2.0f
-_M2.0f dd __?float32?__(-2.0)
+_M2.0f dd -2.0
 extern _W6
 _W6 dw 6
 extern _W10
