@@ -82,20 +82,22 @@ extern _B0123
 _B0123 db 0, 1, 2, 3
 extern _2.0f
 _2.0f dd 2.0
+extern _100.0f
+_100.0f dd 100.0
 extern _M1.0f
 _M1.0f dd -1.0
 extern _M2.0f
 _M2.0f dd -2.0
+extern _FMAX
+_FMAX dd 0x7F7FFFFF
+extern _FMIN
+_FMIN dd 0xFF7FFFFF
 extern _W6
 _W6 dw 6
 extern _W10
 _W10 dw 10
 extern _W15
 _W15 dw 15
-extern _FMAX
-_FMAX dd 0x7F7FFFFF
-extern _FMIN
-_FMIN dd 0xFF7FFFFF
 
 DefFunc _MathInit
 	FrameBegin 0, 0, ebx

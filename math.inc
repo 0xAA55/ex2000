@@ -73,15 +73,15 @@ struc DMatrix
 endstruc
 
 struc FloatMap
-.data resd 1
-.border_len resd 1
-.num_pixels resd 1
-.num_floats resd 1
-.num_bytes resd 1
-.bytes_per_pixel resd 1
-.dims resd 1
-.head_size equ $ - FloatMap
-.row_ptr:
+	.data resd 1
+	.border_len resd 1
+	.num_pixels resd 1
+	.num_floats resd 1
+	.num_bytes resd 1
+	.bytes_per_pixel resd 1
+	.dims resd 1
+	.head_size equ $ - FloatMap
+	.row_ptr:
 endstruc
 
 extern _Pi_P
@@ -90,6 +90,7 @@ extern _2Pi
 extern _2.0f
 extern _M1.0f
 extern _M2.0f
+extern _100.0f
 extern _W6
 extern _W10
 extern _W15
@@ -148,8 +149,8 @@ extern _BatchAdd
 extern _BatchMax
 
 struc CurvePoint
-.volume resd 1
-.weight resd 1
+	.volume resd 1
+	.weight resd 1
 endstruc
 ; typedef struct CurvePoints_s
 ; {
