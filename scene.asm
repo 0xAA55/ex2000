@@ -66,6 +66,7 @@ extern _ProjectionMatrix
 _ProjectionMatrix resb Matrix.size
 extern _CameraPos
 _CameraPos resb Vector.size
+
 extern _ClientRect
 _ClientRect:
 .l resd 1
@@ -320,11 +321,16 @@ DefFunc _SceneUnload
 	ret
 
 DefFunc _Scene
-	FrameBegin 1, 5
-	AssignVars TimerValue
+	FrameBegin 4, 5
+	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32
 
+	fld qword [_Timer + Timer.TimerVal]
+	fst qword DeltaTimeL
+	fstp dword TimerValue32
 	invoke_cdecl _UpdateTimer, _Timer
-	fstp st0
+	fsub qword DeltaTimeL
+	fst qword DeltaTimeL
+	fstp dword DeltaTime32
 
 	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
 	movq xmm0, [_ClientRect.l]
@@ -378,8 +384,6 @@ DefFunc _Scene
 	fild dword [_ClientRect.r]
 	fidiv dword [_ClientRect.b]
 	fstp dword [_Aspect]
-	fld qword [_Timer + Timer.TimerVal]
-	fstp dword TimerValue
 	invoke_dll_stdcall glViewport, [_ClientRect.l], [_ClientRect.t], [_ClientRect.r], [_ClientRect.b]
 
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
@@ -401,7 +405,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUniformMatrix4fv, [_BillboardProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Aspect], [_Aspect]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.FovY], [_FovYCos]
-	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], TimerValue
+	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], TimerValue32
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_BillboardProgramLocations.Noise], 0
@@ -413,7 +417,7 @@ DefFunc _Scene
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
 	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Transform], 1, 1, _TransformMatrix
-	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue
+	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue32
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_TerrainProgramLocations.Terrain], 0
@@ -436,7 +440,10 @@ DefFunc _Scene
 .end:
 	FrameEnd
 	ret
-	%undef TimerValue
+	%undef TimerValue32
+	%undef DeltaTimeL
+	%undef DeltaTimeH
+	%undef DeltaTime32
 
 DefFunc _SwapBuffers
 	FrameBegin 0, 0
