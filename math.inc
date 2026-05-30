@@ -133,10 +133,10 @@ extern _MathInit
 ; void MathDeInit();
 extern _MathDeInit
 
-; void FMatrix2DMatrix(DMatrix *out, Matrix *m);
-extern _FMatrix2DMatrix
-
 %ifdef _DEBUG
+	; void FMatrix2DMatrix(DMatrix *out, Matrix *m);
+	extern _FMatrix2DMatrix
+
 	; void DebugMatrix(int x, int y, Matrix *m);
 	extern _DebugMatrix
 %endif
