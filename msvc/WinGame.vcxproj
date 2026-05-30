@@ -63,26 +63,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>make -j</NMakeBuildCommandLine>
-    <NMakeOutput>ex2000.exe</NMakeOutput>
-    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>cd .. &amp; make -j</NMakeBuildCommandLine>
+    <NMakeOutput>$(SolutionDir)ex2000.exe</NMakeOutput>
+    <NMakeCleanCommandLine>cd .. &amp; make clean</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>$(SolutionDir)out\$(Configuration)</IntDir>
     <ExecutablePath>$(SolutionDir)tools;$(ExecutablePath)</ExecutablePath>
-    <NMakeReBuildCommandLine>make again</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; make again</NMakeReBuildCommandLine>
     <IncludePath>$(SolutionDir);$(SolutionDir)math;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)out;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>make -j</NMakeBuildCommandLine>
-    <NMakeOutput>ex2000.exe</NMakeOutput>
-    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>cd .. &amp; make -j</NMakeBuildCommandLine>
+    <NMakeOutput>$(SolutionDir)ex2000.exe</NMakeOutput>
+    <NMakeCleanCommandLine>cd .. &amp; make clean</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>$(SolutionDir)out\$(Configuration)</IntDir>
     <ExecutablePath>$(SolutionDir)tools;$(ExecutablePath)</ExecutablePath>
-    <NMakeReBuildCommandLine>make again</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>cd .. &amp; make again</NMakeReBuildCommandLine>
     <IncludePath>$(SolutionDir);$(SolutionDir)math;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(SolutionDir)out;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -102,11 +102,17 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <NMakeCompile>
+      <NMakeCompileFileCommandLine>cd .. &amp; make</NMakeCompileFileCommandLine>
+    </NMakeCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <NMakeCompile>
+      <NMakeCompileFileCommandLine>cd .. &amp; make</NMakeCompileFileCommandLine>
+    </NMakeCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Manifest>
