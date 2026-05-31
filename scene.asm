@@ -606,7 +606,7 @@ DefFunc _Scene
 
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Transform], 1, 1, _TransformMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Transform], 1, 0, _TransformMatrix
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue32
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]

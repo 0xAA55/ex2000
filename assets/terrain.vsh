@@ -13,5 +13,5 @@ void main()
 {
 	texcoord = uv;
 	frag_normal = normal;
-	gl_Position = vec4(position, 1.0) * transform;
+	gl_Position = transform * vec4(position, 1.0);
 }
