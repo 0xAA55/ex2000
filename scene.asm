@@ -577,17 +577,7 @@ DefFunc _Scene
 
 	jmp .end_of_frame
 .loaded:
-	fld dword TimerValue32
-	fsincos
-	fmul dword [_100.0f]
-	fstp dword [_CameraPos + Vector.x]
-	fmul dword [_100.0f]
-	fstp dword [_CameraPos + Vector.z]
-	fld dword TimerValue32
-	fmul dword [_2.0f]
-	fsin
-	fmul dword [_100.0f]
-	fstp dword [_CameraPos + Vector.y]
+	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
 
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
