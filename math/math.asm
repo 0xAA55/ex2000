@@ -145,7 +145,6 @@ DefFunc _MathInit
 .init_math_loop:
 	mov [_IdentityMatrix + edx], eax
 	mov [_F1111 + (ecx - 1) * 4], eax
-	mov [_FPMPM + (ecx - 1) * 4], eax
 	mov dword [_point_001_vector + (ecx - 1) * 4], __?float32?__(0.001)
 	mov byte  [_FP5P5P5P5 + (ecx - 1) * 4 + 3], 0x3F
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
@@ -153,17 +152,15 @@ DefFunc _MathInit
 	mov word  [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
 	add edx, 20
 	loop .init_math_loop
-	mov eax, ecx
-	mov al, 1
-	shl eax, 31
-	or [_FPMPM + 0x4], eax
-	or [_FPMPM + 0xC], eax
-	pxor xmm0, xmm0
-	pxor xmm1, xmm1
-	subps xmm0, [_F1111]
-	subps xmm1, [_FPMPM]
+	xorps xmm0, xmm0
+	movaps xmm1, [_F1111]
+	movaps xmm2, [_F1111]
+	subps xmm0, xmm1
 	movaps [_FMMMM], xmm0
+	unpcklps xmm1, xmm0
+	unpcklps xmm0, xmm2
 	movaps [_FPMPM], xmm1
+	movaps [_FMPMP], xmm0
 	dec ecx
 	mov [_UF000], ecx
 	movdqa xmm0, [_UF000]
