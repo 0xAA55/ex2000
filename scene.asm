@@ -114,6 +114,9 @@ _CameraViewMatrix resb Matrix.size
 extern _ProjectionMatrix
 _ProjectionMatrix resb Matrix.size
 
+extern _MovementSpeed
+_MovementSpeed resb Vector.size
+
 extern _CameraPos
 _CameraPos resb Vector.size
 
@@ -156,6 +159,9 @@ istruc CurvePoint
 	at .volume, dd 0.3
 	at .weight, dd 0.3
 iend
+
+extern _DefaultMovementSpeed
+_DefaultMovementSpeed dd 10.0
 
 extern _FovDegree
 _FovDegree dw 60
@@ -491,8 +497,10 @@ DefFunc _SceneUnload
 	ret
 
 DefFunc _Scene
-	FrameBegin 4, 5, ebx
+	FrameBegin 11, 5, ebx, esi, edi
 	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32
+	AssignVars KeyW, KeyS, KeyA, KeyD, KeySpace, KeyCtrl
+	AssignVars CurMovementSpeed
 
 	fld qword [_Timer + Timer.TimerVal]
 	fstp qword DeltaTimeL
@@ -520,6 +528,22 @@ DefFunc _Scene
 	test eax, eax
 	jnz .quit
 
+[segment .rdata]
+.keys_to_detect db 'WSAD', VK_SPACE, VK_CONTROL, 0
+.num_keys_to_detect equ $ - .keys_to_detect
+__SECT__
+	mov esi, .keys_to_detect
+	lea edi, KeyW
+.loop_check_keys:
+	xor eax, eax
+	lodsb
+	test eax, eax
+	jz .after_check_keys
+	invoke_dll_stdcall GetAsyncKeyState, eax
+	stosd
+	jmp .loop_check_keys
+.after_check_keys:
+
 	movq xmm1, [_WindowRect.r]
 	movq xmm0, [_CursorPos]
 	paddd xmm1, [_WindowRect.l]
@@ -531,7 +555,7 @@ DefFunc _Scene
 	cvtdq2ps xmm1, xmm1
 	subps xmm0, xmm1
 	mulps xmm0, xmm3
-	addps xmm2, xmm0
+	subps xmm2, xmm0
 	movd eax, xmm2
 	cmp eax, [_Pi_P]
 	jle .pi_p
@@ -579,14 +603,75 @@ DefFunc _Scene
 
 	jmp .end_of_frame
 .loaded:
-	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
-
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 1000.0f
 	invoke_cdecl _MatrixMultiply, _TransformMatrix, _ModelMatrix, _CameraViewMatrix
 	invoke_cdecl _MatrixMultiplyTo, _TransformMatrix, _ProjectionMatrix
+
+	xor eax, eax
+	mov edx, eax
+	dec eax
+	movaps xmm0, [_MovementSpeed]
+	movss xmm1, DeltaTime32
+	mulss xmm1, [_DefaultMovementSpeed]
+	shufps xmm1, xmm1, 0
+	movaps xmm2, [_CameraMatrix + Matrix.z]
+	movaps xmm3, [_CameraMatrix + Matrix.x]
+	movaps xmm4, [_F0100]
+	mulps xmm2, xmm1
+	mulps xmm3, xmm1
+	mulps xmm4, xmm1
+	test eax, KeyW
+	jz .no_w
+	subps xmm0, xmm2
+.no_w:
+	test eax, KeyS
+	jz .no_s
+	addps xmm0, xmm2
+.no_s:
+	test eax, KeyA
+	jz .no_a
+	subps xmm0, xmm3
+.no_a:
+	test eax, KeyD
+	jz .no_d
+	addps xmm0, xmm3
+.no_d:
+	test eax, KeySpace
+	jz .no_space
+	addps xmm0, xmm4
+.no_space:
+	test eax, KeyCtrl
+	jz .no_ctrl
+	subps xmm0, xmm4
+.no_ctrl:
+	movaps [_MovementSpeed], xmm0
+	or edx, KeyW
+	or edx, KeyS
+	or edx, KeyA
+	or edx, KeyD
+	or edx, KeySpace
+	or edx, KeyCtrl
+	test edx, edx
+	jnz .no_decel
+	invoke_cdecl _VectorLength, &CurMovementSpeed, _MovementSpeed, 3
+	movss xmm1, CurMovementSpeed
+	minss xmm1, [_DefaultMovementSpeed]
+	mulss xmm1, DeltaTime32
+	shufps xmm1, xmm1, 0 ; xmm1 = min(DefSpeed, CurSpeed) * DeltaTime
+	movaps xmm0, [_MovementSpeed]
+	movaps xmm2, xmm0
+	mulps xmm2, xmm1 ;xmm2 = Speed * xmm1
+	subps xmm0, xmm2 ;Speed -= xmm2
+	movaps [_MovementSpeed], xmm0
+.no_decel:
+	movss xmm1, DeltaTime32
+	shufps xmm1, xmm1, 0
+	mulps xmm0, xmm1
+	addps xmm0, [_CameraPos]
+	movaps [_CameraPos], xmm0
 
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
@@ -636,6 +721,11 @@ DefFunc _Scene
 	%undef DeltaTimeL
 	%undef DeltaTimeH
 	%undef DeltaTime32
+	%undef KeyW
+	%undef KeyS
+	%undef KeyA
+	%undef KeyD
+	%undef KeySpace
 
 DefFunc _SwapBuffers
 	FrameBegin 0, 0
