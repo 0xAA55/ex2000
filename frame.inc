@@ -435,6 +435,19 @@
 			__RotatePassReg mov, (%%Param) & 0xFFFFFFFF, CallParam(%1 + 0), (%%Param) & 0xFFFFFFFF
 			__RotatePassReg mov, (%%Param) >> 32, CallParam(%1 + 1), (%%Param) >> 32
 		%endif
+	%elif %substr(%%ParamStr, 1, 4) == "f2d "
+		%xdefine %%Param %tok(%substr(%%ParamStr, 5))
+		%defstr %%ParamStr %%Param
+		%strlen %%ParamStrLen %%ParamStr
+		%assign __NumParamsPassed 2
+		%if %substr(%%ParamStr, 1, 1) == "["
+			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
+			%xdefine %%Inner %tok(%%InnerStr)
+			fld dword [%%Inner]
+			fstp qword CallParam(%1)
+		%else
+			%error `f2d` only supports convert float number from memory address.
+		%endif
 	%elif __IsFloatF
 		mov dword CallParam(%1), __?float32?__(%tok(%substr(%%ParamStr, 1, -2)))
 	%elif __IsFloatD
@@ -501,6 +514,20 @@
 			%assign __StdCallEspBias (__StdCallEspBias + 4)
 			push (%%Param) & 0xFFFFFFFF
 			%assign __StdCallEspBias (__StdCallEspBias + 4)
+		%endif
+	%elif %substr(%%ParamStr, 1, 4) == "f2d "
+		%xdefine %%Param %tok(%substr(%%ParamStr, 5))
+		%defstr %%ParamStr %%Param
+		%strlen %%ParamStrLen %%ParamStr
+		%assign __NumParamsPassed 2
+		%if %substr(%%ParamStr, 1, 1) == "["
+			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
+			%xdefine %%Inner %tok(%%InnerStr)
+			sub esp, 8
+			fld dword [%%Inner]
+			fstp qword [esp]
+		%else
+			%error `f2d` only supports convert float number from memory address.
 		%endif
 	%elif __IsFloatF
 		__FlushPassArgs
