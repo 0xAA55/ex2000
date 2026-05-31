@@ -14,5 +14,5 @@ void main()
 	vec2 xy_rel_bar = (xy - bar_pos) / BarSize;
 	vec2 bar_distance = max(vec2(0.0), ((BarSize * 0.5) - abs(xy - VirtualResolution * 0.5)) / (BarSize * 0.5));
 	float bar = pow(bar_distance.x * bar_distance.y, 0.01);
-	color = mix(vec4(0.0), mix(vec4(0.2), vec4(1.0), progress >= xy_rel_bar.x ? 1.0 : 0.0), bar);
+	color = mix(vec4(0.0), mix(vec4(0.2), vec4(1.0), pow(min(1.0, max(0.0, progress - xy_rel_bar.x)), 0.1)), bar);
 }
