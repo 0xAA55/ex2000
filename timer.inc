@@ -2,11 +2,11 @@
 %define _TIMER_INC_ 1
 
 struc Timer
-.StartTime resq 1
-.PausedTime resq 1
-.TimerVal resq 1
-.IsPaused resd 1
-.size equ $ - Timer
+	.StartTime resq 1
+	.PausedTime resq 1
+	.TimerVal resq 1
+	.IsPaused resd 1
+	.size equ $ - Timer
 endstruc
 
 ; double GetSysTimerVal();
