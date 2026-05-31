@@ -102,7 +102,7 @@ void MatrixRotationEuler(Matrix_p out, float yaw, float pitch, float roll)
 	MatrixRotationX(&pm, pitch);
 	MatrixRotationY(&ym, yaw);
 	MatrixMultMatrix(&rpm, &rm, &pm);
-	MatrixMultMatrix(out, &ym, &rpm);
+	MatrixMultMatrix(out, &rpm, &ym);
 }
 
 void MatrixViewEuler(Matrix_p out, Vector_p pos, float yaw, float pitch, float roll)
@@ -114,7 +114,7 @@ void MatrixViewEuler(Matrix_p out, Vector_p pos, float yaw, float pitch, float r
 	MatrixRotationX(&pm, pitch);
 	MatrixRotationY(&ym, yaw);
 	MatrixMultMatrix(&rpm, &rm, &pm);
-	MatrixMultMatrix(&yrpm, &ym, &rpm);
+	MatrixMultMatrix(&yrpm, &rpm, &ym);
 	MatrixTranspose(&ret, &yrpm);
 	ret.w.x = -VectorDot3(&yrpm.x, pos);
 	ret.w.y = -VectorDot3(&yrpm.y, pos);

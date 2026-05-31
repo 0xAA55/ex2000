@@ -4,8 +4,8 @@
 
 %ifndef _EULER_DEBUG
 DefFunc _MatrixRotationEuler
-	FrameBegin 8, 0
-	AssignVars _CY, _SY, _CP, _SP, _CR, _SR, _CPSR, _SPSR
+	FrameBegin 6, 0
+	AssignVars _CY, _SY, _CP, _SP, _CR, _SR
 
 	xor eax, eax
 	mov ecx, 3
@@ -20,70 +20,66 @@ DefFunc _MatrixRotationEuler
 	loop .sincos
 
 	mov eax, Param(0)
-	movaps xmm0, [_ZeroVector]
+	xorps xmm0, xmm0
 	movaps [eax + Matrix.x], xmm0
 	movaps [eax + Matrix.y], xmm0
 	movaps [eax + Matrix.z], xmm0
 	movaps [eax + Matrix.w], xmm0
 
-	;xx = _CY * _CR
-	;xy = _CY * _CPSR + _SY * _SP;
-	;xz = _CY * _SPSR - _SY * _CP;
-	;yx = -_SR;
-	;yy = _CRCP;
-	;yz = _CRSP;
-	;zx = _CR * _SY;
-	;zy = _CPSR * _SY - _SP * _CY;
-	;zz = _SPSR * _SY + _CP * _CY;
-	;ww = 1.0;
+	;xx = cy * cr + spsr * sy
+	;xy = cp * sr
+	;xz = spsr * cy - sy * cr
+	;yx = spcr * sy - cy * sr
+	;yy = cr * cp
+	;yz = sr * sy + spcr * cy
+	;zx = sy * cp
+	;zy = -sp
+	;zz = cy * cp
+	;ww = 1.0
 
-	movss xmm0, _CP
+	movss xmm0, _SP
 	movss xmm1, _SP
-	movss xmm2, _CR
-	movss xmm3, _CY
-	movss xmm4, _CY
+	movss xmm2, _CY
+	movss xmm4, _CP
 	movss xmm5, _SY
-	movss xmm6, _CY
-	movss xmm7, _SY
-	mulss xmm0, _SR
-	mulss xmm1, _SR
-	mulss xmm2, _CP
-	mulss xmm3, _CR
-	mulss xmm4, xmm0
-	mulss xmm5, _SP
-	mulss xmm6, xmm1
-	mulss xmm7, _CP
-	addss xmm4, xmm5
-	subss xmm6, xmm7
-	movss _CPSR, xmm0
-	movss _SPSR, xmm1
-	movss [eax + Matrix.xx], xmm3
-	movss [eax + Matrix.xy], xmm4
-	movss [eax + Matrix.xz], xmm6
-	movss [eax + Matrix.yy], xmm2
-
-	movss xmm0, [_ZeroVector]
-	movss xmm1, _CR
-	movss xmm2, _CR
-	movss xmm3, _CPSR
-	movss xmm4, _SP
-	movss xmm5, _SPSR
-	movss xmm6, _CY
-	subss xmm0, _SR
-	mulss xmm1, _SP
-	mulss xmm2, _SY
+	movss xmm7, _CY
+	mulss xmm0, _SR ;SPSR
+	mulss xmm1, _CR ;SPCR
+	mulss xmm2, _CR
+	movss xmm3, xmm0
+	movss xmm6, xmm1
+	mulss xmm7, _SR
+	mulss xmm4, _SR ;xy
 	mulss xmm3, _SY
-	mulss xmm4, _CY
-	mulss xmm5, _SY
-	mulss xmm6, _CP
-	subss xmm3, xmm4
-	addss xmm5, xmm6
-	movss [eax + Matrix.yx], xmm0
-	movss [eax + Matrix.yz], xmm1
-	movss [eax + Matrix.zx], xmm2
-	movss [eax + Matrix.zy], xmm3
+	mulss xmm0, _CY
+	mulss xmm5, _CR
+	mulss xmm6, _SY
+	addss xmm2, xmm3 ;xx
+	subss xmm0, xmm5 ;xz
+	subss xmm6, xmm7 ;yx
+	movss [eax + Matrix.xy], xmm4
+	movss [eax + Matrix.xx], xmm2
+	movss [eax + Matrix.xz], xmm0
+	movss [eax + Matrix.yx], xmm6
+
+	movss xmm0, _CR
+	mulss xmm1, _CY
+	movss xmm2, _SR
+	movss xmm3, _SY
+	xorps xmm4, xmm4
+	movss xmm5, _CY
+	mulss xmm0, _CP ;yy
+	mulss xmm2, _SY
+	mulss xmm3, _CP ;zx
+	subss xmm4, _SP ;zy
+	mulss xmm5, _CP ;zz
+	addss xmm1, xmm2 ;yz
+	movss [eax + Matrix.yy], xmm0
+	movss [eax + Matrix.zx], xmm3
+	movss [eax + Matrix.zy], xmm4
 	movss [eax + Matrix.zz], xmm5
-	mov dword[eax + Matrix.ww], 0x3F800000
+	movss [eax + Matrix.yz], xmm1
+	mov dword[eax + Matrix.ww], __?float32?__(1.0)
 
 	FrameEnd
 	ret
@@ -93,8 +89,6 @@ DefFunc _MatrixRotationEuler
 	%undef _SP
 	%undef _CR
 	%undef _SR
-	%undef _CPSR
-	%undef _SPSR
 %else
 DefFunc _MakeIdentity
 	movaps xmm0, [_IdentityMatrix + Matrix.x]
@@ -171,7 +165,7 @@ DefFunc _MatrixRotationEuler
 	invoke_cdecl _MatrixRotationX, PM, Param(2)
 	invoke_cdecl _MatrixRotationY, YM, Param(1)
 	invoke_cdecl _MatrixMultiply, RPM, RM, PM
-	invoke_cdecl _MatrixMultiply, Param(0), YM, RPM
+	invoke_cdecl _MatrixMultiply, Param(0), RPM, YM
 
 	FrameEnd
 	ret

@@ -13,8 +13,8 @@ DefFunc _MatrixViewEuler
 	mulps xmm0, [_FMMMM]
 	movaps [ebx], xmm0
 
-	invoke_cdecl _MatrixRotationEuler, edi, Param(2), Param(3), Param(4)
-	invoke_cdecl _MatrixTranspose, esi, edi
+	invoke_cdecl _MatrixRotationEuler, esi, Param(2), Param(3), Param(4)
+	invoke_cdecl _MatrixTranspose, edi, esi
 	invoke_cdecl _VectorDot, &[edi + Matrix.wx], &[esi + Matrix.x], ebx, 3
 	invoke_cdecl _VectorDot, &[edi + Matrix.wy], &[esi + Matrix.y], ebx, 3
 	invoke_cdecl _VectorDot, &[edi + Matrix.wz], &[esi + Matrix.z], ebx, 3
