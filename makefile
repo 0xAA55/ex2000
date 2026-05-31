@@ -32,7 +32,7 @@ out/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	nasm -f win32 -g $(DEFS) $^ -o $@
 out/assets.cab: $(wildcard assets/*)
-	if not exist out mkdir out
+	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\*
 out/math.lib: $(wildcard math/*)
 	make -C math
