@@ -79,8 +79,8 @@ _TerrainBitmap resd 1
 extern _TerrainMesh
 _TerrainMesh resd 1
 
-extern _Scene_Loading_Progress
-_Scene_Loading_Progress resd 1
+extern _SceneLoadingProgress
+_SceneLoadingProgress resd 1
 
 extern _CameraYaw
 _CameraYaw resd 1
@@ -273,7 +273,7 @@ DefFunc _SceneInit
 	mov [_ProgressProgramLocations.Progress], eax
 
 	xor eax, eax
-	mov [_Scene_Loading_Progress], eax
+	mov [_SceneLoadingProgress], eax
 	mov al, 1
 .end:
 	FrameEnd
@@ -345,12 +345,12 @@ DefFunc _SceneLoad05
 DefFunc _SceneLoad06
 	FrameBegin 0, 4
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
-	mov ecx, [_Scene_Loading_Progress]
+	mov ecx, [_SceneLoadingProgress]
 	xor edx, edx
 	dec edx
 	test eax, eax
 	cmovz ecx, edx
-	mov [_Scene_Loading_Progress], ecx
+	mov [_SceneLoadingProgress], ecx
 	jz .end
 
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
@@ -390,12 +390,12 @@ DefFunc _SceneLoad07
 DefFunc _SceneLoad08
 	FrameBegin 0, 4, edi
 	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
-	mov ecx, [_Scene_Loading_Progress]
+	mov ecx, [_SceneLoadingProgress]
 	xor edx, edx
 	dec edx
 	test eax, eax
 	cmovz ecx, edx
-	mov [_Scene_Loading_Progress], ecx
+	mov [_SceneLoadingProgress], ecx
 	jz .end
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawTerrainVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
@@ -443,7 +443,7 @@ DefFunc _SceneLoad0B
 DefFunc _SceneLoadProgressive
 	FrameBegin 0, 0, ebx
 
-	mov ebx, [_Scene_Loading_Progress]
+	mov ebx, [_SceneLoadingProgress]
 	cmp ebx, 0
 	jl .end
 	cmp ebx, _NumItemsToLoad
@@ -451,9 +451,9 @@ DefFunc _SceneLoadProgressive
 .load:
 	invoke_cdecl [.load_sequence + ebx * 4]
 	inc ebx
-	mov [_Scene_Loading_Progress], ebx
+	mov [_SceneLoadingProgress], ebx
 .end:
-	mov eax, [_Scene_Loading_Progress]
+	mov eax, [_SceneLoadingProgress]
 	FrameEnd
 	ret
 segment .rdata
@@ -512,7 +512,7 @@ DefFunc _Scene
 	invoke_dll_stdcall GetForegroundWindow
 	cmp eax, [_hWnd]
 	jnz .after_check_input
-	cmp dword[_Scene_Loading_Progress], _NumItemsToLoad
+	cmp dword[_SceneLoadingProgress], _NumItemsToLoad
 	jl .after_check_input
 	invoke_dll_stdcall GetAsyncKeyState, 0x1B
 	test eax, eax
@@ -569,7 +569,7 @@ DefFunc _Scene
 
 	invoke_dll_stdcall glUseProgram, [_DrawProgressProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	cvtsi2ss xmm0, [_Scene_Loading_Progress]
+	cvtsi2ss xmm0, [_SceneLoadingProgress]
 	cvtsi2ss xmm1, ebx
 	divss xmm0, xmm1
 	invoke_dll_stdcall glUniform1f, [_ProgressProgramLocations.Progress], xmm0.x
