@@ -1,6 +1,7 @@
-OBJ_DIR=../out
+OBJ_DIR:=../out
 SRCS=$(wildcard *.asm)
 OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
+DEFS:=
 
 %.inc:
 	copy $@+
@@ -46,6 +47,6 @@ warpfmap.asm: common.inc
 
 $(OBJ_DIR)/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-	nasm -I.. -f win32 -g $^ -o $@
+	nasm -I.. -f win32 -g $(DEFS) $^ -o $@
 $(OBJ_DIR)/math.lib: $(OBJS)
 	lib /NOLOGO /OUT:$@ /NODEFAULTLIB $^

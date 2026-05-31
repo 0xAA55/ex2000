@@ -1,7 +1,8 @@
-OBJ_DIR=out
+OBJ_DIR:=out
 SRCS=$(filter-out stub.asm, $(wildcard *.asm))
 OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
 LIBS=out/math.lib lib/kernel32.lib
+DEFS:=
 
 all: ex2000.exe
 .PHONY: clean again
@@ -29,7 +30,7 @@ out/stub.bin: stub.asm
 	nasm $^ -o $@
 out/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-	nasm -f win32 -g $^ -o $@
+	nasm -f win32 -g $(DEFS) $^ -o $@
 out/assets.cab: $(wildcard assets/*)
 	if not exist out mkdir out
 	cabarc -r -p -m LZX:21 N $@ assets\\*
