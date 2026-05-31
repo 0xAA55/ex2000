@@ -32,6 +32,7 @@ DefFunc _InitTimer
 	FrameBegin 0, 0
 	call _GetSysTimerVal
 	mov edx, Param(0)
+	fst qword [edx + Timer.PausedTime]
 	fstp qword [edx + Timer.StartTime]
 	xor eax, eax
 	mov [edx + Timer.IsPaused], eax
