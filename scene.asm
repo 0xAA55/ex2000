@@ -238,7 +238,6 @@ DefFunc _SceneInit
 .no_dwmflush:
 	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
-
 	fldpi
 	fdiv dword [_2.0f]
 	fst dword [_MaxPitch]
@@ -284,33 +283,39 @@ DefFunc _FakeDwmFlush
 	ret
 
 DefFunc _SceneLoad00
+	FrameBegin 0, 0
+	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad01
 	FrameBegin 0, 3
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 2048, 1.0f, 8
 	mov [_NoiseBitmap], eax
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad01
+DefFunc _SceneLoad02
 	FrameBegin 0, 1
 	invoke_cdecl _DuplicateFloatMap, [_NoiseBitmap]
 	mov [_TerrainBitmap], eax
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad02
+DefFunc _SceneLoad03
 	FrameBegin 0, 3
 	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, 3
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad03
+DefFunc _SceneLoad04
 	FrameBegin 0, 3
 	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 250.0f
 	mov [_TerrainMesh], eax
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad04
+DefFunc _SceneLoad05
 	FrameBegin 0, 0, ebx
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
@@ -324,7 +329,7 @@ DefFunc _SceneLoad04
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad05
+DefFunc _SceneLoad06
 	FrameBegin 0, 1, ebx
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTextureMipLinear
@@ -342,7 +347,7 @@ DefFunc _SceneLoad05
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad06
+DefFunc _SceneLoad07
 	FrameBegin 0, 4
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
 	mov ecx, [_SceneLoadingProgress]
@@ -376,7 +381,7 @@ DefFunc _SceneLoad06
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad07
+DefFunc _SceneLoad08
 	FrameBegin 0, 6, ebx
 	mov ebx, [_TerrainMesh]
 	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [ebx + SimpleMesh.num_vertices], [ebx + SimpleMesh.vertices]
@@ -387,7 +392,7 @@ DefFunc _SceneLoad07
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad08
+DefFunc _SceneLoad09
 	FrameBegin 0, 4, edi
 	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
 	mov ecx, [_SceneLoadingProgress]
@@ -425,18 +430,15 @@ DefFunc _SceneLoad08
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad09
-	FrameBegin 0, 0
-	FrameEnd
-	ret
-
 DefFunc _SceneLoad0A
 	FrameBegin 0, 0
+
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad0B
 	FrameBegin 0, 0
+
 	FrameEnd
 	ret
 
