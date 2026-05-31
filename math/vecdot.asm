@@ -12,7 +12,7 @@ DefFunc _VectorDot
 
 	movups xmm0, [eax]
 	movups xmm1, [ebx]
-	pand xmm0, [_UF000 + ecx]
+	andps xmm0, [_UF000 + ecx]
 	mulps xmm0, xmm1
 	cmp dword [_HaveSSE3], 0
 	jz .no_sse3

@@ -8,7 +8,7 @@ DefFunc _MatrixEulerTranslated
 	mov ecx, Param(1)
 	jecxz .end
 	movaps xmm0, [ecx]
-	pand xmm0, [_UFFF0]
+	andps xmm0, [_UFFF0]
 	addps xmm0, [edi + Matrix.w]
 	movaps [edi + Matrix.w], xmm0
 

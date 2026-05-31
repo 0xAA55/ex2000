@@ -14,10 +14,10 @@ DefFunc _VectorNormal
 	movups xmm0, [edx]
 	shufps xmm2, xmm2, 0
 	movups xmm1, [eax]
-	pand xmm0, [_U0FFF + ecx]
-	pand xmm1, [_UF000 + ecx]
+	andps xmm0, [_U0FFF + ecx]
+	andps xmm1, [_UF000 + ecx]
 	divps xmm1, xmm2
-	por xmm0, xmm1
+	orps xmm0, xmm1
 	movups [edx], xmm0
 
 	FrameEnd
