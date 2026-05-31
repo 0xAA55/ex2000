@@ -4,7 +4,7 @@ DefFunc _MatrixProjection
 	FrameBegin 0, 0
 
 	mov eax, Param(0)
-	movaps xmm0, [_ZeroVector]
+	xorps xmm0, xmm0
 	movaps [eax + Matrix.x], xmm0
 	movaps [eax + Matrix.y], xmm0
 	movaps [eax + Matrix.z], xmm0
