@@ -493,9 +493,9 @@ DefFunc _Scene
 	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32
 
 	fld qword [_Timer + Timer.TimerVal]
-	fst qword DeltaTimeL
-	fstp dword TimerValue32
+	fstp qword DeltaTimeL
 	invoke_cdecl _UpdateTimer, _Timer
+	fst dword TimerValue32
 	fsub qword DeltaTimeL
 	fst qword DeltaTimeL
 	fstp dword DeltaTime32
