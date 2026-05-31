@@ -10,6 +10,7 @@ uniform vec4 skycolor = vec4(0.1, 0.2, 0.8, 1.0);
 uniform vec4 suncolor = vec4(1.0, 0.9, 0.8, 1.0);
 uniform vec3 sunpos = normalize(vec3(1.0, 1.0, 1.0));
 uniform float sunsize = 1000.0;
+uniform float cloud_size = 10.0;
 in vec2 texcoord;
 out vec4 color;
 
@@ -24,7 +25,7 @@ void main()
 	if (fragdir.y >= 0.0)
 	{
 		color = mix(fogcolor, skycolor, fragdir.y);
-		vec2 cloud_uv = fragdir.xz * 0.5 / fragdir.y;
+		vec2 cloud_uv = (fragdir.xz / fragdir.y) / cloud_size;
 		float dist = length(cloud_uv);
 		float cloud = texture2D(noise, cloud_uv + time * 0.005).r;
 		float fog = 1.0 / max(1.0, dist);
