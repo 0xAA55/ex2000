@@ -161,7 +161,7 @@ istruc CurvePoint
 iend
 
 extern _DefaultMovementSpeed
-_DefaultMovementSpeed dd 10.0
+_DefaultMovementSpeed dd 100.0
 
 extern _FovDegree
 _FovDegree dw 60
@@ -616,6 +616,7 @@ __SECT__
 	movaps xmm0, [_MovementSpeed]
 	movss xmm1, DeltaTime32
 	mulss xmm1, [_DefaultMovementSpeed]
+	addss xmm1, xmm1
 	shufps xmm1, xmm1, 0
 	movaps xmm2, [_CameraMatrix + Matrix.z]
 	movaps xmm3, [_CameraMatrix + Matrix.x]
@@ -648,14 +649,6 @@ __SECT__
 	subps xmm0, xmm4
 .no_ctrl:
 	movaps [_MovementSpeed], xmm0
-	or edx, KeyW
-	or edx, KeyS
-	or edx, KeyA
-	or edx, KeyD
-	or edx, KeySpace
-	or edx, KeyCtrl
-	test edx, edx
-	jnz .no_decel
 	invoke_cdecl _VectorLength, &CurMovementSpeed, _MovementSpeed, 3
 	movss xmm1, CurMovementSpeed
 	minss xmm1, [_DefaultMovementSpeed]
@@ -666,7 +659,6 @@ __SECT__
 	mulps xmm2, xmm1 ;xmm2 = Speed * xmm1
 	subps xmm0, xmm2 ;Speed -= xmm2
 	movaps [_MovementSpeed], xmm0
-.no_decel:
 	movss xmm1, DeltaTime32
 	shufps xmm1, xmm1, 0
 	mulps xmm0, xmm1
