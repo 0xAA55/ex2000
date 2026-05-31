@@ -190,10 +190,10 @@ DefFunc _MathInit
 	movaps [_FCCCC], xmm0
 	addps xmm0, [_F4444]
 	movaps [_FHHHH], xmm0
-	pxor xmm2, xmm4
-	pxor xmm3, xmm4
-	movdqa [_UFF00], xmm2
-	movdqa [_UFFF0], xmm3
+	pxor xmm3, xmm1
+	pxor xmm4, xmm1
+	movdqa [_UFF00], xmm3
+	movdqa [_UFFF0], xmm4
 .end:
 	FrameEnd
 	ret
