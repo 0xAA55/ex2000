@@ -230,7 +230,7 @@ import_dll_func LoadLibraryA
 extern _hInstance
 
 %ifdef _DEBUG
-extern _hDCDesktop
+	extern _hDCDesktop
 %endif
 
 extern _LoadFuncGroup
