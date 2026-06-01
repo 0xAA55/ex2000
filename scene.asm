@@ -698,20 +698,34 @@ __SECT__
 .no_ctrl:
 	movaps [_MovementSpeed], xmm0
 	invoke_cdecl _VectorLength, &CurMovementSpeed, _MovementSpeed, 3
+	mov eax, __?float32?__(0.00001)
 	movss xmm1, CurMovementSpeed
-	minss xmm1, [_DefaultMovementSpeed]
-	mulss xmm1, DeltaTime32
-	shufps xmm1, xmm1, 0 ; xmm1 = min(DefSpeed, CurSpeed) * DeltaTime
+	movd xmm2, eax
+	ucomiss xmm1, xmm2
+	jbe .no_decel
 	movaps xmm0, [_MovementSpeed]
-	movaps xmm2, xmm0
-	mulps xmm2, xmm1 ;xmm2 = Speed * xmm1
-	subps xmm0, xmm2 ;Speed -= xmm2
+	shufps xmm1, xmm1, 0
+	rcpps xmm1, xmm1
+	mulps xmm0, xmm1 ;xmm0 = normalize(_MovementSpeed)
+	movss xmm1, CurMovementSpeed
+	xorps xmm2, xmm2
+	movss xmm3, [_DefaultMovementSpeed]
+	mulss xmm3, DeltaTime32
+	subss xmm1, xmm3
+	maxps xmm1, xmm2
+	shufps xmm1, xmm1, 0 ;xmm1 = CurSpeed - DefSpeed * DeltaTime
+	mulps xmm0, xmm1 ;xmm0 = NormalizedSpeed * xmm1
 	movaps [_MovementSpeed], xmm0
 	movss xmm1, DeltaTime32
 	shufps xmm1, xmm1, 0
 	mulps xmm0, xmm1
 	addps xmm0, [_CameraPos]
 	movaps [_CameraPos], xmm0
+	jmp .finished_decel
+.no_decel:
+	xorps xmm0, xmm0
+	movaps [_MovementSpeed], xmm0
+.finished_decel:
 
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
