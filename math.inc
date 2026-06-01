@@ -187,6 +187,7 @@ extern _BatchMax
 struc CurvePoint
 	.volume resd 1
 	.weight resd 1
+	.size equ $ - .volume
 endstruc
 ; typedef struct CurvePoints_s
 ; {
@@ -336,7 +337,7 @@ extern _FloatMapBlt
 ; void FloatMapCurve(FloatMap *map, CurvePoints_p curve, size_t num_curve_points);
 extern _FloatMapCurve
 
-struc SimpleVertex
+%macro InstSimpleVertex 0
 .position:
 	.x resd 1
 	.y resd 1
@@ -349,6 +350,9 @@ struc SimpleVertex
 	.u resd 1
 	.v resd 1
 .size equ $ - SimpleVertex
+%endmacro
+struc SimpleVertex
+	InstSimpleVertex
 endstruc
 struc SimpleMesh ; All data of a `SimpleMesh` must be `malloc()` once
 	.vertices resd 1

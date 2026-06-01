@@ -184,6 +184,7 @@ istruc CurvePoint
 	at .volume, dd 0.3
 	at .weight, dd 0.3
 iend
+.num_points equ ($ - _TerrainCurvePoints) / CurvePoint.size
 
 extern _DefaultMovementSpeed
 _DefaultMovementSpeed dd 100.0
@@ -345,7 +346,7 @@ DefFunc _SceneLoad02
 
 DefFunc _SceneLoad03
 	FrameBegin 0, 3
-	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, 3
+	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, _TerrainCurvePoints.num_points
 	FrameEnd
 	ret
 
