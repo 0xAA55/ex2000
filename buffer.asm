@@ -9,71 +9,53 @@ import_dll_func memcpy
 import_dll_func memset
 
 DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity, data(or_null)
-	FrameBegin 3, 3, esi, edi
+	FrameBegin 2, 3, ebx, edi
 	NameParams BufferInst, BufType, BufUsage, BufItemSize, BufCapacity, BufData
-	AssignVars GLObject, CBSize, NumData
+	AssignVars CBSize, NumData
 
 	xor eax, eax
 	mov NumData, eax
-	mov GLObject, eax
 	mov ecx, GlBuffer.size / 4
-	mov esi, BufferInst
-	mov edi, esi
+	mov ebx, BufferInst
+	mov edi, ebx
 	rep stosd
 
 	mov eax, BufItemSize
 	mul dword BufCapacity
-	test edx, edx
-	jnz .failexit
 	mov CBSize, eax
 
 	invoke_cdecl _malloc, eax
-	mov [esi + GlBuffer.pointer], eax
+	mov [ebx + GlBuffer.pointer], eax
 
-	lea eax, GLObject
-	invoke_dll_stdcall glGenBuffers, 1, eax
-
-	mov eax, [esi + GlBuffer.pointer]
-	test eax, eax
-	jz .failexit
-	mov eax, GLObject
-	test eax, eax
-	jz .failexit
+	invoke_dll_stdcall glGenBuffers, 1, &[ebx + GlBuffer.gl_buffer]
 
 	mov eax, BufData
 	test eax, eax
 	jz .after_copy
-	invoke_dll_cdecl memcpy, [esi + GlBuffer.pointer], BufData, CBSize
+	invoke_dll_cdecl memcpy, [ebx + GlBuffer.pointer], BufData, CBSize
 	mov eax, BufCapacity
 	mov NumData, eax
 .after_copy:
 	mov edi, BufType
 
-	invoke_dll_stdcall glBindBuffer, edi, GLObject
+	invoke_dll_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
 	invoke_dll_stdcall glBufferData, edi, CBSize, BufData, BufUsage
 	invoke_dll_stdcall glBindBuffer, edi, 0
 
-	mov eax, GLObject
-	mov ecx, BufCapacity
-	mov edx, BufItemSize
-	mov [esi + GlBuffer.gl_buffer], eax
-	mov [esi + GlBuffer.capacity], ecx
-	mov [esi + GlBuffer.gl_buffer_cap], ecx
-	mov eax, BufUsage
-	mov [esi + GlBuffer.gl_buffer_type], edi
-	mov [esi + GlBuffer.size_of_item], edx
-	mov ecx, NumData
-	mov [esi + GlBuffer.gl_buffer_usage], eax
-	mov [esi + GlBuffer.num_items], ecx
-	mov [esi + GlBuffer.flushed], ecx
-
+	mov eax, BufCapacity
+	mov ecx, BufItemSize
+	mov edx, BufUsage
+	mov [ebx + GlBuffer.capacity], eax
+	mov [ebx + GlBuffer.gl_buffer_cap], eax
+	mov [ebx + GlBuffer.gl_buffer_type], edi
+	mov eax, NumData
+	mov [ebx + GlBuffer.size_of_item], ecx
+	mov [ebx + GlBuffer.gl_buffer_usage], edx
+	mov [ebx + GlBuffer.num_items], eax
 	xor eax, eax
 	inc eax
-	jmp .end
-.failexit:
-	invoke_cdecl _DeInitBuffer, esi
+	mov [ebx + GlBuffer.flushed], eax
 
-	xor eax, eax
 .end:
 	FrameEnd
 	ret
