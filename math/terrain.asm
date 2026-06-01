@@ -107,12 +107,11 @@ DefFunc _AltitudeToTerrain
 	movaps xmm6, [_F1111]
 	shufps xmm5, xmm5, _MM_SHUFFLE(0, 0, 0, 0)
 	shufps xmm4, xmm4, _MM_SHUFFLE(0, 0, 0, 0)
-	addps xmm5, [_F1111]
-	divps xmm6, xmm5 ; xmm6 = 1.0 / (border_len + 1.0)
-	divps xmm4, xmm5 ; xmm4 = size_mod / (border_len + 1.0)
+	divps xmm6, xmm5 ; xmm6 = 1.0 / border_len
+	divps xmm4, xmm5 ; xmm4 = size_mod / border_len
 	movss xmm2, xmm4
 	addss xmm2, xmm4
-	divss xmm7, xmm2 ; height_mod / (2.0 * size_mod / (border_len + 1.0))
+	divss xmm7, xmm2 ; height_mod / (2.0 * size_mod / border_len)
 	shufps xmm7, xmm7, 0
 	movss _NXZ_MOD, xmm7
 
@@ -167,8 +166,8 @@ DefFunc _AltitudeToTerrain
 	movd xmm1, _CUR_HEIGHT
 	cvtdq2ps xmm0, xmm0
 	movaps xmm3, xmm0
-	mulps xmm0, xmm4 ; xz * size_mod / (border_len + 1.0)
-	mulps xmm3, xmm6 ; uv / (border_len + 1.0)
+	mulps xmm0, xmm4 ; xz * size_mod / border_len
+	mulps xmm3, xmm6 ; uv / border_len
 	pshufd xmm2, xmm0, _MM_SHUFFLE(1, 1, 1, 1)
 	movss [edi + SimpleVertex.x], xmm0
 	movss [edi + SimpleVertex.y], xmm1
