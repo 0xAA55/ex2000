@@ -161,6 +161,7 @@ DefFunc _BufferPushItem
 	xor eax, eax
 	LoadParam esi, 0
 	mov [esi + GlBuffer.flushed], eax
+	inc dword[esi + GlBuffer.num_items]
 
 	inc eax
 	jmp .end
