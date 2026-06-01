@@ -12,70 +12,47 @@ _HaveSSE3 resd 1
 extern _HaveSSE41
 _HaveSSE41 resd 1
 
+%macro MakeVector 1
+extern %1
+%1:
+	InstVector
+%endmacro
+
 segment .bss
 alignb 16
-extern _Rand4MulVal
-_Rand4MulVal resd 4
-extern _Rand4AddVal
-_Rand4AddVal resd 4
-extern _Rand4AndVal
-_Rand4AndVal resd 4
-extern _FPMPM
-_FPMPM resd 4
-extern _FMPMP
-_FMPMP resd 4
-extern _FMMMM
-_FMMMM resd 4
-extern _F1111
-_F1111 resd 4
-extern _F2222
-_F2222 resd 4
-extern _F3333
-_F3333 resd 4
-extern _F4444
-_F4444 resd 4
-extern _F8888
-_F8888 resd 4
-extern _FCCCC
-_FCCCC resd 4
-extern _FHHHH
-_FHHHH resd 4
-extern _I0123
-_I0123 resd 4
-extern _F0123
-_F0123 resd 4
-extern _UF0F0
-_UF0F0 resd 4
-extern _UF000
-_UF000 resd 4
-extern _UFF00
-_UFF00 resd 4
-extern _UFFF0
-_UFFF0 resd 4
-extern _UFFFF
-_UFFFF resd 4
-extern _U0FFF
-_U0FFF resd 4
-extern _U00FF
-_U00FF resd 4
-extern _U000F
-_U000F resd 4
-extern _ZeroVector
-_ZeroVector resd 4
-extern _FP5P5P5P5
-_FP5P5P5P5 resd 4
-extern _point_001_vector
-_point_001_vector resd 4
+MakeVector _Rand4MulVal
+MakeVector _Rand4AddVal
+MakeVector _Rand4AndVal
+MakeVector _FPMPM
+MakeVector _FMPMP
+MakeVector _FMMMM
+MakeVector _F1111
+MakeVector _F2222
+MakeVector _F3333
+MakeVector _F4444
+MakeVector _F8888
+MakeVector _FCCCC
+MakeVector _FHHHH
+MakeVector _I0123
+MakeVector _F0123
+MakeVector _UF0F0
+MakeVector _U0F0F
+MakeVector _UF000
+MakeVector _UFF00
+MakeVector _UFFF0
+MakeVector _UFFFF
+MakeVector _U0FFF
+MakeVector _U00FF
+MakeVector _U000F
+MakeVector _ZeroVector
+MakeVector _FP5P5P5P5
+MakeVector _point_001_vector
 extern _IdentityMatrix
 _IdentityMatrix:
-extern _F1000
-extern _F0100
-extern _F0010
-extern _F0001
-_F1000 resd 4
-_F0100 resd 4
-_F0010 resd 4
-_F0001 resd 4
+MakeVector _F1000
+MakeVector _F0100
+MakeVector _F0010
+MakeVector _F0001
 
 segment .rdata
 extern _B0123
@@ -173,6 +150,12 @@ DefFunc _MathInit
 	movdqa [_U0FFF], xmm2
 	movdqa [_U00FF], xmm3
 	movdqa [_U000F], xmm4
+	pxor xmm0, xmm1
+	pxor xmm3, xmm1
+	pxor xmm4, xmm1
+	movdqa [_U0F0F], xmm0
+	movdqa [_UFF00], xmm3
+	movdqa [_UFFF0], xmm4
 	movaps xmm0, [_F1111]
 	addps xmm0, xmm0
 	movaps [_F2222], xmm0
@@ -186,10 +169,6 @@ DefFunc _MathInit
 	movaps [_FCCCC], xmm0
 	addps xmm0, [_F4444]
 	movaps [_FHHHH], xmm0
-	pxor xmm3, xmm1
-	pxor xmm4, xmm1
-	movdqa [_UFF00], xmm3
-	movdqa [_UFFF0], xmm4
 .end:
 	FrameEnd
 	ret
