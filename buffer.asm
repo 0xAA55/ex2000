@@ -206,39 +206,37 @@ DefFunc _BufferFlush
 	test eax, eax
 	jnz .end
 
+.reentry:
 	mov eax, [esi + GlBuffer.capacity]
+	test eax, eax
+	jnz .check_glbuffer_size
+.no_cap:
+	mov ecx, [esi + GlBuffer.gl_buffer_cap]
+	inc eax
+	cmp eax, ecx
+	cmovb eax, ecx
+	mov [esi + GlBuffer.capacity], eax
+	mul dword[esi + GlBuffer.size_of_item]
+	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
+	mov [esi + GlBuffer.pointer], eax
+	jmp .reentry
+
+.check_glbuffer_size:
 	cmp eax, [esi + GlBuffer.gl_buffer_cap]
 	je .map
-
-	mul dword [esi + GlBuffer.size_of_item]
+	mov [esi + GlBuffer.gl_buffer_cap], eax
+	mul dword[esi + GlBuffer.size_of_item]
 	mov ebx, eax
-	test eax, eax
-	jz .empty
-
-	lea edi, [esi + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glDeleteBuffers, 1, edi
-	invoke_dll_stdcall glGenBuffers, 1, edi
-	mov eax, [edi]
 	mov edi, [esi + GlBuffer.gl_buffer_type]
 	invoke_dll_stdcall glBindBuffer, edi, eax
 	invoke_dll_stdcall glBufferData, edi, ebx, [esi + GlBuffer.pointer], [esi + GlBuffer.gl_buffer_usage]
+	invoke_dll_stdcall glBindBuffer, edi, 0
 	xor eax, eax
-	invoke_dll_stdcall glBindBuffer, edi, eax
-	mov eax, [esi + GlBuffer.capacity]
-	mov [esi + GlBuffer.gl_buffer_cap], eax
-	xor eax, eax
-	jmp .flushed
-.empty:
-	lea edi, [esi + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glDeleteBuffers, 1, edi
-	xor eax, eax
-	mov [edi], eax
-	mov [esi + GlBuffer.gl_buffer_cap], eax
 	jmp .flushed
 
 .map:
-	test eax, eax ; Check if capacity is zero
-	jz .flushed
+	mul dword[esi + GlBuffer.size_of_item]
+	mov ebx, eax
 	mov edi, [esi + GlBuffer.gl_buffer_type]
 	invoke_dll_stdcall glBindBuffer, edi, [esi + GlBuffer.gl_buffer]
 	invoke_dll_stdcall glMapBuffer, edi, GL_WRITE_ONLY
@@ -262,34 +260,19 @@ DefFunc _BufferTrimExcess
 	mov eax, [esi + GlBuffer.num_items]
 	cmp eax, [esi + GlBuffer.capacity]
 	je .success
+	xor ecx, ecx
+	mov [esi + GlBuffer.flushed], ecx
+	inc ecx
+	test eax, eax
+	cmovz eax, ecx
+	mov [esi + GlBuffer.capacity], eax
 	mul dword [esi + GlBuffer.size_of_item]
-
 	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
 	mov [esi + GlBuffer.pointer], eax
-	test eax, eax
-	jz .failed
-
-	mov eax, [esi + GlBuffer.num_items]
-	mov [esi + GlBuffer.capacity], eax
-
-	xor eax, eax
-	mov [esi + GlBuffer.flushed], eax
 
 .success:
 	inc eax
 	jmp .end
-
-.failed:
-	invoke_cdecl _free, [esi + GlBuffer.pointer]
-
-	lea eax, [esi + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glDeleteBuffers, 1, eax
-
-	xor eax, eax
-	mov [esi + GlBuffer.gl_buffer], eax
-	mov [esi + GlBuffer.gl_buffer_cap], eax
-	mov [esi + GlBuffer.num_items], eax
-	mov [esi + GlBuffer.capacity], eax
 
 .end:
 	FrameEnd
@@ -303,23 +286,14 @@ DefFunc _BufferResize
 	cmp eax, [esi + GlBuffer.capacity]
 	jbe .change_size
 
-	mul dword [esi + GlBuffer.size_of_item]
-	test edx, edx
-	jnz .failed
-
-	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
-	test eax, eax
-	jz .failed
-
-	LoadParam eax, 1
 	mov [esi + GlBuffer.capacity], eax
+	mul dword [esi + GlBuffer.size_of_item]
+	invoke_cdecl _realloc, [esi + GlBuffer.pointer], eax
 
 .change_size: ;eax = new size
 	mov [esi + GlBuffer.num_items], eax
 
 	jmp .end
-.failed:
-	xor eax, eax
 
 .end:
 	FrameEnd
