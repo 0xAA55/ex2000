@@ -201,7 +201,7 @@ _BillBoardVertices:
 	invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
 %endmacro
 
-%macro GetAttribLocation 2+
+%macro GetAttribLocation 2
 	[segment .rdata]
 	%%AttribName db %2, 0
 
@@ -209,7 +209,7 @@ _BillBoardVertices:
 	invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
 %endmacro
 
-%macro GetUniformLocation 2+
+%macro GetUniformLocation 2
 	[segment .rdata]
 	%%UniformName db %2, 0
 

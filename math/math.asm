@@ -121,7 +121,6 @@ DefFunc _MathInit
 	invoke_dll_stdcall ExitProcess, 1
 
 .no_sse41:
-
 	fldpi
 	fldpi
 	fadd
