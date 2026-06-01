@@ -10,7 +10,7 @@ uniform vec4 skycolor = vec4(0.1, 0.2, 0.8, 1.0);
 uniform vec4 suncolor = vec4(1.0, 0.9, 0.8, 1.0);
 uniform vec3 sunpos = normalize(vec3(1.0, 1.0, 1.0));
 uniform float sunsize = 1000.0;
-uniform float cloud_size = 10.0;
+uniform float cloud_size = 5.0;
 in vec2 texcoord;
 out vec4 color;
 
