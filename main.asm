@@ -11,7 +11,7 @@ extern _Scene
 extern _SceneInit
 extern _SceneUnload
 
-struc WNDCLASSEX
+%macro InstWNDCLASSEX 0
 	.cbSize resd 1
 	.style resd 1
 	.lpfnWndProc resd  1
@@ -25,9 +25,9 @@ struc WNDCLASSEX
 	.lpszClassName resd 1
 	.hIconSm resd 1
     .size equ $ - .cbSize
-endstruc
+%endmacro
 
-struc MSG
+%macro InstMSG 0
     .hwnd resd 1
     .message resd 1
     .wParam resd 1
@@ -36,6 +36,14 @@ struc MSG
     .pt_x resd 1
     .pt_y resd 1
     .size equ $ - .hwnd
+%endmacro
+
+struc WNDCLASSEX
+	InstWNDCLASSEX
+endstruc
+
+struc MSG
+	InstMSG
 endstruc
 
 segment .rdata
@@ -46,11 +54,13 @@ segment .bss
 extern _hWnd
 extern _hDC
 extern _MSG
-_WCEx resb WNDCLASSEX.size
+_WCEx:
+	InstWNDCLASSEX
 _ClassAtom resd 1
 _hWnd resd 1
 _hDC resd 1
-_MSG resb MSG.size
+_MSG:
+	InstMSG
 
 segment .bss
 _LastUFunc:
@@ -76,21 +86,21 @@ DefFunc _entry
 DefFunc _main
 	FrameBegin 0, 1
 
-	mov dword[_WCEx + WNDCLASSEX.cbSize], WNDCLASSEX.size
-	mov dword[_WCEx + WNDCLASSEX.lpfnWndProc], _WndProc@16
-	mov dword[_WCEx + WNDCLASSEX.hbrBackground], 6
-	mov dword[_WCEx + WNDCLASSEX.lpszClassName], _ClassName
+	mov dword[_WCEx.cbSize], WNDCLASSEX.size
+	mov dword[_WCEx.lpfnWndProc], _WndProc@16
+	mov dword[_WCEx.hbrBackground], 6
+	mov dword[_WCEx.lpszClassName], _ClassName
 
 	mov eax, [_hInstance]
-	mov [_WCEx + WNDCLASSEX.hInstance], eax
+	mov [_WCEx.hInstance], eax
 
 	invoke_dll_stdcall LoadIconA, 0, 32512
 
-	mov [_WCEx + WNDCLASSEX.hIcon], eax
-	mov [_WCEx + WNDCLASSEX.hIconSm], eax
+	mov [_WCEx.hIcon], eax
+	mov [_WCEx.hIconSm], eax
 
 	invoke_dll_stdcall LoadCursorA, 0, 32512
-	mov [_WCEx + WNDCLASSEX.hCursor], eax
+	mov [_WCEx.hCursor], eax
 
 	invoke_dll_stdcall RegisterClassExA, _WCEx
 	mov [_ClassAtom], eax
@@ -130,7 +140,7 @@ DefFunc _DoEvents
 	test eax, eax
 	jz .finish
 
-	cmp dword [_MSG + MSG.message], WM_QUIT
+	cmp dword [_MSG.message], WM_QUIT
 	je .quit
 
 	invoke_dll_stdcall TranslateMessage, _MSG

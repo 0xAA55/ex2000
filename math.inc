@@ -6,17 +6,15 @@
 %define FLT_MAX 0x7F7FFFFF
 %define FLT_MIN 0xFF7FFFFF
 
-; Must be 16-byte aligned
-struc Vector
+%macro InstVector 0
 	.x resd 1
 	.y resd 1
 	.z resd 1
 	.w resd 1
-	.size equ $ - Vector
-endstruc
+	.size equ $ - .x
+%endmacro
 
-; Must be 16-byte aligned
-struc Matrix
+%macro InstMatrix 0
 .x:
 	.xx resd 1
 	.xy resd 1
@@ -37,18 +35,18 @@ struc Matrix
 	.wy resd 1
 	.wz resd 1
 	.ww resd 1
-	.size equ $ - Matrix
-endstruc
+	.size equ $ - .x
+%endmacro
 
-struc DVector
+%macro InstDVector 0
 	.x resq 1
 	.y resq 1
 	.z resq 1
 	.w resq 1
-	.size equ $ - Vector
-endstruc
+	.size equ $ - .x
+%endmacro
 
-struc DMatrix
+%macro InstDMatrix 0
 .x:
 	.xx resq 1
 	.xy resq 1
@@ -69,10 +67,10 @@ struc DMatrix
 	.wy resq 1
 	.wz resq 1
 	.ww resq 1
-	.size equ $ - Matrix
-endstruc
+	.size equ $ - .x
+%endmacro
 
-struc FloatMap
+%macro InstFloatMap 0
 	.data resd 1
 	.border_len resd 1
 	.num_pixels resd 1
@@ -80,8 +78,30 @@ struc FloatMap
 	.num_bytes resd 1
 	.bytes_per_pixel resd 1
 	.dims resd 1
-	.head_size equ $ - FloatMap
+	.head_size equ $ - .data
 	.row_ptr:
+%endmacro
+
+; Must be 16-byte aligned
+struc Vector
+	InstVector
+endstruc
+
+; Must be 16-byte aligned
+struc Matrix
+	InstMatrix
+endstruc
+
+struc DVector
+	InstDVector
+endstruc
+
+struc DMatrix
+	InstDMatrix
+endstruc
+
+struc FloatMap
+	InstFloatMap
 endstruc
 
 extern _Pi_P
@@ -253,11 +273,15 @@ extern _GenRadiusMap
 ; FloatMap *GenDistanceMap(int size);
 extern _GenDistanceMap
 
+%macro InstFMDataCmn 0
+	.dst_map resd 1
+	.src_map resd 1
+	.userdata resd 1
+	.size equ $ - .dst_map
+%endmacro
+
 struc FMDataCmn
-.dst_map resd 1
-.src_map resd 1
-.userdata resd 1
-.size equ $ - FMDataCmn
+	InstFMDataCmn
 endstruc
 
 ; FloatMap *FloatMapMTPool(

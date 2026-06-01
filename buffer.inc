@@ -1,7 +1,8 @@
 %ifndef _BUFFER_INC_
 %define _BUFFER_INC_ 1
 
-struc GlBuffer
+%macro InstGlBuffer 0
+	.address:
 	.pointer resd 1
 	.num_items resd 1
 	.capacity resd 1
@@ -11,7 +12,11 @@ struc GlBuffer
 	.gl_buffer_usage resd 1
 	.gl_buffer_cap resd 1
 	.flushed resd 1 ; Non-zero or zero
-	.size equ $ - GlBuffer
+	.size equ $ - .address
+%endmacro
+
+struc GlBuffer
+	InstGlBuffer
 endstruc
 
 ; void InitBuffer(GlBuffer *p_buffer, GLenum buffer_type, GLenum buffer_usage, size_t item_size, size_t capacity, void *pointer_to_data_or_null);

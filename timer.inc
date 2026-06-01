@@ -1,12 +1,17 @@
 %ifndef _TIMER_INC_
 %define _TIMER_INC_ 1
 
-struc Timer
+%macro InstTimer 0
+	.Address:
 	.StartTime resq 1
 	.PausedTime resq 1
 	.TimerVal resq 1
 	.IsPaused resd 1
-	.size equ $ - Timer
+	.size equ $ - .Address
+%endmacro
+
+struc Timer
+	InstTimer
 endstruc
 
 ; double GetSysTimerVal();
@@ -33,10 +38,7 @@ extern _UnpauseTimer
 	[segment .bss]
 	extern %1
 	%1:
-		.StartTime resq 1
-		.PausedTime resq 1
-		.TimerVal resq 1
-		.IsPaused resd 1
+		InstTimer
 
 	__SECT__
 	invoke_cdecl _InitTimer, %1

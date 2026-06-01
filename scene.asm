@@ -14,7 +14,8 @@ def_dll_func DwmFlush
 
 segment .bss
 extern _BillboardVerticesBuffer
-_BillboardVerticesBuffer resb GlBuffer.size
+_BillboardVerticesBuffer:
+	InstGlBuffer
 
 extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
@@ -32,10 +33,12 @@ extern _DrawTerrainProgram
 _DrawTerrainProgram resd 1
 
 extern _TerrainVerticesBuffer
-_TerrainVerticesBuffer resb GlBuffer.size
+_TerrainVerticesBuffer:
+	InstGlBuffer
 
 extern _TerrainIndicesBuffer
-_TerrainIndicesBuffer resb GlBuffer.size
+_TerrainIndicesBuffer:
+	InstGlBuffer
 
 extern _PerlinNoiseTexture
 _PerlinNoiseTexture resd 1
@@ -44,25 +47,26 @@ extern _PerlinNoiseTextureMipLinear
 _PerlinNoiseTextureMipLinear resd 1
 
 extern _Timer
-_Timer resb Timer.size
+_Timer:
+	InstTimer
 
 extern _ProgressProgramLocations
 _ProgressProgramLocations:
-.Progress resd 1
+	.Progress resd 1
 
 extern _BillboardProgramLocations
 _BillboardProgramLocations:
-.CameraMatrix resd 1
-.Aspect resd 1
-.FovY resd 1
-.Noise resd 1
-.Time resd 1
+	.CameraMatrix resd 1
+	.Aspect resd 1
+	.FovY resd 1
+	.Noise resd 1
+	.Time resd 1
 
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
-.Transform resd 1
-.Time resd 1
-.Terrain resd 1
+	.ViewProj resd 1
+	.Time resd 1
+	.Terrain resd 1
 
 extern _MinPitch
 _MinPitch resd 1
@@ -100,25 +104,32 @@ _FovYCos resd 1
 segment .bss
 alignb 16
 extern _ModelMatrix
-_ModelMatrix resb Matrix.size
+_ModelMatrix:
+	InstMatrix
 
-extern _TransformMatrix
-_TransformMatrix resb Matrix.size
+extern _ViewProjMatrix
+_ViewProjMatrix:
+	InstMatrix
 
 extern _CameraMatrix
-_CameraMatrix resb Matrix.size
+_CameraMatrix:
+	InstMatrix
 
 extern _CameraViewMatrix
-_CameraViewMatrix resb Matrix.size
+_CameraViewMatrix:
+	InstMatrix
 
 extern _ProjectionMatrix
-_ProjectionMatrix resb Matrix.size
+_ProjectionMatrix:
+	InstMatrix
 
 extern _MovementSpeed
-_MovementSpeed resb Vector.size
+_MovementSpeed:
+	InstVector
 
 extern _CameraPos
-_CameraPos resb Vector.size
+_CameraPos:
+	InstVector
 
 extern _ClientRect
 _ClientRect:
@@ -266,7 +277,7 @@ DefFunc _SceneInit
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
 	GetAttribLocation [_DrawProgressProgram], "position"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
@@ -365,7 +376,7 @@ DefFunc _SceneLoad07
 	jz .end
 
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
 	GetAttribLocation [_DrawBillboardProgram], "position"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
@@ -410,7 +421,7 @@ DefFunc _SceneLoad09
 	jz .end
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawTerrainVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_TerrainVerticesBuffer + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_TerrainVerticesBuffer.gl_buffer]
 	GetAttribLocation [_DrawTerrainProgram], "position"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
@@ -502,7 +513,7 @@ DefFunc _Scene
 	AssignVars KeyW, KeyS, KeyA, KeyD, KeySpace, KeyCtrl
 	AssignVars CurMovementSpeed
 
-	fld qword [_Timer + Timer.TimerVal]
+	fld qword [_Timer.TimerVal]
 	fstp qword DeltaTimeL
 	invoke_cdecl _UpdateTimer, _Timer
 	fst dword TimerValue32
@@ -690,9 +701,9 @@ __SECT__
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_TerrainProgramLocations.Terrain], 0
-	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer + GlBuffer.gl_buffer]
 	invoke_dll_stdcall glDrawElements, GL_TRIANGLES, [_TerrainIndicesBuffer + GlBuffer.num_items], GL_UNSIGNED_INT, 0
-	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer.gl_buffer]
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
