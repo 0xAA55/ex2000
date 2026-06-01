@@ -6,6 +6,22 @@
 %define FLT_MAX 0x7F7FFFFF
 %define FLT_MIN 0xFF7FFFFF
 
+%define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
+
+%define _MM_CMP_EQ_    0x00
+%define _MM_CMP_LT_    0x01
+%define _MM_CMP_LE_    0x02
+%define _MM_CMP_UNORD_ 0x03
+%define _MM_CMP_NEQ_   0x04
+%define _MM_CMP_GE_    0x05
+%define _MM_CMP_GT_    0x06
+%define _MM_CMP_ORD_   0x07
+
+%define _MM_ROUND_NEAREST_ 0x00
+%define _MM_ROUND_DOWN_    0x01
+%define _MM_ROUND_UP_      0x02
+%define _MM_ROUND_ZERO_    0x03
+
 %macro InstVector 0
 	.x resd 1
 	.y resd 1
