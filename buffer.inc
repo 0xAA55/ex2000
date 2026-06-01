@@ -31,6 +31,9 @@ extern _BufferPushItem
 ; void BufferPopItem(GlBuffer *p_buffer, void *item_or_null);
 extern _BufferPopItem
 
+; void BufferClear(GlBuffer *p_buffer);
+extern _BufferClear
+
 ; void BufferFlush(GlBuffer *p_buffer);
 extern _BufferFlush
 
