@@ -78,9 +78,9 @@ DefFunc _BatchCurve
 	movss xmm2, xmm1 ;temp_value_1
 	movss xmm3, xmm1 ;temp_value_2
 	xorps xmm4, xmm4
-	cmpss xmm2, xmm7, _MM_LE_
-	cmpss xmm3, xmm7, _MM_GT_
-	cmpss xmm4, xmm1, _MM_LT_ ; 0 < value ?
+	cmpss xmm2, xmm7, _MM_CMP_LE_
+	cmpss xmm3, xmm7, _MM_CMP_GT_
+	cmpss xmm4, xmm1, _MM_CMP_LT_ ; 0 < value ?
 	andps xmm2, xmm1 ;temp_value_1 = (value <= weight) ? value : 0.0f;
 	andps xmm3, xmm6 ;temp_value_2 = (value > weight) ? volume : 0.0f;
 	mulss xmm2, xmm6 ;temp_value_1 *= volume;
@@ -112,9 +112,9 @@ DefFunc _BatchCurve
 	movaps xmm2, xmm1 ;temp_value_1
 	movaps xmm3, xmm1 ;temp_value_2
 	xorps xmm4, xmm4
-	cmpps xmm2, xmm7, _MM_LE_
-	cmpps xmm3, xmm7, _MM_GT_
-	cmpps xmm4, xmm1, _MM_LT_ ; 0 < value ?
+	cmpps xmm2, xmm7, _MM_CMP_LE_
+	cmpps xmm3, xmm7, _MM_CMP_GT_
+	cmpps xmm4, xmm1, _MM_CMP_LT_ ; 0 < value ?
 	andps xmm2, xmm1 ;temp_value_1 = (value <= weight) ? value : 0.0f;
 	andps xmm3, xmm6 ;temp_value_2 = (value > weight) ? volume : 0.0f;
 	mulps xmm2, xmm6 ;temp_value_1 *= volume;
