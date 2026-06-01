@@ -331,7 +331,7 @@ DefFunc _SceneLoad03
 
 DefFunc _SceneLoad04
 	FrameBegin 0, 3
-	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 250.0f
+	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 500.0f
 	mov [_TerrainMesh], eax
 	FrameEnd
 	ret
