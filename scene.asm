@@ -40,6 +40,10 @@ extern _TerrainIndicesBuffer
 _TerrainIndicesBuffer:
 	InstGlBuffer
 
+extern _TerrainInstancesBuffer
+_TerrainInstancesBuffer:
+	InstGlBuffer
+
 extern _PerlinNoiseTexture
 _PerlinNoiseTexture resd 1
 
@@ -404,13 +408,20 @@ DefFunc _SceneLoad08
 	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [ebx + SimpleMesh.num_vertices], [ebx + SimpleMesh.vertices]
 	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [ebx + SimpleMesh.num_indices], [ebx + SimpleMesh.indices]
 	invoke_cdecl _free, ebx
+	invoke_cdecl _InitBuffer, _TerrainInstancesBuffer, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, Matrix.size, 9, NULL
 	xor eax, eax
-	mov [_TerrainMesh], 0
+	mov ebx, eax
+	mov [_TerrainMesh], eax
+.init_inst_buffer:
+	invoke_cdecl _BufferPushItem, _TerrainInstancesBuffer, _IdentityMatrix
+	inc ebx
+	cmp ebx, [_TerrainInstancesBuffer.capacity]
+	jb .init_inst_buffer
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad09
-	FrameBegin 0, 4, edi
+	FrameBegin 0, 4, edi, ebx
 	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
 	mov ecx, [_SceneLoadingProgress]
 	xor edx, edx
@@ -434,11 +445,25 @@ DefFunc _SceneLoad09
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
 	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, SimpleVertex.size, SimpleVertex.uv
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_TerrainInstancesBuffer.gl_buffer]
+	GetAttribLocation [_DrawTerrainProgram], "transform"
+	mov edi, eax
+	xor ebx, ebx
+.loop_set_mat:
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	mov eax, ebx
+	shl eax, 4
+	invoke_dll_stdcall glVertexAttribPointer, edi, 4, GL_FLOAT, 0, Matrix.size, eax
+	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
+	inc ebx
+	inc edi
+	cmp bl, 4
+	jb .loop_set_mat
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	GetUniformLocation [_DrawTerrainProgram], "transform"
-	mov [_TerrainProgramLocations.Transform], eax
+	GetUniformLocation [_DrawTerrainProgram], "view_proj"
+	mov [_TerrainProgramLocations.ViewProj], eax
 	GetUniformLocation [_DrawTerrainProgram], "time"
 	mov [_TerrainProgramLocations.Time], eax
 	GetUniformLocation [_DrawTerrainProgram], "terrain"
@@ -500,6 +525,7 @@ DefFunc _SceneUnload
 	invoke_cdecl _DestroyFloatMap, [_TerrainBitmap]
 	invoke_cdecl _DeInitBuffer, _TerrainVerticesBuffer
 	invoke_cdecl _DeInitBuffer, _TerrainIndicesBuffer
+	invoke_cdecl _DeInitBuffer, _TerrainInstancesBuffer
 	invoke_cdecl _DeInitBuffer, _BillboardVerticesBuffer
 
 	mov [_TerrainBitmap], ebx
@@ -618,8 +644,7 @@ __SECT__
 	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 1000.0f
-	invoke_cdecl _MatrixMultiply, _TransformMatrix, _ModelMatrix, _CameraViewMatrix
-	invoke_cdecl _MatrixMultiplyTo, _TransformMatrix, _ProjectionMatrix
+	invoke_cdecl _MatrixMultiply, _ViewProjMatrix, _CameraViewMatrix, _ProjectionMatrix
 
 	xor eax, eax
 	mov edx, eax
@@ -694,15 +719,17 @@ __SECT__
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_LINE
 
+	invoke_cdecl _BufferFlush, _TerrainInstancesBuffer
+
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Transform], 1, 0, _TransformMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.ViewProj], 1, 0, _ViewProjMatrix
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue32
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
 	invoke_dll_stdcall glUniform1i, [_TerrainProgramLocations.Terrain], 0
-	invoke_dll_stdcall glDrawElements, GL_TRIANGLES, [_TerrainIndicesBuffer + GlBuffer.num_items], GL_UNSIGNED_INT, 0
 	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer.gl_buffer]
+	invoke_dll_stdcall glDrawElementsInstanced, GL_TRIANGLES, [_TerrainIndicesBuffer.num_items], GL_UNSIGNED_INT, 0, [_TerrainInstancesBuffer + GlBuffer.num_items]
 	invoke_dll_stdcall glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, [_TerrainIndicesBuffer.gl_buffer]
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
