@@ -33,7 +33,7 @@ void main()
 	}
 	else
 	{
-		color = mix(fogcolor, vec4(0.0), -fragdir.y);
+		color = fogcolor;
 	}
 
 	color += sun;
