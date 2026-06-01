@@ -198,6 +198,14 @@ DefFunc _BufferPopItem
 	FrameEnd
 	ret
 
+DefFunc _BufferClear
+	FrameBegin 0, 0
+	xor eax, eax
+	mov edx, Param(0)
+	mov [edx + GlBuffer.num_items], eax
+	FrameEnd
+	ret
+
 DefFunc _BufferFlush
 	FrameBegin 0, 3, ebx, esi, edi
 
