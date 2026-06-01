@@ -6,6 +6,8 @@
 %include "shader.inc"
 %include "math.inc"
 
+%define TerrainBorderLen 7
+
 extern _hWnd
 extern _hDC
 
@@ -135,6 +137,14 @@ extern _CameraPos
 _CameraPos:
 	InstVector
 
+extern _TerrainMapScalingVector
+_TerrainMapScalingVector:
+	InstVector
+
+extern _TerrainMapScalingVectorRCP
+_TerrainMapScalingVectorRCP:
+	InstVector
+
 extern _ClientRect
 _ClientRect:
 .l resd 1
@@ -177,6 +187,12 @@ iend
 
 extern _DefaultMovementSpeed
 _DefaultMovementSpeed dd 100.0
+
+extern _TerrainMapScaling
+_TerrainMapScaling dd 500.0
+
+extern _TerrainMapHeightAmplifier
+_TerrainMapHeightAmplifier dd 200.0
 
 extern _FovDegree
 _FovDegree dw 60
@@ -305,13 +321,17 @@ DefFunc _FakeDwmFlush
 
 DefFunc _SceneLoad00
 	FrameBegin 0, 0
-	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
+	movss xmm0, [_TerrainMapScaling]
+	shufps xmm0, xmm0, 0
+	movaps [_TerrainMapScalingVector], xmm0
+	rcpps xmm0, xmm0
+	movaps [_TerrainMapScalingVectorRCP], xmm0
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad01
 	FrameBegin 0, 3
-	invoke_cdecl _GenMultiLayerPerlinAltitude, 2048, 1.0f, 8
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 8
 	mov [_NoiseBitmap], eax
 	FrameEnd
 	ret
@@ -331,7 +351,7 @@ DefFunc _SceneLoad03
 
 DefFunc _SceneLoad04
 	FrameBegin 0, 3
-	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], 100.0f, 500.0f
+	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], [_TerrainMapHeightAmplifier], [_TerrainMapScaling]
 	mov [_TerrainMesh], eax
 	FrameEnd
 	ret
@@ -408,15 +428,9 @@ DefFunc _SceneLoad08
 	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [ebx + SimpleMesh.num_vertices], [ebx + SimpleMesh.vertices]
 	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [ebx + SimpleMesh.num_indices], [ebx + SimpleMesh.indices]
 	invoke_cdecl _free, ebx
-	invoke_cdecl _InitBuffer, _TerrainInstancesBuffer, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, Matrix.size, 9, NULL
+	invoke_cdecl _InitBuffer, _TerrainInstancesBuffer, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, Matrix.size, TerrainBorderLen * TerrainBorderLen, NULL
 	xor eax, eax
-	mov ebx, eax
 	mov [_TerrainMesh], eax
-.init_inst_buffer:
-	invoke_cdecl _BufferPushItem, _TerrainInstancesBuffer, _IdentityMatrix
-	inc ebx
-	cmp ebx, [_TerrainInstancesBuffer.capacity]
-	jb .init_inst_buffer
 	FrameEnd
 	ret
 
@@ -474,7 +488,7 @@ DefFunc _SceneLoad09
 
 DefFunc _SceneLoad0A
 	FrameBegin 0, 0
-
+	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
 	FrameEnd
 	ret
 
@@ -718,6 +732,70 @@ __SECT__
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_LINE
+
+	invoke_cdecl _BufferResize, _TerrainInstancesBuffer, TerrainBorderLen * TerrainBorderLen
+	xor eax, eax
+	mov ebx, [_TerrainInstancesBuffer.pointer]
+	mov [_TerrainInstancesBuffer.flushed], eax
+
+	movaps xmm0, [_CameraPos]
+	movaps xmm7, [_TerrainMapScalingVector]
+	andps xmm0, [_UF0F0]
+	andps xmm7, [_UF0F0]
+	mulps xmm0, [_TerrainMapScalingVectorRCP]
+	cmp dword[_HaveSSE41], 0
+	jnz .with_sse41
+	cvttps2dq xmm1, xmm0
+	cvtdq2ps xmm6, xmm1
+	movaps xmm3, xmm0
+	xorps xmm4, xmm4
+	movaps xmm5, xmm0
+	cmpps xmm3, xmm6, _MM_CMP_NEQ_
+	cmpps xmm5, xmm4, _MM_CMP_LT_
+	andps xmm3, xmm5
+	movaps xmm4, [_F1111]
+	andps xmm4, xmm3
+	subps xmm6, xmm4
+	jmp .prep_instance_buffer
+.with_sse41:
+	roundps xmm6, xmm0, _MM_ROUND_DOWN_
+.prep_instance_buffer:
+	movaps xmm0, [_F1000]
+	movaps xmm1, [_F0100]
+	movaps xmm2, [_F0010]
+	xorps xmm4, xmm4
+	xorps xmm5, xmm5
+
+	mov eax, (-TerrainBorderLen / 2) & 0xFFFFFFFF
+	xor esi, esi
+.terrain_loopy:
+	mov ecx, eax
+	add ecx, esi
+	xor edi, edi
+.terrain_loopx:
+	mov edx, eax
+	add edx, edi
+	cvtsi2ss xmm4, ecx
+	cvtsi2ss xmm5, edx
+	movaps xmm3, xmm6
+	shufps xmm4, xmm5, _MM_SHUFFLE(1, 0, 1, 0)
+	addps xmm3, xmm4
+	mulps xmm3, xmm7
+	addps xmm3, [_F0001]
+
+	movups [ebx + Matrix.x], xmm0
+	movups [ebx + Matrix.y], xmm1
+	movups [ebx + Matrix.z], xmm2
+	movups [ebx + Matrix.w], xmm3
+	add ebx, Matrix.size
+
+	inc edi
+	cmp edi, TerrainBorderLen
+	jl .terrain_loopx
+
+	inc esi
+	cmp esi, TerrainBorderLen
+	jl .terrain_loopy
 
 	invoke_cdecl _BufferFlush, _TerrainInstancesBuffer
 
