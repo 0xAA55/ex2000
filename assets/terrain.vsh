@@ -1,6 +1,7 @@
 #version 330
 
-uniform mat4 view_proj;
+uniform mat4 view;
+uniform mat4 proj;
 
 in vec3 position;
 in vec3 normal;
@@ -9,10 +10,12 @@ in mat4 transform;
 
 out vec3 frag_normal;
 out vec2 texcoord;
+out vec3 frag_position;
 
 void main()
 {
 	texcoord = uv;
 	frag_normal = normal;
-	gl_Position = view_proj * transform * vec4(position, 1.0);
+	frag_position = (view * transform * vec4(position, 1.0)).xyz;
+	gl_Position = proj * view * transform * vec4(position, 1.0);
 }

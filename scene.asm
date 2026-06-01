@@ -70,7 +70,8 @@ _BillboardProgramLocations:
 
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
-	.ViewProj resd 1
+	.View resd 1
+	.Proj resd 1
 	.Time resd 1
 	.Terrain resd 1
 
@@ -392,13 +393,8 @@ DefFunc _SceneLoad06
 DefFunc _SceneLoad07
 	FrameBegin 0, 4
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
-	mov ecx, [_SceneLoadingProgress]
-	xor edx, edx
-	dec edx
 	test eax, eax
-	cmovz ecx, edx
-	mov [_SceneLoadingProgress], ecx
-	jz .end
+	jz .bad_end
 
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
@@ -418,6 +414,10 @@ DefFunc _SceneLoad07
 	mov [_BillboardProgramLocations.Noise], eax
 	GetUniformLocation [_DrawBillboardProgram], "time"
 	mov [_BillboardProgramLocations.Time], eax
+	jmp .end
+.bad_end:
+	dec eax
+	mov [_SceneLoadingProgress], eax
 
 .end:
 	FrameEnd
@@ -438,13 +438,9 @@ DefFunc _SceneLoad08
 DefFunc _SceneLoad09
 	FrameBegin 0, 4, edi, ebx
 	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
-	mov ecx, [_SceneLoadingProgress]
-	xor edx, edx
-	dec edx
 	test eax, eax
-	cmovz ecx, edx
-	mov [_SceneLoadingProgress], ecx
-	jz .end
+	jz .bad_end
+	
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawTerrainVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_TerrainVerticesBuffer.gl_buffer]
@@ -477,19 +473,25 @@ DefFunc _SceneLoad09
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	GetUniformLocation [_DrawTerrainProgram], "view_proj"
-	mov [_TerrainProgramLocations.ViewProj], eax
+	GetUniformLocation [_DrawTerrainProgram], "view"
+	mov [_TerrainProgramLocations.View], eax
+	GetUniformLocation [_DrawTerrainProgram], "proj"
+	mov [_TerrainProgramLocations.Proj], eax
 	GetUniformLocation [_DrawTerrainProgram], "time"
 	mov [_TerrainProgramLocations.Time], eax
 	GetUniformLocation [_DrawTerrainProgram], "terrain"
 	mov [_TerrainProgramLocations.Terrain], eax
+	jmp .end
+.bad_end:
+	dec eax
+	mov [_SceneLoadingProgress], eax
 .end:
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad0A
 	FrameBegin 0, 0
-	mov dword [_CameraPos + Vector.y], __?float32?__(100.0)
+	mov dword [_CameraPos + Vector.y], __?float32?__(200.0)
 	FrameEnd
 	ret
 
@@ -654,10 +656,8 @@ __SECT__
 	jmp .end_of_frame
 .loaded:
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
-	invoke_cdecl _MatrixEulerTranslated, _ModelMatrix, NULL, 0, 0, 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
-	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 1000.0f
-	invoke_cdecl _MatrixMultiply, _ViewProjMatrix, _CameraViewMatrix, _ProjectionMatrix
+	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 2000.0f
 
 	xor eax, eax
 	mov edx, eax
@@ -779,7 +779,7 @@ __SECT__
 	xorps xmm4, xmm4
 	xorps xmm5, xmm5
 
-	mov eax, (-TerrainBorderLen / 2) & 0xFFFFFFFF
+	mov eax, (-TerrainBorderLen / 2 + 1) & 0xFFFFFFFF
 	xor esi, esi
 .terrain_loopy:
 	mov ecx, eax
@@ -814,7 +814,8 @@ __SECT__
 
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawTerrainVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.ViewProj], 1, 0, _ViewProjMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.View], 1, 0, _CameraViewMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_TerrainProgramLocations.Proj], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform1f, [_TerrainProgramLocations.Time], TimerValue32
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
