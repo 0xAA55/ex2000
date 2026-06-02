@@ -244,10 +244,10 @@
 %endmacro
 
 %macro __IsPassRegAllUsed 1
-	%xdefine %1 \
+	%xdefine %1 (\
 		__EAX_USED_FOR_PASS && \
 		__ECX_USED_FOR_PASS && \
-		__EDX_USED_FOR_PASS
+		__EDX_USED_FOR_PASS)
 %endmacro
 
 %macro __IsRegAvoidForPass 2
@@ -260,11 +260,9 @@
 %macro __AddRegUsedForPass 1
 	%ifidn %1, eax
 		%define __EAX_USED_FOR_PASS 1
-	%endif
-	%ifidn %1, ecx
+	%elifidn %1, ecx
 		%define __ECX_USED_FOR_PASS 1
-	%endif
-	%ifidn %1, edx
+	%elifidn %1, edx
 		%define __EDX_USED_FOR_PASS 1
 	%endif
 %endmacro
@@ -272,11 +270,9 @@
 %macro __AddRegAvoidForPass 1
 	%ifidn %1, eax
 		%define __EAX_AVOID_FOR_PASS 1
-	%endif
-	%ifidn %1, ecx
+	%elifidn %1, ecx
 		%define __ECX_AVOID_FOR_PASS 1
-	%endif
-	%ifidn %1, edx
+	%elifidn %1, edx
 		%define __EDX_AVOID_FOR_PASS 1
 	%endif
 %endmacro
@@ -347,6 +343,9 @@
 	%assign __1_prep_cnt 0
 	%assign __2_prep_cnt 0
 	%assign __3_prep_cnt 0
+	%define __EAX_USED_FOR_PASS 0
+	%define __ECX_USED_FOR_PASS 0
+	%define __EDX_USED_FOR_PASS 0
 %endmacro
 
 %macro __RotatePassReg 4
@@ -402,9 +401,6 @@
 			__IsPassRegAllUsed __ALL_USED
 			%if __ALL_USED != 0
 				__FlushPassArgs
-				%define __EAX_USED_FOR_PASS 0
-				%define __ECX_USED_FOR_PASS 0
-				%define __EDX_USED_FOR_PASS 0
 			%endif
 			%exitmacro
 		%endif
