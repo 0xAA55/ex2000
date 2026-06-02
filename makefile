@@ -47,5 +47,8 @@ again:
 	make clean
 	make all -j
 
+unrich: ex2000.exe
+	python tools/unrich.py $^
+
 run: ex2000.exe
 	ex2000.exe
