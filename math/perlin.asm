@@ -122,8 +122,7 @@ DefFunc _ConvertPerlinMapToAltitude
 .get_steps:
 	fild dword _X
 	fmul dword _RECIPROCAL
-	fstp CallParam(0)
-	call _SmootherStep
+	invoke_cdecl _SmootherStep, st0
 	fstp dword [ebx]
 	add ebx, 4
 	mov eax, _X
