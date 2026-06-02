@@ -86,9 +86,9 @@ DefFunc _entry
 DefFunc _main
 	FrameBegin 0, 1
 
-	mov dword[_WCEx.cbSize], WNDCLASSEX.size
+	mov byte[_WCEx.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx.lpfnWndProc], _WndProc@16
-	mov dword[_WCEx.hbrBackground], 6
+	mov byte[_WCEx.hbrBackground], 6
 	mov dword[_WCEx.lpszClassName], _ClassName
 
 	mov eax, [_hInstance]
