@@ -178,7 +178,7 @@
 	%else
 		invoke_stdcall _DebugMsg, %%format
 	%endif
-	add esp, __StdCallParamIndex * 4
+	add esp, __ParamIndex * 4
 %endmacro
 
 %macro debug_printf 1-2+
@@ -191,7 +191,7 @@
 	%else
 		invoke_dll_stdcall printf, %%format
 	%endif
-	add esp, __StdCallParamIndex * 4
+	add esp, __ParamIndex * 4
 %endmacro
 
 %macro debug_show 3-4+
@@ -208,7 +208,7 @@
 	%else
 		invoke_stdcall _DebugShow, %1, %2, %%format
 	%endif
-	add esp, __StdCallParamIndex * 4
+	add esp, __ParamIndex * 4
 %endmacro
 
 %macro snprintf 3-4+

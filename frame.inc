@@ -412,7 +412,7 @@
 	%error No registers available to store address reference parameters to pass
 %endmacro
 
-%macro __PrepParam 2
+%macro __PrepCdeclParam 2
 	%if %1 >= Frame_NumReservedParams
 		%error Bad param index %1
 		%exitmacro
@@ -599,7 +599,7 @@
 	%endif
 %endmacro
 
-%macro invoke_stdcall 1-*
+%macro invoke_function 1-*
 	%if %0 == 1
 		call %1
 	%else
@@ -610,15 +610,24 @@
 		__ResetPassReg
 		%define esp (esP + __StdCallEspBias)
 		%rep %0 - 1
-			%rotate -1
+			%rotate 1
 			__PickOutRegToAvoid %1
 		%endrep
-		%rotate -1
-		%assign __StdCallParamIndex 0
+		%rotate 1
+		%assign __ParamIndex 0
 		%assign __NumParamsToCheck %0 - 1
 		%rep %0 - 1
-			%rotate -1
-			__PrepStdCallParam __StdCallParamIndex, %1
+			%if __InvokeStdCall
+				%rotate -1
+				__PrepStdCallParam __ParamIndex, %1
+			%elif __InvokeCdecl
+				%rotate 1
+				%if !%isidn(%1, _)
+					__PrepCdeclParam __ParamIndex, %1
+				%endif
+			%else
+				%error Unknown calling conversion, please define '__InvokeCdecl' or '__InvokeStdCall'
+			%endif
 			%assign __NumParamsChecking 0
 			%assign __EaxUsed 0
 			%assign __EcxUsed 0
@@ -636,11 +645,14 @@
 					%assign __EcxUsed  __EcxUsed | __ECX_USED
 					%assign __EdxUsed  __EdxUsed | __EDX_USED
 				%endif
-			%assign __StdCallParamIndex __StdCallParamIndex + __NumParamsPassed
 				%assign __NumParamsChecking __NumParamsChecking + 1
-				%rotate 1
+				%if __InvokeStdCall
+					%rotate -1
+				%elif __InvokeCdecl
+					%rotate 1
+				%endif
 			%endrep
-			%assign __StdCallParamIndex __StdCallParamIndex + __NumParamsPassed
+			%assign __ParamIndex __ParamIndex + __NumParamsPassed
 			%assign __NumParamsToCheck __NumParamsToCheck - 1
 			%if __EAX_USED == 0
 				%define __EAX_AVOID_FOR_PASS 0
@@ -652,10 +664,24 @@
 				%define __EDX_AVOID_FOR_PASS 0
 			%endif
 		%endrep
-		%rotate -1
+		%if __InvokeStdCall
+			%rotate -1
+		%elif __InvokeCdecl
+			%rotate 1
+		%endif
 		__FlushPassArgs
 		call %1
 		%undef esp
+	%endif
+%endmacro
+
+%macro invoke_stdcall 1-2+
+	%define __InvokeCdecl 0
+	%define __InvokeStdCall 1
+	%if %0 == 1
+		invoke_function %1
+	%else
+		invoke_function %1, %2
 	%endif
 %endmacro
 
@@ -667,58 +693,13 @@
 	%endif
 %endmacro
 
-%macro invoke_cdecl 1-*
+%macro invoke_cdecl 1-2+
+	%define __InvokeCdecl 1
+	%define __InvokeStdCall 0
 	%if %0 == 1
-		call %1
+		invoke_function %1
 	%else
-		__ResetPassReg
-		%rep %0 - 1
-			%rotate 1
-			__PickOutRegToAvoid %1
-		%endrep
-		%rotate 1
-		%assign __CDeclParamIndex 0
-		%assign __NumParamsToCheck %0 - 1
-		%rep %0 - 1
-			%rotate 1
-			%if !%isidn(%1, _)
-				__PrepParam __CDeclParamIndex, %1
-			%endif
-			%assign __NumParamsChecking 0
-			%assign __EaxUsed 0
-			%assign __EcxUsed 0
-			%assign __EdxUsed 0
-			%rep %0
-				%if __NumParamsChecking < __NumParamsToCheck
-					%undef __EAX_USED
-					%undef __ECX_USED
-					%undef __EDX_USED
-					%defstr __ParamsToCheck %1
-					__StrContains __EAX_USED, __ParamsToCheck, "eax"
-					__StrContains __ECX_USED, __ParamsToCheck, "ecx"
-					__StrContains __EDX_USED, __ParamsToCheck, "edx"
-					%assign __EaxUsed  __EaxUsed | __EAX_USED
-					%assign __EcxUsed  __EcxUsed | __ECX_USED
-					%assign __EdxUsed  __EdxUsed | __EDX_USED
-				%endif
-				%assign __NumParamsChecking __NumParamsChecking + 1
-				%rotate 1
-			%endrep
-			%assign __CDeclParamIndex __CDeclParamIndex + __NumParamsPassed
-			%assign __NumParamsToCheck __NumParamsToCheck - 1
-			%if __EAX_USED == 0
-				%define __EAX_AVOID_FOR_PASS 0
-			%endif
-			%if __ECX_USED == 0
-				%define __ECX_AVOID_FOR_PASS 0
-			%endif
-			%if __EDX_USED == 0
-				%define __EDX_AVOID_FOR_PASS 0
-			%endif
-		%endrep
-		%rotate 1
-		__FlushPassArgs
-		call %1
+		invoke_function %1, %2
 	%endif
 %endmacro
 
