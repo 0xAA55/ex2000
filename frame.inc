@@ -231,60 +231,66 @@
 
 %define __IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
 
+%define __NUM_REG_USED_FOR_PASS (\
+	__EAX_USED_FOR_PASS + \
+	__ECX_USED_FOR_PASS + \
+	__EDX_USED_FOR_PASS)
+
 %macro __IsRegUsedForPass 2
-	__StrContains %1, __PassRegUsed, %str(%2)
+	%define %1 \
+		(%isidn(%2, eax) && __EAX_USED_FOR_PASS) || \
+		(%isidn(%2, ecx) && __ECX_USED_FOR_PASS) || \
+		(%isidn(%2, edx) && __EDX_USED_FOR_PASS)
 %endmacro
 
 %macro __IsPassRegAllUsed 1
-	%undef __EAX_USED
-	%undef __ECX_USED
-	%undef __EDX_USED
-	%undef __EAX_AVOID
-	%undef __ECX_AVOID
-	%undef __EDX_AVOID
-	__StrContains __EAX_USED, __PassRegUsed, "eax"
-	__StrContains __ECX_USED, __PassRegUsed, "ecx"
-	__StrContains __EDX_USED, __PassRegUsed, "edx"
-	__StrContains __EAX_AVOID, __PassRegAvoid, "eax"
-	__StrContains __ECX_AVOID, __PassRegAvoid, "ecx"
-	__StrContains __EDX_AVOID, __PassRegAvoid, "edx"
-	%if	(__EAX_AVOID == 0 && __EAX_USED == 0) || \
-		(__ECX_AVOID == 0 && __ECX_USED == 0) || \
-		(__EDX_AVOID == 0 && __EDX_USED == 0)
-		%define %1 0
-	%else
-		%define %1 1
-	%endif
+	%xdefine %1 \
+		__EAX_USED_FOR_PASS && \
+		__ECX_USED_FOR_PASS && \
+		__EDX_USED_FOR_PASS
 %endmacro
 
 %macro __IsRegAvoidForPass 2
-	__StrContains %1, __PassRegAvoid, %str(%2)
+	%xdefine %1 \
+		(%isidn(%2, eax) && __EAX_AVOID_FOR_PASS) || \
+		(%isidn(%2, ecx) && __ECX_AVOID_FOR_PASS) || \
+		(%isidn(%2, edx) && __EDX_AVOID_FOR_PASS)
 %endmacro
 
 %macro __AddRegUsedForPass 1
-	%undef __RegSearchPos
-	__IsRegUsedForPass __RegSearchPos, %str(%1)
-	%if __RegSearchPos == 0
-		%strcat __PassRegUsed __PassRegUsed, %str(%1)
+	%ifidn %1, eax
+		%define __EAX_USED_FOR_PASS 1
+	%endif
+	%ifidn %1, ecx
+		%define __ECX_USED_FOR_PASS 1
+	%endif
+	%ifidn %1, edx
+		%define __EDX_USED_FOR_PASS 1
 	%endif
 %endmacro
 
 %macro __AddRegAvoidForPass 1
-	%undef __RegSearchPos
-	__IsRegAvoidForPass __RegSearchPos, %str(%1)
-	%if __RegSearchPos == 0
-		%strcat __PassRegAvoid __PassRegAvoid, %str(%1)
+	%ifidn %1, eax
+		%define __EAX_AVOID_FOR_PASS 1
+	%endif
+	%ifidn %1, ecx
+		%define __ECX_AVOID_FOR_PASS 1
+	%endif
+	%ifidn %1, edx
+		%define __EDX_AVOID_FOR_PASS 1
 	%endif
 %endmacro
 
 %macro __ResetPassReg 0
 	%undef __PassReg
-	%undef __PassRegUsed
-	%undef __PassRegAvoid
+	%define __EAX_USED_FOR_PASS 0
+	%define __ECX_USED_FOR_PASS 0
+	%define __EDX_USED_FOR_PASS 0
+	%define __EAX_AVOID_FOR_PASS 0
+	%define __ECX_AVOID_FOR_PASS 0
+	%define __EDX_AVOID_FOR_PASS 0
 	%undef __LastPassParam
 	%define __PassReg
-	%defstr __PassRegUsed
-	%defstr __PassRegAvoid
 	%define __LastPassParam
 	%assign __StdCallEspBias 0
 	%assign __1_prep_cnt 0
@@ -361,7 +367,7 @@
 		__IsRegAvoidForPass __IsAvoid, __PassReg
 		%if __IsAvoid == 0
 			__AddRegUsedForPass __PassReg
-			%if %strlen(__PassRegUsed) <= 3
+			%if __NUM_REG_USED_FOR_PASS == 1
 				%ifndef __UseLastReg
 					%xdefine __1_load %1 __PassReg, %2
 				%endif
@@ -371,7 +377,7 @@
 					%xdefine __1_prep%[__1_prep_cnt] mov %3, __PassReg
 				%endif
 				%assign __1_prep_cnt __1_prep_cnt + 1
-			%elif %strlen(__PassRegUsed) <= 6
+			%elif __NUM_REG_USED_FOR_PASS == 2
 				%ifndef __UseLastReg
 					%xdefine __2_load %1 __PassReg, %2
 				%endif
@@ -396,7 +402,9 @@
 			__IsPassRegAllUsed __ALL_USED
 			%if __ALL_USED != 0
 				__FlushPassArgs
-				%defstr __PassRegUsed
+				%define __EAX_USED_FOR_PASS 0
+				%define __ECX_USED_FOR_PASS 0
+				%define __EDX_USED_FOR_PASS 0
 			%endif
 			%exitmacro
 		%endif
@@ -607,10 +615,42 @@
 		%endrep
 		%rotate -1
 		%assign __StdCallParamIndex 0
+		%assign __NumParamsToCheck %0 - 1
 		%rep %0 - 1
 			%rotate -1
 			__PrepStdCallParam __StdCallParamIndex, %1
+			%assign __NumParamsChecking 0
+			%assign __EaxUsed 0
+			%assign __EcxUsed 0
+			%assign __EdxUsed 0
+			%rep %0
+				%if __NumParamsChecking < __NumParamsToCheck
+					%undef __EAX_USED
+					%undef __ECX_USED
+					%undef __EDX_USED
+					%defstr __ParamsToCheck %1
+					__StrContains __EAX_USED, __ParamsToCheck, "eax"
+					__StrContains __ECX_USED, __ParamsToCheck, "ecx"
+					__StrContains __EDX_USED, __ParamsToCheck, "edx"
+					%assign __EaxUsed  __EaxUsed | __EAX_USED
+					%assign __EcxUsed  __EcxUsed | __ECX_USED
+					%assign __EdxUsed  __EdxUsed | __EDX_USED
+				%endif
 			%assign __StdCallParamIndex __StdCallParamIndex + __NumParamsPassed
+				%assign __NumParamsChecking __NumParamsChecking + 1
+				%rotate 1
+			%endrep
+			%assign __StdCallParamIndex __StdCallParamIndex + __NumParamsPassed
+			%assign __NumParamsToCheck __NumParamsToCheck - 1
+			%if __EAX_USED == 0
+				%define __EAX_AVOID_FOR_PASS 0
+			%endif
+			%if __ECX_USED == 0
+				%define __ECX_AVOID_FOR_PASS 0
+			%endif
+			%if __EDX_USED == 0
+				%define __EDX_AVOID_FOR_PASS 0
+			%endif
 		%endrep
 		%rotate -1
 		__FlushPassArgs
@@ -638,12 +678,43 @@
 		%endrep
 		%rotate 1
 		%assign __CDeclParamIndex 0
+		%assign __NumParamsToCheck %0 - 1
 		%rep %0 - 1
 			%rotate 1
 			%if !%isidn(%1, _)
 				__PrepParam __CDeclParamIndex, %1
 			%endif
+			%assign __NumParamsChecking 0
+			%assign __EaxUsed 0
+			%assign __EcxUsed 0
+			%assign __EdxUsed 0
+			%rep %0
+				%if __NumParamsChecking < __NumParamsToCheck
+					%undef __EAX_USED
+					%undef __ECX_USED
+					%undef __EDX_USED
+					%defstr __ParamsToCheck %1
+					__StrContains __EAX_USED, __ParamsToCheck, "eax"
+					__StrContains __ECX_USED, __ParamsToCheck, "ecx"
+					__StrContains __EDX_USED, __ParamsToCheck, "edx"
+					%assign __EaxUsed  __EaxUsed | __EAX_USED
+					%assign __EcxUsed  __EcxUsed | __ECX_USED
+					%assign __EdxUsed  __EdxUsed | __EDX_USED
+				%endif
+				%assign __NumParamsChecking __NumParamsChecking + 1
+				%rotate 1
+			%endrep
 			%assign __CDeclParamIndex __CDeclParamIndex + __NumParamsPassed
+			%assign __NumParamsToCheck __NumParamsToCheck - 1
+			%if __EAX_USED == 0
+				%define __EAX_AVOID_FOR_PASS 0
+			%endif
+			%if __ECX_USED == 0
+				%define __ECX_AVOID_FOR_PASS 0
+			%endif
+			%if __EDX_USED == 0
+				%define __EDX_AVOID_FOR_PASS 0
+			%endif
 		%endrep
 		%rotate 1
 		__FlushPassArgs
