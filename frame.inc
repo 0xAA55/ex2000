@@ -638,9 +638,10 @@
 		%undef __pos_eax
 		%undef __pos_ecx
 		%undef __pos_edx
-		__StrContains __pos_eax, %str(%1), "eax"
-		__StrContains __pos_ecx, %str(%1), "ecx"
-		__StrContains __pos_edx, %str(%1), "edx"
+		%defstr %%Param %1
+		__StrContains __pos_eax, %%Param, "eax"
+		__StrContains __pos_ecx, %%Param, "ecx"
+		__StrContains __pos_edx, %%Param, "edx"
 		%if __pos_eax > 0
 			__AddRegAvoidForPass eax
 		%endif
