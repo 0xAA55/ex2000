@@ -502,6 +502,11 @@
 		%else
 			%error `f2d` only supports convert float number from memory address.
 		%endif
+	%elifidn __ParamStr, 'st0'
+		fstp dword CallParam(%1)
+	%elifidn __ParamStr, 'st0d'
+		%assign __NumParamsPassed 2
+		fstp qword CallParam(%1)
 	%elif __IsFloatF
 		mov dword CallParam(%1), __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
 	%elif __IsFloatD
@@ -596,6 +601,15 @@
 		%else
 			%error `f2d` only supports convert float number from memory address.
 		%endif
+	%elifidn __ParamStr, 'st0'
+		sub esP, 4
+		%assign __StdCallEspBias __StdCallEspBias + 4
+		fstp dword [esP]
+	%elifidn __ParamStr, 'st0d'
+		%assign __NumParamsPassed 2
+		sub esP, 8
+		%assign __StdCallEspBias __StdCallEspBias + 8
+		fstp qword [esP]
 	%elif __IsFloatF
 		__FlushPassArgs
 		push __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
