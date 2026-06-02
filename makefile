@@ -38,7 +38,7 @@ out/math.lib: $(wildcard math/*)
 	make -C math
 
 ex2000.exe: $(OBJS) $(LIBS) out/stub.bin
-	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /INCREMENTAL:no /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(LIBS)
+	link /NOLOGO /NODEFAULTLIB /NOENTRY /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(LIBS)
 
 clean:
 	del /f /s /q out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb ex2000.exe
