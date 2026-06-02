@@ -4,6 +4,8 @@
 ; %define Frame_UseEBP
 ; %define INVOKE_CHECK
 
+%define PassCdeclParamsByPush
+
 %macro DefFunc 1
 	%xdefine CurFuncName %1
 	segment .text
@@ -14,7 +16,11 @@
 %macro FrameBegin 2-3+
 	%assign Frame_NumVariables %1
 	%assign Frame_NumReservedParams %2
-	%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
+	%ifdef PassCdeclParamsByPush
+		%assign Frame_NumLocals Frame_NumVariables
+	%else
+		%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
+	%endif
 	%assign Frame_NumSavedRegs 0
 	%ifdef Frame_UseEBP
 		push ebp
@@ -38,8 +44,13 @@
 %else
 	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1) * 4)
 %endif
-%define AddrOfVariable(x) (esp + (Frame_NumReservedParams + (x)) * 4)
-%define AddrOfCallParam(x) (esp + (x) * 4)
+%ifdef PassCdeclParamsByPush
+	%define AddrOfVariable(x) (esp + (x) * 4)
+	%define AddrOfCallParam(x) %error There are no addresses for call params
+%else
+	%define AddrOfVariable(x) (esp + (Frame_NumReservedParams + (x)) * 4)
+	%define AddrOfCallParam(x) (esp + (x) * 4)
+%endif
 %define Param(x) [AddrOfParam(x)]
 %define Variable(x) [AddrOfVariable(x)]
 %define CallParam(x) [AddrOfCallParam(x)]
@@ -751,12 +762,23 @@
 %endmacro
 
 %macro invoke_cdecl 1-2+
-	%define __InvokeCdecl 1
-	%define __InvokeStdCall 0
+	%ifdef PassCdeclParamsByPush
+		%define __InvokeCdecl 0
+		%define __InvokeStdCall 1
+		%assign __ParamIndex 0
+	%else
+		%define __InvokeCdecl 1
+		%define __InvokeStdCall 0
+	%endif
 	%if %0 == 1
 		invoke_function %1
 	%else
 		invoke_function %1, %2
+	%endif
+	%ifdef PassCdeclParamsByPush
+		%if __ParamIndex != 0
+			add esp, __ParamIndex * 4
+		%endif
 	%endif
 %endmacro
 
