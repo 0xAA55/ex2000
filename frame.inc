@@ -287,6 +287,9 @@
 	%defstr __PassRegAvoid
 	%define __LastPassParam
 	%assign __StdCallEspBias 0
+	%assign __1_prep_cnt 0
+	%assign __2_prep_cnt 0
+	%assign __3_prep_cnt 0
 %endmacro
 
 %macro __FlushPassArgs 0
@@ -299,30 +302,45 @@
 	%ifdef __3_load
 		__3_load
 	%endif
-	%ifdef __1_prep
-		__1_prep
-		%ifidn %substr(%str(__1_prep), 1, 4), 'push'
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
-		%endif
+	%if __1_prep_cnt > 0
+		%assign __prep_index 0
+		%rep __1_prep_cnt
+			__1_prep%[__prep_index]
+			%ifidn %substr(%str(__1_prep%[__prep_index]), 1, 4), 'push'
+				%assign __StdCallEspBias (__StdCallEspBias + 4)
+			%endif
+			%undef __1_prep%[__prep_index]
+			%assign __prep_index __prep_index + 1
+		%endrep
 	%endif
-	%ifdef __2_prep
-		__2_prep
-		%ifidn %substr(%str(__2_prep), 1, 4), 'push'
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
-		%endif
+	%if __2_prep_cnt > 0
+		%assign __prep_index 0
+		%rep __2_prep_cnt
+			__2_prep%[__prep_index]
+			%ifidn %substr(%str(__2_prep%[__prep_index]), 1, 4), 'push'
+				%assign __StdCallEspBias (__StdCallEspBias + 4)
+			%endif
+			%undef __2_prep%[__prep_index]
+			%assign __prep_index __prep_index + 1
+		%endrep
 	%endif
-	%ifdef __3_prep
-		__3_prep
-		%ifidn %substr(%str(__3_prep), 1, 4), 'push'
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
-		%endif
+	%if __3_prep_cnt > 0
+		%assign __prep_index 0
+		%rep __3_prep_cnt
+			__3_prep%[__prep_index]
+			%ifidn %substr(%str(__3_prep%[__prep_index]), 1, 4), 'push'
+				%assign __StdCallEspBias (__StdCallEspBias + 4)
+			%endif
+			%undef __3_prep%[__prep_index]
+			%assign __prep_index __prep_index + 1
+		%endrep
 	%endif
 	%undef __1_load
 	%undef __2_load
 	%undef __3_load
-	%undef __1_prep
-	%undef __2_prep
-	%undef __3_prep
+	%assign __1_prep_cnt 0
+	%assign __2_prep_cnt 0
+	%assign __3_prep_cnt 0
 %endmacro
 
 %macro __RotatePassReg 4
@@ -348,28 +366,31 @@
 					%xdefine __1_load %1 __PassReg, %2
 				%endif
 				%ifidn %3, push
-					%xdefine __1_prep push __PassReg
+					%xdefine __1_prep%[__1_prep_cnt] push __PassReg
 				%else
-					%xdefine __1_prep mov %3, __PassReg
+					%xdefine __1_prep%[__1_prep_cnt] mov %3, __PassReg
 				%endif
+				%assign __1_prep_cnt __1_prep_cnt + 1
 			%elif %strlen(__PassRegUsed) <= 6
 				%ifndef __UseLastReg
 					%xdefine __2_load %1 __PassReg, %2
 				%endif
 				%ifidn %3, push
-					%xdefine __2_prep push __PassReg
+					%xdefine __2_prep%[__2_prep_cnt] push __PassReg
 				%else
-					%xdefine __2_prep mov %3, __PassReg
+					%xdefine __2_prep%[__2_prep_cnt] mov %3, __PassReg
 				%endif
+				%assign __2_prep_cnt __2_prep_cnt + 1
 			%else
 				%ifndef __UseLastReg
 					%xdefine __3_load %1 __PassReg, %2
 				%endif
 				%ifidn %3, push
-					%xdefine __3_prep push __PassReg
+					%xdefine __3_prep%[__3_prep_cnt] push __PassReg
 				%else
-					%xdefine __3_prep mov %3, __PassReg
+					%xdefine __3_prep%[__3_prep_cnt] mov %3, __PassReg
 				%endif
+				%assign __3_prep_cnt __3_prep_cnt + 1
 			%endif
 			%undef __ALL_USED
 			__IsPassRegAllUsed __ALL_USED
