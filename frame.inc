@@ -265,21 +265,21 @@
 	__EDX_USED_FOR_PASS)
 
 %macro __IsRegUsedForPass 2
-	%define %1 \
+	%assign %1 \
 		(%isidn(%2, eax) && __EAX_USED_FOR_PASS) || \
 		(%isidn(%2, ecx) && __ECX_USED_FOR_PASS) || \
 		(%isidn(%2, edx) && __EDX_USED_FOR_PASS)
 %endmacro
 
 %macro __IsPassRegAllUsed 1
-	%xdefine %1 (\
+	%assign %1 (\
 		__EAX_USED_FOR_PASS && \
 		__ECX_USED_FOR_PASS && \
 		__EDX_USED_FOR_PASS)
 %endmacro
 
 %macro __IsRegAvoidForPass 2
-	%xdefine %1 \
+	%assign %1 \
 		(%isidn(%2, eax) && __EAX_AVOID_FOR_PASS) || \
 		(%isidn(%2, ecx) && __ECX_AVOID_FOR_PASS) || \
 		(%isidn(%2, edx) && __EDX_AVOID_FOR_PASS)
