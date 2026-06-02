@@ -337,7 +337,7 @@
 		%rep __1_prep_cnt
 			__1_prep%[__prep_index]
 			%ifidn %substr(%str(__1_prep%[__prep_index]), 1, 4), 'push'
-				%assign __StdCallEspBias (__StdCallEspBias + 4)
+				%assign __StdCallEspBias __StdCallEspBias + 4
 			%endif
 			%undef __1_prep%[__prep_index]
 			%assign __prep_index __prep_index + 1
@@ -348,7 +348,7 @@
 		%rep __2_prep_cnt
 			__2_prep%[__prep_index]
 			%ifidn %substr(%str(__2_prep%[__prep_index]), 1, 4), 'push'
-				%assign __StdCallEspBias (__StdCallEspBias + 4)
+				%assign __StdCallEspBias __StdCallEspBias + 4
 			%endif
 			%undef __2_prep%[__prep_index]
 			%assign __prep_index __prep_index + 1
@@ -359,7 +359,7 @@
 		%rep __3_prep_cnt
 			__3_prep%[__prep_index]
 			%ifidn %substr(%str(__3_prep%[__prep_index]), 1, 4), 'push'
-				%assign __StdCallEspBias (__StdCallEspBias + 4)
+				%assign __StdCallEspBias __StdCallEspBias + 4
 			%endif
 			%undef __3_prep%[__prep_index]
 			%assign __prep_index __prep_index + 1
@@ -441,162 +441,178 @@
 		%error Bad param index %1
 		%exitmacro
 	%endif
-	%xdefine %%Param %2
-	%defstr %%ParamStr %%Param
-	%strlen %%ParamStrLen %%ParamStr
+	%xdefine __Param %2
+	%defstr __ParamStr __Param
+	%strlen __ParamStrLen __ParamStr
 	%assign __NumParamsPassed 1
 	%undef __IsFloatF
 	%undef __IsFloatD
-	IsFloatF __IsFloatF, %%Param
-	IsFloatStr __IsFloatD, %%ParamStr
-	%if %substr(%%ParamStr, 1, 1) == "&"
-		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
-		__RotatePassReg lea, %%Param, CallParam(%1), %tok(%%ParamStr)
-	%elif %substr(%%ParamStr, 1, 1) == "["
-		__RotatePassReg mov, %%Param, CallParam(%1), %%Param
-	%elif %substr(%%ParamStr, 1, 3) == "xmm"
+	IsFloatF __IsFloatF, __Param
+	IsFloatStr __IsFloatD, __ParamStr
+	%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+	%if %substr(__ParamStr, 1, 1) == "&"
+		%xdefine __Param %tok(%substr(__ParamStr, 2))
+		__RotatePassReg lea, __Param, CallParam(%1), %tok(__ParamStr)
+	%elif %substr(__ParamStr, 1, 1) == "["
+		__RotatePassReg mov, __Param, CallParam(%1), __Param
+	%elif %substr(__ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
-		StripStringFromDot __XmmParamStr, %%ParamStr
+		StripStringFromDot __XmmParamStr, __ParamStr
 		%xdefine __XmmParam %tok(__XmmParamStr)
-		%if %substr(%%ParamStr, %%ParamStrLen -1) == ".x"
+		%if %substr(__ParamStr, __ParamStrLen -1) == ".x"
 			movss CallParam(%1), __XmmParam
-		%elif %substr(%%ParamStr, %%ParamStrLen -2) == ".xy"
+		%elif %substr(__ParamStr, __ParamStrLen -2) == ".xy"
 			%assign __NumParamsPassed 2
 			movq CallParam(%1), __XmmParam
-		%elif %substr(%%ParamStr, %%ParamStrLen -4) == ".xyzw"
+		%elif %substr(__ParamStr, __ParamStrLen -4) == ".xyzw"
 			%assign __NumParamsPassed 4
 			movdqu CallParam(%1), __XmmParam
 		%else
-			%error Unknown param %%ParamStr
+			%error Unknown param __ParamStr
 		%endif
-	%elif %substr(%%ParamStr, 1, 3) == "qw "
-		%xdefine %%Param %tok(%substr(%%ParamStr, 4))
-		%defstr %%ParamStr %%Param
-		%strlen %%ParamStrLen %%ParamStr
+	%elif %substr(__ParamStr, 1, 3) == "qw "
+		%xdefine __Param %tok(%substr(__ParamStr, 4))
+		%defstr __ParamStr __Param
+		%strlen __ParamStrLen __ParamStr
 		%assign __NumParamsPassed 2
-		%if %substr(%%ParamStr, 1, 1) == "["
-			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
-			%xdefine %%Inner %tok(%%InnerStr)
-			__RotatePassReg mov, [%%Inner + 0], CallParam(%1 + 0), [%%Inner + 0]
-			__RotatePassReg mov, [%%Inner + 4], CallParam(%1 + 1), [%%Inner + 4]
-		%elif %substr(%%ParamStr, 1, 2) == "&["
-			%xdefine %%InnerStr %substr(%%ParamStr, 3, -2)
-			%xdefine %%Inner %tok(%%InnerStr)
-			__RotatePassReg lea, [%%Inner + 0], CallParam(%1 + 0), [%%Inner + 0]
-			__RotatePassReg lea, [%%Inner + 4], CallParam(%1 + 1), [%%Inner + 4]
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			__RotatePassReg mov, [__Inner + 0], CallParam(%1 + 0), [__Inner + 0]
+			__RotatePassReg mov, [__Inner + 4], CallParam(%1 + 1), [__Inner + 4]
+		%elif %substr(__ParamStr, 1, 2) == "&["
+			%xdefine __InnerStr %substr(__ParamStr, 3, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			__RotatePassReg lea, [__Inner + 0], CallParam(%1 + 0), [__Inner + 0]
+			__RotatePassReg lea, [__Inner + 4], CallParam(%1 + 1), [__Inner + 4]
 		%else
-			__RotatePassReg mov, (%%Param) & 0xFFFFFFFF, CallParam(%1 + 0), (%%Param) & 0xFFFFFFFF
-			__RotatePassReg mov, (%%Param) >> 32, CallParam(%1 + 1), (%%Param) >> 32
+			__RotatePassReg mov, (__Param) & 0xFFFFFFFF, CallParam(%1 + 0), (__Param) & 0xFFFFFFFF
+			__RotatePassReg mov, (__Param) >> 32, CallParam(%1 + 1), (__Param) >> 32
 		%endif
-	%elif %substr(%%ParamStr, 1, 4) == "f2d "
-		%xdefine %%Param %tok(%substr(%%ParamStr, 5))
-		%defstr %%ParamStr %%Param
-		%strlen %%ParamStrLen %%ParamStr
+	%elif %substr(__ParamStr, 1, 4) == "f2d "
+		%xdefine __Param %tok(%substr(__ParamStr, 5))
+		%defstr __ParamStr __Param
+		%strlen __ParamStrLen __ParamStr
 		%assign __NumParamsPassed 2
-		%if %substr(%%ParamStr, 1, 1) == "["
-			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
-			%xdefine %%Inner %tok(%%InnerStr)
-			fld dword [%%Inner]
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			fld dword [__Inner]
 			fstp qword CallParam(%1)
 		%else
 			%error `f2d` only supports convert float number from memory address.
 		%endif
 	%elif __IsFloatF
-		mov dword CallParam(%1), __?float32?__(%tok(%substr(%%ParamStr, 1, -2)))
+		mov dword CallParam(%1), __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
 	%elif __IsFloatD
 		%assign __NumParamsPassed 2
-		mov dword CallParam(%1 + 0), (__?float64?__(%%Param) & 0xFFFFFFFF)
-		mov dword CallParam(%1 + 1), (__?float64?__(%%Param) >> 32)
+		mov dword CallParam(%1 + 0), (__?float64?__(__Param) & 0xFFFFFFFF)
+		mov dword CallParam(%1 + 1), (__?float64?__(__Param) >> 32)
 	%else
-		mov dword CallParam(%1), %%Param
+		mov dword CallParam(%1), __Param
 	%endif
 	%xdefine __LastPassParam %2
+	%undef __ESP_PLACE_HOLDER__
 %endmacro
 
 %macro __PrepStdCallParam 2
-	%xdefine %%Param %2
-	%defstr %%ParamStr %%Param
-	%strlen %%ParamStrLen %%ParamStr
+	%define __Param %2
+	%defstr __ParamStr __Param
+	%strlen __ParamStrLen __ParamStr
 	%assign __NumParamsPassed 1
 	%undef __IsFloatF
 	%undef __IsFloatD
-	IsFloatF __IsFloatF, %%Param
-	IsFloatStr __IsFloatD, %%ParamStr
-	%if %substr(%%ParamStr, 1, 1) == "&"
-		%xdefine %%Param %tok(%substr(%%ParamStr, 2))
-		__RotatePassReg lea, %%Param, push, %%%tok(%%ParamStr)
-	%elif %substr(%%ParamStr, 1, 3) == "xmm"
+	IsFloatF __IsFloatF, __Param
+	IsFloatStr __IsFloatD, __ParamStr
+	%if %substr(__ParamStr, 1, 1) == "&"
+		%define __Param %tok(%substr(__ParamStr, 2))
+		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+		__RotatePassReg lea, __Param, push, %%%tok(__ParamStr)
+		%undef __ESP_PLACE_HOLDER__
+	%elif %substr(__ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
-		StripStringFromDot __XmmParamStr, %%ParamStr
+		StripStringFromDot __XmmParamStr, __ParamStr
 		%xdefine __XmmParam %tok(__XmmParamStr)
-		%if %substr(%%ParamStr, %%ParamStrLen -1) == ".x"
-			sub esp, 4
-			movss [esp], __XmmParam
-		%elif %substr(%%ParamStr, %%ParamStrLen -2) == ".xy"
+		%if %substr(__ParamStr, __ParamStrLen -1) == ".x"
+			sub esP, 4
+			%assign __StdCallEspBias __StdCallEspBias + 4
+			movss [esP], __XmmParam
+		%elif %substr(__ParamStr, __ParamStrLen -2) == ".xy"
 			%assign __NumParamsPassed 2
-			sub esp, 8
-			movq [esp], __XmmParam
-		%elif %substr(%%ParamStr, %%ParamStrLen -4) == ".xyzw"
+			sub esP, 8
+			%assign __StdCallEspBias __StdCallEspBias + 8
+			movq [esP], __XmmParam
+		%elif %substr(__ParamStr, __ParamStrLen -4) == ".xyzw"
 			%assign __NumParamsPassed 4
-			sub esp, 16
-			movdqu [esp], __XmmParam
+			sub esP, 16
+			%assign __StdCallEspBias __StdCallEspBias + 16
+			movdqu [esP], __XmmParam
 		%else
-			%error Unknown param %%ParamStr
+			%error Unknown param __ParamStr
 		%endif
-	%elif %substr(%%ParamStr, 1, 3) == "qw "
-		%xdefine %%Param %tok(%substr(%%ParamStr, 4))
-		%defstr %%ParamStr %%Param
-		%strlen %%ParamStrLen %%ParamStr
+	%elif %substr(__ParamStr, 1, 3) == "qw "
+		%define __Param %tok(%substr(__ParamStr, 4))
+		%defstr __ParamStr __Param
+		%strlen __ParamStrLen __ParamStr
 		%assign __NumParamsPassed 2
-		%if %substr(%%ParamStr, 1, 1) == "["
+		%if %substr(__ParamStr, 1, 1) == "["
 			__FlushPassArgs
-			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
-			%xdefine %%Inner %tok(%%InnerStr)
-			push [%%Inner + 4]
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
-			push [%%Inner + 0]
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
-		%elif %substr(%%ParamStr, 1, 2) == "&["
-			%xdefine %%InnerStr %substr(%%ParamStr, 3, -2)
-			%xdefine %%Inner %tok(%%InnerStr)
-			__RotatePassReg lea, [%%Inner + 4], push, [%%Inner + 4]
-			__RotatePassReg lea, [%%Inner + 0], push, [%%Inner + 0]
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			push [__Inner + 4]
+			%undef __ESP_PLACE_HOLDER__
+			%assign __StdCallEspBias __StdCallEspBias + 4
+			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			push [__Inner + 0]
+			%undef __ESP_PLACE_HOLDER__
+			%assign __StdCallEspBias __StdCallEspBias + 4
+		%elif %substr(__ParamStr, 1, 2) == "&["
+			%xdefine __InnerStr %substr(__ParamStr, 3, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			__RotatePassReg lea, [__Inner + 4], push, [__Inner + 4]
+			__RotatePassReg lea, [__Inner + 0], push, [__Inner + 0]
 		%else
 			__FlushPassArgs
-			push (%%Param) >> 32
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
-			push (%%Param) & 0xFFFFFFFF
-			%assign __StdCallEspBias (__StdCallEspBias + 4)
+			push (__Param) >> 32
+			%assign __StdCallEspBias __StdCallEspBias + 4
+			push (__Param) & 0xFFFFFFFF
+			%assign __StdCallEspBias __StdCallEspBias + 4
 		%endif
-	%elif %substr(%%ParamStr, 1, 4) == "f2d "
-		%xdefine %%Param %tok(%substr(%%ParamStr, 5))
-		%defstr %%ParamStr %%Param
-		%strlen %%ParamStrLen %%ParamStr
+	%elif %substr(__ParamStr, 1, 4) == "f2d "
+		%define __Param %tok(%substr(__ParamStr, 5))
+		%defstr __ParamStr __Param
+		%strlen __ParamStrLen __ParamStr
 		%assign __NumParamsPassed 2
-		%if %substr(%%ParamStr, 1, 1) == "["
-			%xdefine %%InnerStr %substr(%%ParamStr, 2, -2)
-			%xdefine %%Inner %tok(%%InnerStr)
-			sub esp, 8
-			fld dword [%%Inner]
-			fstp qword [esp]
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			sub esP, 8
+			%assign __StdCallEspBias __StdCallEspBias + 8
+			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			fld dword [__Inner]
+			%undef __ESP_PLACE_HOLDER__
+			fstp qword [esP]
 		%else
 			%error `f2d` only supports convert float number from memory address.
 		%endif
 	%elif __IsFloatF
 		__FlushPassArgs
-		push __?float32?__(%tok(%substr(%%ParamStr, 1, -2)))
-		%assign __StdCallEspBias (__StdCallEspBias + 4)
+		push __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
+		%assign __StdCallEspBias __StdCallEspBias + 4
 	%elif __IsFloatD
 		__FlushPassArgs
 		%assign __NumParamsPassed 2
-		push (__?float64?__(%%Param) >> 32)
-		%assign __StdCallEspBias (__StdCallEspBias + 4)
-		push (__?float64?__(%%Param) & 0xFFFFFFFF)
-		%assign __StdCallEspBias (__StdCallEspBias + 4)
+		push (__?float64?__(__Param) >> 32)
+		%assign __StdCallEspBias __StdCallEspBias + 4
+		push (__?float64?__(__Param) & 0xFFFFFFFF)
+		%assign __StdCallEspBias __StdCallEspBias + 4
 	%else
 		__FlushPassArgs
-		push %%Param
-		%assign __StdCallEspBias (__StdCallEspBias + 4)
+		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+		push __Param
+		%undef __ESP_PLACE_HOLDER__
+		%assign __StdCallEspBias __StdCallEspBias + 4
 	%endif
 	%xdefine __LastPassParam %2
 %endmacro
@@ -632,7 +648,7 @@
 			%error Preserved keyword `esP` was defined to something.
 		%endif
 		__ResetPassReg
-		%define esp (esP + __StdCallEspBias)
+		%define esp __ESP_PLACE_HOLDER__
 		%rep %0 - 1
 			%rotate 1
 			__PickOutRegToAvoid %1
@@ -694,7 +710,9 @@
 			%rotate 1
 		%endif
 		__FlushPassArgs
+		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 		call %1
+		%undef __ESP_PLACE_HOLDER__
 		%undef esp
 	%endif
 %endmacro
