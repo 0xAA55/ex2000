@@ -650,13 +650,13 @@
 			%endrep
 			%assign __ParamIndex __ParamIndex + __NumParamsPassed
 			%assign __NumParamsToCheck __NumParamsToCheck - 1
-			%if __EAX_USED == 0
+			%if __EaxUsed == 0
 				%define __EAX_AVOID_FOR_PASS 0
 			%endif
-			%if __ECX_USED == 0
+			%if __EcxUsed == 0
 				%define __ECX_AVOID_FOR_PASS 0
 			%endif
-			%if __EDX_USED == 0
+			%if __EdxUsed == 0
 				%define __EDX_AVOID_FOR_PASS 0
 			%endif
 		%endrep
