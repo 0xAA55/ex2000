@@ -776,7 +776,9 @@
 		invoke_function %1, %2
 	%endif
 	%ifdef PassCdeclParamsByPush
-		%if __ParamIndex != 0
+		%if __ParamIndex == 1
+			pop ecx
+		%elif __ParamIndex != 0
 			add esp, __ParamIndex * 4
 		%endif
 	%endif
