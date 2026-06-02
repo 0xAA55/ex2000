@@ -156,6 +156,34 @@
 	%pop
 %endmacro
 
+%macro __ReplaceSubStr 4
+	%strlen %%old_len %2
+	%strlen %%orig_len %1
+	%assign %%pos 1
+	%assign %%found 0
+
+	%rep %%orig_len - %%old_len + 1
+		%substr %%part %1 %%pos, %%old_len
+		%ifidn %%part, %2
+			%assign %%found 1
+			%exitrep
+		%endif
+		%assign %%pos %%pos + 1
+	%endrep
+
+	%if %%found
+		%if %%pos > 1
+			%substr %%before %1 1, %%pos - 1
+		%else
+			%define %%before ""
+		%endif
+		%substr after %1 %%pos + %%old_len, %%orig_len - (%%pos + %%old_len - 1)
+		%strcat %4, %%before, %3, after
+	%else
+		%define %4 %1
+	%endif
+%endmacro
+
 %macro IsFloatStr 2
 	%xdefine %%src %2
 	%strlen %%len %%src
