@@ -648,59 +648,23 @@
 	%ifdef __DEBUG_EVALUATION
 		%warning %%expre
 	%endif
-	%rep 10000 ;Process unary + -
-		%ifdef __ConditionError
-			%exitmacro
-		%endif
-		%assign %%found 0
-		%strlen %%len %%expre
-		%assign %%pos 0
-		%rep %%len
-			%assign %%pos %%pos + 1
-			%define %%c %substr(%%expre, %%pos, 2)
-			%assign %%found 1
-			%if %%c == '++' || %%c == '--'
-				%xdefine %%expre %strcat(%strcat(%substr(%%expre, 1, %%pos - 1), '+', %substr(%%expre, %%pos + 2)))
-				%exitrep
-			%elif %%c == '+-' || %%c == '-+'
-				%xdefine %%expre %strcat(%strcat(%substr(%%expre, 1, %%pos - 1), '-', %substr(%%expre, %%pos + 2)))
-				%exitrep
-			%else
-				%assign %%found 0
-			%endif
-		%endrep
-		%if %%found == 0
-			%exitrep
-		%endif
-	%endrep
-	%ifdef __DEBUG_EVALUATION
-		%warning %%expre
-	%endif
 	%rep 10000 ;Process binary + -
 		%ifdef __ConditionError
 			%exitmacro
 		%endif
 		%assign %%found 0
-		%if %substr(%%expre, 1, 1) == '-'
-			%undef __EvalExtractedIdent
-			%undef __EvalAfterIdent
-			%undef __EvalIdentBase
-			__ExtractIdent %substr(%%expre, 2), __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
-			%undef __IsIdentOperableResult
-			__IsIdentOperable __IsIdentOperableResult, __EvalExtractedIdent
-			%if __IsIdentOperableResult
-				%assign %%found 1
-				__EvalAddRuntimeOpcodes neg %tok(__EvalExtractedIdent)
-				%xdefine %%expre %substr(%%expre, 2)
-			%endif
-		%endif
 		%strlen %%len %%expre
 		%assign %%pos 0
 		%rep %%len
+			%assign %%isminus 0
 			%assign %%pos %%pos + 1
 			%define __ToExtract %substr(%%expre, %%pos)
 			%if %strlen(__ToExtract) == 0
 				%exitrep
+			%endif
+			%if %substr(__ToExtract, 1, 1) == '-'
+				%assign %%isminus 1
+				%xdefine __ToExtract %substr(__ToExtract, 2)
 			%endif
 			%undef __EvalExtractedIdent
 			%undef __EvalAfterIdent
@@ -708,7 +672,27 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
-				%if %%o == '+' || %%o == '-'
+				%if %strlen(%%o) == 0
+					%if %%isminus
+						%undef __IsIdentOperableResult
+						__IsIdentOperable __IsIdentOperableResult, __EvalExtractedIdent
+						%if __IsIdentOperableResult
+							%assign %%found 1
+							__EvalAddRuntimeOpcodes neg %tok(__EvalExtractedIdent)
+							%define %%changed_to __EvalExtractedIdent
+						%else
+							%define %%changed_to %strcat('-', __EvalExtractedIdent)
+						%endif
+					%else
+						%xdefine %%changed_to __EvalExtractedIdent
+					%endif
+					__EvalCheckResult %%changed_to
+					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
+					%strcat %%expre %%expre, %%changed_to
+					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
+					%exitrep
+				%elif %%o == '+' || %%o == '-'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -718,7 +702,11 @@
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
 						%assign %%found 1
-						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
+						%if !%%isminus
+							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
+						%else
+							%defstr %%changed_to -%eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
+						%endif
 					%else
 						%undef __IsIdentOperableResult1
 						%undef __IsIdentOperableResult2
@@ -726,23 +714,53 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							%if __EvalExtractedIdent2 != '0'
-								%if %%o == '-'
-									__EvalAddRuntimeOpcodes sub %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%if __EvalIdentBase2 > 0
+								%if %%isminus
+									%strcat __EvalExtractedIdent2 '-', __EvalExtractedIdent2
+								%endif
+								%if %%o == '+'
+									__EvalAddRuntimeOpcodes add_imm %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%else
-									__EvalAddRuntimeOpcodes add %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									__EvalAddRuntimeOpcodes sub_imm %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+								%endif
+								%xdefine %%changed_to __EvalExtractedIdent
+							%else
+								%if %%o == '+'
+									%if !%%isminus
+										__EvalAddRuntimeOpcodes add %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+										%xdefine %%changed_to __EvalExtractedIdent
+									%else
+										__EvalAddRuntimeOpcodes sub %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+										%xdefine %%changed_to __EvalExtractedIdent2
+									%endif
+									%xdefine %%changed_to __EvalExtractedIdent
+								%else
+									%if %%isminus
+										__EvalAddRuntimeOpcodes neg %tok(__EvalExtractedIdent)
+									%endif
+									__EvalAddRuntimeOpcodes sub %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%xdefine %%changed_to __EvalExtractedIdent
 								%endif
 							%endif
-							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
-							%assign %%found 1
-							%if %%o == '-'
-								__EvalAddRuntimeOpcodes neg %tok(__EvalExtractedIdent2)
+							%if __EvalIdentBase > 0
+								%assign %%found 1
+								%if %%isminus
+									%strcat __EvalExtractedIdent '-', __EvalExtractedIdent
+								%endif
+								%if %%o == '+'
+									__EvalAddRuntimeOpcodes add_imm %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+									%xdefine %%changed_to __EvalExtractedIdent2
+								%else
+									__EvalAddRuntimeOpcodes push %tok(__EvalExtractedIdent)
+									__EvalAddRuntimeOpcodes sub [esp], %tok(__EvalExtractedIdent2)
+									__EvalAddRuntimeOpcodes pop %tok(__EvalExtractedIdent2)
+									%xdefine %%changed_to __EvalExtractedIdent2
+								%endif
 							%endif
-							%if __EvalExtractedIdent != '0'
-								__EvalAddRuntimeOpcodes add %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
-							%endif
-							%xdefine %%changed_to __EvalExtractedIdent2
+						%else
+							%error __EvalExtractedIdent is not operable, cannot perform %%o on it
+							%define __ConditionError
 						%endif
 					%endif
 					__EvalCheckResult %%changed_to
