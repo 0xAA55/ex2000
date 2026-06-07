@@ -350,6 +350,24 @@
 	%endif
 %endmacro
 
+%macro __EvalAddRuntimeOpcodes 1+
+	%ifndef __EvalRuntimeOpcodeIndex
+		%assign __EvalRuntimeOpcodeIndex 0
+	%endif
+	%defstr __EvalRuntimeOpcodes%[__EvalRuntimeOpcodeIndex] %1
+	%assign __EvalRuntimeOpcodeIndex __EvalRuntimeOpcodeIndex + 1
+%endmacro
+
+%macro __EvalReleaseRuntimeOpcodes 0
+	%assign %%pos 0
+	%rep __EvalRuntimeOpcodeIndex
+		%tok(__EvalRuntimeOpcodes%[%%pos])
+		%undef __EvalRuntimeOpcodes%[%%pos]
+		%assign %%pos %%pos + 1
+	%endrep
+	%undef __EvalRuntimeOpcodeIndex
+%endmacro
+
 %macro __EvalCheckResult 1
 	%ifidn %1, '#ERROR#'
 		%error Unevaluable expression occurs near __EvalExtractedIdent
@@ -384,15 +402,9 @@
 					%if __IsIdentOperableResult
 						%assign %%found 1
 						%if %%c == '~'
-							not %tok(__EvalExtractedIdent)
+							__EvalAddRuntimeOpcodes bitnot %tok(__EvalExtractedIdent)
 						%elif %%c == '!'
-							test %tok(__EvalExtractedIdent), -1
-							jz %%z
-							mov %tok(__EvalExtractedIdent), 0
-							jmp %%nz
-						%%z:
-							inc %tok(__EvalExtractedIdent)
-						%%nz:
+							__EvalAddRuntimeOpcodes logicnot %tok(__EvalExtractedIdent)
 						%else
 							%error Unknown operator %%c
 							%define __ConditionError
@@ -467,95 +479,57 @@
 							%undef __IsIdentOperableResult2
 							__IsIdentOperable __IsIdentOperableResult1, __EvalExtractedIdent
 							__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
-							%if %isidni(__EvalExtractedIdent, 'eax') || %isidni(__EvalExtractedIdent2, 'eax')
+							%if (__IsIdentOperableResult1 == 0 && __IsIdentOperableResult2 != 0) || \
+								(!%isidni(__EvalExtractedIdent, 'eax') && %isidni(__EvalExtractedIdent2, 'eax')) || \
+								(!%isidni(__EvalExtractedIdent, 'ax') && %isidni(__EvalExtractedIdent2, 'ax')) || \
+								(!%isidni(__EvalExtractedIdent, 'al') && %isidni(__EvalExtractedIdent2, 'al'))
+								%assign %%temp __IsIdentOperableResult1
+								%assign __IsIdentOperableResult1 __IsIdentOperableResult2
+								%assign __IsIdentOperableResult2 %%temp
+								%xdefine %%temp __EvalExtractedIdent
+								%xdefine __EvalExtractedIdent __EvalExtractedIdent2
+								%xdefine __EvalExtractedIdent2 %%temp
+								%xdefine %%temp __EvalIdentBase
+								%xdefine __EvalIdentBase __EvalIdentBase2
+								%xdefine __EvalIdentBase2 %%temp
+							%endif
+							%xdefine __RightIdent __EvalExtractedIdent2
+							%xdefine __RightBase __EvalIdentBase2
+							%xdefine __RightOperable __IsIdentOperableResult2
+							%if %isidni(__EvalExtractedIdent, 'eax')
 								%assign %%found 1
-								%if %isidni(__EvalExtractedIdent, 'eax')
-									%xdefine __RightIdent __EvalExtractedIdent2
-									%xdefine __RightBase __EvalIdentBase2
-									%xdefine __RightOperable __IsIdentOperableResult2
-								%else
-									%xdefine __RightIdent __EvalExtractedIdent
-									%xdefine __RightBase __EvalIdentBase
-									%xdefine __RightOperable __IsIdentOperableResult1
-								%endif
 								%if __RightBase > 0
-									%if __IsPow2Number(%tok(__RightIdent))
-										%undef __BitsOfNumber
-										__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-										shl eax, %eval(__BitsOfNumber - 1)
-									%else
-										[segment .rdata]
-										%%const32 dd %tok(__RightIdent)
-										__SECT__
-										mul dword[%%const32]
-									%endif
+									__EvalAddRuntimeOpcodes mul_imm32 %tok(__RightIdent)
 								%elif __RightOperable == 32
-									mul %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_reg32 %tok(__RightIdent)
 								%elif __RightOperable == 1
-									mul dword %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_mem32 %tok(__RightIdent)
 								%else
 									%error eax can only multiply to 32-bit data
 									%define __ConditionError
 								%endif
 								%define %%changed_to 'eax'
-							%elif %isidni(__EvalExtractedIdent, 'ax') || %isidni(__EvalExtractedIdent2, 'ax')
+							%elif %isidni(__EvalExtractedIdent, 'ax')
 								%assign %%found 1
-								%if %isidni(__EvalExtractedIdent, 'ax')
-									%xdefine __RightIdent __EvalExtractedIdent2
-									%xdefine __RightBase __EvalIdentBase2
-									%xdefine __RightOperable __IsIdentOperableResult2
-								%else
-									%xdefine __RightIdent __EvalExtractedIdent
-									%xdefine __RightBase __EvalIdentBase
-									%xdefine __RightOperable __IsIdentOperableResult1
-								%endif
 								%if __RightBase > 0
-									%if __IsPow2Number(%tok(__RightIdent))
-										%undef __BitsOfNumber
-										__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-										shl ax, %eval(__BitsOfNumber - 1)
-									%else
-										[segment .rdata]
-										%%const16 dw %tok(__RightIdent)
-										__SECT__
-										mul word[%%const16]
-									%endif
+									__EvalAddRuntimeOpcodes mul_imm16 %tok(__RightIdent)
 								%elif __RightOperable == 16
-									mul %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_reg16 %tok(__RightIdent)
 								%elif __RightOperable == 1
-									mul word %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_mem16 %tok(__RightIdent)
 								%else
 									%error ax can only multiply to 16-bit data
 									%define __ConditionError
 								%endif
 								%define %%changed_to 'ax'
-							%elif %isidni(__EvalExtractedIdent, 'al') || %isidni(__EvalExtractedIdent2, 'al')
+							%elif %isidni(__EvalExtractedIdent, 'al')
 								%assign %%found 1
-								%if %isidni(__EvalExtractedIdent, 'al')
-									%xdefine __RightIdent __EvalExtractedIdent2
-									%xdefine __RightBase __EvalIdentBase2
-									%xdefine __RightOperable __IsIdentOperableResult2
-								%else
-									%xdefine __RightIdent __EvalExtractedIdent
-									%xdefine __RightBase __EvalIdentBase
-									%xdefine __RightOperable __IsIdentOperableResult1
-								%endif
 								%if __RightBase > 0
-									%if __IsPow2Number(%tok(__RightIdent))
-										%undef __BitsOfNumber
-										__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-										mov ah, 0
-										shl ax, %eval(__BitsOfNumber - 1)
-									%else
-										[segment .rdata]
-										%%const8 db %tok(__RightIdent)
-										__SECT__
-										mul byte[%%const8]
-									%endif
+									__EvalAddRuntimeOpcodes mul_imm8 %tok(__RightIdent)
 								%elif __RightOperable == 8
-									mul %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_reg8 %tok(__RightIdent)
 								%elif __RightOperable == 1
-									mul byte %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_mem %tok(__RightIdent)
 								%else
 									%error al can only multiply to 8-bit data
 									%define __ConditionError
@@ -565,7 +539,7 @@
 								%assign %%found 1
 								%undef __BitsOfNumber
 								__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-								shl %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
+								__EvalAddRuntimeOpcodes shl %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
 								%define %%changed_to __EvalExtractedIdent
 							%else
 								%error Cannot perform multiply without 'eax' or 'ax' or 'al'
@@ -582,27 +556,11 @@
 							%if %isidni(__EvalExtractedIdent, 'eax')
 								%assign %%found 1
 								%if __RightBase > 0
-									%if __IsPow2Number(%tok(__RightIdent))
-										%undef __BitsOfNumber
-										__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-										%if %%o == '/'
-											shr eax, %eval(__BitsOfNumber - 1)
-										%else
-											and eax, %eval((1 << (__BitsOfNumber - 1)) - 1)
-										%endif
-									%else
-										[segment .rdata]
-										%%const32 dd %tok(__RightIdent)
-										__SECT__
-										xor edx, edx
-										div dword[%%const32]
-									%endif
+									__EvalAddRuntimeOpcodes div_imm32, %tok(__RightIdent)
 								%elif __RightOperable == 32
-									xor edx, edx
-									div %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_reg32, %tok(__RightIdent)
 								%elif __RightOperable == 1
-									xor edx, edx
-									div dword %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_mem32, %tok(__RightIdent)
 								%elif __RightOperable != 0
 									%error Cannot divide by a __RightOperable bit integer
 									%define __ConditionError
@@ -622,32 +580,17 @@
 							%elif %isidni(__EvalExtractedIdent, 'ax')
 								%assign %%found 1
 								%if __RightBase > 0
-									%if __IsPow2Number(%tok(__RightIdent))
-										%undef __BitsOfNumber
-										__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-										%if %%o == '/'
-											shr ax, %eval(__BitsOfNumber - 1)
-										%else
-											and ax, %eval((1 << (__BitsOfNumber - 1)) - 1)
-										%endif
-									%else
-										[segment .rdata]
-										%%const16 dw %tok(__RightIdent)
-										__SECT__
-										xor dx, dx
-										div word[%%const16]
-									%endif
+									__EvalAddRuntimeOpcodes div_imm16, %tok(__RightIdent)
 									%assign %%divbits 16
 								%elif __RightOperable == 16
-									xor dx, dx
-									div %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_reg16, %tok(__RightIdent)
 									%assign %%divbits 16
 								%elif __RightOperable == 8
-									div %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_reg8, %tok(__RightIdent)
 									%assign %%divbits 8
 								%elif __RightOperable == 1
+									__EvalAddRuntimeOpcodes div_mem16, %tok(__RightIdent)
 									%assign %%divbits 16
-									div word %tok(__RightIdent)
 								%elif __RightOperable != 0
 									%error Cannot divide by a __RightOperable bit integer
 									%define __ConditionError
@@ -675,9 +618,9 @@
 								%undef __BitsOfNumber
 								__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
 								%if %%o == '/'
-									shr %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
+									__EvalAddRuntimeOpcodes shr %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
 								%else
-									and %tok(__EvalExtractedIdent), %eval((1 << (__BitsOfNumber - 1)) - 1)
+									__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent), %eval((1 << (__BitsOfNumber - 1)) - 1)
 								%endif
 								%define %%changed_to __EvalExtractedIdent
 							%else
@@ -747,7 +690,7 @@
 			__IsIdentOperable __IsIdentOperableResult, __EvalExtractedIdent
 			%if __IsIdentOperableResult
 				%assign %%found 1
-				neg %tok(__EvalExtractedIdent)
+				__EvalAddRuntimeOpcodes neg %tok(__EvalExtractedIdent)
 				%xdefine %%expre %substr(%%expre, 2)
 			%endif
 		%endif
@@ -785,19 +728,19 @@
 							%assign %%found 1
 							%if __EvalExtractedIdent2 != '0'
 								%if %%o == '-'
-									sub %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									__EvalAddRuntimeOpcodes sub %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%else
-									add %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									__EvalAddRuntimeOpcodes add %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%endif
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
 							%if %%o == '-'
-								neg %tok(__EvalExtractedIdent2)
+								__EvalAddRuntimeOpcodes neg %tok(__EvalExtractedIdent2)
 							%endif
 							%if __EvalExtractedIdent != '0'
-								add %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+								__EvalAddRuntimeOpcodes add %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%endif
@@ -857,9 +800,9 @@
 							%if __EvalExtractedIdent != '0'
 								%assign %%found 1
 								%if %%o == '<<'
-									shl %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									__EvalAddRuntimeOpcodes shl %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%else
-									shr %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									__EvalAddRuntimeOpcodes shr %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%endif
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
@@ -921,30 +864,18 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							cmp %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
-							mov %tok(__EvalExtractedIdent), 0
 							%if %%o == '<='
-								jg %%gt
-								inc %tok(__EvalExtractedIdent)
-							%%gt:
+								__EvalAddRuntimeOpcodes cmple %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%else
-								jl %%lt
-								inc %tok(__EvalExtractedIdent)
-							%%lt:
+								__EvalAddRuntimeOpcodes cmpge %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							cmp %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
-							mov %tok(__EvalExtractedIdent2), 0
 							%if %%o == '>='
-								jl %%lt
-								inc %tok(__EvalExtractedIdent2)
-							%%lt:
+								__EvalAddRuntimeOpcodes cmplt %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%else
-								jg %%gt
-								inc %tok(__EvalExtractedIdent2)
-							%%gt:
+								__EvalAddRuntimeOpcodes cmpgt %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
@@ -977,30 +908,18 @@
 							__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 							%if __IsIdentOperableResult1
 								%assign %%found 1
-								cmp %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
-								mov %tok(__EvalExtractedIdent), 0
 								%if %%o == '<'
-									jge %%ge
-									inc %tok(__EvalExtractedIdent)
-								%%ge:
+									__EvalAddRuntimeOpcodes cmplt %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%else
-									jle %%le
-									inc %tok(__EvalExtractedIdent)
-								%%le:
+									__EvalAddRuntimeOpcodes cmpgt %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%endif
 								%xdefine %%changed_to __EvalExtractedIdent
 							%elif __IsIdentOperableResult2
 								%assign %%found 1
-								cmp %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
-								mov %tok(__EvalExtractedIdent2), 0
-								%if %%o == '>'
-									jle %%le
-									inc %tok(__EvalExtractedIdent2)
-								%%le:
+								%if %%o == '<'
+									__EvalAddRuntimeOpcodes cmpge %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 								%else
-									jge %%ge
-									inc %tok(__EvalExtractedIdent2)
-								%%ge:
+									__EvalAddRuntimeOpcodes cmple %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 								%endif
 								%xdefine %%changed_to __EvalExtractedIdent2
 							%else
@@ -1063,30 +982,18 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							cmp %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
-							mov %tok(__EvalExtractedIdent), 0
 							%if %%o == '=='
-								jnz %%nz
-								inc %tok(__EvalExtractedIdent)
-								%%nz:
+								__EvalAddRuntimeOpcodes cmpeq %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%else
-								jz %%z
-								inc %tok(__EvalExtractedIdent)
-								%%z:
+								__EvalAddRuntimeOpcodes cmpneq %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							cmp %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
-							mov %tok(__EvalExtractedIdent2), 0
 							%if %%o == '=='
-								jnz %%nz
-								inc %tok(__EvalExtractedIdent2)
-								%%nz:
+								__EvalAddRuntimeOpcodes cmpeq %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%else
-								jz %%z
-								inc %tok(__EvalExtractedIdent2)
-								%%z:
+								__EvalAddRuntimeOpcodes cmpneq %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
@@ -1150,11 +1057,11 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							and %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							and %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1213,11 +1120,11 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							xor %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							__EvalAddRuntimeOpcodes xor %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							xor %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							__EvalAddRuntimeOpcodes xor %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1280,11 +1187,11 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							or %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							__EvalAddRuntimeOpcodes bitor %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							or %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							__EvalAddRuntimeOpcodes bitor %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1343,17 +1250,11 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							cmp %tok(__EvalExtractedIdent), 0
-							jz %%no
-							mov %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
-							%%no:
+							__EvalAddRuntimeOpcodes logicand %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							cmp %tok(__EvalExtractedIdent2), 0
-							jz %%no
-							mov %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
-							%%no:
+							__EvalAddRuntimeOpcodes logicand %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1412,19 +1313,11 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							or %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
-							cmp %tok(__EvalExtractedIdent), 0
-							jz %%z
-								mov %tok(__EvalExtractedIdent), 1
-							%%z:
+							__EvalAddRuntimeOpcodes logicor %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							or %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
-							cmp %tok(__EvalExtractedIdent2), 0
-							jz %%z
-								mov %tok(__EvalExtractedIdent2), 1
-							%%z:
+							__EvalAddRuntimeOpcodes logicor %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1483,11 +1376,11 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							mov %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							__EvalAddRuntimeOpcodes mov %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							mov %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							__EvalAddRuntimeOpcodes mov %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1550,6 +1443,7 @@
 		%endif
 	%endrep
 	__EvaluateSimple %tok(%%expre)
+	__EvalReleaseRuntimeOpcodes
 %endmacro
 
 ; Evaluate (2 * (-2 + 4 + 6 * ~eax - ecx + 8 / 3)) * 4 << 1 >= 1 > 0 == ecx != edx && 1 || ecx % 16
