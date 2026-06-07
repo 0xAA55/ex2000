@@ -360,6 +360,9 @@
 
 %macro __EvalReleaseRuntimeOpcodes 0
 	%assign %%pos 0
+	%ifndef __EvalRuntimeOpcodeIndex
+		%exitmacro
+	%endif
 	%rep __EvalRuntimeOpcodeIndex
 		%tok(__EvalRuntimeOpcodes%[%%pos])
 		%undef __EvalRuntimeOpcodes%[%%pos]
