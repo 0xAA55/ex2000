@@ -1485,7 +1485,7 @@
 	__EvalReleaseRuntimeOpcodes
 %endmacro
 
-; Evaluate (2 * (-2 + 4 + 6 * ~eax - ecx + 8 / 3)) * 4 << 1 >= 1 > 0 == ecx != edx && 1 || ecx % 16
+; Evaluate (2 * (-2 + 4 + 6 * ~eax - ecx + 8 / 3 + 7 - 4 + 5)) * 4 << 1 >= 1 > 0 == ecx != edx && 1 || ecx % 16
 ; __EvaluateResult
 
 %endif
