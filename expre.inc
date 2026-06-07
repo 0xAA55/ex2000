@@ -454,7 +454,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
-				%if %%o == '*' || %%o == '/' || %%o == '%'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '*' || %%o == '/' || %%o == '%'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -801,7 +803,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 2)
-				%if %%o == '<<' || %%o == '>>'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '<<' || %%o == '>>'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -911,7 +915,9 @@
 					%exitrep
 				%else
 					%define %%o %substr(__EvalAfterIdent, 1, 1)
-					%if %%o == '<' || %%o == '>'
+					%if %strlen(%%o) == 0
+						%exitrep
+					%elif %%o == '<' || %%o == '>'
 						%undef __EvalExtractedIdent2
 						%undef __EvalAfterIdent2
 						%undef __EvalIdentBase2
@@ -953,8 +959,6 @@
 						%strcat %%expre %%expre, __EvalAfterIdent2
 						%define %%changed_to '#ERROR#'
 						%exitrep
-					%else
-						%define %%o %substr(__EvalAfterIdent, 1, 1)
 					%endif
 				%endif
 			%endif
@@ -985,7 +989,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 2)
-				%if %%o == '==' || %%o == '!='
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '==' || %%o == '!='
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -1056,7 +1062,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
-				%if %%o == '&'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '&'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -1123,7 +1131,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
-				%if %%o == '^'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '^'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -1186,7 +1196,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
-				%if %%o == '|'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '|'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -1253,7 +1265,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 2)
-				%if %%o == '&&'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '&&'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -1316,7 +1330,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 2)
-				%if %%o == '||'
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '||'
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -1379,7 +1395,9 @@
 			__ExtractIdent __ToExtract, __EvalExtractedIdent, __EvalAfterIdent, __EvalIdentBase
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
-				%if %%o == '='
+				%if %strlen(%%o) == 0
+					%exitrep
+				%elif %%o == '='
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
