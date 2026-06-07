@@ -328,17 +328,7 @@
 	%strlen %%len %%expre
 	%substr %%last %%expre %%len,1
 	%define %1 0
-	%if %isidni(%%expre, 'xmm0') || %isidni(%%expre, 'xmm1') || %isidni(%%expre, 'xmm2') || %isidni(%%expre, 'xmm3') || \
-		%isidni(%%expre, 'xmm4') || %isidni(%%expre, 'xmm5') || %isidni(%%expre, 'xmm6') || %isidni(%%expre, 'xmm7') || \
-		%isidni(%%expre, 'xmm0.xyzw') || %isidni(%%expre, 'xmm1.xyzw') || %isidni(%%expre, 'xmm2.xyzw') || %isidni(%%expre, 'xmm3.xyzw') || \
-		%isidni(%%expre, 'xmm4.xyzw') || %isidni(%%expre, 'xmm5.xyzw') || %isidni(%%expre, 'xmm6.xyzw') || %isidni(%%expre, 'xmm7.xyzw')
-		%define %1 128
-	%elif   %isidni(%%expre, 'xmm0.xy') || %isidni(%%expre, 'xmm1.xy') || %isidni(%%expre, 'xmm2.xy') || %isidni(%%expre, 'xmm3.xy') || \
-			%isidni(%%expre, 'xmm4.xy') || %isidni(%%expre, 'xmm5.xy') || %isidni(%%expre, 'xmm6.xy') || %isidni(%%expre, 'xmm7.xy')
-		%define %1 64
-	%elif %isidni(%%expre, 'xmm0.x') || %isidni(%%expre, 'xmm1.x') || %isidni(%%expre, 'xmm2.x') || %isidni(%%expre, 'xmm3.x') || \
-		  %isidni(%%expre, 'xmm4.x') || %isidni(%%expre, 'xmm5.x') || %isidni(%%expre, 'xmm6.x') || %isidni(%%expre, 'xmm7.x') || \
-		  %isidni(%%expre, 'eax') || %isidni(%%expre, 'ecx') || %isidni(%%expre, 'edx') || %isidni(%%expre, 'ebx') || \
+	%if %isidni(%%expre, 'eax') || %isidni(%%expre, 'ecx') || %isidni(%%expre, 'edx') || %isidni(%%expre, 'ebx') || \
 		  %isidni(%%expre, 'esp') || %isidni(%%expre, 'ebp') || %isidni(%%expre, 'esi') || %isidni(%%expre, 'edi')
 		%define %1 32
 	%elif %isidni(%%expre, 'ax') || %isidni(%%expre, 'cx') || %isidni(%%expre, 'dx') || %isidni(%%expre, 'bx') || \
@@ -356,10 +346,6 @@
 			%define %1 16
 		%elif %isidni(%substr(%%expre, 1, 6), 'dword[')
 			%define %1 32
-		%elif %isidni(%substr(%%expre, 1, 6), 'qword[')
-			%define %1 64
-		%elif %isidni(%substr(%%expre, 1, 8), 'xmmword[')
-			%define %1 128
 		%endif
 	%endif
 %endmacro
