@@ -350,8 +350,16 @@
 	%endif
 %endmacro
 
+%macro __EvalCheckResult 1
+	%ifidn %1, '#ERROR#'
+		%error Unevaluable expression occurs near __EvalExtractedIdent
+		%define __ConditionError
+	%endif
+%endmacro
+
 %macro __EvaluateSimple 1
 	__RemoveSpaces %%expre, %str(%1)
+	%define %%changed_to '#ERROR#'
 	%rep 10000 ;Process unary ~ !
 		%ifdef __ConditionError
 			%exitmacro
@@ -397,9 +405,11 @@
 						%define __ConditionError
 					%endif
 				%endif
+				__EvalCheckResult %%changed_to
 				%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 				%strcat %%expre %%expre, %%changed_to
 				%strcat %%expre %%expre, __EvalAfterIdent
+				%define %%changed_to '#ERROR#'
 				%exitrep
 			%endif
 		%endrep
@@ -569,8 +579,8 @@
 							%xdefine __RightIdent __EvalExtractedIdent2
 							%xdefine __RightBase __EvalIdentBase2
 							%xdefine __RightOperable __IsIdentOperableResult2
-							%assign %%found 1
 							%if %isidni(__EvalExtractedIdent, 'eax')
+								%assign %%found 1
 								%if __RightBase > 0
 									%if __IsPow2Number(%tok(__RightIdent))
 										%undef __BitsOfNumber
@@ -610,6 +620,7 @@
 									%endif
 								%endif
 							%elif %isidni(__EvalExtractedIdent, 'ax')
+								%assign %%found 1
 								%if __RightBase > 0
 									%if __IsPow2Number(%tok(__RightIdent))
 										%undef __BitsOfNumber
@@ -678,9 +689,11 @@
 							%define __ConditionError
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -753,7 +766,6 @@
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 1)
 				%if %%o == '+' || %%o == '-'
-					%assign %%found 1
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -762,6 +774,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -769,6 +782,7 @@
 						__IsIdentOperable __IsIdentOperableResult1, __EvalExtractedIdent
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
+							%assign %%found 1
 							%if __EvalExtractedIdent2 != '0'
 								%if %%o == '-'
 									sub %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
@@ -778,6 +792,7 @@
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
+							%assign %%found 1
 							%if %%o == '-'
 								neg %tok(__EvalExtractedIdent2)
 							%endif
@@ -787,9 +802,11 @@
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -821,7 +838,6 @@
 			%if __EvalIdentBase >= 0
 				%define %%o %substr(__EvalAfterIdent, 1, 2)
 				%if %%o == '<<' || %%o == '>>'
-					%assign %%found 1
 					%undef __EvalExtractedIdent2
 					%undef __EvalAfterIdent2
 					%undef __EvalIdentBase2
@@ -830,6 +846,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -838,6 +855,7 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%if __EvalExtractedIdent != '0'
+								%assign %%found 1
 								%if %%o == '<<'
 									shl %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%else
@@ -850,9 +868,11 @@
 							%define __ConditionError
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -892,6 +912,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -930,14 +951,15 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%else
 					%define %%o %substr(__EvalAfterIdent, 1, 1)
 					%if %%o == '<' || %%o == '>'
-						%assign %%found 1
 						%undef __EvalExtractedIdent2
 						%undef __EvalAfterIdent2
 						%undef __EvalIdentBase2
@@ -946,6 +968,7 @@
 							%error Syntax error: %%expre
 							%define __ConditionError
 						%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+							%assign %%found 1
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%else
 							%undef __IsIdentOperableResult1
@@ -953,6 +976,7 @@
 							__IsIdentOperable __IsIdentOperableResult1, __EvalExtractedIdent
 							__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 							%if __IsIdentOperableResult1
+								%assign %%found 1
 								cmp %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								mov %tok(__EvalExtractedIdent), 0
 								%if %%o == '<'
@@ -966,6 +990,7 @@
 								%endif
 								%xdefine %%changed_to __EvalExtractedIdent
 							%elif __IsIdentOperableResult2
+								%assign %%found 1
 								cmp %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
 								mov %tok(__EvalExtractedIdent2), 0
 								%if %%o == '>'
@@ -982,9 +1007,11 @@
 								%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 							%endif
 						%endif
+						__EvalCheckResult %%changed_to
 						%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 						%strcat %%expre %%expre, %%changed_to
 						%strcat %%expre %%expre, __EvalAfterIdent2
+						%define %%changed_to '#ERROR#'
 						%exitrep
 					%else
 						%define %%o %substr(__EvalAfterIdent, 1, 1)
@@ -1027,6 +1054,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1065,9 +1093,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -1111,6 +1141,7 @@
 							%define %%changed_to %strcat(%strcat(__EvalExtractedIdent, '&'), __EvalExtractedIdent2)
 						%endif
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1129,9 +1160,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -1171,6 +1204,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1189,9 +1223,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -1235,6 +1271,7 @@
 							%define %%changed_to %strcat(%strcat(__EvalExtractedIdent, '|'), __EvalExtractedIdent2)
 						%endif
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1253,9 +1290,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -1295,6 +1334,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1319,9 +1359,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -1361,6 +1403,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1387,9 +1430,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
@@ -1429,6 +1474,7 @@
 						%error Syntax error: %%expre
 						%define __ConditionError
 					%elif __EvalIdentBase > 0 && __EvalIdentBase2 > 0
+						%assign %%found 1
 						%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 					%else
 						%undef __IsIdentOperableResult1
@@ -1447,9 +1493,11 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
+					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
 					%strcat %%expre %%expre, __EvalAfterIdent2
+					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
 			%endif
