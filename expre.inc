@@ -822,8 +822,15 @@
 						__IsIdentOperable __IsIdentOperableResult1, __EvalExtractedIdent
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
-							%if __EvalExtractedIdent != '0'
-								%assign %%found 1
+							%assign %%found 1
+							%if __EvalExtractedIdent == 'eax' && __EvalIdentBase2 > 0
+								%assign %%mult_num (1 << %tok(__EvalExtractedIdent2))
+								%if %%o == '<<'
+									__EvalAddRuntimeOpcodes mul_imm32 %%mult_num
+								%else
+									__EvalAddRuntimeOpcodes div_imm32 %%mult_num
+								%endif
+							%else
 								%if %%o == '<<'
 									__EvalAddRuntimeOpcodes shl %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
 								%else
