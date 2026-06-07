@@ -488,15 +488,15 @@
 								(!%isidni(__EvalExtractedIdent, 'eax') && %isidni(__EvalExtractedIdent2, 'eax')) || \
 								(!%isidni(__EvalExtractedIdent, 'ax') && %isidni(__EvalExtractedIdent2, 'ax')) || \
 								(!%isidni(__EvalExtractedIdent, 'al') && %isidni(__EvalExtractedIdent2, 'al'))
-								%assign %%temp __IsIdentOperableResult1
-								%assign __IsIdentOperableResult1 __IsIdentOperableResult2
-								%assign __IsIdentOperableResult2 %%temp
 								%xdefine %%temp __EvalExtractedIdent
 								%xdefine __EvalExtractedIdent __EvalExtractedIdent2
 								%xdefine __EvalExtractedIdent2 %%temp
 								%xdefine %%temp __EvalIdentBase
 								%xdefine __EvalIdentBase __EvalIdentBase2
 								%xdefine __EvalIdentBase2 %%temp
+								%assign %%temp __IsIdentOperableResult1
+								%assign __IsIdentOperableResult1 __IsIdentOperableResult2
+								%assign __IsIdentOperableResult2 %%temp
 							%endif
 							%xdefine __RightIdent __EvalExtractedIdent2
 							%xdefine __RightBase __EvalIdentBase2
