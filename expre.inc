@@ -506,11 +506,11 @@
 							%if %isidni(__EvalExtractedIdent, 'eax')
 								%assign %%found 1
 								%if __RightBase > 0
-									__EvalAddRuntimeOpcodes mul_imm32 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_imm32 eax, %tok(__RightIdent)
 								%elif __RightOperable == 32
-									__EvalAddRuntimeOpcodes mul_reg32 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_reg32 eax, %tok(__RightIdent)
 								%elif __RightOperable == 1
-									__EvalAddRuntimeOpcodes mul_mem32 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_mem32 eax, %tok(__RightIdent)
 								%else
 									%error eax can only multiply to 32-bit data
 									%define __ConditionError
@@ -519,11 +519,11 @@
 							%elif %isidni(__EvalExtractedIdent, 'ax')
 								%assign %%found 1
 								%if __RightBase > 0
-									__EvalAddRuntimeOpcodes mul_imm16 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_imm16 ax, %tok(__RightIdent)
 								%elif __RightOperable == 16
-									__EvalAddRuntimeOpcodes mul_reg16 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_reg16 ax, %tok(__RightIdent)
 								%elif __RightOperable == 1
-									__EvalAddRuntimeOpcodes mul_mem16 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_mem16 ax, %tok(__RightIdent)
 								%else
 									%error ax can only multiply to 16-bit data
 									%define __ConditionError
@@ -532,11 +532,11 @@
 							%elif %isidni(__EvalExtractedIdent, 'al')
 								%assign %%found 1
 								%if __RightBase > 0
-									__EvalAddRuntimeOpcodes mul_imm8 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_imm8 al, %tok(__RightIdent)
 								%elif __RightOperable == 8
-									__EvalAddRuntimeOpcodes mul_reg8 %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_reg8 al, %tok(__RightIdent)
 								%elif __RightOperable == 1
-									__EvalAddRuntimeOpcodes mul_mem %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes mul_mem al, %tok(__RightIdent)
 								%else
 									%error al can only multiply to 8-bit data
 									%define __ConditionError
@@ -563,11 +563,11 @@
 							%if %isidni(__EvalExtractedIdent, 'eax')
 								%assign %%found 1
 								%if __RightBase > 0
-									__EvalAddRuntimeOpcodes div_imm32, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_imm32 eax, %tok(__RightIdent)
 								%elif __RightOperable == 32
-									__EvalAddRuntimeOpcodes div_reg32, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_reg32 eax, %tok(__RightIdent)
 								%elif __RightOperable == 1
-									__EvalAddRuntimeOpcodes div_mem32, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_mem32 eax, %tok(__RightIdent)
 								%elif __RightOperable != 0
 									%error Cannot divide by a __RightOperable bit integer
 									%define __ConditionError
@@ -587,16 +587,16 @@
 							%elif %isidni(__EvalExtractedIdent, 'ax')
 								%assign %%found 1
 								%if __RightBase > 0
-									__EvalAddRuntimeOpcodes div_imm16, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_imm16 ax, %tok(__RightIdent)
 									%assign %%divbits 16
 								%elif __RightOperable == 16
-									__EvalAddRuntimeOpcodes div_reg16, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_reg16 ax, %tok(__RightIdent)
 									%assign %%divbits 16
 								%elif __RightOperable == 8
-									__EvalAddRuntimeOpcodes div_reg8, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_reg8 ax, %tok(__RightIdent)
 									%assign %%divbits 8
 								%elif __RightOperable == 1
-									__EvalAddRuntimeOpcodes div_mem16, %tok(__RightIdent)
+									__EvalAddRuntimeOpcodes div_mem16 ax, %tok(__RightIdent)
 									%assign %%divbits 16
 								%elif __RightOperable != 0
 									%error Cannot divide by a __RightOperable bit integer
@@ -828,9 +828,9 @@
 							%if __EvalExtractedIdent == 'eax' && __EvalIdentBase2 > 0
 								%assign %%mult_num (1 << %tok(__EvalExtractedIdent2))
 								%if %%o == '<<'
-									__EvalAddRuntimeOpcodes mul_imm32 %%mult_num
+									__EvalAddRuntimeOpcodes mul_imm32 eax, %%mult_num
 								%else
-									__EvalAddRuntimeOpcodes div_imm32 %%mult_num
+									__EvalAddRuntimeOpcodes div_imm32 eax, %%mult_num
 								%endif
 							%else
 								%if %%o == '<<'
