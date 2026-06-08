@@ -420,12 +420,14 @@
 						%define __ConditionError
 					%endif
 				%endif
-				__EvalCheckResult %%changed_to
-				%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
-				%strcat %%expre %%expre, %%changed_to
-				%strcat %%expre %%expre, __EvalAfterIdent
-				%define %%changed_to '#ERROR#'
-				%exitrep
+				%if !%isidni(%%changed_to, '!=')
+					__EvalCheckResult %%changed_to
+					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
+					%strcat %%expre %%expre, %%changed_to
+					%strcat %%expre %%expre, __EvalAfterIdent
+					%define %%changed_to '#ERROR#'
+					%exitrep
+				%endif
 			%endif
 		%endrep
 		%if %%found == 0
@@ -1103,12 +1105,14 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
-					__EvalCheckResult %%changed_to
-					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
-					%strcat %%expre %%expre, %%changed_to
-					%strcat %%expre %%expre, __EvalAfterIdent2
-					%define %%changed_to '#ERROR#'
-					%exitrep
+					%if !%isidni(%substr(%%changed_to, %strlen(%%changed_to) - 1), '&&')
+						__EvalCheckResult %%changed_to
+						%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
+						%strcat %%expre %%expre, %%changed_to
+						%strcat %%expre %%expre, __EvalAfterIdent2
+						%define %%changed_to '#ERROR#'
+						%exitrep
+					%endif
 				%endif
 			%endif
 		%endrep
@@ -1237,12 +1241,14 @@
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
 						%endif
 					%endif
-					__EvalCheckResult %%changed_to
-					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
-					%strcat %%expre %%expre, %%changed_to
-					%strcat %%expre %%expre, __EvalAfterIdent2
-					%define %%changed_to '#ERROR#'
-					%exitrep
+					%if !%isidni(%substr(%%changed_to, %strlen(%%changed_to) - 1), '||')
+						__EvalCheckResult %%changed_to
+						%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
+						%strcat %%expre %%expre, %%changed_to
+						%strcat %%expre %%expre, __EvalAfterIdent2
+						%define %%changed_to '#ERROR#'
+						%exitrep
+					%endif
 				%endif
 			%endif
 		%endrep
