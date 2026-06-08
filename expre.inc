@@ -452,7 +452,133 @@
 		%exitmacro
 	%endif
 	%rep __EvalRuntimeOpcodeIndex
-		%tok(__EvalRuntimeOpcodes%[%%pos])
+		__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos]
+		%ifidni __BreakDownOpcode, 'bitnot'
+			not %tok(__AllOperandsToBreakDown)
+		%elif %isidni(__BreakDownOpcode, 'bitand') || %isidni(__BreakDownOpcode, 'bitand_imm')
+			and %tok(__AllOperandsToBreakDown)
+		%elif %isidni(__BreakDownOpcode, 'bitor') || %isidni(__BreakDownOpcode, 'bitor_imm')
+			or %tok(__AllOperandsToBreakDown)
+		%elif %isidni(__BreakDownOpcode, 'mul_imm32') || %isidni(__BreakDownOpcode, 'mul_imm16') || %isidni(__BreakDownOpcode, 'mul_imm8')
+			%assign %%imm %tok(__BreakDownOperands%[1])
+			%if __IsPow2Number(%%imm)
+				%undef __BitsOfNumber
+				__GetMaxBitsOfNumber __BitsOfNumber, %%imm
+				shl %tok(__BreakDownOperands%[0]), (1 << (__BitsOfNumber - 1))
+			%else
+				[segment .rdata]
+				%ifidni(__BreakDownOpcode, 'mul_imm32')
+					%%immdata dd %%imm
+				%elifidni(__BreakDownOpcode, 'mul_imm16')
+					%%immdata dw %%imm
+				%elifidni(__BreakDownOpcode, 'mul_imm8')
+					%%immdata db %%imm
+				%else
+					%%immdata dd %%imm
+				%endif
+				__SECT__
+				mul %tok(__BreakDownOperands%[0]), [%%immdata]
+			%endif
+		%elif \
+			%isidni(__BreakDownOpcode, 'mul_reg32') || %isidni(__BreakDownOpcode, 'mul_reg16') || %isidni(__BreakDownOpcode, 'mul_reg8') || \
+			%isidni(__BreakDownOpcode, 'mul_mem32') || %isidni(__BreakDownOpcode, 'mul_mem16') || %isidni(__BreakDownOpcode, 'mul_mem8') || \
+			%isidni(__BreakDownOpcode, 'mul_mem')
+			mul %tok(__BreakDownOperands%[1])
+		%elif %isidni(__BreakDownOpcode, 'div_imm32') || %isidni(__BreakDownOpcode, 'div_imm16') || %isidni(__BreakDownOpcode, 'div_imm8')
+			%assign %%imm %tok(__BreakDownOperands%[1])
+			%if __IsPow2Number(%%imm)
+				%undef __BitsOfNumber
+				__GetMaxBitsOfNumber __BitsOfNumber, %%imm
+				shr %tok(__BreakDownOperands%[0]), (1 << (__BitsOfNumber - 1))
+			%else
+				%ifidni(__BreakDownOpcode, 'div_imm32')
+					[segment .rdata]
+					%%immdata dd %%imm
+					__SECT__
+					xor edx, edx
+				%elifidni(__BreakDownOpcode, 'div_imm16')
+					[segment .rdata]
+					%%immdata dw %%imm
+					__SECT__
+					xor dx, dx
+				%elifidni(__BreakDownOpcode, 'div_imm8')
+					[segment .rdata]
+					%%immdata db %%imm
+					__SECT__
+				%endif
+				div %tok(__BreakDownOperands%[0]), [%%immdata]
+			%endif
+		%elif %isidni(__BreakDownOpcode, 'div_reg32') || %isidni(__BreakDownOpcode, 'div_mem32')
+			xor edx, edx
+			div %tok(__BreakDownOperands%[0]), %tok(__BreakDownOperands%[1])
+		%elif %isidni(__BreakDownOpcode, 'div_reg16') || %isidni(__BreakDownOpcode, 'div_mem16')
+			xor dx, dx
+			div %tok(__BreakDownOperands%[0]), %tok(__BreakDownOperands%[1])
+		%elif %isidni(__BreakDownOpcode, 'div_reg8') || %isidni(__BreakDownOpcode, 'div_mem8')
+			div %tok(__BreakDownOperands%[1])
+		%elifidni __BreakDownOpcode, 'shl_imm'
+			shl %tok(__AllOperandsToBreakDown)
+		%elifidni __BreakDownOpcode, 'shr_imm'
+			shr %tok(__AllOperandsToBreakDown)
+		%elifidni __BreakDownOpcode, 'add_imm'
+			add %tok(__AllOperandsToBreakDown)
+		%elifidni __BreakDownOpcode, 'sub_imm'
+			sub %tok(__AllOperandsToBreakDown)
+		%elifidni __BreakDownOpcode, 'logicnot'
+			cmp %tok(__AllOperandsToBreakDown), 0
+			mov %tok(__AllOperandsToBreakDown), 0
+			jnz %%nz
+			inc %tok(__AllOperandsToBreakDown)
+		%%nz:
+		%elifidni __BreakDownOpcode, 'logicand'
+			cmp %tok(__BreakDownOperands%[0]), 0
+			jz %%z
+			mov %tok(__AllOperandsToBreakDown)
+		%%z:
+		%elifidni __BreakDownOpcode, 'logicor'
+			cmp %tok(__BreakDownOperands%[0]), 0
+			jnz %%nz
+			mov %tok(__AllOperandsToBreakDown)
+		%%nz:
+		%elifidni __BreakDownOpcode, 'cmplt'
+			cmp %tok(__AllOperandsToBreakDown)
+			mov %tok(__BreakDownOperands%[0]), 0
+			jge %%ge
+			inc %tok(__BreakDownOperands%[0])
+		%%ge:
+		%elifidni __BreakDownOpcode, 'cmple'
+			cmp %tok(__AllOperandsToBreakDown)
+			mov %tok(__BreakDownOperands%[0]), 0
+			jg %%gt
+			inc %tok(__BreakDownOperands%[0])
+		%%gt:
+		%elifidni __BreakDownOpcode, 'cmpgt'
+			cmp %tok(__AllOperandsToBreakDown)
+			mov %tok(__BreakDownOperands%[0]), 0
+			jle %%le
+			inc %tok(__BreakDownOperands%[0])
+		%%le:
+		%elifidni __BreakDownOpcode, 'cmpge'
+			cmp %tok(__AllOperandsToBreakDown)
+			mov %tok(__BreakDownOperands%[0]), 0
+			jl %%lt
+			inc %tok(__BreakDownOperands%[0])
+		%%lt:
+		%elifidni __BreakDownOpcode, 'cmpeq'
+			cmp %tok(__AllOperandsToBreakDown)
+			mov %tok(__BreakDownOperands%[0]), 0
+			jne %%ne
+			inc %tok(__BreakDownOperands%[0])
+		%%ne:
+		%elifidni __BreakDownOpcode, 'cmpneq'
+			cmp %tok(__AllOperandsToBreakDown)
+			mov %tok(__BreakDownOperands%[0]), 0
+			je %%e
+			inc %tok(__BreakDownOperands%[0])
+		%%e:
+		%else
+			%tok(__EvalRuntimeOpcodes%[%%pos])
+		%endif
 		%undef __EvalRuntimeOpcodes%[%%pos]
 		%assign %%pos %%pos + 1
 	%endrep
