@@ -784,7 +784,7 @@
 					__EvalCheckResult %%changed_to
 					%xdefine %%expre %substr(%%expre, 1, %%pos - 1)
 					%strcat %%expre %%expre, %%changed_to
-					%strcat %%expre %%expre, __EvalAfterIdent2
+					%strcat %%expre %%expre, __EvalAfterIdent
 					%define %%changed_to '#ERROR#'
 					%exitrep
 				%elif %%o == '+' || %%o == '-'
