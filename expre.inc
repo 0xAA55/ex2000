@@ -422,6 +422,28 @@
 	%endrep
 %endmacro
 
+%macro __EvalIsSharingOperands 0
+	%assign __EvalIsSharingOperandsResult 0
+	%assign %%dupindex 0
+	%rep __EvalDupNumOperands
+		%assign %%index 0
+		%rep __BreakDownNumOperands
+			%ifidni __EvalDupOperands%[%%dupindex], __BreakDownOperands%[%%index]
+				%undef __EvalIsSharingOperandsResult
+				__IsIdentOperable __EvalIsSharingOperandsResult, __BreakDownOperands%[%%index]
+				%if __EvalIsSharingOperandsResult != 0
+					%exitrep
+				%endif
+			%endif
+			%assign %%index %%index + 1
+		%endrep
+		%if __EvalIsSharingOperandsResult
+			%exitrep
+		%endif
+		%assign %%dupindex %%dupindex + 1
+	%endrep
+%endmacro
+
 %endmacro
 
 %macro __EvalReleaseRuntimeOpcodes 0
