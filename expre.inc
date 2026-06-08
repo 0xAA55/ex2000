@@ -991,6 +991,10 @@
 					%define %%changed_to '#ERROR#'
 					%exitrep
 				%endif
+			%elif __EvalExtractedIdent == '+'
+				%assign %%found 1
+				%xdefine %%expre __EvalAfterIdent
+				%exitrep
 			%endif
 		%endrep
 		%if %%found == 0
