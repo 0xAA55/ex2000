@@ -634,7 +634,7 @@
 								%assign %%found 1
 								%undef __BitsOfNumber
 								__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
-								__EvalAddRuntimeOpcodes shl %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
+								__EvalAddRuntimeOpcodes shl_imm %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
 								%define %%changed_to __EvalExtractedIdent
 							%else
 								%error Cannot perform multiply without 'eax' or 'ax' or 'al'
@@ -713,9 +713,9 @@
 								%undef __BitsOfNumber
 								__GetMaxBitsOfNumber __BitsOfNumber, %tok(__RightIdent)
 								%if %%o == '/'
-									__EvalAddRuntimeOpcodes shr %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
+									__EvalAddRuntimeOpcodes shr_imm %tok(__EvalExtractedIdent), %eval(__BitsOfNumber - 1)
 								%else
-									__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent), %eval((1 << (__BitsOfNumber - 1)) - 1)
+									__EvalAddRuntimeOpcodes bitand_imm %tok(__EvalExtractedIdent), %eval((1 << (__BitsOfNumber - 1)) - 1)
 								%endif
 								%define %%changed_to __EvalExtractedIdent
 							%else
@@ -922,9 +922,17 @@
 								%endif
 							%else
 								%if %%o == '<<'
-									__EvalAddRuntimeOpcodes shl %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%if __EvalIdentBase2 > 0
+										__EvalAddRuntimeOpcodes shl_imm %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%else
+										__EvalAddRuntimeOpcodes shl %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%endif
 								%else
-									__EvalAddRuntimeOpcodes shr %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%if __EvalIdentBase2 > 0
+										__EvalAddRuntimeOpcodes shr_imm %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%else
+										__EvalAddRuntimeOpcodes shr %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+									%endif
 								%endif
 							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
@@ -1183,11 +1191,19 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%if __EvalIdentBase2 > 0
+								__EvalAddRuntimeOpcodes bitand_imm %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%else
+								__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							%if __EvalIdentBase > 0
+								__EvalAddRuntimeOpcodes bitand_imm %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							%else
+								__EvalAddRuntimeOpcodes bitand %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							%endif
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
@@ -1319,11 +1335,19 @@
 						__IsIdentOperable __IsIdentOperableResult2, __EvalExtractedIdent2
 						%if __IsIdentOperableResult1
 							%assign %%found 1
-							__EvalAddRuntimeOpcodes bitor %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%if __EvalIdentBase2 > 0
+								__EvalAddRuntimeOpcodes bitor_imm %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%else
+								__EvalAddRuntimeOpcodes bitor %tok(__EvalExtractedIdent), %tok(__EvalExtractedIdent2)
+							%endif
 							%xdefine %%changed_to __EvalExtractedIdent
 						%elif __IsIdentOperableResult2
 							%assign %%found 1
-							__EvalAddRuntimeOpcodes bitor %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							%if __EvalIdentBase > 0
+								__EvalAddRuntimeOpcodes bitor_imm %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							%else
+								__EvalAddRuntimeOpcodes bitor %tok(__EvalExtractedIdent2), %tok(__EvalExtractedIdent)
+							%endif
 							%xdefine %%changed_to __EvalExtractedIdent2
 						%else
 							%defstr %%changed_to %eval(%tok(__EvalExtractedIdent)%tok(%%o)%tok(__EvalExtractedIdent2))
