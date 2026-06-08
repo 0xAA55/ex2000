@@ -444,6 +444,215 @@
 	%endrep
 %endmacro
 
+%macro __EvalOptimizeRuntimeOpcodes 0
+	%ifndef __EvalRuntimeOpcodeIndex
+		%exitmacro
+	%endif
+	%rep 10000
+		%ifdef __ConditionError
+			%exitmacro
+		%endif
+		%assign %%pos 0
+		%assign %%found 0
+		%rep __EvalRuntimeOpcodeIndex
+			__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos]
+			__EvalDupOperands
+			%ifidni __BreakDownOpcode, 'bitnot'
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if %isidni(__BreakDownOpcode, 'bitnot') && __EvalDupNumOperands == 1 && __EvalIsSharingOperandsResult
+						%assign %%found 1
+						%defstr __EvalRuntimeOpcodes%[%%pos] nop
+						%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+						%exitrep
+					%else
+						%if __EvalIsSharingOperandsResult
+							%exitrep
+						%endif
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%elifidni __BreakDownOpcode, 'mul_imm32'
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if %isidni(__BreakDownOpcode, 'mul_imm32') && __EvalDupNumOperands == 2 && %isidni(__BreakDownOperands%[0], __EvalDupOperands%[0])
+						%assign %%found 1
+						%defstr __EvalRuntimeOpcodes%[%%pos] mul_imm32 %tok(__BreakDownOperands%[0]), %eval(%tok(__BreakDownOperands%[1]) * %tok(__EvalDupOperands%[1]))
+						%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+						%exitrep
+					%else
+						%if __EvalIsSharingOperandsResult
+							%exitrep
+						%endif
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%elif (%isidni(__EvalDupOpcode, 'add_imm') || %isidni(__EvalDupOpcode, 'sub_imm'))
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if (__EvalDupNumOperands == 2 && %isidni(__BreakDownOperands%[0], __EvalDupOperands%[0]))
+						%if %isidni(__BreakDownOpcode, 'add_imm')
+							%assign %%found 1
+							%if %isidni(__EvalDupOpcode, 'add_imm')
+								%assign %%imm %eval(%tok(__EvalDupOperands%[1]) + %tok(__BreakDownOperands%[1]))
+							%else
+								%assign %%imm %eval(%tok(__BreakDownOperands%[1]) - %tok(__EvalDupOperands%[1]))
+							%endif
+							%if %%imm > 0
+								%defstr __EvalRuntimeOpcodes%[%%pos] add_imm %tok(__EvalDupOperands%[0]), %%imm
+							%elif %%imm < 0
+								%defstr __EvalRuntimeOpcodes%[%%pos] sub_imm %tok(__EvalDupOperands%[0]), %eval(-%%imm)
+							%else
+								%defstr __EvalRuntimeOpcodes%[%%pos] nop
+							%endif
+							%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+							%exitrep
+						%elif %isidni(__BreakDownOpcode, 'sub_imm')
+							%assign %%found 1
+							%if %isidni(__EvalDupOpcode, 'add_imm')
+								%assign %%imm %eval(%tok(__EvalDupOperands%[1]) - %tok(__BreakDownOperands%[1]))
+							%else
+								%assign %%imm %eval(-(%tok(__EvalDupOperands%[1]) + %tok(__BreakDownOperands%[1])))
+							%endif
+							%if %%imm > 0
+								%defstr __EvalRuntimeOpcodes%[%%pos] add_imm %tok(__EvalDupOperands%[0]), %%imm
+							%elif %%imm < 0
+								%defstr __EvalRuntimeOpcodes%[%%pos] sub_imm %tok(__EvalDupOperands%[0]), %eval(-%%imm)
+							%else
+								%defstr __EvalRuntimeOpcodes%[%%pos] nop
+							%endif
+							%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+							%exitrep
+						%elif __EvalIsSharingOperandsResult
+							%exitrep
+						%endif
+					%elif __EvalIsSharingOperandsResult
+						%exitrep
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%elifidni __EvalDupOpcode, 'bitor_imm'
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if %isidni(__BreakDownOpcode, 'bitor_imm') && __EvalDupNumOperands == 2 && %isidni(__BreakDownOperands%[0], __EvalDupOperands%[0])
+						%assign %%found 1
+						%assign %%imm %eval(%tok(__EvalDupOperands%[1]) | %tok(__BreakDownOperands%[1]))
+						%if %%imm != 0
+							%defstr __EvalRuntimeOpcodes%[%%pos] bitor_imm %tok(__EvalDupOperands%[0]), %%imm
+						%else
+							%defstr __EvalRuntimeOpcodes%[%%pos] nop
+						%endif
+						%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+						%exitrep
+					%elif __EvalIsSharingOperandsResult
+						%exitrep
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%elifidni __EvalDupOpcode, 'bitand_imm'
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if %isidni(__BreakDownOpcode, 'bitand_imm') && __EvalDupNumOperands == 2 && %isidni(__BreakDownOperands%[0], __EvalDupOperands%[0])
+						%assign %%found 1
+						%assign %%imm %eval(%tok(__EvalDupOperands%[1]) & %tok(__BreakDownOperands%[1]))
+						%defstr __EvalRuntimeOpcodes%[%%pos] bitand_imm %tok(__EvalDupOperands%[0]), %%imm
+						%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+						%exitrep
+					%elif __EvalIsSharingOperandsResult
+						%exitrep
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%elifidni __EvalDupOpcode, 'shl_imm'
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if %isidni(__BreakDownOpcode, 'shl_imm') && __EvalDupNumOperands == 2 && %isidni(__BreakDownOperands%[0], __EvalDupOperands%[0])
+						%assign %%found 1
+						%assign %%imm %eval(%tok(__EvalDupOperands%[1]) + %tok(__BreakDownOperands%[1]))
+						%defstr __EvalRuntimeOpcodes%[%%pos] shl_imm %tok(__EvalDupOperands%[0]), %%imm
+						%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+						%exitrep
+					%elif __EvalIsSharingOperandsResult
+						%exitrep
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%elifidni __EvalDupOpcode, 'shr_imm'
+				%assign %%pos2 %%pos + 1
+				%rep __EvalRuntimeOpcodeIndex
+					%ifndef __EvalRuntimeOpcodes%[%%pos2]
+						%exitrep
+					%endif
+					__EvalBreakDownOpcode __EvalRuntimeOpcodes%[%%pos2]
+					__EvalIsSharingOperands
+					%if %isidni(__BreakDownOpcode, 'shr_imm') && __EvalDupNumOperands == 2 && %isidni(__BreakDownOperands%[0], __EvalDupOperands%[0])
+						%assign %%found 1
+						%assign %%imm %eval(%tok(__EvalDupOperands%[1]) + %tok(__BreakDownOperands%[1]))
+						%defstr __EvalRuntimeOpcodes%[%%pos] shr_imm %tok(__EvalDupOperands%[0]), %%imm
+						%defstr __EvalRuntimeOpcodes%[%%pos2] nop
+						%exitrep
+					%elif __EvalIsSharingOperandsResult
+						%exitrep
+					%endif
+					%assign %%pos2 %%pos2 + 1
+				%endrep
+			%endif
+			__EvalUndefDupOperands
+			%assign %%pos %%pos + 1
+		%endrep
+		%assign %%pos 0
+		%rep __EvalRuntimeOpcodeIndex
+			%if %isidni(__EvalRuntimeOpcodes%[%%pos], 'nop')
+				%assign %%found 1
+				%rep __EvalRuntimeOpcodeIndex
+					%assign %%pos2 %%pos + 1
+					%ifdef __EvalRuntimeOpcodes%[%%pos2]
+						%xdefine __EvalRuntimeOpcodes%[%%pos] __EvalRuntimeOpcodes%[%%pos2]
+					%else
+						%undef __EvalRuntimeOpcodes%[%%pos]
+						%assign __EvalRuntimeOpcodeIndex %%pos
+						%exitrep
+					%endif
+					%assign %%pos %%pos2
+				%endrep
+				%exitrep
+			%endif
+			%assign %%pos %%pos + 1
+		%endrep
+		%if %%found == 0
+			%exitrep
+		%endif
+	%endrep
 %endmacro
 
 %macro __EvalReleaseRuntimeOpcodes 0
@@ -1737,6 +1946,7 @@
 		%endif
 	%endrep
 	__EvaluateSimple %tok(%%expre)
+	__EvalOptimizeRuntimeOpcodes
 	__EvalReleaseRuntimeOpcodes
 %endmacro
 
