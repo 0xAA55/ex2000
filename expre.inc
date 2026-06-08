@@ -404,6 +404,24 @@
 	%xdefine __BreakDownOpcode %%expre
 %endmacro
 
+%macro __EvalDupOperands 0
+	%assign %%index 0
+	%assign __EvalDupNumOperands __BreakDownNumOperands
+	%xdefine __EvalDupOpcode __BreakDownOpcode
+	%rep __EvalDupNumOperands
+		%xdefine __EvalDupOperands%[%%index] __BreakDownOperands%[%%index]
+		%assign %%index %%index + 1
+	%endrep
+%endmacro
+
+%macro __EvalUndefDupOperands 0
+	%assign %%index 0
+	%rep __EvalDupNumOperands
+		%undef __EvalDupOperands%[%%index]
+		%assign %%index %%index + 1
+	%endrep
+%endmacro
+
 %endmacro
 
 %macro __EvalReleaseRuntimeOpcodes 0
