@@ -358,6 +358,54 @@
 	%assign __EvalRuntimeOpcodeIndex __EvalRuntimeOpcodeIndex + 1
 %endmacro
 
+%macro __EvalBreakDownOpcode 1 ;String
+	%assign %%pos 0
+	%xdefine %%expre %1
+	%undef __BreakDownOpcode
+	%ifdef __BreakDownNumOperands
+		%rep __BreakDownNumOperands
+			%undef __BreakDownOperands%[%%pos]
+			%assign %%pos %%pos + 1
+		%endrep
+	%endif
+	%assign __BreakDownNumOperands 0
+	%assign %%pos 0
+	%defstr __AllOperandsToBreakDown
+	%rep %strlen(%%expre)
+		%assign %%pos %%pos + 1
+		%if %substr(%%expre, %%pos, 1) == ' '
+			%xdefine __BreakDownOpcode %substr(%%expre, 1, %%pos - 1)
+			__RemoveSpaces %%operand, %substr(%%expre, %%pos + 1)
+			%xdefine __AllOperandsToBreakDown %%operand
+			%xdefine __BreakDownOperands%[__BreakDownNumOperands] __AllOperandsToBreakDown
+			%assign %%pos 0
+			%rep 10000
+				%assign %%found 0
+				%assign %%pos 0
+				%xdefine %%operand __BreakDownOperands%[__BreakDownNumOperands]
+				%rep %strlen(%%operand)
+					%assign %%pos %%pos + 1
+					%if %substr(%%operand, %%pos, 1) == ','
+						%xdefine __BreakDownOperands%[__BreakDownNumOperands] %substr(%%operand, 1, %%pos - 1)
+						%assign __BreakDownNumOperands __BreakDownNumOperands + 1
+						%xdefine __BreakDownOperands%[__BreakDownNumOperands] %substr(%%operand, %%pos + 1)
+						%assign %%found 1
+						%exitrep
+					%endif
+				%endrep
+				%if %%found == 0
+					%exitrep
+				%endif
+			%endrep
+			%assign __BreakDownNumOperands __BreakDownNumOperands + 1
+			%exitmacro
+		%endif
+	%endrep
+	%xdefine __BreakDownOpcode %%expre
+%endmacro
+
+%endmacro
+
 %macro __EvalReleaseRuntimeOpcodes 0
 	%assign %%pos 0
 	%ifndef __EvalRuntimeOpcodeIndex
