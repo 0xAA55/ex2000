@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _BitMapClamp
+DefFunc _FloatMapClamp
 	FrameBegin 0, 0, ebx, edi
 
 	movss xmm6, Param(1)

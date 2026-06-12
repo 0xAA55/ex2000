@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _BitMapApplyGain
+DefFunc _FloatMapApplyGain
 	FrameBegin 0, 0, ebx, esi
 
 	mov ebx, Param(0)

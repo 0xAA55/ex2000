@@ -8,10 +8,10 @@ struc PoolProcParam
 endstruc
 
 segment .bss
-extern _BitMapCurveNumWorkers
-_BitMapCurveNumWorkers resd 1
+extern _FloatMapCurveNumWorkers
+_FloatMapCurveNumWorkers resd 1
 
-DefFunc _BitMapCurvePoolProc
+DefFunc _FloatMapCurvePoolProc
 	FrameBegin 0, 4, ebx, esi, edi
 
 	mov ebx, Param(0)
@@ -28,7 +28,7 @@ DefFunc _BitMapCurvePoolProc
 	ret
 
 
-DefFunc _BitMapCurve
+DefFunc _FloatMapCurve
 	FrameBegin 0, 5, ebx, esi, edi
 
 	mov ebx, Param(0)
@@ -43,11 +43,11 @@ DefFunc _BitMapCurve
 	mov eax, edi
 	mov edi, esi
 	rep stosd
-	mov eax, [_BitMapCurveNumWorkers]
+	mov eax, [_FloatMapCurveNumWorkers]
 	mov cl, 8
 	test eax, eax
 	cmovz eax, ecx
-	mov [_BitMapCurveNumWorkers], eax
+	mov [_FloatMapCurveNumWorkers], eax
 
 	mov eax, Param(1)
 	mov ecx, Param(2)
@@ -55,7 +55,7 @@ DefFunc _BitMapCurve
 	mov [edi + PoolProcParam.curve_points], ecx
 	mov [edi + PoolProcParam.fmap], ebx
 
-	invoke_cdecl _PoolRun, _BitMapCurvePoolProc, [_BitMapCurveNumWorkers], [ebx + BitMap.border_len], esi, 0
+	invoke_cdecl _PoolRun, _FloatMapCurvePoolProc, [_FloatMapCurveNumWorkers], [ebx + BitMap.border_len], esi, 0
 	invoke_cdecl _free, eax
 	invoke_cdecl _free, esi
 

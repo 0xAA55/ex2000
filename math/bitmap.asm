@@ -60,7 +60,7 @@ DefFunc _DestroyBitMap
 	FrameEnd
 	ret
 
-DefFunc _GetXYBitMap
+DefFunc _GetBitmapPixelAddress
 	FrameBegin 0, 0, ebx
 
 	mov ebx, Param(2)

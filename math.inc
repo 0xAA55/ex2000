@@ -254,8 +254,8 @@ extern _SmootherStep
 ; BitMap *CreatePerlinMap2D(int border_len);
 extern _CreatePerlinMap2D
 
-; float *GetXYBitMap(int x, int y, BitMap *map);
-extern _GetXYBitMap
+; float *GetBitmapPixelAddress(int x, int y, BitMap *map);
+extern _GetBitmapPixelAddress
 
 ; BitMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, BitMap *src);
 extern _ConvertPerlinMapToAltitude
@@ -263,14 +263,14 @@ extern _ConvertPerlinMapToAltitude
 ; BitMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
 extern _GenPerlinAltitude
 
-; void AccumulateBitMap(BitMap *accum_to, BitMap *src);
-extern _AccumulateBitMap
+; void AccumulateFloatMap(BitMap *accum_to, BitMap *src);
+extern _AccumulateFloatMap
 
-; void MultiplyBitMap(BitMap *mult_to, BitMap *src);
-extern _MultiplyBitMap
+; void MultiplyFloatMap(BitMap *mult_to, BitMap *src);
+extern _MultiplyFloatMap
 
-; void BitMapApplyGain(BitMap *map, float gain);
-extern _BitMapApplyGain
+; void FloatMapApplyGain(BitMap *map, float gain);
+extern _FloatMapApplyGain
 
 ; BitMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers);
 extern _GenMultiLayerPerlinAltitude
@@ -290,33 +290,33 @@ extern _GenRadiusMap
 ; BitMap *GenDistanceMap(int size);
 extern _GenDistanceMap
 
-%macro InstFMDataCmn 0
+%macro InstBMDataCmn 0
 	.dst_map resd 1
 	.src_map resd 1
 	.userdata resd 1
 	.size equ $ - .dst_map
 %endmacro
 
-struc FMDataCmn
-	InstFMDataCmn
+struc BMDataCmn
+	InstBMDataCmn
 endstruc
 
 ; BitMap *BitMapMTPool(
 ; 	BitMap *src,
 ; 	int num_workers,
 ; 	void *userdata,
-; 	int(*work_proc)(FMDataCmn *param, size_t index),
+; 	int(*work_proc)(BMDataCmn *param, size_t index),
 ; 	size_t stack_size);
 extern _BitMapMTPool
 
-; BitMap *BitMapGaussianBlur(BitMap *src, int16_t blur_radius);
-extern _BitMapGaussianBlur
+; BitMap *FloatMapGaussianBlur(BitMap *src, int16_t blur_radius);
+extern _FloatMapGaussianBlur
 
-; float BitMapGetMaxValue(BitMap *src);
-extern _BitMapGetMaxValue
+; float FloatMapGetMaxValue(BitMap *src);
+extern _FloatMapGetMaxValue
 
-; void BitMapClamp(BitMap *map, float max, float min);
-extern _BitMapClamp
+; void FloatMapClamp(BitMap *map, float max, float min);
+extern _FloatMapClamp
 
 ; void BitMapBlt(
 ; 	BitMap *dst,
@@ -334,8 +334,8 @@ extern _BitMapClamp
 ; );
 extern _BitMapBlt
 
-; void BitMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
-extern _BitMapCurve
+; void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
+extern _FloatMapCurve
 
 %macro InstSimpleVertex 0
 .position:

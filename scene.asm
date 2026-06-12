@@ -347,7 +347,7 @@ DefFunc _SceneLoad02
 
 DefFunc _SceneLoad03
 	FrameBegin 0, 3
-	invoke_cdecl _BitMapCurve, [_TerrainBitmap], _TerrainCurvePoints, _TerrainCurvePoints.num_points
+	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, _TerrainCurvePoints.num_points
 	FrameEnd
 	ret
 

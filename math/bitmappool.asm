@@ -13,13 +13,13 @@ DefFunc _BitMapMTPool
 	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], [ebx + BitMap.dims]
 	mov edi, eax
 
-	invoke_cdecl _malloc, FMDataCmn.size
+	invoke_cdecl _malloc, BMDataCmn.size
 	mov esi, eax
 
 	mov eax, Param(2)
-	mov [esi + FMDataCmn.dst_map], edi
-	mov [esi + FMDataCmn.src_map], ebx
-	mov [esi + FMDataCmn.userdata], eax
+	mov [esi + BMDataCmn.dst_map], edi
+	mov [esi + BMDataCmn.src_map], ebx
+	mov [esi + BMDataCmn.userdata], eax
 
 	mov eax, [ebx + BitMap.border_len]
 	invoke_cdecl _malloc, &[eax * 4]

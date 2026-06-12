@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _BitMapGetMaxValue
+DefFunc _FloatMapGetMaxValue
 	FrameBegin 0, 3, ebx
 
 	mov ebx, Param(0)

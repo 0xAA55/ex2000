@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _MultiplyBitMap
+DefFunc _MultiplyFloatMap
 	FrameBegin 0, 0, esi, edi
 
 	mov edi, Param(0)

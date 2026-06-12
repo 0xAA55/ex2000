@@ -144,21 +144,21 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _X
 	mul eax, Param(0)
 	mov _BX, eax
-	invoke_cdecl _GetXYBitMap, _X, _Y, esi
+	invoke_cdecl _GetBitmapPixelAddress, _X, _Y, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P00XY_P10XY + Vector.x], eax
 	mov [_P00XY_P10XY + Vector.y], edx
 	mov eax, _X
 	inc eax
-	invoke_cdecl _GetXYBitMap, eax, _Y, esi
+	invoke_cdecl _GetBitmapPixelAddress, eax, _Y, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P00XY_P10XY + Vector.z], eax
 	mov [_P00XY_P10XY + Vector.w], edx
 	mov eax, _Y
 	inc eax
-	invoke_cdecl _GetXYBitMap, _X, eax, esi
+	invoke_cdecl _GetBitmapPixelAddress, _X, eax, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P01XY_P11XY + Vector.x], eax
@@ -167,7 +167,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov ecx, _Y
 	inc eax
 	inc ecx
-	invoke_cdecl _GetXYBitMap, eax, ecx, esi
+	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P01XY_P11XY + Vector.z], eax
@@ -212,7 +212,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov ecx, _BY
 	add eax, _IX
 	add ecx, _IY
-	invoke_cdecl _GetXYBitMap, eax, ecx, edi
+	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, edi
 	mov edx, eax
 
 	mov eax, _IX
@@ -337,7 +337,7 @@ DefFunc _GenPerlinAltitude
 	FrameEnd
 	ret
 
-DefFunc _AccumulateBitMap
+DefFunc _AccumulateFloatMap
 	FrameBegin 0, 0, esi, edi
 
 	mov esi, Param(1)
@@ -472,7 +472,7 @@ DefFunc _GenMultiLayerPerlinAltitude
 	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, [_PerlinNumWorkers], Param(2), _JOBS, 0
 	mov edi, eax
 .accumulate:
-	invoke_cdecl _AccumulateBitMap, [edi], [edi + ebx * 4]
+	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]
 	invoke_cdecl _DestroyBitMap, [edi + ebx * 4]
 	inc ebx
 	cmp ebx, Param(2)
@@ -486,11 +486,11 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov ebx, [edi]
 	invoke_cdecl _free, edi
 
-	invoke_cdecl _BitMapGetMaxValue, ebx
+	invoke_cdecl _FloatMapGetMaxValue, ebx
 	fdivr dword Param(1)
 	fstp dword _GAIN
 
-	invoke_cdecl _BitMapApplyGain, ebx, _GAIN
+	invoke_cdecl _FloatMapApplyGain, ebx, _GAIN
 
 	mov eax, ebx
 	FrameEnd
