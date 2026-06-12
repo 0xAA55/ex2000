@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _FloatMapMTPool
+DefFunc _BitMapMTPool
 	FrameBegin 1, 5, ebx, esi, edi
 	AssignVars _JOBS
 
@@ -10,7 +10,7 @@ DefFunc _FloatMapMTPool
 
 	mov ebx, Param(0)
 
-	invoke_cdecl _CreateFloatMap, [ebx + FloatMap.border_len], [ebx + FloatMap.dims]
+	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], [ebx + BitMap.dims]
 	mov edi, eax
 
 	invoke_cdecl _malloc, FMDataCmn.size
@@ -21,18 +21,18 @@ DefFunc _FloatMapMTPool
 	mov [esi + FMDataCmn.src_map], ebx
 	mov [esi + FMDataCmn.userdata], eax
 
-	mov eax, [ebx + FloatMap.border_len]
+	mov eax, [ebx + BitMap.border_len]
 	invoke_cdecl _malloc, &[eax * 4]
 	mov _JOBS, eax
 
 	push edi
 	mov edi, eax
-	mov ecx, [ebx + FloatMap.border_len]
+	mov ecx, [ebx + BitMap.border_len]
 	mov eax, esi
 	rep stosd
 	pop edi
 
-	invoke_cdecl _PoolRun, Param(3), Param(1), [ebx + FloatMap.border_len], _JOBS, Param(4)
+	invoke_cdecl _PoolRun, Param(3), Param(1), [ebx + BitMap.border_len], _JOBS, Param(4)
 
 	invoke_cdecl _free, eax
 	invoke_cdecl _free, esi

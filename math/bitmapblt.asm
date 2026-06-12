@@ -1,11 +1,11 @@
 %include "common.inc"
 
-DefFunc _FloatMapBlt
+DefFunc _BitMapBlt
 	FrameBegin 8, 4, ebx, esi, edi
 	AssignVars _DX, _DY, _DW, _DH, _DR, _DB, _SX, _SY
 
 	mov eax, Param(9)
-	mov ecx, _FloatMapBltDefLineProc
+	mov ecx, _BitMapBltDefLineProc
 	mov edi, Param(0) ;dst
 	mov esi, Param(5) ;src
 	mov ebx, Param(8) ;userdata
@@ -48,8 +48,8 @@ DefFunc _FloatMapBlt
 	psubd xmm2, xmm1 ;(sx, sy) -= (dmx, dmy)
 	psubd xmm3, xmm1 ;(dx, dy) -= (dmx, dmy)
 	paddd xmm4, xmm1 ;(dw, dh) += (dmx, dmy)
-	movd xmm0, [esi + FloatMap.border_len]
-	movd xmm1, [edi + FloatMap.border_len]
+	movd xmm0, [esi + BitMap.border_len]
+	movd xmm1, [edi + BitMap.border_len]
 	movq _SX, xmm2
 	movq _DX, xmm3
 	pshufd xmm0, xmm0, 0 ;sl, sl, sl, sl
@@ -96,19 +96,19 @@ DefFunc _FloatMapBlt
 	movq _DW, xmm2
 
 	mov eax, _DX
-	mul dword [edi + FloatMap.bytes_per_pixel]
+	mul dword [edi + BitMap.bytes_per_pixel]
 	mov _DX, eax
 
 	mov eax, _SX
-	mul dword [esi + FloatMap.bytes_per_pixel]
+	mul dword [esi + BitMap.bytes_per_pixel]
 	mov _SX, eax
 
 	xor eax, eax
 	mov _DY, eax
 .loopy:
 	mov ecx, _SY
-	mov eax, [edi + FloatMap.row_ptr + eax * 4]
-	mov edx, [esi + FloatMap.row_ptr + ecx * 4]
+	mov eax, [edi + BitMap.row_ptr + eax * 4]
+	mov edx, [esi + BitMap.row_ptr + ecx * 4]
 	inc ecx
 	mov _SY, ecx
 
@@ -140,11 +140,11 @@ DefFunc _FloatMapBlt
 	%undef _SX
 	%undef _SY
 
-DefFunc _FloatMapBltDefLineProc
+DefFunc _BitMapBltDefLineProc
 	FrameBegin 0, 3, ebx
 
 	mov ebx, Param(3)
-	mov eax, [ebx + FloatMap.dims]
+	mov eax, [ebx + BitMap.dims]
 	mul dword Param(2)
 	invoke_dll_cdecl memcpy, Param(0), Param(1), &[eax * 4]
 

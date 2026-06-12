@@ -7,14 +7,14 @@ _PerlinNumWorkers resd 1
 DefFunc _CreatePerlinMap2D
 	FrameBegin 8, 2, ebx, esi
 
-	invoke_cdecl _CreateFloatMap, Param(0), 2
+	invoke_cdecl _CreateBitMap, Param(0), 2
 	mov ebx, eax
 
 	mov eax, Param(0)
 	cmp eax, 1
 	jae .blae1
 
-	mov esi, [ebx + FloatMap.data]
+	mov esi, [ebx + BitMap.data]
 	invoke_dll_cdecl rand
 	shl eax, 1
 	sub eax, 0x7FFF
@@ -33,8 +33,8 @@ DefFunc _CreatePerlinMap2D
 	and esi, 0xFFFFFFF0
 	invoke_cdecl _CreateSeedVector, esi
 
-	mov eax, [ebx + FloatMap.data]
-	mov ecx, [ebx + FloatMap.num_pixels]
+	mov eax, [ebx + BitMap.data]
+	mov ecx, [ebx + BitMap.num_pixels]
 	shr ecx, 1
 	movaps xmm2, [_F1111]
 	movaps xmm3, [esi]
@@ -90,8 +90,8 @@ DefFunc _ConvertPerlinMapToAltitude
 
 	mov esi, Param(2)
 	mov eax, Param(0)
-	mul dword [esi + FloatMap.border_len]
-	invoke_cdecl _CreateFloatMap, eax, 1
+	mul dword [esi + BitMap.border_len]
+	invoke_cdecl _CreateBitMap, eax, 1
 	mov edi, eax
 
 	invoke_cdecl _aligned_malloc, 6 * 0x10, 0x10
@@ -144,21 +144,21 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _X
 	mul eax, Param(0)
 	mov _BX, eax
-	invoke_cdecl _GetXYFloatMap, _X, _Y, esi
+	invoke_cdecl _GetXYBitMap, _X, _Y, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P00XY_P10XY + Vector.x], eax
 	mov [_P00XY_P10XY + Vector.y], edx
 	mov eax, _X
 	inc eax
-	invoke_cdecl _GetXYFloatMap, eax, _Y, esi
+	invoke_cdecl _GetXYBitMap, eax, _Y, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P00XY_P10XY + Vector.z], eax
 	mov [_P00XY_P10XY + Vector.w], edx
 	mov eax, _Y
 	inc eax
-	invoke_cdecl _GetXYFloatMap, _X, eax, esi
+	invoke_cdecl _GetXYBitMap, _X, eax, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P01XY_P11XY + Vector.x], eax
@@ -167,7 +167,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov ecx, _Y
 	inc eax
 	inc ecx
-	invoke_cdecl _GetXYFloatMap, eax, ecx, esi
+	invoke_cdecl _GetXYBitMap, eax, ecx, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
 	mov [_P01XY_P11XY + Vector.z], eax
@@ -212,7 +212,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov ecx, _BY
 	add eax, _IX
 	add ecx, _IY
-	invoke_cdecl _GetXYFloatMap, eax, ecx, edi
+	invoke_cdecl _GetXYBitMap, eax, ecx, edi
 	mov edx, eax
 
 	mov eax, _IX
@@ -250,13 +250,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	cmp eax, [esi + FloatMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jb .loopx
 
 	mov eax, _Y
 	inc eax
 	mov _Y, eax
-	cmp eax, [esi + FloatMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jb .loopy
 
 	invoke_cdecl _free, _STEPS
@@ -265,8 +265,8 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov ebx, edi
 	movaps xmm5, [_FP5P5P5P5]
 	movss xmm7, Param(1)
-	mov esi, [ebx + FloatMap.data]
-	mov eax, [ebx + FloatMap.num_floats]
+	mov esi, [ebx + BitMap.data]
+	mov eax, [ebx + BitMap.num_floats]
 	test al, 0xF
 	jz .batch_proc
 	mov ecx, eax
@@ -332,18 +332,18 @@ DefFunc _GenPerlinAltitude
 	mov ebx, eax
 	invoke_cdecl _ConvertPerlinMapToAltitude, Param(1), Param(2), ebx
 	mov edi, eax
-	invoke_cdecl _DestroyFloatMap, ebx
+	invoke_cdecl _DestroyBitMap, ebx
 	mov eax, edi
 	FrameEnd
 	ret
 
-DefFunc _AccumulateFloatMap
+DefFunc _AccumulateBitMap
 	FrameBegin 0, 0, esi, edi
 
 	mov esi, Param(1)
 	mov edi, Param(0)
-	mov ecx, [esi + FloatMap.num_floats]
-	mov eax, [edi + FloatMap.num_floats]
+	mov ecx, [esi + BitMap.num_floats]
+	mov eax, [edi + BitMap.num_floats]
 	cmp eax, ecx
 	je .good_size
 .bad_size:
@@ -351,8 +351,8 @@ DefFunc _AccumulateFloatMap
 	jmp .bad_size
 .good_size:
 	mov ecx, eax
-	mov esi, [esi + FloatMap.data]
-	mov edi, [edi + FloatMap.data]
+	mov esi, [esi + BitMap.data]
+	mov edi, [edi + BitMap.data]
 	xor eax, eax
 	test ecx, 0xF
 	jnz .tail
@@ -472,8 +472,8 @@ DefFunc _GenMultiLayerPerlinAltitude
 	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, [_PerlinNumWorkers], Param(2), _JOBS, 0
 	mov edi, eax
 .accumulate:
-	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]
-	invoke_cdecl _DestroyFloatMap, [edi + ebx * 4]
+	invoke_cdecl _AccumulateBitMap, [edi], [edi + ebx * 4]
+	invoke_cdecl _DestroyBitMap, [edi + ebx * 4]
 	inc ebx
 	cmp ebx, Param(2)
 	jb .accumulate
@@ -486,11 +486,11 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov ebx, [edi]
 	invoke_cdecl _free, edi
 
-	invoke_cdecl _FloatMapGetMaxValue, ebx
+	invoke_cdecl _BitMapGetMaxValue, ebx
 	fdivr dword Param(1)
 	fstp dword _GAIN
 
-	invoke_cdecl _FloatMapApplyGain, ebx, _GAIN
+	invoke_cdecl _BitMapApplyGain, ebx, _GAIN
 
 	mov eax, ebx
 	FrameEnd

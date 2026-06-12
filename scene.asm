@@ -340,14 +340,14 @@ DefFunc _SceneLoad01
 
 DefFunc _SceneLoad02
 	FrameBegin 0, 1
-	invoke_cdecl _DuplicateFloatMap, [_NoiseBitmap]
+	invoke_cdecl _DuplicateBitMap, [_NoiseBitmap]
 	mov [_TerrainBitmap], eax
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad03
 	FrameBegin 0, 3
-	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, _TerrainCurvePoints.num_points
+	invoke_cdecl _BitMapCurve, [_TerrainBitmap], _TerrainCurvePoints, _TerrainCurvePoints.num_points
 	FrameEnd
 	ret
 
@@ -363,7 +363,7 @@ DefFunc _SceneLoad05
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
@@ -377,14 +377,14 @@ DefFunc _SceneLoad06
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + FloatMap.border_len], [ebx + FloatMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + FloatMap.data]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	invoke_cdecl _DestroyFloatMap, ebx
+	invoke_cdecl _DestroyBitMap, ebx
 	xor eax, eax
 	mov [_NoiseBitmap], eax
 	FrameEnd
@@ -539,7 +539,7 @@ DefFunc _SceneUnload
 
 	xor ebx, ebx
 
-	invoke_cdecl _DestroyFloatMap, [_TerrainBitmap]
+	invoke_cdecl _DestroyBitMap, [_TerrainBitmap]
 	invoke_cdecl _DeInitBuffer, _TerrainVerticesBuffer
 	invoke_cdecl _DeInitBuffer, _TerrainIndicesBuffer
 	invoke_cdecl _DeInitBuffer, _TerrainInstancesBuffer

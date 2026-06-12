@@ -86,7 +86,7 @@
 	.size equ $ - .x
 %endmacro
 
-%macro InstFloatMap 0
+%macro InstBitMap 0
 	.data resd 1
 	.border_len resd 1
 	.num_pixels resd 1
@@ -116,8 +116,8 @@ struc DMatrix
 	InstDMatrix
 endstruc
 
-struc FloatMap
-	InstFloatMap
+struc BitMap
+	InstBitMap
 endstruc
 
 extern _Pi_P
@@ -236,43 +236,43 @@ extern _MatrixMultiply
 ; void MatrixMultiplyTo(Matrix *out_l, Matrix *r);
 extern _MatrixMultiplyTo
 
-; FloatMap *CreateFloatMap(int border_len, int dims);
-extern _CreateFloatMap
+; BitMap *CreateBitMap(int border_len, int dims);
+extern _CreateBitMap
 
-; FloatMap *DuplicateFloatMap(FloatMap *src);
-extern _DuplicateFloatMap
+; BitMap *DuplicateBitMap(BitMap *src);
+extern _DuplicateBitMap
 
-; void DestroyFloatMap(FloatMap *map);
-extern _DestroyFloatMap
+; void DestroyBitMap(BitMap *map);
+extern _DestroyBitMap
 
-; FloatMap *WarpFloatMap(FloatMap *src, int x, int y);
-extern _WarpFloatMap
+; BitMap *WarpBitMap(BitMap *src, int x, int y);
+extern _WarpBitMap
 
 ; float SmootherStep(float x);
 extern _SmootherStep
 
-; FloatMap *CreatePerlinMap2D(int border_len);
+; BitMap *CreatePerlinMap2D(int border_len);
 extern _CreatePerlinMap2D
 
-; float *GetXYFloatMap(int x, int y, FloatMap *map);
-extern _GetXYFloatMap
+; float *GetXYBitMap(int x, int y, BitMap *map);
+extern _GetXYBitMap
 
-; FloatMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, FloatMap *src);
+; BitMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, BitMap *src);
 extern _ConvertPerlinMapToAltitude
 
-; FloatMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
+; BitMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
 extern _GenPerlinAltitude
 
-; void AccumulateFloatMap(FloatMap *accum_to, FloatMap *src);
-extern _AccumulateFloatMap
+; void AccumulateBitMap(BitMap *accum_to, BitMap *src);
+extern _AccumulateBitMap
 
-; void MultiplyFloatMap(FloatMap *mult_to, FloatMap *src);
-extern _MultiplyFloatMap
+; void MultiplyBitMap(BitMap *mult_to, BitMap *src);
+extern _MultiplyBitMap
 
-; void FloatMapApplyGain(FloatMap *map, float gain);
-extern _FloatMapApplyGain
+; void BitMapApplyGain(BitMap *map, float gain);
+extern _BitMapApplyGain
 
-; FloatMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers);
+; BitMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers);
 extern _GenMultiLayerPerlinAltitude
 
 ; typedef struct radmap_s
@@ -287,7 +287,7 @@ extern _GenMultiLayerPerlinAltitude
 ; // The returned pointer should be `free()`d.
 extern _GenRadiusMap
 
-; FloatMap *GenDistanceMap(int size);
+; BitMap *GenDistanceMap(int size);
 extern _GenDistanceMap
 
 %macro InstFMDataCmn 0
@@ -301,28 +301,28 @@ struc FMDataCmn
 	InstFMDataCmn
 endstruc
 
-; FloatMap *FloatMapMTPool(
-; 	FloatMap *src,
+; BitMap *BitMapMTPool(
+; 	BitMap *src,
 ; 	int num_workers,
 ; 	void *userdata,
 ; 	int(*work_proc)(FMDataCmn *param, size_t index),
 ; 	size_t stack_size);
-extern _FloatMapMTPool
+extern _BitMapMTPool
 
-; FloatMap *FloatMapGaussianBlur(FloatMap *src, int16_t blur_radius);
-extern _FloatMapGaussianBlur
+; BitMap *BitMapGaussianBlur(BitMap *src, int16_t blur_radius);
+extern _BitMapGaussianBlur
 
-; float FloatMapGetMaxValue(FloatMap *src);
-extern _FloatMapGetMaxValue
+; float BitMapGetMaxValue(BitMap *src);
+extern _BitMapGetMaxValue
 
-; void FloatMapClamp(FloatMap *map, float max, float min);
-extern _FloatMapClamp
+; void BitMapClamp(BitMap *map, float max, float min);
+extern _BitMapClamp
 
-; void FloatMapBlt(
-; 	FloatMap *dst,
+; void BitMapBlt(
+; 	BitMap *dst,
 ; 	int dst_x, int dst_y,
 ; 	int dst_w, int dst_h,
-; 	FloatMap *src,
+; 	BitMap *src,
 ; 	int src_x, int src_y,
 ; 	void *userdata,
 ; 	void (*line_proc)(
@@ -332,10 +332,10 @@ extern _FloatMapClamp
 ; 		void *userdata
 ; 	)
 ; );
-extern _FloatMapBlt
+extern _BitMapBlt
 
-; void FloatMapCurve(FloatMap *map, CurvePoints_p curve, size_t num_curve_points);
-extern _FloatMapCurve
+; void BitMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
+extern _BitMapCurve
 
 %macro InstSimpleVertex 0
 .position:
@@ -361,7 +361,7 @@ struc SimpleMesh ; All data of a `SimpleMesh` must be `malloc()` once
 	.num_indices resd 1
 	.size equ $ - SimpleMesh
 endstruc
-; SimpleMesh *AltitudeToTerrain(FloatMap *src, float height_mod, float size_mod);
+; SimpleMesh *AltitudeToTerrain(BitMap *src, float height_mod, float size_mod);
 extern _AltitudeToTerrain
 
 %endif

@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _FloatMapClamp
+DefFunc _BitMapClamp
 	FrameBegin 0, 0, ebx, edi
 
 	movss xmm6, Param(1)
@@ -9,8 +9,8 @@ DefFunc _FloatMapClamp
 	shufps xmm6, xmm6, 0
 	shufps xmm7, xmm7, 0
 
-	mov edi, [ebx + FloatMap.data]
-	mov eax, [ebx + FloatMap.num_floats]
+	mov edi, [ebx + BitMap.data]
+	mov eax, [ebx + BitMap.num_floats]
 
 .process_16:
 	cmp eax, 0x10

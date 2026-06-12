@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _FloatMapGaussianBlurPoolProc
+DefFunc _BitMapGaussianBlurPoolProc
 	FrameBegin 2, 3, ebx, esi, edi
 	AssignVars _X, _Y
 
@@ -24,7 +24,7 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	pcmpgtw xmm1, xmm0
 	punpcklwd xmm0, xmm1
 	paddd xmm0, xmm5
-	invoke_cdecl _GetXYFloatMap, xmm0.xy, [ebx + FMDataCmn.src_map]
+	invoke_cdecl _GetXYBitMap, xmm0.xy, [ebx + FMDataCmn.src_map]
 	addss xmm7, [eax]
 	inc edi
 	cmp edi, [esi]
@@ -32,14 +32,14 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	divss xmm7, xmm6
 	movq xmm0, _X
 
-	invoke_cdecl _GetXYFloatMap, xmm5.xy, [ebx + FMDataCmn.dst_map]
+	invoke_cdecl _GetXYBitMap, xmm5.xy, [ebx + FMDataCmn.dst_map]
 	movss [eax], xmm7
 
 	mov eax, _X
 	inc eax
 	mov _X, eax
 	mov ecx, [ebx + FMDataCmn.src_map]
-	cmp eax, [ecx + FloatMap.border_len]
+	cmp eax, [ecx + BitMap.border_len]
 	jb .proc_pixels
 
 	FrameEnd
@@ -47,12 +47,12 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	%undef _X
 	%undef _Y
 
-DefFunc _FloatMapGaussianBlur
+DefFunc _BitMapGaussianBlur
 	FrameBegin 1, 5, ebx
 
 	invoke_cdecl _GenRadiusMap, Param(1)
 	mov Variable(0), eax
-	invoke_cdecl _FloatMapMTPool, Param(0), 8, eax, _FloatMapGaussianBlurPoolProc, 0
+	invoke_cdecl _BitMapMTPool, Param(0), 8, eax, _BitMapGaussianBlurPoolProc, 0
 	mov ebx, eax
 	invoke_cdecl _free, Variable(0)
 	mov eax, ebx

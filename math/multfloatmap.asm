@@ -1,12 +1,12 @@
 %include "common.inc"
 
-DefFunc _MultiplyFloatMap
+DefFunc _MultiplyBitMap
 	FrameBegin 0, 0, esi, edi
 
 	mov edi, Param(0)
 	mov esi, Param(1)
-	mov eax, [edi + FloatMap.num_floats]
-	mov ecx, [esi + FloatMap.num_floats]
+	mov eax, [edi + BitMap.num_floats]
+	mov ecx, [esi + BitMap.num_floats]
 	cmp eax, ecx
 	je .good_size
 .bad_size:
@@ -14,8 +14,8 @@ DefFunc _MultiplyFloatMap
 	jmp .bad_size
 .good_size:
 	mov ecx, eax
-	mov esi, [esi + FloatMap.data]
-	mov edi, [edi + FloatMap.data]
+	mov esi, [esi + BitMap.data]
+	mov edi, [edi + BitMap.data]
 	xor eax, eax
 	test ecx, 0xF
 	jnz .tail

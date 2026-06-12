@@ -1,15 +1,15 @@
 %include "common.inc"
 
-DefFunc _WarpFloatMap
+DefFunc _WarpBitMap
 	FrameBegin 4, 2, ebx, esi, edi
 	AssignVars _X, _Y, _BITMASK, _ROWPTR
 
 	mov esi, Param(0)
-	invoke_cdecl _CreateFloatMap, [esi + FloatMap.border_len], [esi + FloatMap.dims]
+	invoke_cdecl _CreateBitMap, [esi + BitMap.border_len], [esi + BitMap.dims]
 	mov ebx, eax
-	mov edi, [eax + FloatMap.data]
+	mov edi, [eax + BitMap.data]
 
-	mov eax, [ebx + FloatMap.border_len]
+	mov eax, [ebx + BitMap.border_len]
 	dec eax
 	mov _BITMASK, eax
 
@@ -19,7 +19,7 @@ DefFunc _WarpFloatMap
 	add eax, Param(2)
 	and eax, _BITMASK
 	mov esi, Param(0)
-	mov eax, [esi + FloatMap.row_ptr + eax * 4]
+	mov eax, [esi + BitMap.row_ptr + eax * 4]
 	mov _ROWPTR, eax
 	xor eax, eax
 	mov _X, eax
@@ -27,7 +27,7 @@ DefFunc _WarpFloatMap
 	add eax, Param(1)
 	and eax, _BITMASK
 	mov esi, _ROWPTR
-	mov ecx, [ebx + FloatMap.dims]
+	mov ecx, [ebx + BitMap.dims]
 	mul ecx
 	lea esi, [esi + eax * 4]
 	rep movsd
@@ -35,13 +35,13 @@ DefFunc _WarpFloatMap
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	cmp eax, [ebx + FloatMap.border_len]
+	cmp eax, [ebx + BitMap.border_len]
 	jb .loopx
 
 	mov eax, _Y
 	inc eax
 	mov _Y, eax
-	cmp eax, [ebx + FloatMap.border_len]
+	cmp eax, [ebx + BitMap.border_len]
 	jb .loopy
 
 	mov eax, ebx

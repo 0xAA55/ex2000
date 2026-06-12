@@ -15,15 +15,15 @@ dmap.asm: common.inc
 batchadd.asm: common.inc
 batchmax.asm: common.inc
 batchcurve.asm: common.inc
-floatmap.asm: common.inc
+bitmap.asm: common.inc
 floatmapclamp.asm: common.inc
 floatmapcurve.asm: common.inc
-floatmapdup.asm: common.inc
-floatmapblt.asm: common.inc
+bitmapdup.asm: common.inc
+bitmapblt.asm: common.inc
 floatmapgain.asm: common.inc
 floatmapgaussianblur.asm: common.inc
 floatmapmax.asm: common.inc
-floatmappool.asm: common.inc
+bitmappool.asm: common.inc
 makefile: common.inc
 mateuler.asm: common.inc
 math.asm: common.inc
@@ -43,7 +43,7 @@ vecdot.asm: common.inc
 veclength.asm: common.inc
 vecmultmat.asm: common.inc
 vecnormal.asm: common.inc
-warpfmap.asm: common.inc
+warpbitmap.asm: common.inc
 
 $(OBJ_DIR)/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)

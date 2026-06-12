@@ -1,12 +1,12 @@
 %include "common.inc"
 
-DefFunc _FloatMapApplyGain
+DefFunc _BitMapApplyGain
 	FrameBegin 0, 0, ebx, esi
 
 	mov ebx, Param(0)
 
-	mov eax, [ebx + FloatMap.num_floats]
-	mov esi, [ebx + FloatMap.data]
+	mov eax, [ebx + BitMap.num_floats]
+	mov esi, [ebx + BitMap.data]
 	movss xmm7, Param(1)
 	test al, 0xF
 	mov ecx, eax

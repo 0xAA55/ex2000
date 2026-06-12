@@ -6,22 +6,22 @@ DefFunc _AltitudeToTerrain
 	AssignVars _X, _Y, _NUM_V, _NUM_I, _CB_V, _BM, _YI, _YI2
 
 	mov esi, Param(0)
-	cmp dword[esi + FloatMap.dims], 1
+	cmp dword[esi + BitMap.dims], 1
 	je .good
 .bad:
 	int3
 	jmp .bad
 .good:
 
-	mov eax, [esi + FloatMap.border_len]
+	mov eax, [esi + BitMap.border_len]
 	dec eax
 	mov _BM, eax ; bitmask for wrapping sampling
-	mov eax, [esi + FloatMap.border_len]
+	mov eax, [esi + BitMap.border_len]
 	mov ecx, 6
 	inc eax ; Extra vertices for seamless combinations
 	mul eax
 	mov _NUM_V, eax
-	mov eax, [esi + FloatMap.num_pixels]
+	mov eax, [esi + BitMap.num_pixels]
 	mul ecx
 	mov _NUM_I, eax
 	mov eax, SimpleVertex.size
@@ -47,7 +47,7 @@ DefFunc _AltitudeToTerrain
 
 	xor eax, eax
 	mov edi, [ebx + SimpleMesh.indices]
-	mov ecx, [esi + FloatMap.border_len]
+	mov ecx, [esi + BitMap.border_len]
 	inc ecx
 	movd xmm5, ecx
 	pshufd xmm5, xmm5, 0x00
@@ -78,13 +78,13 @@ DefFunc _AltitudeToTerrain
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	cmp eax, [esi + FloatMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jb .loopx_i
 
 	mov eax, _Y
 	inc eax
 	mov _Y, eax
-	cmp eax, [esi + FloatMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jb .loopy_i
 
 .gen_vertices:
@@ -102,7 +102,7 @@ DefFunc _AltitudeToTerrain
 	mov edi, [ebx + SimpleMesh.vertices]
 
 	movss xmm7, Param(1) ; height_mod
-	cvtsi2ss xmm5, [esi + FloatMap.border_len]
+	cvtsi2ss xmm5, [esi + BitMap.border_len]
 	movss xmm4, Param(2) ; size_mod
 	movaps xmm6, [_F1111]
 	shufps xmm5, xmm5, _MM_SHUFFLE(0, 0, 0, 0)
@@ -123,9 +123,9 @@ DefFunc _AltitudeToTerrain
 	lea edx, [eax + 1]
 	and ecx, _BM
 	and edx, _BM
-	mov eax, [esi + FloatMap.row_ptr + eax * 4]
-	mov ecx, [esi + FloatMap.row_ptr + ecx * 4]
-	mov edx, [esi + FloatMap.row_ptr + edx * 4]
+	mov eax, [esi + BitMap.row_ptr + eax * 4]
+	mov ecx, [esi + BitMap.row_ptr + ecx * 4]
+	mov edx, [esi + BitMap.row_ptr + edx * 4]
 	mov _CURR_ROW, eax ; y
 	mov _PREV_ROW, ecx ; y - 1
 	mov _NEXT_ROW, edx ; y + 1
@@ -179,13 +179,13 @@ DefFunc _AltitudeToTerrain
 	mov eax, _X
 	inc eax
 	mov _X, eax
-	cmp eax, [esi + FloatMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jbe .loopx_v
 
 	mov eax, _Y
 	inc eax
 	mov _Y, eax
-	cmp eax, [esi + FloatMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jbe .loopy_v
 
 	mov eax, ebx
