@@ -39,53 +39,44 @@ DefFunc _FloatMapDownScale
 	ret
 
 DefFunc _FloatMapDownScalePoolProc
-	FrameBegin 2, 0, ebx, edi
-	AssignVars DstMapSize, _X
+	FrameBegin 0, 0, ebx, edi
 
 	mov ebx, Param(0)
 	mov eax, [ebx + 0] ;dst
 	mov ebx, [ebx + 4] ;src
 
-	mov ecx, Param(1)
-	mov edi, [eax + BitMap.row_ptr + ecx * 4]
-	shl ecx, 1
-	mov edx, [ebx + BitMap.row_ptr + ecx * 4 + 4]
-	mov ecx, [ebx + BitMap.row_ptr + ecx * 4 + 0]
-
-	mov eax, [eax + BitMap.border_len]
-	mov DstMapSize, eax
+	mov edx, Param(1)
+	mov edi, [eax + BitMap.row_ptr + edx * 4]
+	mov ecx, [eax + BitMap.border_len]
+	lea eax, [edx * 2]
+	mov edx, [ebx + BitMap.row_ptr + eax * 4 + 4]
+	mov eax, [ebx + BitMap.row_ptr + eax * 4 + 0]
 
 	test dword[ebx + BitMap.border_len], 0x0F
 	jz .proc_many
 
-	xor eax, eax
-	mov _X, eax
 .loop_proc:
-	movss xmm0, [ecx + 0]
+	movss xmm0, [eax + 0]
 	addss xmm0, [edx + 0]
-	addss xmm0, [ecx + 4]
+	addss xmm0, [eax + 4]
 	addss xmm0, [edx + 4]
 	divss xmm0, [_F4444]
 	movss [edi], xmm0
-	add ecx, 8
+	add eax, 8
 	add edx, 8
 	add edi, 4
 
-	mov eax, _X
-	inc eax
-	mov _X, eax
-	cmp eax, DstMapSize
-	jb .loop_proc
+	dec ecx
+	jnz .loop_proc
 	jmp .end
 
 .proc_many:
-	xor eax, eax
-	mov _X, eax
+	shr ecx, 3
 .loop_many:
-	movaps xmm0, [ecx + 0x00]
-	movaps xmm1, [ecx + 0x10]
-	movaps xmm2, [ecx + 0x20]
-	movaps xmm3, [ecx + 0x30]
+	movaps xmm0, [eax + 0x00]
+	movaps xmm1, [eax + 0x10]
+	movaps xmm2, [eax + 0x20]
+	movaps xmm3, [eax + 0x30]
 	addps xmm0, [edx + 0x00]
 	addps xmm1, [edx + 0x10]
 	addps xmm2, [edx + 0x20]
@@ -114,19 +105,13 @@ DefFunc _FloatMapDownScalePoolProc
 	movq [edi + 0x08], xmm1
 	movq [edi + 0x10], xmm2
 	movq [edi + 0x18], xmm3
-	add ecx, 0x40
+	add eax, 0x40
 	add edx, 0x40
 	add edi, 0x20
 
-	mov eax, _X
-	add eax, 8
-	mov _X, eax
-	cmp eax, DstMapSize
-	jb .loop_many
-	jmp .end
+	dec ecx
+	jnz .loop_many
 
 .end:
 	FrameEnd
 	ret
-	%undef DstMap
-	%undef _X
