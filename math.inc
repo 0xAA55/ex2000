@@ -345,6 +345,9 @@ extern _FloatMapCurve
 ; BitMap *FloatMapDownScale(BitMap *map);
 extern _FloatMapDownScale
 
+; BitMap *GenKMapOfAltitudeMap(BitMap *map);
+extern _GenKMapOfAltitudeMap
+
 %macro InstSimpleVertex 0
 .position:
 	.x resd 1
