@@ -269,6 +269,9 @@ extern _AccumulateFloatMap
 ; void MultiplyFloatMap(BitMap *mult_to, BitMap *src);
 extern _MultiplyFloatMap
 
+; void FloatMapDivide(BitMap *dst, BitMap *src);
+extern _FloatMapDivide
+
 ; void FloatMapApplyGain(BitMap *map, float gain);
 extern _FloatMapApplyGain
 
