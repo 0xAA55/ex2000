@@ -245,7 +245,7 @@ extern _DuplicateBitMap
 ; void DestroyBitMap(BitMap *map);
 extern _DestroyBitMap
 
-; BitMap *WarpBitMap(BitMap *src, int x, int y);
+; void WarpBitMap(BitMap *dst, BitMap *src, int x, int y);
 extern _WarpBitMap
 
 ; float SmootherStep(float x);

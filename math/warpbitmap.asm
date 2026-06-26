@@ -1,53 +1,63 @@
 %include "common.inc"
 
 DefFunc _WarpBitMap
-	FrameBegin 4, 2, ebx, esi, edi
-	AssignVars _X, _Y, _BITMASK, _ROWPTR
+	FrameBegin 6, 3, ebx, esi, edi
+	AssignVars _Y, _BITMASK, _SRC_ROWPTR, _DST_ROWPTR, _FIRST_COPY_LEN, _SECOND_COPY_LEN
 
-	mov esi, Param(0)
-	invoke_cdecl _CreateBitMap, [esi + BitMap.border_len], [esi + BitMap.dims]
-	mov ebx, eax
-	mov edi, [eax + BitMap.data]
+	mov esi, Param(1)
 
-	mov eax, [ebx + BitMap.border_len]
+	mov eax, [esi + BitMap.border_len]
 	dec eax
 	mov _BITMASK, eax
+
+	mov eax, [esi + BitMap.bytes_per_pixel]
+	imul dword[esi + BitMap.border_len]
+	mov edi, eax
+
+	mov eax, Param(2)
+	and eax, _BITMASK
+	imul dword[esi + BitMap.bytes_per_pixel]
+	mov ebx, eax ; src_x_offset
+
+	lea ecx, [edi - eax]
+	lea edx, [edi - ecx]
+	mov _FIRST_COPY_LEN, ecx
+	mov _SECOND_COPY_LEN, edx
+
+	mov edi, Param(0)
 
 	xor eax, eax
 	mov _Y, eax
 .loopy:
-	add eax, Param(2)
+	add eax, Param(3)
 	and eax, _BITMASK
-	mov esi, Param(0)
-	mov eax, [esi + BitMap.row_ptr + eax * 4]
-	mov _ROWPTR, eax
-	xor eax, eax
-	mov _X, eax
-.loopx:
-	add eax, Param(1)
-	and eax, _BITMASK
-	mov esi, _ROWPTR
-	mov ecx, [ebx + BitMap.dims]
-	mul ecx
-	lea esi, [esi + eax * 4]
-	rep movsd
+	mov ecx, [esi + BitMap.row_ptr + eax * 4]
+	mov edx, [edi + BitMap.row_ptr + eax * 4]
+	mov _SRC_ROWPTR, ecx
+	mov _DST_ROWPTR, edx
 
-	mov eax, _X
-	inc eax
-	mov _X, eax
-	cmp eax, [ebx + BitMap.border_len]
-	jb .loopx
+	invoke_dll_cdecl memcpy, edx, &[ecx + ebx], _FIRST_COPY_LEN
 
+	mov eax, _SECOND_COPY_LEN
+	test eax, eax
+	jz .next_y
+
+	mov edx, _DST_ROWPTR
+	add edx, _FIRST_COPY_LEN
+	invoke_dll_cdecl memcpy, edx, _SRC_ROWPTR, _SECOND_COPY_LEN
+
+.next_y:
 	mov eax, _Y
 	inc eax
 	mov _Y, eax
-	cmp eax, [ebx + BitMap.border_len]
+	cmp eax, [esi + BitMap.border_len]
 	jb .loopy
 
-	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _X
 	%undef _Y
 	%undef _BITMASK
-	%undef _ROWPTR
+	%undef _SRC_ROWPTR
+	%undef _DST_ROWPTR
+	%undef _FIRST_COPY_LEN
+	%undef _SECOND_COPY_LEN
