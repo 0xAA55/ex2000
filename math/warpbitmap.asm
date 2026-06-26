@@ -19,8 +19,10 @@ DefFunc _WarpBitMap
 	imul dword[esi + BitMap.bytes_per_pixel]
 	mov ebx, eax ; src_x_offset
 
-	lea ecx, [edi - eax]
-	lea edx, [edi - ecx]
+	mov ecx, edi
+	mov edx, edi
+	sub ecx, eax
+	sub edx, ecx
 	mov _FIRST_COPY_LEN, ecx
 	mov _SECOND_COPY_LEN, edx
 
