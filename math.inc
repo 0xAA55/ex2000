@@ -307,6 +307,8 @@ endstruc
 ; 	void *userdata,
 ; 	int(*work_proc)(BMDataCmn *param, size_t index),
 ; 	size_t stack_size);
+; // Each line of the bitmap were processed by `work_proc()`
+; // The `index` param for `work_proc()` is the row number of the bitmap
 extern _BitMapMTPool
 
 ; BitMap *FloatMapGaussianBlur(BitMap *src, int16_t blur_radius);
