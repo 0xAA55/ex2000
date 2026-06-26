@@ -339,7 +339,7 @@ extern _BitMapBlt
 ; void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
 extern _FloatMapCurve
 
-; BitMap *FloatMapDownScale(BitMap *map)
+; BitMap *FloatMapDownScale(BitMap *map);
 extern _FloatMapDownScale
 
 %macro InstSimpleVertex 0
