@@ -477,3 +477,24 @@ DefFunc _aligned_free
 .end:
 	FrameEnd
 	ret
+
+DefFunc _ReleaseComObj
+	FrameBegin 0
+	invoke_com Param(0), IUnknown.Release
+	FrameEnd
+	ret
+
+DefFunc _SafeRelease
+	FrameBegin 0, ebx
+
+	mov ebx, Param(0)
+	mov eax, [ebx]
+	test eax, eax
+	jz .end
+
+	invoke_com eax, IUnknown.Release
+	mov dword[ebx], 0
+
+.end:
+	FrameEnd
+	ret

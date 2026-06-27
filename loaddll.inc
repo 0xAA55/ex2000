@@ -260,6 +260,9 @@ extern _aligned_free
 
 extern _NLtoNUL
 
+extern _ReleaseComObj
+extern _SafeRelease
+
 import_dll User32
 import_dll GDI32
 import_dll MSVCRT

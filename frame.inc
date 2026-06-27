@@ -579,6 +579,13 @@
 	%endif
 %endmacro
 
+%macro __PickOutRegToAvoidFromArgs 1-*
+	%rep %0 - 1
+		%rotate 1
+		__PickOutRegToAvoid %1
+	%endrep
+%endmacro
+
 %macro invoke_stdcall 1-*
 	%if %0 == 1
 		call %1
@@ -587,7 +594,10 @@
 			%undef esP
 			%error Preserved keyword `esP` was defined to something.
 		%endif
-		__ResetPassReg
+		%ifndef __NoResetPassReg
+			__ResetPassReg
+		%endif
+		%undef __NoResetPassReg
 		%define esp __ESP_PLACE_HOLDER__
 		%rep %0 - 1
 			%rotate 1
@@ -669,5 +679,29 @@
 		invoke_cdecl [_addr_of_ %+ %1], %2
 	%endif
 %endmacro
+
+%macro invoke_com 2-3+
+	__ResetPassReg
+	%define __NoResetPassReg
+	__PickOutRegToAvoid %1
+	__PickOutRegToAvoid %2
+	%if %0 != 2
+		__PickOutRegToAvoidFromArgs %3
+	%endif
+	__RotatePassReg
+	mov __PassReg, %1
+	mov __PassReg, [__PassReg]
+	%if %0 == 2
+		invoke_stdcall [__PassReg + %2], %1
+	%else
+		invoke_stdcall [__PassReg + %2], %1, %3
+	%endif
+%endmacro
+
+struc IUnknown
+	.QueryInterface resd 1
+	.AddRef resd 1
+	.Release resd 1
+endstruc
 
 %endif
