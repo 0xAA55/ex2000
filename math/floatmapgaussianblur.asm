@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _FloatMapGaussianBlurPoolProc
-	FrameBegin 2, 3, ebx, esi, edi
+	FrameBegin 2, ebx, esi, edi
 	AssignVars _X, _Y
 
 	xor eax, eax
@@ -48,7 +48,7 @@ DefFunc _FloatMapGaussianBlurPoolProc
 	%undef _Y
 
 DefFunc _FloatMapGaussianBlur
-	FrameBegin 1, 5, ebx
+	FrameBegin 1, ebx
 
 	invoke_cdecl _GenRadiusMap, Param(1)
 	mov Variable(0), eax

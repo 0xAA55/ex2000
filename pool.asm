@@ -14,7 +14,7 @@ struc Pool
 endstruc
 
 DefFunc _PoolRun
-	FrameBegin 0, 2, ebx, esi, edi
+	FrameBegin 0, ebx, esi, edi
 
 	invoke_cdecl _aligned_malloc, Pool.size, 32
 	mov ebx, eax
@@ -80,7 +80,7 @@ DefFunc _PoolRun
 	ret
 
 DefFunc _PoolThreadProc
-	FrameBegin 0, 2, ebx, esi
+	FrameBegin 0, ebx, esi
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
 	mov ebx, Param(0)
 .find_next_job:

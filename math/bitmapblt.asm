@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _BitMapBlt
-	FrameBegin 8, 4, ebx, esi, edi
+	FrameBegin 8, ebx, esi, edi
 	AssignVars _DX, _DY, _DW, _DH, _DR, _DB, _SX, _SY
 
 	mov eax, Param(9)
@@ -141,7 +141,7 @@ DefFunc _BitMapBlt
 	%undef _SY
 
 DefFunc _BitMapBltDefLineProc
-	FrameBegin 0, 3, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(3)
 	mov eax, [ebx + BitMap.dims]

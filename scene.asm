@@ -1,5 +1,6 @@
 %include "loaddll.inc"
 %include "timer.inc"
+%include "vblank.inc"
 %include "gl33.inc"
 %include "buffer.inc"
 %include "assets.inc"
@@ -10,9 +11,6 @@
 
 extern _hWnd
 extern _hDC
-
-def_dll Dwmapi, "dwmapi.dll"
-def_dll_func DwmFlush
 
 segment .bss
 extern _BillboardVerticesBuffer
@@ -237,7 +235,7 @@ _BillBoardVertices:
 
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 DefFunc _SceneLoadShaderProgram
-	FrameBegin 3, 3, esi
+	FrameBegin 3, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsQuery, Param(1), 0
@@ -255,27 +253,20 @@ DefFunc _SceneLoadShaderProgram
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 0, 6, ebx, esi
+	FrameBegin 0, ebx, esi
 
 	invoke_cdecl _InitTimer, _Timer
+	invoke_cdecl _VBlankInit
 
 	mov eax, [_addr_of_wglSwapInterval]
 	test eax, eax
-	jz .no_swap_interval
+	jnz .use_swap_interval
 
+	jmp .load_scene
+.use_swap_interval:
 	invoke_dll_stdcall wglSwapInterval, 1
-	jmp .load_scene
-.no_swap_interval:
-	load_dll Dwmapi
-	test eax, eax
-	jz .no_dwmflush
+	mov dword[_addr_of_WaitForVBlank], _FakeWaitForVBlank
 
-	load_dll_func Dwmapi, DwmFlush
-	test eax, eax
-	jz .no_dwmflush
-	jmp .load_scene
-.no_dwmflush:
-	mov dword [_addr_of_DwmFlush], _FakeDwmFlush
 .load_scene:
 	fldpi
 	fdiv dword [_2.0f]
@@ -317,12 +308,8 @@ DefFunc _SceneInit
 	FrameEnd
 	ret
 
-DefFunc _FakeDwmFlush
-	xor eax, eax
-	ret
-
 DefFunc _SceneLoad00
-	FrameBegin 0, 0
+	FrameBegin 0
 	movss xmm0, [_TerrainMapScaling]
 	shufps xmm0, xmm0, 0
 	movaps [_TerrainMapScalingVector], xmm0
@@ -332,34 +319,34 @@ DefFunc _SceneLoad00
 	ret
 
 DefFunc _SceneLoad01
-	FrameBegin 0, 3
+	FrameBegin 0
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 8
 	mov [_NoiseBitmap], eax
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad02
-	FrameBegin 0, 1
+	FrameBegin 0
 	invoke_cdecl _DuplicateBitMap, [_NoiseBitmap]
 	mov [_TerrainBitmap], eax
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad03
-	FrameBegin 0, 3
+	FrameBegin 0
 	invoke_cdecl _FloatMapCurve, [_TerrainBitmap], _TerrainCurvePoints, _TerrainCurvePoints.num_points
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad04
-	FrameBegin 0, 3
+	FrameBegin 0
 	invoke_cdecl _AltitudeToTerrain, [_TerrainBitmap], [_TerrainMapHeightAmplifier], [_TerrainMapScaling]
 	mov [_TerrainMesh], eax
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad05
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTexture]
@@ -373,7 +360,7 @@ DefFunc _SceneLoad05
 	ret
 
 DefFunc _SceneLoad06
-	FrameBegin 0, 1, ebx
+	FrameBegin 0, ebx
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _PerlinNoiseTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_PerlinNoiseTextureMipLinear]
@@ -391,7 +378,7 @@ DefFunc _SceneLoad06
 	ret
 
 DefFunc _SceneLoad07
-	FrameBegin 0, 4
+	FrameBegin 0
 	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
 	test eax, eax
 	jz .bad_end
@@ -424,7 +411,7 @@ DefFunc _SceneLoad07
 	ret
 
 DefFunc _SceneLoad08
-	FrameBegin 0, 6, ebx
+	FrameBegin 0, ebx
 	mov ebx, [_TerrainMesh]
 	invoke_cdecl _InitBuffer, _TerrainVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, SimpleVertex.size, [ebx + SimpleMesh.num_vertices], [ebx + SimpleMesh.vertices]
 	invoke_cdecl _InitBuffer, _TerrainIndicesBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, 4, [ebx + SimpleMesh.num_indices], [ebx + SimpleMesh.indices]
@@ -436,7 +423,7 @@ DefFunc _SceneLoad08
 	ret
 
 DefFunc _SceneLoad09
-	FrameBegin 0, 4, edi, ebx
+	FrameBegin 0, edi, ebx
 	SceneLoadShaderProgram _DrawTerrainProgram, "assets\terrain.vsh", 0, "assets\terrain.fsh"
 	test eax, eax
 	jz .bad_end
@@ -490,19 +477,19 @@ DefFunc _SceneLoad09
 	ret
 
 DefFunc _SceneLoad0A
-	FrameBegin 0, 0
+	FrameBegin 0
 	mov dword [_CameraPos + Vector.y], __?float32?__(200.0)
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad0B
-	FrameBegin 0, 0
+	FrameBegin 0
 
 	FrameEnd
 	ret
 
 DefFunc _SceneLoadProgressive
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, [_SceneLoadingProgress]
 	cmp ebx, 0
@@ -535,7 +522,7 @@ extern _NumItemsToLoad
 _NumItemsToLoad equ ($ - .load_sequence) / 4
 
 DefFunc _SceneUnload
-	FrameBegin 0, 5, ebx
+	FrameBegin 0, ebx
 
 	xor ebx, ebx
 
@@ -547,11 +534,13 @@ DefFunc _SceneUnload
 
 	mov [_TerrainBitmap], ebx
 
+	invoke_cdecl _VBlankDeInit
+
 	FrameEnd
 	ret
 
 DefFunc _Scene
-	FrameBegin 11, 5, ebx, esi, edi
+	FrameBegin 11, ebx, esi, edi
 	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32
 	AssignVars KeyW, KeyS, KeyA, KeyD, KeySpace, KeyCtrl
 	AssignVars CurMovementSpeed
@@ -850,12 +839,12 @@ __SECT__
 	%undef KeySpace
 
 DefFunc _SwapBuffers
-	FrameBegin 0, 0
+	FrameBegin 0
 	mov eax, [_addr_of_wglSwapInterval]
 	test eax, eax
 	jnz .swap_buffers
 
-	invoke_dll_stdcall DwmFlush
+	invoke_dll_stdcall WaitForVBlank
 
 .swap_buffers:
 	invoke_dll_stdcall wglSwapBuffers, [_hDC]

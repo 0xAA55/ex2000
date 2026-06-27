@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _BitMapMTPool
-	FrameBegin 1, 5, ebx, esi, edi
+	FrameBegin 1, ebx, esi, edi
 	AssignVars _JOBS
 
 	; ebx = src_map

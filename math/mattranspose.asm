@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _MatrixTranspose
-	FrameBegin 0, 0
+	FrameBegin 0
 
 	mov eax, Param(1)
 	movaps xmm3, [eax + Matrix.y]

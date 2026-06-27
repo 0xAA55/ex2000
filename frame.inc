@@ -13,21 +13,16 @@
 	%1:
 %endmacro
 
-%macro FrameBegin 2-3+
+%macro FrameBegin 1-2+
 	%assign Frame_NumVariables %1
-	%assign Frame_NumReservedParams %2
-	%ifdef PassCdeclParamsByPush
-		%assign Frame_NumLocals Frame_NumVariables
-	%else
-		%assign Frame_NumLocals Frame_NumVariables + Frame_NumReservedParams
-	%endif
+	%assign Frame_NumLocals Frame_NumVariables
 	%assign Frame_NumSavedRegs 0
 	%ifdef Frame_UseEBP
 		push ebp
 		mov ebp, esp
 	%endif
-	%if %0 > 2
-		%xdefine Frame_SavedRegs %3
+	%if %0 > 1
+		%xdefine Frame_SavedRegs %2
 		FrameSaveRegs Frame_SavedRegs
 	%else
 		%undef Frame_SavedRegs
@@ -44,13 +39,8 @@
 %else
 	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1) * 4)
 %endif
-%ifdef PassCdeclParamsByPush
-	%define AddrOfVariable(x) (esp + (x) * 4)
-	%define AddrOfCallParam(x) %error There are no addresses for call params
-%else
-	%define AddrOfVariable(x) (esp + (Frame_NumReservedParams + (x)) * 4)
-	%define AddrOfCallParam(x) (esp + (x) * 4)
-%endif
+%define AddrOfVariable(x) (esp + (x) * 4)
+%define AddrOfCallParam(x) %error There are no addresses for call params
 %define Param(x) [AddrOfParam(x)]
 %define Variable(x) [AddrOfVariable(x)]
 %define CallParam(x) [AddrOfCallParam(x)]
@@ -387,10 +377,30 @@
 	%define __EDX_USED_FOR_PASS 0
 %endmacro
 
-%macro __RotatePassReg 4
+%macro __RotatePassReg 0
 	%rep 4
 		%undef __UseLastReg
-		%ifidn __LastPassParam, %4
+		%ifidn __PassReg, eax
+			%define __PassReg ecx
+		%elifidn __PassReg, ecx
+			%define __PassReg edx
+		%else
+			%define __PassReg eax
+		%endif
+		%undef __IsAvoid
+		__IsRegAvoidForPass __IsAvoid, __PassReg
+		%if __IsAvoid == 0
+			__AddRegUsedForPass __PassReg
+			%exitmacro
+		%endif
+	%endrep
+	%error No registers available to store address reference parameters to pass
+%endmacro
+
+%macro __PassParam 3 ;The opcode to load, the operand, the actual param
+	%rep 4
+		%undef __UseLastReg
+		%ifidn __LastPassParam, %3
 			%define __UseLastReg 1
 		%else
 			%ifidn __PassReg, eax
@@ -409,31 +419,19 @@
 				%ifndef __UseLastReg
 					%xdefine __1_load %1 __PassReg, %2
 				%endif
-				%ifidn %3, push
-					%xdefine __1_prep%[__1_prep_cnt] push __PassReg
-				%else
-					%xdefine __1_prep%[__1_prep_cnt] mov %3, __PassReg
-				%endif
+				%xdefine __1_prep%[__1_prep_cnt] push __PassReg
 				%assign __1_prep_cnt __1_prep_cnt + 1
 			%elif __NUM_REG_USED_FOR_PASS == 2
 				%ifndef __UseLastReg
 					%xdefine __2_load %1 __PassReg, %2
 				%endif
-				%ifidn %3, push
-					%xdefine __2_prep%[__2_prep_cnt] push __PassReg
-				%else
-					%xdefine __2_prep%[__2_prep_cnt] mov %3, __PassReg
-				%endif
+				%xdefine __2_prep%[__2_prep_cnt] push __PassReg
 				%assign __2_prep_cnt __2_prep_cnt + 1
 			%else
 				%ifndef __UseLastReg
 					%xdefine __3_load %1 __PassReg, %2
 				%endif
-				%ifidn %3, push
-					%xdefine __3_prep%[__3_prep_cnt] push __PassReg
-				%else
-					%xdefine __3_prep%[__3_prep_cnt] mov %3, __PassReg
-				%endif
+				%xdefine __3_prep%[__3_prep_cnt] push __PassReg
 				%assign __3_prep_cnt __3_prep_cnt + 1
 			%endif
 			%undef __ALL_USED
@@ -447,91 +445,7 @@
 	%error No registers available to store address reference parameters to pass
 %endmacro
 
-%macro __PrepCdeclParam 2
-	%if %1 >= Frame_NumReservedParams
-		%error Bad param index %1
-		%exitmacro
-	%endif
-	%xdefine __Param %2
-	%defstr __ParamStr __Param
-	%strlen __ParamStrLen __ParamStr
-	%assign __NumParamsPassed 1
-	%undef __IsFloatF
-	%undef __IsFloatD
-	IsFloatF __IsFloatF, __Param
-	IsFloatStr __IsFloatD, __ParamStr
-	%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
-	%if %substr(__ParamStr, 1, 1) == "&"
-		%xdefine __Param %tok(%substr(__ParamStr, 2))
-		__RotatePassReg lea, __Param, CallParam(%1), %tok(__ParamStr)
-	%elif %substr(__ParamStr, 1, 1) == "["
-		__RotatePassReg mov, __Param, CallParam(%1), __Param
-	%elif %substr(__ParamStr, 1, 3) == "xmm"
-		%undef __XmmParamStr
-		StripStringFromDot __XmmParamStr, __ParamStr
-		%xdefine __XmmParam %tok(__XmmParamStr)
-		%if %substr(__ParamStr, __ParamStrLen -1) == ".x"
-			movss CallParam(%1), __XmmParam
-		%elif %substr(__ParamStr, __ParamStrLen -2) == ".xy"
-			%assign __NumParamsPassed 2
-			movq CallParam(%1), __XmmParam
-		%elif %substr(__ParamStr, __ParamStrLen -4) == ".xyzw"
-			%assign __NumParamsPassed 4
-			movdqu CallParam(%1), __XmmParam
-		%else
-			%error Unknown param __ParamStr
-		%endif
-	%elif %substr(__ParamStr, 1, 3) == "qw "
-		%xdefine __Param %tok(%substr(__ParamStr, 4))
-		%defstr __ParamStr __Param
-		%strlen __ParamStrLen __ParamStr
-		%assign __NumParamsPassed 2
-		%if %substr(__ParamStr, 1, 1) == "["
-			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
-			%xdefine __Inner %tok(__InnerStr)
-			__RotatePassReg mov, [__Inner + 0], CallParam(%1 + 0), [__Inner + 0]
-			__RotatePassReg mov, [__Inner + 4], CallParam(%1 + 1), [__Inner + 4]
-		%elif %substr(__ParamStr, 1, 2) == "&["
-			%xdefine __InnerStr %substr(__ParamStr, 3, -2)
-			%xdefine __Inner %tok(__InnerStr)
-			__RotatePassReg lea, [__Inner + 0], CallParam(%1 + 0), [__Inner + 0]
-			__RotatePassReg lea, [__Inner + 4], CallParam(%1 + 1), [__Inner + 4]
-		%else
-			__RotatePassReg mov, (__Param) & 0xFFFFFFFF, CallParam(%1 + 0), (__Param) & 0xFFFFFFFF
-			__RotatePassReg mov, (__Param) >> 32, CallParam(%1 + 1), (__Param) >> 32
-		%endif
-	%elif %substr(__ParamStr, 1, 4) == "f2d "
-		%xdefine __Param %tok(%substr(__ParamStr, 5))
-		%defstr __ParamStr __Param
-		%strlen __ParamStrLen __ParamStr
-		%assign __NumParamsPassed 2
-		%if %substr(__ParamStr, 1, 1) == "["
-			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
-			%xdefine __Inner %tok(__InnerStr)
-			fld dword [__Inner]
-			fstp qword CallParam(%1)
-		%else
-			%error `f2d` only supports convert float number from memory address.
-		%endif
-	%elifidn __ParamStr, 'st0'
-		fstp dword CallParam(%1)
-	%elifidn __ParamStr, 'st0d'
-		%assign __NumParamsPassed 2
-		fstp qword CallParam(%1)
-	%elif __IsFloatF
-		mov dword CallParam(%1), __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
-	%elif __IsFloatD
-		%assign __NumParamsPassed 2
-		mov dword CallParam(%1 + 0), (__?float64?__(__Param) & 0xFFFFFFFF)
-		mov dword CallParam(%1 + 1), (__?float64?__(__Param) >> 32)
-	%else
-		mov dword CallParam(%1), __Param
-	%endif
-	%xdefine __LastPassParam %2
-	%undef __ESP_PLACE_HOLDER__
-%endmacro
-
-%macro __PrepStdCallParam 2
+%macro __PrepParam 2
 	%define __Param %2
 	%defstr __ParamStr __Param
 	%strlen __ParamStrLen __ParamStr
@@ -543,7 +457,7 @@
 	%if %substr(__ParamStr, 1, 1) == "&"
 		%define __Param %tok(%substr(__ParamStr, 2))
 		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
-		__RotatePassReg lea, __Param, push, %%%tok(__ParamStr)
+		__PassParam lea, __Param, %tok(__ParamStr)
 		%undef __ESP_PLACE_HOLDER__
 	%elif %substr(__ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
@@ -586,8 +500,8 @@
 		%elif %substr(__ParamStr, 1, 2) == "&["
 			%xdefine __InnerStr %substr(__ParamStr, 3, -2)
 			%xdefine __Inner %tok(__InnerStr)
-			__RotatePassReg lea, [__Inner + 4], push, [__Inner + 4]
-			__RotatePassReg lea, [__Inner + 0], push, [__Inner + 0]
+			__PassParam lea, [__Inner + 4], [__Inner + 4]
+			__PassParam lea, [__Inner + 0], [__Inner + 0]
 		%else
 			__FlushPassArgs
 			push (__Param) >> 32
@@ -665,7 +579,7 @@
 	%endif
 %endmacro
 
-%macro invoke_function 1-*
+%macro invoke_stdcall 1-*
 	%if %0 == 1
 		call %1
 	%else
@@ -683,17 +597,8 @@
 		%assign __ParamIndex 0
 		%assign __NumParamsToCheck %0 - 1
 		%rep %0 - 1
-			%if __InvokeStdCall
-				%rotate -1
-				__PrepStdCallParam __ParamIndex, %1
-			%elif __InvokeCdecl
-				%rotate 1
-				%if !%isidn(%1, _)
-					__PrepCdeclParam __ParamIndex, %1
-				%endif
-			%else
-				%error Unknown calling conversion, please define '__InvokeCdecl' or '__InvokeStdCall'
-			%endif
+			%rotate -1
+			__PrepParam __ParamIndex, %1
 			%assign __NumParamsChecking 0
 			%assign __EaxUsed 0
 			%assign __EcxUsed 0
@@ -712,11 +617,7 @@
 					%assign __EdxUsed  __EdxUsed | __EDX_USED
 				%endif
 				%assign __NumParamsChecking __NumParamsChecking + 1
-				%if __InvokeStdCall
-					%rotate -1
-				%elif __InvokeCdecl
-					%rotate 1
-				%endif
+				%rotate -1
 			%endrep
 			%assign __ParamIndex __ParamIndex + __NumParamsPassed
 			%assign __NumParamsToCheck __NumParamsToCheck - 1
@@ -730,26 +631,12 @@
 				%define __EDX_AVOID_FOR_PASS 0
 			%endif
 		%endrep
-		%if __InvokeStdCall
-			%rotate -1
-		%elif __InvokeCdecl
-			%rotate 1
-		%endif
+		%rotate -1
 		__FlushPassArgs
 		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 		call %1
 		%undef __ESP_PLACE_HOLDER__
 		%undef esp
-	%endif
-%endmacro
-
-%macro invoke_stdcall 1-2+
-	%define __InvokeCdecl 0
-	%define __InvokeStdCall 1
-	%if %0 == 1
-		invoke_function %1
-	%else
-		invoke_function %1, %2
 	%endif
 %endmacro
 
@@ -762,25 +649,16 @@
 %endmacro
 
 %macro invoke_cdecl 1-2+
-	%ifdef PassCdeclParamsByPush
-		%define __InvokeCdecl 0
-		%define __InvokeStdCall 1
-		%assign __ParamIndex 0
-	%else
-		%define __InvokeCdecl 1
-		%define __InvokeStdCall 0
-	%endif
+	%assign __ParamIndex 0
 	%if %0 == 1
-		invoke_function %1
+		invoke_stdcall %1
 	%else
-		invoke_function %1, %2
+		invoke_stdcall %1, %2
 	%endif
-	%ifdef PassCdeclParamsByPush
-		%if __ParamIndex == 1
-			pop ecx
-		%elif __ParamIndex != 0
-			add esp, __ParamIndex * 4
-		%endif
+	%if __ParamIndex == 1
+		pop ecx
+	%elif __ParamIndex != 0
+		add esp, __ParamIndex * 4
 	%endif
 %endmacro
 

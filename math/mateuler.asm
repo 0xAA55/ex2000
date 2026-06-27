@@ -4,7 +4,7 @@
 
 %ifndef _EULER_DEBUG
 DefFunc _MatrixRotationEuler
-	FrameBegin 6, 0
+	FrameBegin 6
 	AssignVars _CY, _SY, _CP, _SP, _CR, _SR
 
 	xor eax, eax
@@ -102,7 +102,7 @@ DefFunc _MakeIdentity
 	ret
 
 DefFunc _MatrixRotationX
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	call _MakeIdentity
@@ -119,7 +119,7 @@ DefFunc _MatrixRotationX
 	ret
 
 DefFunc _MatrixRotationY
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	call _MakeIdentity
@@ -136,7 +136,7 @@ DefFunc _MatrixRotationY
 	ret
 
 DefFunc _MatrixRotationZ
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	call _MakeIdentity
@@ -153,7 +153,7 @@ DefFunc _MatrixRotationZ
 	ret
 
 DefFunc _MatrixRotationEuler
-	FrameBegin 0x44, 3, ebx
+	FrameBegin 0x44, ebx
 
 	lea ebx, Variable(4)
 	and ebx, 0xFFFFFFF0

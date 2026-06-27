@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _FloatMapGetMaxValue
-	FrameBegin 0, 3, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	mov eax, [ebx + BitMap.num_floats]

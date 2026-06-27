@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _MatrixEulerTranslated
-	FrameBegin 0, 4, edi
+	FrameBegin 0, edi
 
 	mov edi, Param(0)
 	invoke_cdecl _MatrixRotationEuler, edi, Param(2), Param(3), Param(4)

@@ -12,7 +12,7 @@ _TlsCallbackListSize resd 1
 _TlsCallbackListCap resd 1
 
 DefFunc _TlsInit
-	FrameBegin 0, 1
+	FrameBegin 0
 
 	invoke_dll_stdcall TlsAlloc
 	mov [_TlsIndex], eax
@@ -27,7 +27,7 @@ DefFunc _TlsInit
 	ret
 
 DefFunc _TlsDeInit
-	FrameBegin 0, 1
+	FrameBegin 0
 
 	invoke_cdecl _free, [_TlsCallbackList]
 	invoke_dll_stdcall TlsFree, [_TlsIndex]
@@ -43,7 +43,7 @@ DefFunc _TlsDeInit
 	ret
 
 DefFunc _TlsRegisterCallback
-	FrameBegin 0, 2, ebx
+	FrameBegin 0, ebx
 
 	mov ecx, Param(0)
 	mov edx, [_TlsCallbackListCap]
@@ -66,7 +66,7 @@ DefFunc _TlsRegisterCallback
 	ret
 
 DefFunc _TlsInvokeCallbacks
-	FrameBegin 0, 3, ebx, esi, edi
+	FrameBegin 0, ebx, esi, edi
 
 	mov esi, [_TlsCallbackList]
 	xor edi, edi

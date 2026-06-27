@@ -2,7 +2,7 @@
 %include "buffer.inc"
 
 DefFunc _AltitudeToTerrain
-	FrameBegin 8, 3, ebx, esi, edi
+	FrameBegin 8, ebx, esi, edi
 	AssignVars _X, _Y, _NUM_V, _NUM_I, _CB_V, _BM, _YI, _YI2
 
 	mov esi, Param(0)

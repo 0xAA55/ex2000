@@ -11,7 +11,7 @@ _PerfFreq resq 1
 _SysTimerVal resq 1
 
 DefFunc _GetSysTimerVal
-	FrameBegin 0, 0
+	FrameBegin 0
 	invoke_dll_stdcall QueryPerformanceFrequency, _PerfFreq
 	invoke_dll_stdcall QueryPerformanceCounter, _SysTimerVal
 
@@ -22,14 +22,14 @@ DefFunc _GetSysTimerVal
 	ret
 
 DefFunc _GetTimerVal
-	FrameBegin 0, 0
+	FrameBegin 0
 	mov eax, Param(0)
 	fld qword [eax + Timer.TimerVal]
 	FrameEnd
 	ret
 
 DefFunc _InitTimer
-	FrameBegin 0, 0
+	FrameBegin 0
 	call _GetSysTimerVal
 	mov edx, Param(0)
 	fst qword [edx + Timer.PausedTime]
@@ -40,7 +40,7 @@ DefFunc _InitTimer
 	ret
 
 DefFunc _UpdateTimer
-	FrameBegin 0, 0, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	mov eax, [esi + Timer.IsPaused]
@@ -60,14 +60,14 @@ DefFunc _UpdateTimer
 	ret
 
 DefFunc _IsTimerPaused
-	FrameBegin 0, 0
+	FrameBegin 0
 	mov eax, Param(0)
 	mov eax, [eax + Timer.IsPaused]
 	FrameEnd
 	ret
 
 DefFunc _PauseTimer
-	FrameBegin 0, 0, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	mov eax, [esi + Timer.IsPaused]
@@ -85,7 +85,7 @@ DefFunc _PauseTimer
 	ret
 
 DefFunc _UnpauseTimer
-	FrameBegin 0, 0, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	mov eax, [esi + Timer.IsPaused]

@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _GenRadiusMap
-	FrameBegin 2, 1, ebx, esi, edi
+	FrameBegin 2, ebx, esi, edi
 	AssignVars DistSq, Y_Y
 
 	mov eax, Param(0)

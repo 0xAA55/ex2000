@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _VectorMultMatrix
-	FrameBegin 0, 0
+	FrameBegin 0
 
 	mov eax, Param(2)
 	mov ecx, Param(1)

@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _VectorDot
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 
 	mov eax, Param(1) ;v1
 	mov ecx, Param(3) ;dim

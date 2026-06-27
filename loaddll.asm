@@ -143,7 +143,7 @@ _addr_of_OpenGL32 resd 1
 _addr_of_WinMM    resd 1
 
 DefFunc _InitLoadLibrary
-	FrameBegin 1, 0, ebx, esi, edi
+	FrameBegin 1, ebx, esi, edi
 	AssignVars Index
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
@@ -262,7 +262,7 @@ DefFunc _NextString
 	ret
 
 DefFunc _NLtoNUL
-	FrameBegin 0, 0, esi, edi
+	FrameBegin 0, esi, edi
 
 	mov esi, Param(0)
 	mov ecx, Param(1)
@@ -280,7 +280,7 @@ DefFunc _NLtoNUL
 
 ; void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
 DefFunc _LoadFuncsFromAssets
-	FrameBegin 1, 2, ebx, esi, edi
+	FrameBegin 1, ebx, esi, edi
 	AssignVars SizeOfNames
 
 	mov edi, Param(0)
@@ -297,7 +297,7 @@ DefFunc _LoadFuncsFromAssets
 	%undef SizeOfNames
 
 DefFunc _InitDelayedLoadFunc
-	FrameBegin 1, 2, ebx
+	FrameBegin 1, ebx
 	AssignVars SizeOfFuncs
 
 	AssetsQuery 'assets\KFUNC', &SizeOfFuncs
@@ -325,7 +325,7 @@ _DebugMsgBufferSize equ 4096
 _DebugShowRect resd 4
 
 DefFunc _InitDbg
-	FrameBegin 0, 2
+	FrameBegin 0
 	mov eax, [_DebugMsgBuffer]
 	test eax, eax
 	jnz .end
@@ -342,7 +342,7 @@ DefFunc _InitDbg
 	ret
 
 DefFunc _DebugMsg
-	FrameBegin 0, 4
+	FrameBegin 0
 	call _InitDbg
 
 	lea eax, Param(1)
@@ -356,7 +356,7 @@ DefFunc _DebugMsg
 
 %ifdef _DEBUG
 DefFunc _DebugShow
-	FrameBegin 0, 4
+	FrameBegin 0
 	call _InitDbg
 
 	movq xmm0, Param(0)
@@ -376,7 +376,7 @@ DefFunc _DebugShow
 	ret
 
 DefFunc _DebugShowV
-	FrameBegin 0, 4
+	FrameBegin 0
 	call _InitDbg
 
 	movq xmm0, Param(0)
@@ -397,7 +397,7 @@ DefFunc _DebugShowV
 %endif
 
 DefFunc _snprintf
-	FrameBegin 0, 4
+	FrameBegin 0
 
 	lea eax, Param(3)
 	invoke_dll_cdecl vsnprintf, Param(0), Param(1), Param(2), eax
@@ -407,13 +407,13 @@ DefFunc _snprintf
 	ret
 
 DefFunc _malloc
-	FrameBegin 0, 0
+	FrameBegin 0
 	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
 
 DefFunc _calloc
-	FrameBegin 0, 0
+	FrameBegin 0
 
 	mov eax, Param(0)
 	mul dword Param(1)
@@ -423,7 +423,7 @@ DefFunc _calloc
 	ret
 
 DefFunc _realloc
-	FrameBegin 0, 0
+	FrameBegin 0
 	mov eax, Param(0)
 	test eax, eax
 	jz .ptr_is_null
@@ -436,13 +436,13 @@ DefFunc _realloc
 	ret
 
 DefFunc _free
-	FrameBegin 0, 0
+	FrameBegin 0
 	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
 
 DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
-	FrameBegin 0, 1
+	FrameBegin 0
 
 	mov eax, Param(1)
 	cmp eax, 8
@@ -466,7 +466,7 @@ DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
 	ret
 
 DefFunc _aligned_free
-	FrameBegin 0, 1
+	FrameBegin 0
 
 	mov eax, Param(0)
 	test eax, eax

@@ -9,7 +9,7 @@ import_dll_func memcpy
 import_dll_func memset
 
 DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, capacity, data(or_null)
-	FrameBegin 2, 3, ebx, edi
+	FrameBegin 2, ebx, edi
 	NameParams BufferInst, BufType, BufUsage, BufItemSize, BufCapacity, BufData
 	AssignVars CBSize, NumData
 
@@ -70,7 +70,7 @@ DefFunc _InitBuffer ;pointer to GlBuffer, buffer type, buffer usage, item_size, 
 	%undef NumData
 
 DefFunc _DeInitBuffer
-	FrameBegin 0, 1, edi
+	FrameBegin 0, edi
 
 	LoadParam edi, 0
 	invoke_cdecl _free, [edi + GlBuffer.pointer]
@@ -90,7 +90,7 @@ DefFunc _DeInitBuffer
 	ret
 
 DefFunc _BufferSizeGrow
-	FrameBegin 1, 2, esi
+	FrameBegin 1, esi
 
 	LoadParam esi, 0
 	mov eax, [esi + GlBuffer.capacity]
@@ -117,7 +117,7 @@ DefFunc _BufferSizeGrow
 	ret
 
 DefFunc _BufferPushItem
-	FrameBegin 0, 1, esi, edi
+	FrameBegin 0, esi, edi
 
 	LoadParam esi, 0
 	mov eax, [esi + GlBuffer.num_items]
@@ -154,7 +154,7 @@ DefFunc _BufferPushItem
 	ret
 
 DefFunc _BufferPopItem
-	FrameBegin 0, 0, esi, edi
+	FrameBegin 0, esi, edi
 
 	LoadParam esi, 0
 	LoadParam edi, 1
@@ -181,7 +181,7 @@ DefFunc _BufferPopItem
 	ret
 
 DefFunc _BufferClear
-	FrameBegin 0, 0
+	FrameBegin 0
 	xor eax, eax
 	mov edx, Param(0)
 	mov [edx + GlBuffer.num_items], eax
@@ -189,7 +189,7 @@ DefFunc _BufferClear
 	ret
 
 DefFunc _BufferFlush
-	FrameBegin 0, 3, ebx, esi, edi
+	FrameBegin 0, ebx, esi, edi
 
 	LoadParam esi, 0
 	mov eax, [esi + GlBuffer.flushed]
@@ -244,7 +244,7 @@ DefFunc _BufferFlush
 	ret
 
 DefFunc _BufferTrimExcess
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	LoadParam esi, 0
 	mov eax, [esi + GlBuffer.num_items]
@@ -269,7 +269,7 @@ DefFunc _BufferTrimExcess
 	ret
 
 DefFunc _BufferResize
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	LoadParam esi, 0
 	LoadParam eax, 1

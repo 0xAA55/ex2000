@@ -41,7 +41,7 @@
 ;}
 
 DefFunc _BatchCurve
-	FrameBegin 1, 0, ebx, esi, edi
+	FrameBegin 1, ebx, esi, edi
 	AssignVars DATA_TO_PROC
 
 	mov edi, Param(0)

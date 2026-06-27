@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _MatrixViewEuler
-	FrameBegin 0x18, 4, ebx, esi, edi
+	FrameBegin 0x18, ebx, esi, edi
 
 	mov edi, Param(0)
 	lea esi, Variable(4)

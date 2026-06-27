@@ -2,7 +2,7 @@
 %include "avlbst.inc"
 
 DefFunc _BatchMax
-	FrameBegin 8, 3, ebx, esi, edi
+	FrameBegin 8, ebx, esi, edi
 
 	lea edi, Variable(4)
 	and edi, 0xFFFFFFF0

@@ -580,7 +580,7 @@ DefFunc _isdigit_al
 	ret
 
 DefFunc _CheckOpenGLProcAddress
-	FrameBegin 0, 2
+	FrameBegin 0
 
 	LoadParam eax, 0
 	test eax, eax
@@ -602,7 +602,7 @@ DefFunc _CheckOpenGLProcAddress
 	ret
 
 DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
-	FrameBegin 0, 2
+	FrameBegin 0
 	invoke_dll_cdecl strcpy, [_FuncNameBuf], Param(0)
 	invoke_dll_stdcall wglGetProcAddress, [_FuncNameBuf]
 	invoke_cdecl _CheckOpenGLProcAddress, eax
@@ -610,7 +610,7 @@ DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 	ret
 
 DefFunc _InitGL33
-	FrameBegin 2, 4, esi, edi
+	FrameBegin 2, esi, edi
 	AssignVars EcxHome, AssetLength
 
 	def_dll_func_and_load GDI32, ChoosePixelFormat
@@ -730,7 +730,7 @@ DefFunc _InitGL33
 	ret
 
 DefFunc _DeInitGL33
-	FrameBegin 0, 0
+	FrameBegin 0
 	xor eax, eax
 	invoke_dll_stdcall wglMakeCurrent, eax, eax
 	invoke_dll_stdcall wglDeleteContext, [_hGLRC]

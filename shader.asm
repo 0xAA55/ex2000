@@ -13,7 +13,7 @@ _ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
 
 ; int ShaderCreate(int program, int shader_type, char *shader_code, char **pp_out_infolog)
 DefFunc _ShaderCreate
-	FrameBegin 5, 2
+	FrameBegin 5
 	AssignVars _Shader, _SourceLen, _CompileStatus, _InfoLogLen, _InfoLogBuf
 
 	invoke_dll_stdcall glCreateShader, Param(1)
@@ -62,7 +62,7 @@ DefFunc _ShaderCreate
 
 ; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 DefFunc _ProgramCreate
-	FrameBegin 7, 4, esi, edi
+	FrameBegin 7, esi, edi
 	AssignVars _ECX_Home, _PRG, _InfoLog, _InfoLogLen, _LinkStatus, _ShaderType, _FormatBuffer
 
 	mov eax, Param(0)

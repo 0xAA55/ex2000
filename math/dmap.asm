@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _GenDistanceMap
-	FrameBegin 3, 2, ebx, edi
+	FrameBegin 3, ebx, edi
 	AssignVars _Y, _SV, _EV
 
 	invoke_cdecl _CreateBitMap, Param(0), 1

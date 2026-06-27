@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _VectorNormal
-	FrameBegin 1, 4
+	FrameBegin 1
 
 	invoke_cdecl _VectorDot, &Variable(0), Param(1), Param(1), Param(2)
 	mov eax, Param(1)

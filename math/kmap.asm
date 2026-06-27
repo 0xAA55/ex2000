@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _GenKMapOfAltitudeMap
-	FrameBegin 0, 5, ebx, esi, edi
+	FrameBegin 0, ebx, esi, edi
 
 	mov esi, Param(0)
 	invoke_cdecl _GenDistanceMap, [esi + BitMap.border_len]
@@ -16,7 +16,7 @@ DefFunc _GenKMapOfAltitudeMap
 	ret
 
 DefFunc _GenKMapOfAltitudeMapPoolProc
-	FrameBegin 7, 0, ebx, esi, edi
+	FrameBegin 7, ebx, esi, edi
 	AssignVars _X, _IX, _IY, _CbMap, _HalfSize, _AltDivDistMap, _DstRowPtr
 
 	mov ebx, Param(0)

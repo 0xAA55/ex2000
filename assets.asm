@@ -73,14 +73,14 @@ extern _AssetsCabName
 _AssetsCabName db "assets.cab", 0
 
 DefFunc _AssetsInitLoadDll
-	FrameBegin 0, 0
+	FrameBegin 0
 	def_dll_and_load Cabinet, "cabinet.dll"
 	dll_func_group_load Cabinet, CabinetFunc
 	FrameEnd
 	ret
 
 DefFunc _AssetsDestroyFileStruct
-	FrameBegin 0, 1, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _free, [ebx + FileStruct.data]
@@ -90,7 +90,7 @@ DefFunc _AssetsDestroyFileStruct
 	ret
 
 DefFunc _AssetsFnOpen
-	FrameBegin 0, 4, esi
+	FrameBegin 0, esi
 
 	invoke_dll_cdecl strcmp, Param(0), _AssetsCabName
 	test eax, eax
@@ -146,7 +146,7 @@ DefFunc _AssetsFnOpen
 	ret
 
 DefFunc _AssetsTrimFileMemory
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	mov eax, [esi + FileStruct.file_size]
@@ -182,7 +182,7 @@ DefFunc _AssetsTrimFileMemory
 	ret
 
 DefFunc _AssetsAssertFileIsOpened
-	FrameBegin 0, 0
+	FrameBegin 0
 
 	mov eax, Param(0)
 	test eax, eax
@@ -206,7 +206,7 @@ DefFunc _AssetsAssertFileIsOpened
 	ret
 
 DefFunc _AssetsFnClose
-	FrameBegin 0, 1, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -229,7 +229,7 @@ DefFunc _AssetsFnClose
 	ret
 
 DefFunc _AssetsFnRead
-	FrameBegin 0, 3, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -279,7 +279,7 @@ DefFunc _AssetsFnRead
 
 ; int AssetsFileGrowCapacity(FileStruct *f, size_t desired_minimal_capacity)
 DefFunc _AssetsFileGrowCapacity
-	FrameBegin 1, 3, esi
+	FrameBegin 1, esi
 
 	mov esi, Param(0)
 	mov eax, [esi + FileStruct.file_capacity]
@@ -319,7 +319,7 @@ DefFunc _AssetsFileGrowCapacity
 	ret
 
 DefFunc _AssetsFnWrite
-	FrameBegin 0, 3, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -355,7 +355,7 @@ DefFunc _AssetsFnWrite
 	ret
 
 DefFunc _AssetsFnSeek
-	FrameBegin 0, 1, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -421,7 +421,7 @@ DefFunc _AssetsFnSeek
 	ret
 
 DefFunc _AssetsFnOnNotify
-	FrameBegin 0, 1, esi
+	FrameBegin 0, esi
 
 	mov eax, Param(0)
 	mov esi, Param(1)
@@ -459,7 +459,7 @@ DefFunc _AssetsFnOnNotify
 	ret
 
 ;DefFunc _AssetsShow
-;	FrameBegin 0, 1, esi
+;	FrameBegin 0, esi
 ;
 ;	mov esi, Param(0)
 ;	test esi, esi
@@ -474,7 +474,7 @@ DefFunc _AssetsFnOnNotify
 ;	ret
 
 DefFunc _AssetsInit
-	FrameBegin 1, 9
+	FrameBegin 1
 
 	invoke_cdecl _AssetsInitLoadDll
 
@@ -495,7 +495,7 @@ DefFunc _AssetsInit
 	ret
 
 DefFunc _AssetsQuery
-	FrameBegin 0, 2
+	FrameBegin 0
 
 	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
 	test eax, eax
@@ -515,7 +515,7 @@ DefFunc _AssetsQuery
 	ret
 
 DefFunc _AssetsDestroy
-	FrameBegin 0, 1
+	FrameBegin 0
 	invoke_cdecl _AVLClear, _AssetsTree
 	FrameEnd
 	ret

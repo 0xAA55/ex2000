@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _WarpBitMap
-	FrameBegin 6, 3, ebx, esi, edi
+	FrameBegin 6, ebx, esi, edi
 	AssignVars _Y, _BITMASK, _SRC_ROWPTR, _DST_ROWPTR, _FIRST_COPY_LEN, _SECOND_COPY_LEN
 
 	mov esi, Param(1)

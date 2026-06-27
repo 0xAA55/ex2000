@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _FloatMapClamp
-	FrameBegin 0, 0, ebx, edi
+	FrameBegin 0, ebx, edi
 
 	movss xmm6, Param(1)
 	movss xmm7, Param(2)

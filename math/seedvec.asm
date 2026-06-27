@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _CreateSeedVector
-	FrameBegin 0, 2, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 

@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _MatrixMultiply
-	FrameBegin 0, 3, esi, edi
+	FrameBegin 0, esi, edi
 
 	mov esi, Param(1)
 	mov edi, Param(0)
@@ -16,7 +16,7 @@ DefFunc _MatrixMultiply
 	ret
 
 DefFunc _MatrixMultiplyTo
-	FrameBegin 0x14, 3, ebx, edi
+	FrameBegin 0x14, ebx, edi
 
 	lea ebx, Variable(4)
 	mov edi, Param(0)

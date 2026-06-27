@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _CreateBitMap
-	FrameBegin 1, 2, ebx, edi
+	FrameBegin 1, ebx, edi
 
 	mov eax, Param(0)
 	invoke_cdecl _malloc, &[eax * 4 + BitMap.head_size]
@@ -48,7 +48,7 @@ DefFunc _CreateBitMap
 	ret
 
 DefFunc _DestroyBitMap
-	FrameBegin 0, 1, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	test ebx, ebx
@@ -61,7 +61,7 @@ DefFunc _DestroyBitMap
 	ret
 
 DefFunc _GetBitmapPixelAddress
-	FrameBegin 0, 0, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(2)
 

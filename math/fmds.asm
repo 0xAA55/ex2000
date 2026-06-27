@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _FloatMapDownScale
-	FrameBegin 2, 5, ebx, esi, edi
+	FrameBegin 2, ebx, esi, edi
 
 	mov ebx, Param(0)
 	cmp byte[ebx + BitMap.bytes_per_pixel], 4
@@ -39,7 +39,7 @@ DefFunc _FloatMapDownScale
 	ret
 
 DefFunc _FloatMapDownScalePoolProc
-	FrameBegin 0, 0, ebx, edi
+	FrameBegin 0, ebx, edi
 
 	mov ebx, Param(0)
 	mov eax, [ebx + 0] ;dst

@@ -5,7 +5,7 @@ extern _PerlinNumWorkers
 _PerlinNumWorkers resd 1
 
 DefFunc _CreatePerlinMap2D
-	FrameBegin 8, 2, ebx, esi
+	FrameBegin 8, ebx, esi
 
 	invoke_cdecl _CreateBitMap, Param(0), 2
 	mov ebx, eax
@@ -78,7 +78,7 @@ DefFunc _CreatePerlinMap2D
 	ret
 
 DefFunc _ConvertPerlinMapToAltitude
-	FrameBegin 9, 3, ebx, esi, edi
+	FrameBegin 9, ebx, esi, edi
 	AssignVars _STEPS, _RECIPROCAL, _MATRIX
 	AssignVars _X, _Y, _BX, _BY, _IX, _IY
 	%define _P00XY_P10XY ebx + 0x00
@@ -327,7 +327,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	%undef _DP_00_10_01_11
 
 DefFunc _GenPerlinAltitude
-	FrameBegin 0, 3, ebx, edi
+	FrameBegin 0, ebx, edi
 	invoke_cdecl _CreatePerlinMap2D, Param(0)
 	mov ebx, eax
 	invoke_cdecl _ConvertPerlinMapToAltitude, Param(1), Param(2), ebx
@@ -338,7 +338,7 @@ DefFunc _GenPerlinAltitude
 	ret
 
 DefFunc _AccumulateFloatMap
-	FrameBegin 0, 0, esi, edi
+	FrameBegin 0, esi, edi
 
 	mov esi, Param(1)
 	mov edi, Param(0)
@@ -392,7 +392,7 @@ struc GenPerlinLayerData
 endstruc
 
 DefFunc _GenPerlinLayerPoolProc
-	FrameBegin 0, 3, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	invoke_dll_cdecl srand, [ebx + GenPerlinLayerData.job_index]
@@ -405,7 +405,7 @@ DefFunc _GenPerlinLayerPoolProc
 	ret
 
 DefFunc _GenMultiLayerPerlinAltitude
-	FrameBegin 1, 5, ebx, esi, edi
+	FrameBegin 1, ebx, esi, edi
 	AssignVars _JOBS
 
 	mov eax, Param(0)

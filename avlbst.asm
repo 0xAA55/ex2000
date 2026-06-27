@@ -3,7 +3,7 @@
 
 ; char *AVLKeyCopy(char *key);
 DefFunc _AVLKeyCopy
-	FrameBegin 0, 2
+	FrameBegin 0
 
 	invoke_dll_cdecl strlen, Param(0)
 	inc eax
@@ -19,7 +19,7 @@ DefFunc _AVLKeyDelete
 
 ; AVLBST_Node *AVLNewNode(char *key, void* userdata, void(*on_free)(void *userdata));
 DefFunc _AVLNewNode
-	FrameBegin 0, 2, edi
+	FrameBegin 0, edi
 
 	invoke_cdecl _calloc, AVLBST_Node.size, 1
 	mov edi, eax
@@ -43,7 +43,7 @@ DefFunc _AVLNewNode
 
 ; void AVLDestroyNode(AVLBST_Node *node);
 DefFunc _AVLDestroyNode
-	FrameBegin 0, 1, ebx
+	FrameBegin 0, ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _free, [ebx + AVLBST_Node.key]
@@ -55,7 +55,7 @@ DefFunc _AVLDestroyNode
 
 ; int AVLHeight(AVLBST_Node *n);
 DefFunc _AVLHeight
-	FrameBegin 0, 0
+	FrameBegin 0
 
 	mov eax, Param(0)
 	test eax, eax
@@ -69,7 +69,7 @@ DefFunc _AVLHeight
 
 ; void AVLCalcHeight(AVLBST_Node *n);
 DefFunc _AVLCalcHeight
-	FrameBegin 1, 2, ebx, esi
+	FrameBegin 1, ebx, esi
 
 	mov ebx, Param(0)
 	invoke_cdecl _AVLHeight, [ebx + AVLBST_Node.l_child]
@@ -87,7 +87,7 @@ DefFunc _AVLCalcHeight
 
 ; AVLBST_Node *AVLRol(AVLBST_Node *x);
 DefFunc _AVLRol
-	FrameBegin 0, 1, esi, edi
+	FrameBegin 0, esi, edi
 
 	mov esi, Param(0)
 	mov edi, [esi + AVLBST_Node.r_child]
@@ -105,7 +105,7 @@ DefFunc _AVLRol
 
 ; AVLBST_Node *AVLRor(AVLBST_Node *x);
 DefFunc _AVLRor
-	FrameBegin 0, 1, esi, edi
+	FrameBegin 0, esi, edi
 
 	mov edi, Param(0)
 	mov esi, [edi + AVLBST_Node.l_child]
@@ -123,7 +123,7 @@ DefFunc _AVLRor
 
 ; int AVLGetBalance(AVLBST_Node *x);
 DefFunc _AVLGetBalance
-	FrameBegin 1, 1, ebx, esi
+	FrameBegin 1, ebx, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -143,7 +143,7 @@ DefFunc _AVLGetBalance
 
 ; AVLBST_Node *AVLRotate(AVLBST_Node *x, char *key);
 DefFunc _AVLRotate
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AVLGetBalance, esi
@@ -180,7 +180,7 @@ DefFunc _AVLRotate
 
 ; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata, void(*on_free)(void *userdata));
 DefFunc _AVLInsertRecursive
-	FrameBegin 0, 4, esi
+	FrameBegin 0, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -218,7 +218,7 @@ DefFunc _AVLInsertRecursive
 
 ; int AVLInsert(AVLBST_Node **ppn, char *key, void *userdata, void(*on_free)(void *userdata));
 DefFunc _AVLInsert
-	FrameBegin 0, 4, esi
+	FrameBegin 0, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -240,7 +240,7 @@ DefFunc _AVLInsert
 
 ; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key)
 DefFunc _AVLRemoveRecursive
-	FrameBegin 2, 2, esi, edi
+	FrameBegin 2, esi, edi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -315,7 +315,7 @@ DefFunc _AVLRemoveRecursive
 
 ; int AVLRemove(AVLBST_Node **ppn, char *key);
 DefFunc _AVLRemove
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	mov eax, Param(2)
 	test eax, eax
@@ -346,7 +346,7 @@ DefFunc _AVLRemove
 
 ; AVLBST_Node* AVLSearch(AVLBST_Node *n, char *key);
 DefFunc _AVLSearch
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -373,7 +373,7 @@ DefFunc _AVLSearch
 
 ; void AVLClearRecursive(AVLBST_Node *n);
 DefFunc _AVLClearRecursive
-	FrameBegin 0, 2, ebx, esi, edi
+	FrameBegin 0, ebx, esi, edi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -391,7 +391,7 @@ DefFunc _AVLClearRecursive
 
 ; void AVLClear(AVLBST_Node **ppn);
 DefFunc _AVLClear
-	FrameBegin 0, 2, esi
+	FrameBegin 0, esi
 
 	mov eax, Param(1)
 	test eax, eax
