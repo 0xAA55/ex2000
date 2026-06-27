@@ -290,6 +290,7 @@ import_dll_func InterlockedDecrement
 import_dll_func InterlockedExchange
 
 import_dll_func MessageBoxA
+import_dll_func MessageBoxW
 import_dll_func DrawTextA
 import_dll_func LoadIconA
 import_dll_func LoadCursorA
