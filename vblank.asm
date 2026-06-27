@@ -170,8 +170,11 @@ DefFunc _WaitForVBlankD3D
 	jz .not_found
 
 	invoke_com [eax + AVLBST_Node.userdata], IDXGIOutputVtbl.WaitForVBlank
-
+	jmp .end
 .not_found:
+	invoke_dll_stdcall Sleep, 1
+
+.end:
 	FrameEnd
 	ret
 
@@ -188,9 +191,7 @@ DefFunc _VBlankD3DDeInit
 
 DefFunc _VBlankDeInit
 	FrameBegin 0
-
 	invoke_cdecl _VBlankD3DDeInit
-
 	FrameEnd
 	ret
 
