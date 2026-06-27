@@ -23,7 +23,8 @@ loaddll.asm: loaddll.inc assets.inc
 buffer.asm: loaddll.inc buffer.inc gl33.inc
 gl33.asm: loaddll.inc gl33.inc assets.inc
 pool.asm: loaddll.inc pool.inc
-scene.asm: loaddll.inc timer.inc gl33.inc buffer.inc assets.inc shader.inc math.inc
+scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc
+vblank.asm: loaddll.inc vblank.inc
 shader.asm: loaddll.inc shader.inc gl33.inc
 
 out/stub.bin: stub.asm
