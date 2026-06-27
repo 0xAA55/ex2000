@@ -313,6 +313,7 @@ import_dll_func SetCursorPos
 import_dll_func ShowCursor
 import_dll_func GetAsyncKeyState
 import_dll_func GetForegroundWindow
+import_dll_func MonitorFromWindow
 
 import_dll_func strcpy
 import_dll_func strcat
@@ -355,6 +356,10 @@ import_dll_func srand
 %define CW_USEDEFAULT 0x80000000
 
 %define PM_REMOVE 1
+
+%define MONITOR_DEFAULTTONULL 0
+%define MONITOR_DEFAULTTOPRIMARY 1
+%define MONITOR_DEFAULTTONEAREST 2
 
 %define VK_LBUTTON        0x01
 %define VK_RBUTTON        0x02

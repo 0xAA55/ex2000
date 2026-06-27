@@ -21,3 +21,4 @@ SetCursorPos
 ShowCursor
 GetAsyncKeyState
 GetForegroundWindow
+MonitorFromWindow
