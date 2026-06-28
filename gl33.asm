@@ -546,7 +546,7 @@ DefFunc _isdigit_al
 DefFunc _CheckOpenGLProcAddress
 	FrameBegin 0
 
-	LoadParam eax, 0
+	mov eax, Param(0)
 	test eax, eax
 	jnz .success
 
@@ -680,18 +680,19 @@ DefFunc _InitGL33
 	mov eax, 1
 
 .exit:
-	StoreVariable 0, eax
+	mov Variable(0), eax
 	invoke_cdecl _free, [_OpenGLNullFunctions]
 	invoke_cdecl _free, [_FailInfoBuffer]
 	invoke_cdecl _free, [_FuncNameBuf]
 	xor eax, eax
 	mov [_OpenGLNullFunctions], eax
-	LoadVariable eax, 0
+	mov eax, Variable(0)
 	FrameEnd
 	ret
 
 DefFunc _DeInitGL33
 	FrameBegin 0
+
 	xor eax, eax
 	invoke_dll_stdcall wglMakeCurrent, eax, eax
 	invoke_dll_stdcall wglDeleteContext, [_hGLRC]

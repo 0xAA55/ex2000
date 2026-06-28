@@ -941,7 +941,6 @@ import_dll_func wglDeleteContext
 import_dll_func wglMakeCurrent
 import_dll_func wglSwapBuffers
 import_dll_func wglSwapInterval
-
 import_dll_func glCullFace
 import_dll_func glFrontFace
 import_dll_func glHint
