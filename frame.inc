@@ -4,8 +4,6 @@
 ; %define Frame_UseEBP
 ; %define INVOKE_CHECK
 
-%define PassCdeclParamsByPush
-
 %macro DefFunc 1
 	%xdefine CurFuncName %1
 	segment .text
