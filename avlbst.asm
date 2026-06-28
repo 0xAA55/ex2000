@@ -183,7 +183,7 @@ DefFunc _AVLRotate
 
 ; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
 DefFunc _AVLInsertRecursive
-	FrameBegin 0, ebx, esi
+	FrameBegin 0, ebx, esi, edi
 
 	mov ebx, Param(4)
 
@@ -198,7 +198,7 @@ DefFunc _AVLInsertRecursive
 	mov esi, eax
 	invoke_cdecl [ebx + KeyCompareOps.on_compare], Param(1), [esi + AVLBST_Node.key]
 	cmp eax, 0
-	jz .end
+	jz .equal
 	jg .next_1
 
 	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2), Param(3), ebx
@@ -213,6 +213,14 @@ DefFunc _AVLInsertRecursive
 	invoke_cdecl _AVLCalcHeight, esi
 	invoke_cdecl _AVLRotate, esi, Param(1)
 	jmp .end
+
+.equal:
+	mov edi, Param(3)
+	invoke_cdecl edi, [esi + AVLBST_Node.userdata]
+	mov eax, Param(2)
+	mov [esi + AVLBST_Node.userdata], eax
+	mov [esi + AVLBST_Node.on_free], edi
+	mov [esi + AVLBST_Node.keyops], ebx
 
 .finish:
 	mov eax, esi
