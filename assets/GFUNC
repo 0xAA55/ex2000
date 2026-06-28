@@ -1,3 +1,5 @@
+SelectObject
+DeleteObject
 GetStockObject
 ChoosePixelFormat
 SetPixelFormat

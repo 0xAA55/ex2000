@@ -163,6 +163,10 @@ DefFunc _WndProc@16
 	invoke_dll_stdcall GetDC, Param(0)
 	mov [_hDC], eax
 
+	invoke_dll_stdcall GetStockObject, OEM_FIXED_FONT
+	invoke_dll_stdcall SelectObject, [_hDC], eax
+	invoke_dll_stdcall DeleteObject, eax
+
 	invoke_cdecl _InitGL33
 	test eax, eax
 	jz .fail

@@ -315,6 +315,8 @@ import_dll_func GetAsyncKeyState
 import_dll_func GetForegroundWindow
 import_dll_func MonitorFromWindow
 
+import_dll_func SelectObject
+import_dll_func DeleteObject
 import_dll_func GetStockObject
 import_dll_func ChoosePixelFormat
 import_dll_func SetPixelFormat
@@ -330,6 +332,10 @@ import_dll_func memcpy
 import_dll_func memmove
 import_dll_func rand
 import_dll_func srand
+
+%define PAGE_NOACCESS           0x01
+%define PAGE_READONLY           0x02
+%define PAGE_READWRITE          0x04
 
 %define DT_TOP                      0x00000000
 %define DT_LEFT                     0x00000000
@@ -347,10 +353,6 @@ import_dll_func srand
 %define DT_NOPREFIX                 0x00000800
 %define DT_INTERNAL                 0x00001000
 
-%define PAGE_NOACCESS           0x01
-%define PAGE_READONLY           0x02
-%define PAGE_READWRITE          0x04
-
 %define WM_CREATE 0x0001
 %define WM_DESTROY 0x0002
 %define WM_QUIT 0x0012
@@ -360,6 +362,24 @@ import_dll_func srand
 %define CW_USEDEFAULT 0x80000000
 
 %define PM_REMOVE 1
+
+%define WHITE_BRUSH         0
+%define LTGRAY_BRUSH        1
+%define GRAY_BRUSH          2
+%define DKGRAY_BRUSH        3
+%define BLACK_BRUSH         4
+%define NULL_BRUSH          5
+%define HOLLOW_BRUSH        NULL_BRUSH
+%define WHITE_PEN           6
+%define BLACK_PEN           7
+%define NULL_PEN            8
+%define OEM_FIXED_FONT      10
+%define ANSI_FIXED_FONT     11
+%define ANSI_VAR_FONT       12
+%define SYSTEM_FONT         13
+%define DEVICE_DEFAULT_FONT 14
+%define DEFAULT_PALETTE     15
+%define SYSTEM_FIXED_FONT   16
 
 %define MONITOR_DEFAULTTONULL 0
 %define MONITOR_DEFAULTTOPRIMARY 1

@@ -121,6 +121,8 @@ def_dll_func_addr waveOutWrite
 dll_func_group_end WFunc_DelayedLoad
 
 dll_func_group_start_without_name GFunc_DelayedLoad
+def_dll_func_addr SelectObject
+def_dll_func_addr DeleteObject
 def_dll_func_addr GetStockObject
 def_dll_func_addr ChoosePixelFormat
 def_dll_func_addr SetPixelFormat
