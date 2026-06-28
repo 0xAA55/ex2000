@@ -524,6 +524,40 @@
 		%else
 			%error `f2d` only supports convert float number from memory address.
 		%endif
+	%elif %substr(__ParamStr, 1, 4) == "f2i "
+		%define __Param %tok(%substr(__ParamStr, 5))
+		%defstr __ParamStr __Param
+		%strlen __ParamStrLen __ParamStr
+		%assign __NumParamsPassed 2
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			sub esP, 4
+			%assign __StdCallEspBias __StdCallEspBias + 8
+			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			fld dword [__Inner]
+			%undef __ESP_PLACE_HOLDER__
+			fistp dword [esP]
+		%else
+			%error `f2i` only supports convert float number from memory address.
+		%endif
+	%elif %substr(__ParamStr, 1, 4) == "i2f "
+		%define __Param %tok(%substr(__ParamStr, 5))
+		%defstr __ParamStr __Param
+		%strlen __ParamStrLen __ParamStr
+		%assign __NumParamsPassed 2
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			%xdefine __Inner %tok(__InnerStr)
+			sub esP, 4
+			%assign __StdCallEspBias __StdCallEspBias + 8
+			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			fild dword [__Inner]
+			%undef __ESP_PLACE_HOLDER__
+			fstp dword [esP]
+		%else
+			%error `i2f` only supports convert float number from memory address.
+		%endif
 	%elifidn __ParamStr, 'st0'
 		sub esP, 4
 		%assign __StdCallEspBias __StdCallEspBias + 4
