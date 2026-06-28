@@ -8,6 +8,10 @@ extern _hDC
 def_dll DXGI, "dxgi.dll"
 def_dll_func CreateDXGIFactory
 
+def_dll DDraw, "ddraw.dll"
+def_dll_func DirectDrawEnumerateExA
+def_dll_func DirectDrawCreate
+
 %define D3D11_SDK_VERSION 7
 
 struc IDXGIFactoryVtbl
@@ -69,6 +73,43 @@ struc DXGI_OUTPUT_DESC
 	.size equ $ - .DeviceName
 endstruc
 
+struc IDirectDraw
+	.QueryInterface resd 1
+	.AddRef resd 1
+	.Release resd 1
+	.Compact resd 1
+	.CreateClipper resd 1
+	.CreatePalette resd 1
+	.CreateSurface resd 1
+	.DuplicateSurface resd 1
+	.EnumDisplayModes resd 1
+	.EnumSurfaces resd 1
+	.FlipToGDISurface resd 1
+	.GetCaps resd 1
+	.GetDisplayMode resd 1
+	.GetFourCCCodes resd 1
+	.GetGDISurface resd 1
+	.GetMonitorFrequency resd 1
+	.GetScanLine resd 1
+	.GetVerticalBlankStatus resd 1
+	.Initialize resd 1
+	.RestoreDisplayMode resd 1
+	.SetCooperativeLevel resd 1
+	.SetDisplayMode resd 1
+	.WaitForVerticalBlank resd 1
+endstruc
+
+%define DDENUM_ATTACHEDSECONDARYDEVICES 0x00000001
+%define DDENUM_DETACHEDSECONDARYDEVICES 0x00000002
+%define DDENUM_NONDISPLAYDEVICES        0x00000004
+
+%define DDCREATE_HARDWAREONLY           0x00000001
+%define DDCREATE_EMULATIONONLY          0x00000002
+
+%define DDWAITVB_BLOCKBEGIN             0x00000001
+%define DDWAITVB_BLOCKBEGINEVENT        0x00000002
+%define DDWAITVB_BLOCKEND               0x00000004
+
 segment .rdata
 extern _IID_IDXGIFactory
 _IID_IDXGIFactory:
@@ -83,6 +124,9 @@ _addr_of_WaitForVBlank dd _FakeWaitForVBlank
 segment .bss
 extern _DXGIOutputs
 _DXGIOutputs resd 1
+
+extern _DDrawObjects
+_DDrawObjects resd 1
 
 DefFunc _VBlankInit
 	FrameBegin 8 + DXGI_OUTPUT_DESC.size / 4, ebx, esi, edi
@@ -133,12 +177,33 @@ DefFunc _VBlankInit
 .end_enum_adapeters_dxgi:
 	invoke_cdecl _SafeRelease, &DXGIFactory
 	mov dword[_addr_of_WaitForVBlank], _WaitForVBlankD3D
-
 	xor eax, eax
 	inc eax
 	jmp .end
 
 .no_dxgi:
+	load_dll DDraw
+	test eax, eax
+	jz .no_ddraw
+
+	load_dll_func DDraw, DirectDrawEnumerateExA
+	test eax, eax
+	jz .no_ddraw
+
+	load_dll_func DDraw, DirectDrawCreate
+	test eax, eax
+	jz .no_ddraw
+
+	invoke_dll_stdcall DirectDrawEnumerateExA, _DDEnumCallbackExA@20, NULL, DDENUM_ATTACHEDSECONDARYDEVICES
+	cmp eax, 0
+	jl .no_ddraw
+
+	mov dword[_addr_of_WaitForVBlank], _WaitForVBlankDDraw
+	xor eax, eax
+	inc eax
+	jmp .end
+
+.no_ddraw:
 	; Fallback to `_FakeWaitForVBlank`
 
 .end:
@@ -152,6 +217,39 @@ DefFunc _VBlankInit
 	%undef HMonitor
 	%undef Dummy
 	%undef DXGIOutputDesc
+
+DefFunc _DDEnumCallbackExA@20
+	FrameBegin 3, edi
+	AssignVars DDrawObj, HMonitor, Dummy
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+
+	xor eax, eax
+	lea edi, DDrawObj
+	mov ecx, Frame_NumVariables
+	rep stosd
+
+	invoke_dll_stdcall DirectDrawCreate, Param(0), &DDrawObj, NULL
+	cmp eax, 0
+	jl .fail
+
+	mov eax, Param(4)
+	mov HMonitor, eax
+	invoke_cdecl _AVLInsert, _DDrawObjects, &HMonitor, DDrawObj, _ReleaseComObj
+	xor eax, eax
+	jmp .end
+
+.fail:
+	xor eax, eax
+
+.end:
+	inc eax
+	FrameEnd
+	ret 20
+	%undef HMonitor
+	%undef Dummy
 
 DefFunc _WaitForVBlankD3D
 	FrameBegin 2
@@ -176,10 +274,39 @@ DefFunc _WaitForVBlankD3D
 .end:
 	FrameEnd
 	ret
+	%undef HMonitor
+	%undef Dummy
+
+DefFunc _WaitForVBlankDDraw
+	FrameBegin 2
+	AssignVars HMonitor, Dummy
+
+	xor eax, eax
+	lea edi, HMonitor
+	stosd
+	stosd
+
+	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
+	mov HMonitor, eax ; Use `Dummy` as `NUL` for `strcmp()` inside `AVLInsert()`
+	invoke_cdecl _AVLSearch, [_DDrawObjects], &HMonitor
+	test eax, eax
+	jz .not_found
+
+	invoke_com [eax + AVLBST_Node.userdata], IDirectDraw.WaitForVerticalBlank, DDWAITVB_BLOCKBEGIN, NULL
+	jmp .end
+.not_found:
+	invoke_cdecl _FakeWaitForVBlank
+
+.end:
+	FrameEnd
+	ret
+	%undef HMonitor
+	%undef Dummy
 
 DefFunc _VBlankDeInit
 	FrameBegin 0
 	invoke_cdecl _AVLClear, _DXGIOutputs
+	invoke_cdecl _AVLClear, _DDrawObjects
 	FrameEnd
 	ret
 
