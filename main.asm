@@ -73,8 +73,10 @@ DefFunc _entry
 	invoke_cdecl _TlsInit
 	invoke_cdecl _MathInit
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
+	invoke_cdecl _InitDbg
 	invoke_cdecl _main
 	mov ebx, eax
+	invoke_cdecl _DeInitDbg
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_FINI
 	invoke_cdecl _MathDeInit
 	invoke_cdecl _TlsDeInit

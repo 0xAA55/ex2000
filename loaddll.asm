@@ -95,6 +95,14 @@ def_dll_func rand
 def_dll_func srand
 dll_func_group_end CFunc
 
+dll_func_group_start_without_name GFunc_DelayedLoad
+def_dll_func_addr SelectObject
+def_dll_func_addr DeleteObject
+def_dll_func_addr GetStockObject
+def_dll_func_addr ChoosePixelFormat
+def_dll_func_addr SetPixelFormat
+dll_func_group_end GFunc_DelayedLoad
+
 dll_func_group_start_without_name WFunc_DelayedLoad
 def_dll_func_addr waveOutBreakLoop
 def_dll_func_addr waveOutClose
@@ -119,14 +127,6 @@ def_dll_func_addr waveOutSetVolume
 def_dll_func_addr waveOutUnprepareHeader
 def_dll_func_addr waveOutWrite
 dll_func_group_end WFunc_DelayedLoad
-
-dll_func_group_start_without_name GFunc_DelayedLoad
-def_dll_func_addr SelectObject
-def_dll_func_addr DeleteObject
-def_dll_func_addr GetStockObject
-def_dll_func_addr ChoosePixelFormat
-def_dll_func_addr SetPixelFormat
-dll_func_group_end GFunc_DelayedLoad
 
 segment .rdata
 extern _name_of_User32
@@ -336,7 +336,6 @@ DefFunc _InitDelayedLoadFunc
 segment .bss
 extern _DebugMsgBuffer
 _DebugMsgBuffer resd 1
-_DebugMsgBufferSize equ 4096
 _DebugShowRect resd 4
 
 DefFunc _InitDbg
@@ -356,9 +355,19 @@ DefFunc _InitDbg
 	FrameEnd
 	ret
 
+DefFunc _DeInitDbg
+	FrameBegin 0
+
+	invoke_cdecl _free, [_DebugMsgBuffer]
+
+	xor eax, eax
+	mov [_DebugMsgBuffer], eax
+
+	FrameEnd
+	ret
+
 DefFunc _DebugMsg
 	FrameBegin 0
-	call _InitDbg
 
 	lea eax, Param(1)
 	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(0), eax
@@ -372,7 +381,6 @@ DefFunc _DebugMsg
 %ifdef _DEBUG
 DefFunc _DebugShow
 	FrameBegin 0
-	call _InitDbg
 
 	movq xmm0, Param(0)
 	movq [_DebugShowRect], xmm0
@@ -392,7 +400,6 @@ DefFunc _DebugShow
 
 DefFunc _DebugShowV
 	FrameBegin 0
-	call _InitDbg
 
 	movq xmm0, Param(0)
 	movq [_DebugShowRect], xmm0

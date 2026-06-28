@@ -259,9 +259,14 @@ extern _aligned_malloc
 extern _aligned_free
 
 extern _NLtoNUL
+extern _DebugMsgBuffer
+extern _InitDbg
+extern _DeInitDbg
 
 extern _ReleaseComObj
 extern _SafeRelease
+
+%define _DebugMsgBufferSize 4096
 
 import_dll User32
 import_dll GDI32
