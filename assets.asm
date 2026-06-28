@@ -104,7 +104,7 @@ DefFunc _AssetsFnOpen
 	mov esi, eax
 	mov [esi + FileStruct.opened], eax
 
-	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi, _AssetsDestroyFileStruct
+	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi, _AssetsDestroyFileStruct, _AVLOps_String
 	mov eax, esi
 	jmp .end
 .found:

@@ -128,8 +128,8 @@ extern _DDrawObjects
 _DDrawObjects resd 1
 
 DefFunc _VBlankInit
-	FrameBegin 8 + DXGI_OUTPUT_DESC.size / 4, ebx, esi, edi
-	AssignVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter, HMonitor, Dummy, DXGIOutputDesc
+	FrameBegin 6 + DXGI_OUTPUT_DESC.size / 4, ebx, esi, edi
+	AssignVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter, DXGIOutputDesc
 
 	xor eax, eax
 	lea edi, DXGIFactory
@@ -162,9 +162,7 @@ DefFunc _VBlankInit
 	cmp eax, 0
 	jl .end_enum_outputs_dxgi
 	invoke_com DXGIOutput, IDXGIOutputVtbl.GetDesc, ebx
-	mov eax, [ebx + DXGI_OUTPUT_DESC.HMonitor]
-	mov HMonitor, eax ; Use `Dummy` as `NUL` for `strcmp()` inside `AVLInsert()`
-	invoke_cdecl _AVLInsert, _DXGIOutputs, &HMonitor, DXGIOutput, _ReleaseComObj
+	invoke_cdecl _AVLInsert, _DXGIOutputs, [ebx + DXGI_OUTPUT_DESC.HMonitor], DXGIOutput, _ReleaseComObj, _AVLOps_Integer
 	inc edi
 	jmp .loop_enum_outputs_dxgi
 
@@ -219,8 +217,8 @@ DefFunc _VBlankInit
 	%undef DXGIOutputDesc
 
 DefFunc _DDEnumCallbackExA@20
-	FrameBegin 3, edi
-	AssignVars DDrawObj, HMonitor, Dummy
+	FrameBegin 1, edi
+	AssignVars DDrawObj
 
 	mov eax, Param(0)
 	test eax, eax
@@ -235,9 +233,7 @@ DefFunc _DDEnumCallbackExA@20
 	cmp eax, 0
 	jl .fail
 
-	mov eax, Param(4)
-	mov HMonitor, eax
-	invoke_cdecl _AVLInsert, _DDrawObjects, &HMonitor, DDrawObj, _ReleaseComObj
+	invoke_cdecl _AVLInsert, _DDrawObjects, Param(4), DDrawObj, _ReleaseComObj, _AVLOps_Integer
 	xor eax, eax
 	jmp .end
 
@@ -248,21 +244,12 @@ DefFunc _DDEnumCallbackExA@20
 	inc eax
 	FrameEnd
 	ret 20
-	%undef HMonitor
-	%undef Dummy
 
 DefFunc _WaitForVBlankD3D
-	FrameBegin 2
-	AssignVars HMonitor, Dummy
-
-	xor eax, eax
-	lea edi, HMonitor
-	stosd
-	stosd
+	FrameBegin 0
 
 	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
-	mov HMonitor, eax ; Use `Dummy` as `NUL` for `strcmp()` inside `AVLInsert()`
-	invoke_cdecl _AVLSearch, [_DXGIOutputs], &HMonitor
+	invoke_cdecl _AVLSearch, [_DXGIOutputs], eax
 	test eax, eax
 	jz .not_found
 
@@ -274,21 +261,12 @@ DefFunc _WaitForVBlankD3D
 .end:
 	FrameEnd
 	ret
-	%undef HMonitor
-	%undef Dummy
 
 DefFunc _WaitForVBlankDDraw
-	FrameBegin 2
-	AssignVars HMonitor, Dummy
-
-	xor eax, eax
-	lea edi, HMonitor
-	stosd
-	stosd
+	FrameBegin 0
 
 	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
-	mov HMonitor, eax ; Use `Dummy` as `NUL` for `strcmp()` inside `AVLInsert()`
-	invoke_cdecl _AVLSearch, [_DDrawObjects], &HMonitor
+	invoke_cdecl _AVLSearch, [_DDrawObjects], eax
 	test eax, eax
 	jz .not_found
 
@@ -300,8 +278,6 @@ DefFunc _WaitForVBlankDDraw
 .end:
 	FrameEnd
 	ret
-	%undef HMonitor
-	%undef Dummy
 
 DefFunc _VBlankDeInit
 	FrameBegin 0
