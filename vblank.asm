@@ -117,11 +117,10 @@ _IID_IDXGIFactory:
 	dw 0x21c7, 0x44ae
 	db 0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69
 
-segment .data
-extern _addr_of_WaitForVBlank
-_addr_of_WaitForVBlank dd _FakeWaitForVBlank
-
 segment .bss
+extern _addr_of_WaitForVBlank
+_addr_of_WaitForVBlank resd 1
+
 extern _DXGIOutputs
 _DXGIOutputs resd 1
 
@@ -205,6 +204,7 @@ DefFunc _VBlankInit
 
 .no_ddraw:
 	; Fallback to `_FakeWaitForVBlank`
+	mov dword[_addr_of_WaitForVBlank], _FakeWaitForVBlank
 
 .end:
 	FrameEnd
