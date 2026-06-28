@@ -120,6 +120,12 @@ def_dll_func_addr waveOutUnprepareHeader
 def_dll_func_addr waveOutWrite
 dll_func_group_end WFunc_DelayedLoad
 
+dll_func_group_start_without_name GFunc_DelayedLoad
+def_dll_func_addr GetStockObject
+def_dll_func_addr ChoosePixelFormat
+def_dll_func_addr SetPixelFormat
+dll_func_group_end GFunc_DelayedLoad
+
 segment .rdata
 extern _name_of_User32
 extern _name_of_GDI32
@@ -311,6 +317,11 @@ DefFunc _InitDelayedLoadFunc
 	mov ebx, eax
 	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
 	dll_func_group_load_alter_name User32, UFunc_DelayedLoad, ebx
+
+	AssetsQuery 'assets\GFUNC', &SizeOfFuncs
+	mov ebx, eax
+	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	dll_func_group_load_alter_name GDI32, GFunc_DelayedLoad, ebx
 
 	AssetsQuery 'assets\WFUNC', &SizeOfFuncs
 	mov ebx, eax

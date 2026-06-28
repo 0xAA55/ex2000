@@ -7,36 +7,6 @@ extern _NextString
 extern _hWnd
 extern _hDC
 
-struc PIXELFORMATDESCRIPTOR
-	.nSize: resw 1
-	.nVersion: resw 1
-	.dwFlags: resd 1
-	.iPixelType: resb 1
-	.cColorBits: resb 1
-	.cRedBits: resb 1
-	.cRedShift: resb 1
-	.cGreenBits: resb 1
-	.cGreenShift: resb 1
-	.cBlueBits: resb 1
-	.cBlueShift: resb 1
-	.cAlphaBits: resb 1
-	.cAlphaShift: resb 1
-	.cAccumBits: resb 1
-	.cAccumRedBits: resb 1
-	.cAccumGreenBits: resb 1
-	.cAccumBlueBits: resb 1
-	.cAccumAlphaBits: resb 1
-	.cDepthBits: resb 1
-	.cStencilBits: resb 1
-	.cAuxBuffers: resb 1
-	.iLayerType: resb 1
-	.bReserved: resb 1
-	.dwLayerMask: resd 1
-	.dwVisibleMask: resd 1
-	.dwDamageMask: resd 1
-	.size equ $ - .nSize
-endstruc
-
 segment .bss
 extern _hGLRC
 _hGLRC resd 1
@@ -63,12 +33,6 @@ _FailReason resd 1
 _OpenGLNullFunctions resd 1
 _FailInfoBuffer resd 1
 _FuncNameBuf resd 1 ; The buffer to store the decoded function name
-
-%define PFD_DRAW_TO_WINDOW 0x00000004
-%define PFD_SUPPORT_OPENGL 0x00000020
-%define PFD_DOUBLEBUFFER 0x00000001
-%define PFD_TYPE_RGBA 0
-%define PFD_MAIN_PLANE 0
 
 segment .rdata
 extern _PFD
@@ -612,9 +576,6 @@ DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 DefFunc _InitGL33
 	FrameBegin 2, esi, edi
 	AssignVars EcxHome, AssetLength
-
-	def_dll_func_and_load GDI32, ChoosePixelFormat
-	def_dll_func_and_load GDI32, SetPixelFormat
 
 	LoadFuncsFromAssets _FirstWGLFuncAddr, [_addr_of_OpenGL32], 'assets\WGLFUNC', (_LastWGLFuncAddr - _FirstWGLFuncAddr) / 4
 

@@ -315,6 +315,10 @@ import_dll_func GetAsyncKeyState
 import_dll_func GetForegroundWindow
 import_dll_func MonitorFromWindow
 
+import_dll_func GetStockObject
+import_dll_func ChoosePixelFormat
+import_dll_func SetPixelFormat
+
 import_dll_func strcpy
 import_dll_func strcat
 import_dll_func strlen
@@ -360,6 +364,42 @@ import_dll_func srand
 %define MONITOR_DEFAULTTONULL 0
 %define MONITOR_DEFAULTTOPRIMARY 1
 %define MONITOR_DEFAULTTONEAREST 2
+
+struc PIXELFORMATDESCRIPTOR
+	.nSize: resw 1
+	.nVersion: resw 1
+	.dwFlags: resd 1
+	.iPixelType: resb 1
+	.cColorBits: resb 1
+	.cRedBits: resb 1
+	.cRedShift: resb 1
+	.cGreenBits: resb 1
+	.cGreenShift: resb 1
+	.cBlueBits: resb 1
+	.cBlueShift: resb 1
+	.cAlphaBits: resb 1
+	.cAlphaShift: resb 1
+	.cAccumBits: resb 1
+	.cAccumRedBits: resb 1
+	.cAccumGreenBits: resb 1
+	.cAccumBlueBits: resb 1
+	.cAccumAlphaBits: resb 1
+	.cDepthBits: resb 1
+	.cStencilBits: resb 1
+	.cAuxBuffers: resb 1
+	.iLayerType: resb 1
+	.bReserved: resb 1
+	.dwLayerMask: resd 1
+	.dwVisibleMask: resd 1
+	.dwDamageMask: resd 1
+	.size equ $ - .nSize
+endstruc
+
+%define PFD_DRAW_TO_WINDOW 0x00000004
+%define PFD_SUPPORT_OPENGL 0x00000020
+%define PFD_DOUBLEBUFFER 0x00000001
+%define PFD_TYPE_RGBA 0
+%define PFD_MAIN_PLANE 0
 
 %define VK_LBUTTON        0x01
 %define VK_RBUTTON        0x02
