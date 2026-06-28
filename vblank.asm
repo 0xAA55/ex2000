@@ -312,6 +312,17 @@ DefFunc _VBlankDeInit
 
 DefFunc _FakeWaitForVBlank
 	FrameBegin 0
-	invoke_dll_stdcall Sleep, 100 ; Debug, will change to 1
+
+	cmp dword[.prompted], 0
+	jnz .end
+
+	debug_msg `Cannot provide accurate vertical synchronization for the current screen.`
+
+	inc [.prompted]
+.end:
+	invoke_dll_stdcall Sleep, 1
 	FrameEnd
 	ret
+
+segment .bss
+.prompted resd 1
