@@ -25,9 +25,6 @@ struc AVLBST_Node
 	.size equ $ - AVLBST_Node
 endstruc
 
-extern _AVLKeyCopy
-extern _AVLKeyDelete
-
 ; int AVLInsert(AVLBST_Node **ppn, void *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
 extern _AVLInsert
 
