@@ -261,7 +261,7 @@ DefFunc _AVLInsert
 .ret_op:
 	ret
 
-; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key)
+; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key, int *found)
 DefFunc _AVLRemoveRecursive
 	FrameBegin 2, ebx, esi, edi
 
@@ -276,17 +276,16 @@ DefFunc _AVLRemoveRecursive
 	cmp eax, 0
 	jz .equal
 	jg .key_gt
-	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.l_child], Param(1)
+	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2)
 	mov [esi + AVLBST_Node.l_child], eax
 	jmp .after_remove
 .key_gt:
-	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], Param(1)
+	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2)
 	mov [esi + AVLBST_Node.r_child], eax
 	jmp .after_remove
 .equal:
-	xor eax, eax
-	mov [esi + AVLBST_Node.key], eax
-	mov [esi + AVLBST_Node.userdata], eax
+	mov eax, Param(2)
+	mov byte[eax], 1
 
 	mov eax, [esi + AVLBST_Node.l_child]
 	and eax, [esi + AVLBST_Node.r_child]
@@ -322,8 +321,9 @@ DefFunc _AVLRemoveRecursive
 	mov [edi + AVLBST_Node.userdata], eax
 	invoke_cdecl _AVLKeyCopy, [edi + AVLBST_Node.key], [edi + AVLBST_Node.keyops]
 	mov Variable(1), eax
-	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], eax
+	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], eax, Param(2)
 	mov [esi + AVLBST_Node.r_child], eax
+	invoke_cdecl [esi + AVLBST_Node.on_free], [esi + AVLBST_Node.userdata]
 	mov eax, Variable(0)
 	mov [esi + AVLBST_Node.userdata], eax
 	invoke_cdecl _AVLKeyDelete, [esi + AVLBST_Node.key], [esi + AVLBST_Node.keyops]
@@ -340,8 +340,10 @@ DefFunc _AVLRemoveRecursive
 
 ; int AVLRemove(AVLBST_Node **ppn, char *key);
 DefFunc _AVLRemove
-	FrameBegin 0, esi
+	FrameBegin 1, esi
 
+	xor eax, eax
+	mov Variable(0), eax
 
 	mov eax, Param(0)
 	test eax, eax
@@ -351,13 +353,9 @@ DefFunc _AVLRemove
 	jmp .bad_param
 .next_1:
 	mov esi, eax
-	invoke_cdecl _AVLRemoveRecursive, [esi], Param(1)
-	test eax, eax
-	jz .end
+	invoke_cdecl _AVLRemoveRecursive, [esi], Param(1), &Variable(0)
 	mov [esi], eax
-	xor eax, eax
-	inc eax
-.end:
+	mov eax, Variable(0)
 	FrameEnd
 .return:
 	ret
