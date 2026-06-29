@@ -29,7 +29,7 @@ DefFunc _FreeDataNode
 	FrameEnd
 	ret
 
-; LfuCache *LfuCreate(int capacity, KeyCompareOps *user_ops);
+; LfuCache *LfuCreate(int capacity, KeyCompareOps *user_ops, void *context, void (*on_key_remove)(void *key, void *context));
 DefFunc _LfuCreate
 	FrameBegin 0, ebx
 
@@ -38,12 +38,20 @@ DefFunc _LfuCreate
 
 	mov eax, Param(0)
 	mov ecx, Param(1)
+	mov edx, Param(2)
 	mov [ebx + LfuCache.capacity], eax
 	mov [ebx + LfuCache.user_keyops], ecx
 	jecxz .bad
+	mov eax, .ret_op
+	test edx, edx
+	mov ecx, Param(3)
+	cmovz edx, eax
+	mov [ebx + LfuCache.on_key_remove], edx
+	mov [ebx + LfuCache.context], ecx
 
 	mov eax, ebx
 	FrameEnd
+.ret_op:
 	ret
 .bad:
 	int3
@@ -141,6 +149,7 @@ DefFunc _LfuPut
 	jmp .bad
 .good:
 	mov esi, [eax + AVLBST_Node.key]
+	invoke_cdecl [ebx + LfuCache.on_key_remove], [esi + FreqKey.data_key], [ebx + LfuCache.context]
 	lea edi, _FreqKey
 	mov eax, [esi + FreqKey.freq]
 	mov ecx, [esi + FreqKey.data_key]
