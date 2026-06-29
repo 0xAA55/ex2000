@@ -370,13 +370,13 @@ DefFunc _AVLSearch
 	mov ebx, [eax + AVLBST_Node.keyops]
 
 .doloop:
-	invoke_cdecl [ebx + KeyCompareOps.on_compare], [esi + AVLBST_Node.key], Param(1)
+	invoke_cdecl [ebx + KeyCompareOps.on_compare], Param(1), [esi + AVLBST_Node.key]
 	cmp eax, 0
 	jz .wend
-	jg .gt
+	jl .lt
 	mov esi, [esi + AVLBST_Node.r_child]
 	jmp .while
-.gt:
+.lt:
 	mov esi, [esi + AVLBST_Node.l_child]
 .while:
 	test esi, esi
