@@ -332,12 +332,6 @@ DefFunc _AVLRemoveRecursive
 DefFunc _AVLRemove
 	FrameBegin 0, esi
 
-	mov eax, Param(2)
-	test eax, eax
-	jnz .next_0
-	mov eax, .return
-	mov Param(2), eax
-.next_0:
 
 	mov eax, Param(0)
 	test eax, eax
@@ -408,13 +402,6 @@ DefFunc _AVLClearRecursive
 ; void AVLClear(AVLBST_Node **ppn);
 DefFunc _AVLClear
 	FrameBegin 0, esi
-
-	mov eax, Param(1)
-	test eax, eax
-	jnz .next_0
-	mov eax, .return
-	mov Param(1), eax
-.next_0:
 
 	mov esi, Param(0)
 	invoke_cdecl _AVLClearRecursive, [esi]
