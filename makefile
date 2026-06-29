@@ -19,6 +19,7 @@ assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
 tls.asm: loaddll.inc tls.inc
 timer.asm: loaddll.inc timer.inc
 avlbst.asm: loaddll.inc avlbst.inc
+lfu.asm: loaddll.inc avlbst.inc lfu.inc
 loaddll.asm: loaddll.inc assets.inc
 buffer.asm: loaddll.inc buffer.inc gl33.inc
 gl33.asm: loaddll.inc gl33.inc assets.inc
