@@ -181,7 +181,7 @@ DefFunc _AVLRotate
 	FrameEnd
 	ret
 
-; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
+; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops, AVLBST_Node **pInserted);
 DefFunc _AVLInsertRecursive
 	FrameBegin 0, ebx, esi, edi
 
@@ -192,6 +192,9 @@ DefFunc _AVLInsertRecursive
 	jnz .next_0
 
 	invoke_cdecl _AVLNewNode, Param(1), Param(2), Param(3), ebx
+	; Save inserted node
+	mov edx, Param(5)
+	mov [edx], eax
 	jmp .end
 .next_0:
 
@@ -201,12 +204,12 @@ DefFunc _AVLInsertRecursive
 	jz .equal
 	jg .next_1
 
-	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2), Param(3), ebx
+	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.l_child], Param(1), Param(2), Param(3), ebx, Param(5)
 	mov [esi + AVLBST_Node.l_child], eax
 
 	jmp .next_2
 .next_1:
-	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2), Param(3), ebx
+	invoke_cdecl _AVLInsertRecursive, [esi + AVLBST_Node.r_child], Param(1), Param(2), Param(3), ebx, Param(5)
 	mov [esi + AVLBST_Node.r_child], eax
 
 .next_2:
@@ -216,12 +219,14 @@ DefFunc _AVLInsertRecursive
 
 .equal:
 	invoke_cdecl [esi + AVLBST_Node.on_free], [esi + AVLBST_Node.userdata]
-	mov edi, Param(3)
-	invoke_cdecl edi, [esi + AVLBST_Node.userdata]
 	mov eax, Param(2)
+	mov ecx, Param(3)
 	mov [esi + AVLBST_Node.userdata], eax
-	mov [esi + AVLBST_Node.on_free], edi
+	mov [esi + AVLBST_Node.on_free], ecx
 	mov [esi + AVLBST_Node.keyops], ebx
+	; Save existing node as the inserted node
+	mov edx, Param(5)
+	mov [edx], esi
 
 .finish:
 	mov eax, esi
@@ -230,9 +235,9 @@ DefFunc _AVLInsertRecursive
 	FrameEnd
 	ret
 
-; int AVLInsert(AVLBST_Node **ppn, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
+; AVLBST_Node* AVLInsert(AVLBST_Node **ppn, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
 DefFunc _AVLInsert
-	FrameBegin 0, esi
+	FrameBegin 1, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -242,14 +247,18 @@ DefFunc _AVLInsert
 	jmp .bad_param
 .next_0:
 	mov esi, eax
-	invoke_cdecl _AVLInsertRecursive, [esi], Param(1), Param(2), Param(3), Param(4)
+	mov eax, Param(3)
+	mov ecx, .ret_op
+	test eax, eax
+	cmovz eax, ecx
+	invoke_cdecl _AVLInsertRecursive, [esi], Param(1), Param(2), eax, Param(4), &Variable(0)
 	test eax, eax
 	jz .end
 	mov [esi], eax
-	xor eax, eax
-	inc eax
+	mov eax, Variable(0)
 .end:
 	FrameEnd
+.ret_op:
 	ret
 
 ; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key)
