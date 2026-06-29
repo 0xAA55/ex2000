@@ -144,7 +144,7 @@ DefFunc _AVLGetBalance
 	FrameEnd
 	ret
 
-; AVLBST_Node *AVLRotate(AVLBST_Node *x, char *key);
+; AVLBST_Node *AVLRotate(AVLBST_Node *x);
 DefFunc _AVLRotate
 	FrameBegin 0, esi
 
@@ -211,7 +211,7 @@ DefFunc _AVLInsertRecursive
 
 .next_2:
 	invoke_cdecl _AVLCalcHeight, esi
-	invoke_cdecl _AVLRotate, esi, Param(1)
+	invoke_cdecl _AVLRotate, esi
 	jmp .end
 
 .equal:
