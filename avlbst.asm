@@ -215,6 +215,7 @@ DefFunc _AVLInsertRecursive
 	jmp .end
 
 .equal:
+	invoke_cdecl [esi + AVLBST_Node.on_free], [esi + AVLBST_Node.userdata]
 	mov edi, Param(3)
 	invoke_cdecl edi, [esi + AVLBST_Node.userdata]
 	mov eax, Param(2)
