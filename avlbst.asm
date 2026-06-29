@@ -420,6 +420,24 @@ DefFunc _AVLClear
 .return:
 	ret
 
+; AVLBST_Node *AVLBST_Min(AVLBST_Node *root);
+DefFunc _AVLBST_Min
+	FrameBegin 0
+
+	mov eax, Param(0)
+	test eax, eax
+	jz .end
+
+.loop_left:
+	mov ecx, [eax + AVLBST_Node.l_child]
+	test ecx, ecx
+	cmovnz eax, ecx
+	jnz .loop_left
+
+.end:
+	FrameEnd
+	ret
+
 DefFunc _AVLDupStringKey
 	FrameBegin 0
 	invoke_dll_cdecl strlen, Param(0)
