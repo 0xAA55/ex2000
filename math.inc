@@ -236,7 +236,7 @@ extern _MatrixMultiply
 ; void MatrixMultiplyTo(Matrix *out_l, Matrix *r);
 extern _MatrixMultiplyTo
 
-; BitMap *CreateBitMap(int border_len, int dims);
+; BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
 extern _CreateBitMap
 
 ; BitMap *DuplicateBitMap(BitMap *src);

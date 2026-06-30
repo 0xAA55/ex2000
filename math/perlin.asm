@@ -7,7 +7,7 @@ _PerlinNumWorkers resd 1
 DefFunc _CreatePerlinMap2D
 	FrameBegin 8, ebx, esi
 
-	invoke_cdecl _CreateBitMap, Param(0), 2
+	invoke_cdecl _CreateBitMap, Param(0), 2, 8
 	mov ebx, eax
 
 	mov eax, Param(0)
@@ -91,7 +91,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov esi, Param(2)
 	mov eax, Param(0)
 	mul dword [esi + BitMap.border_len]
-	invoke_cdecl _CreateBitMap, eax, 1
+	invoke_cdecl _CreateBitMap, eax, 1, 4
 	mov edi, eax
 
 	invoke_cdecl _aligned_malloc, 6 * 0x10, 0x10

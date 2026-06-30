@@ -32,7 +32,7 @@ DefFunc _GenKMapOfAltitudeMapPoolProc
 	mov _HalfSize, ecx
 	mov _CbMap, eax
 
-	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], 1
+	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], 1, 4
 	mov _AltDivDistMap, eax
 
 	mov eax, Param(1)

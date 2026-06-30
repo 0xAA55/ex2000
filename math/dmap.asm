@@ -4,7 +4,7 @@ DefFunc _GenDistanceMap
 	FrameBegin 3, ebx, edi
 	AssignVars _Y, _SV, _EV
 
-	invoke_cdecl _CreateBitMap, Param(0), 1
+	invoke_cdecl _CreateBitMap, Param(0), 1, 4
 	mov ebx, eax
 
 	mov eax, Param(0)

@@ -14,7 +14,7 @@ DefFunc _FloatMapDownScale
 	shr eax, 1
 	test eax, eax
 	jz .end
-	invoke_cdecl _CreateBitMap, eax, 1
+	invoke_cdecl _CreateBitMap, eax, 1, 4
 	mov edi, eax
 
 	mov eax, [edi + BitMap.border_len]

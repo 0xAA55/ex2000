@@ -1,5 +1,6 @@
 %include "common.inc"
 
+; BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
 DefFunc _CreateBitMap
 	FrameBegin 1, ebx, edi
 
@@ -28,8 +29,7 @@ DefFunc _CreateBitMap
 	invoke_cdecl _aligned_malloc, eax, 16
 	mov [ebx + BitMap.data], eax
 
-	mov eax, [ebx + BitMap.dims]
-	shl eax, 2
+	mov eax, Param(2)
 	mov [ebx + BitMap.bytes_per_pixel], eax
 
 	mov ecx, [ebx + BitMap.border_len]
@@ -60,6 +60,7 @@ DefFunc _DestroyBitMap
 	FrameEnd
 	ret
 
+; float *GetBitmapPixelAddress(int x, int y, BitMap *map);
 DefFunc _GetBitmapPixelAddress
 	FrameBegin 0, ebx
 
@@ -71,9 +72,9 @@ DefFunc _GetBitmapPixelAddress
 	mov ecx, Param(1)
 	and eax, edx
 	and ecx, edx
-	mul dword [ebx + BitMap.dims]
+	mul dword [ebx + BitMap.bytes_per_pixel]
 	mov ecx, [ebx + BitMap.row_ptr + ecx * 4]
-	lea eax, [eax * 4 + ecx]
+	add eax, ecx
 
 	FrameEnd
 	ret

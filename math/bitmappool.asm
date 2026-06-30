@@ -10,7 +10,7 @@ DefFunc _BitMapMTPool
 
 	mov ebx, Param(0)
 
-	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], [ebx + BitMap.dims]
+	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], [ebx + BitMap.dims], [ebx + BitMap.bytes_per_pixel]
 	mov edi, eax
 
 	invoke_cdecl _malloc, BMDataCmn.size
