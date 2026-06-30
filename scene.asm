@@ -207,50 +207,6 @@ _BillBoardVertices:
 	db 1, 1
 .num equ $ - _BillBoardVertices
 
-%macro SceneLoadShaderProgram 4
-	[segment .rdata]
-	%%VSAssetsPath db %2, 0
-	%%GSAssetsPath db %3, 0
-	%%FSAssetsPath db %4, 0
-
-	__SECT__
-	invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
-%endmacro
-
-%macro GetAttribLocation 2
-	[segment .rdata]
-	%%AttribName db %2, 0
-
-	__SECT__
-	invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
-%endmacro
-
-%macro GetUniformLocation 2
-	[segment .rdata]
-	%%UniformName db %2, 0
-
-	__SECT__
-	invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
-%endmacro
-
-; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
-DefFunc _SceneLoadShaderProgram
-	FrameBegin 3, esi
-
-	mov esi, Param(0)
-	invoke_cdecl _AssetsQuery, Param(1), 0
-	mov Variable(0), eax
-	invoke_cdecl _AssetsQuery, Param(2), 0
-	mov Variable(1), eax
-	invoke_cdecl _AssetsQuery, Param(3), 0
-	mov Variable(2), eax
-
-	invoke_cdecl _ProgramCreate, Variable(0), Variable(1), Variable(2)
-	mov [esi], eax
-
-	FrameEnd
-	ret
-
 ;int SceneInit();
 DefFunc _SceneInit
 	FrameBegin 0, ebx, esi

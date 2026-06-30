@@ -14,6 +14,7 @@ all: ex2000.exe
 	copy $@+
 
 loaddll.inc: frame.inc
+shader.inc: gl33.inc
 main.asm: loaddll.inc assets.inc math.inc tls.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
 tls.asm: loaddll.inc tls.inc
@@ -26,7 +27,7 @@ gl33.asm: loaddll.inc gl33.inc assets.inc
 pool.asm: loaddll.inc pool.inc
 scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc
 vblank.asm: loaddll.inc vblank.inc
-shader.asm: loaddll.inc shader.inc gl33.inc
+shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
 
 out/stub.bin: stub.asm
 	nasm $^ -o $@

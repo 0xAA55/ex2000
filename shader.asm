@@ -1,6 +1,7 @@
 %include "loaddll.inc"
 %include "shader.inc"
 %include "gl33.inc"
+%include "assets.inc"
 
 extern _calloc
 extern _free
@@ -153,3 +154,21 @@ _ST_Vertex_Shader db "Vertex", 0
 _ST_Geometry_Shader db "Geometry", 0
 _ST_Fragment_Shader db "Fragment", 0
 _ST_Offsets db 0, _ST_Geometry_Shader - _ST_Vertex_Shader, _ST_Fragment_Shader - _ST_Vertex_Shader
+
+; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
+DefFunc _SceneLoadShaderProgram
+	FrameBegin 3, esi
+
+	mov esi, Param(0)
+	invoke_cdecl _AssetsQuery, Param(1), 0
+	mov Variable(0), eax
+	invoke_cdecl _AssetsQuery, Param(2), 0
+	mov Variable(1), eax
+	invoke_cdecl _AssetsQuery, Param(3), 0
+	mov Variable(2), eax
+
+	invoke_cdecl _ProgramCreate, Variable(0), Variable(1), Variable(2)
+	mov [esi], eax
+
+	FrameEnd
+	ret
