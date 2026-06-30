@@ -837,6 +837,8 @@ __SECT__
 	%undef KeyA
 	%undef KeyD
 	%undef KeySpace
+	%undef KeyCtrl
+	%undef CurMovementSpeed
 
 DefFunc _SwapBuffers
 	FrameBegin 0
