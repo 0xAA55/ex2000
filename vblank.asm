@@ -270,7 +270,7 @@ DefFunc _WaitForVBlankDDraw
 	test eax, eax
 	jz .not_found
 
-	invoke_com [eax + AVLBST_Node.userdata], IDirectDraw.WaitForVerticalBlank, DDWAITVB_BLOCKBEGIN, NULL
+	invoke_com [eax + AVLBST_Node.userdata], IDirectDraw.WaitForVerticalBlank, DDWAITVB_BLOCKEND, NULL
 	jmp .end
 .not_found:
 	invoke_cdecl _FakeWaitForVBlank
