@@ -43,4 +43,16 @@ extern _BufferTrimExcess
 ; void BufferResize(GlBuffer *p_buffer, size_t new_num_items);
 extern _BufferResize
 
+%macro DumpBufferInfo 1
+	debug_printf `.pointer: %p\n`, [%1 + GlBuffer.pointer]
+	debug_printf `.num_items: %d\n`, [%1 + GlBuffer.num_items]
+	debug_printf `.capacity: %d\n`, [%1 + GlBuffer.capacity]
+	debug_printf `.size_of_item: %d\n`, [%1 + GlBuffer.size_of_item]
+	debug_printf `.gl_buffer: %d\n`, [%1 + GlBuffer.gl_buffer]
+	debug_printf `.gl_buffer_type: %d\n`, [%1 + GlBuffer.gl_buffer_type]
+	debug_printf `.gl_buffer_usage: %d\n`, [%1 + GlBuffer.gl_buffer_usage]
+	debug_printf `.gl_buffer_cap: %d\n`, [%1 + GlBuffer.gl_buffer_cap]
+	debug_printf `.flushed: %d\n`, [%1 + GlBuffer.flushed]
+%endmacro
+
 %endif
