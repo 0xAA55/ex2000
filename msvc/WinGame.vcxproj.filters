@@ -189,5 +189,23 @@
     <None Include="..\math\common.inc">
       <Filter>头文件\math</Filter>
     </None>
+    <None Include="..\lfu.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\utf.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\vblank.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="..\lfu.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\utf.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\vblank.inc">
+      <Filter>头文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

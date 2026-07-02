@@ -134,6 +134,8 @@
     <None Include="..\frame.inc" />
     <None Include="..\gl33.asm" />
     <None Include="..\gl33.inc" />
+    <None Include="..\lfu.asm" />
+    <None Include="..\lfu.inc" />
     <None Include="..\loaddll.asm" />
     <None Include="..\loaddll.inc" />
     <None Include="..\main.asm" />
@@ -181,6 +183,10 @@
     <None Include="..\timer.inc" />
     <None Include="..\tls.asm" />
     <None Include="..\tls.inc" />
+    <None Include="..\utf.asm" />
+    <None Include="..\utf.inc" />
+    <None Include="..\vblank.asm" />
+    <None Include="..\vblank.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
