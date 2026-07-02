@@ -1,6 +1,7 @@
 OBJ_DIR:=out
 SRCS=$(filter-out stub.asm, $(wildcard *.asm))
 OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
+OBJS_D=$(patsubst %.asm, $(OBJ_DIR)/%_d.obj, $(SRCS))
 LIBS=out/math.lib lib/kernel32.lib
 DEFS:=
 
@@ -32,6 +33,9 @@ utf.asm: loaddll.inc utf.inc
 
 out/stub.bin: stub.asm
 	nasm $^ -o $@
+out/%_d.obj: %.asm
+	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	nasm -f win32 -g -D_DEBUG $(DEFS) $^ -o $@
 out/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	nasm -f win32 -g $(DEFS) $^ -o $@
@@ -43,6 +47,9 @@ out/math.lib: $(wildcard math/*)
 
 ex2000.exe: $(OBJS) $(LIBS) out/stub.bin
 	link /NOLOGO /NODEFAULTLIB /NOENTRY /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(LIBS)
+
+ex2000d.exe: $(OBJS_D) $(LIBS) out/stub.bin
+	link /NOLOGO /NODEFAULTLIB /NOENTRY /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:CONSOLE $(OBJS_D) $(LIBS)
 
 clean:
 	del /f /s /q out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb ex2000.exe
@@ -56,3 +63,6 @@ unrich: ex2000.exe
 
 run: ex2000.exe
 	ex2000.exe
+
+rund: ex2000d.exe
+	ex2000d.exe
