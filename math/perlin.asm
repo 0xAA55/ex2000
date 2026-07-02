@@ -440,7 +440,8 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov ecx, Param(2)
 	lea esi, &[eax + ecx * 4] ; esi = ebx + (sizeof GenPerlinLayerData*) * num_layers
 
-	mov eax, 1
+	xor eax, eax
+	inc eax
 	mov ecx, Param(2)
 	movss xmm0, [_F1111]
 	shl eax, ecx

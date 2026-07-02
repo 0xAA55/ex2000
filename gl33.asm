@@ -677,7 +677,8 @@ DefFunc _InitGL33
 	invoke_dll_stdcall MessageBoxA, [_hWnd], [_OpenGLNullFunctions], 0, 0
 
 .end:
-	mov eax, 1
+	xor eax, eax
+	inc eax
 
 .exit:
 	mov Variable(0), eax

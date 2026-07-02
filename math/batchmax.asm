@@ -68,7 +68,8 @@ DefFunc _BatchMax
 	add esi, 0x100
 	dec ecx
 	jnz .loop_64_to_4
-	mov eax, 4
+	xor eax, eax
+	mov al, 4
 	jmp .on_choose_methods
 .batch_8:
 	mov ecx, eax ; batch process data: every 8 input, one 4 output to the intermediate buffer
@@ -80,7 +81,8 @@ DefFunc _BatchMax
 	add esi, 0x20
 	loop .loop_8_to_4
 	movaps [edi], xmm0
-	mov eax, 4
+	xor eax, eax
+	mov al, 4
 	jmp .on_choose_methods
 
 .result:
