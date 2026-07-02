@@ -6,6 +6,7 @@
 %include "assets.inc"
 %include "shader.inc"
 %include "math.inc"
+%include "fontgl.inc"
 
 %define TerrainBorderLen 5
 
@@ -105,6 +106,9 @@ _FovY resd 1
 
 extern _FovYCos
 _FovYCos resd 1
+
+extern _OGLFC
+_OGLFC resd 1
 
 segment .bss
 alignb 16
@@ -256,6 +260,9 @@ DefFunc _SceneInit
 
 	GetUniformLocation [_DrawProgressProgram], "progress"
 	mov [_ProgressProgramLocations.Progress], eax
+
+	invoke_cdecl _OGLFC_Create, [_hDC], 12
+	mov [_OGLFC], eax
 
 	xor eax, eax
 	mov [_SceneLoadingProgress], eax
@@ -496,10 +503,11 @@ DefFunc _SceneUnload
 	ret
 
 DefFunc _Scene
-	FrameBegin 11, ebx, esi, edi
+	FrameBegin 12, ebx, esi, edi
 	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32
 	AssignVars KeyW, KeyS, KeyA, KeyD, KeySpace, KeyCtrl
 	AssignVars CurMovementSpeed
+	AssignVars FramesPerSec
 
 	fld qword [_Timer.TimerVal]
 	fstp qword DeltaTimeL
@@ -773,6 +781,12 @@ __SECT__
 
 	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_FILL
 
+	fld1
+	fdiv qword DeltaTimeL
+	fstp dword FramesPerSec
+
+	GLPrintf [_OGLFC], 0, 0, `FPS: %.1f`, f2d FramesPerSec
+
 .end_of_frame:
 	invoke_cdecl _SwapBuffers
 	xor eax, eax
@@ -795,6 +809,7 @@ __SECT__
 	%undef KeySpace
 	%undef KeyCtrl
 	%undef CurMovementSpeed
+	%undef FramesPerSec
 
 DefFunc _SwapBuffers
 	FrameBegin 0
