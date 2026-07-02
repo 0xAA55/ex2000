@@ -212,10 +212,10 @@ DefFunc _BufferClear
 
 ; void BufferFlush(GlBuffer *p_buffer);
 DefFunc _BufferFlush
-	FrameBegin 1, ebx, edi
-	AssignVars _CbData
+	FrameBegin 0, ebx, esi, edi
 
 	mov ebx, Param(0)
+
 	cmp dword[ebx + GlBuffer.flushed], 0
 	jnz .end
 
@@ -230,14 +230,14 @@ DefFunc _BufferFlush
 	int3
 	jmp .bad
 .good:
-	mov _CbData, eax
+	mov esi, eax
 	pop eax
 	cmp eax, [ebx + GlBuffer.gl_buffer_cap]
 	je .map
 	mov [ebx + GlBuffer.gl_buffer_cap], eax
 	mov edi, [ebx + GlBuffer.gl_buffer_type]
 	invoke_dll_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glBufferData, edi, _CbData, [ebx + GlBuffer.pointer], [ebx + GlBuffer.gl_buffer_usage]
+	invoke_dll_stdcall glBufferData, edi, esi, [ebx + GlBuffer.pointer], [ebx + GlBuffer.gl_buffer_usage]
 	invoke_dll_stdcall glBindBuffer, edi, 0
 	xor eax, eax
 	jmp .flushed
@@ -246,7 +246,7 @@ DefFunc _BufferFlush
 	mov edi, [ebx + GlBuffer.gl_buffer_type]
 	invoke_dll_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
 	invoke_dll_stdcall glMapBuffer, edi, GL_WRITE_ONLY
-	invoke_dll_cdecl memcpy, eax, [ebx + GlBuffer.pointer], _CbData
+	invoke_dll_cdecl memcpy, eax, [ebx + GlBuffer.pointer], esi
 	invoke_dll_stdcall glUnmapBuffer, edi
 	invoke_dll_stdcall glBindBuffer, edi, 0
 	xor eax, eax
@@ -258,7 +258,6 @@ DefFunc _BufferFlush
 .end:
 	FrameEnd
 	ret
-%undef _CbData
 
 ; void BufferTrimExcess(GlBuffer *p_buffer);
 DefFunc _BufferTrimExcess
