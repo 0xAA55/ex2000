@@ -323,8 +323,19 @@ import_dll_func MonitorFromWindow
 import_dll_func SelectObject
 import_dll_func DeleteObject
 import_dll_func GetStockObject
+import_dll_func GetCurrentObject
 import_dll_func ChoosePixelFormat
 import_dll_func SetPixelFormat
+import_dll_func GetTextMetricsW
+import_dll_func GetGlyphOutlineW
+import_dll_func GetTextExtentPoint32W
+import_dll_func CreateCompatibleDC
+import_dll_func CreateDIBSection
+import_dll_func DeleteDC
+import_dll_func SetBkColor
+import_dll_func SetTextColor
+import_dll_func SetBkMode
+import_dll_func ExtTextOutW
 
 import_dll_func strcpy
 import_dll_func strcat
@@ -342,6 +353,10 @@ import_dll_func srand
 %define PAGE_READONLY           0x02
 %define PAGE_READWRITE          0x04
 
+%define TRANSPARENT         1
+%define OPAQUE              2
+%define BKMODE_LAST         2
+
 %define DT_TOP                      0x00000000
 %define DT_LEFT                     0x00000000
 %define DT_CENTER                   0x00000001
@@ -357,6 +372,16 @@ import_dll_func srand
 %define DT_CALCRECT                 0x00000400
 %define DT_NOPREFIX                 0x00000800
 %define DT_INTERNAL                 0x00001000
+
+%define ETO_OPAQUE                   0x0002
+%define ETO_CLIPPED                  0x0004
+%define ETO_GLYPH_INDEX              0x0010
+%define ETO_RTLREADING               0x0080
+%define ETO_NUMERICSLOCAL            0x0400
+%define ETO_NUMERICSLATIN            0x0800
+%define ETO_IGNORELANGUAGE           0x1000
+%define ETO_PDY                      0x2000
+%define ETO_REVERSE_INDEX_MAP        0x10000
 
 %define WM_CREATE 0x0001
 %define WM_DESTROY 0x0002
@@ -385,6 +410,37 @@ import_dll_func srand
 %define DEVICE_DEFAULT_FONT 14
 %define DEFAULT_PALETTE     15
 %define SYSTEM_FIXED_FONT   16
+%define DEFAULT_GUI_FONT    17
+
+%define OBJ_PEN             1
+%define OBJ_BRUSH           2
+%define OBJ_DC              3
+%define OBJ_METADC          4
+%define OBJ_PAL             5
+%define OBJ_FONT            6
+%define OBJ_BITMAP          7
+%define OBJ_REGION          8
+%define OBJ_METAFILE        9
+%define OBJ_MEMDC           10
+%define OBJ_EXTPEN          11
+%define OBJ_ENHMETADC       12
+%define OBJ_ENHMETAFILE     13
+%define OBJ_COLORSPACE      14
+
+struc BITMAPINFOHEADER
+	.biSize resd 1
+	.biWidth resd 1
+	.biHeight resd 1
+	.biPlanes resw 1
+	.biBitCount resw 1
+	.biCompression resd 1
+	.biSizeImage resd 1
+	.biXPelsPerMeter resd 1
+	.biYPelsPerMeter resd 1
+	.biClrUsed resd 1
+	.biClrImportant resd 1
+	.size equ $ - BITMAPINFOHEADER
+endstruc
 
 %define MONITOR_DEFAULTTONULL 0
 %define MONITOR_DEFAULTTOPRIMARY 1
@@ -447,6 +503,58 @@ endstruc
 %define PFD_DEPTH_DONTCARE          0x20000000
 %define PFD_DOUBLEBUFFER_DONTCARE   0x40000000
 %define PFD_STEREO_DONTCARE         0x80000000
+
+struc GLYPHMETRICS
+	.gmBlackBoxX resd 1
+	.gmBlackBoxY resd 1
+	.gmptGlyphOrigin_x resd 1
+	.gmptGlyphOrigin_y resd 1
+	.gmCellIncX resw 1
+	.gmCellIncY resw 1
+	.size equ $ - GLYPHMETRICS
+endstruc
+
+struc MAT2
+	.eM11 resd 1
+	.eM12 resd 1
+	.eM21 resd 1
+	.eM22 resd 1
+	.size equ $ - MAT2
+endstruc
+
+struc TEXTMETRICW
+	.tmHeight resd 1
+	.tmAscent resd 1
+	.tmDescent resd 1
+	.tmInternalLeading resd 1
+	.tmExternalLeading resd 1
+	.tmAveCharWidth resd 1
+	.tmMaxCharWidth resd 1
+	.tmWeight resd 1
+	.tmOverhang resd 1
+	.tmDigitizedAspectX resd 1
+	.tmDigitizedAspectY resd 1
+	.tmFirstChar resw 1
+	.tmLastChar resw 1
+	.tmDefaultChar resw 1
+	.tmBreakChar resw 1
+	.tmItalic resb 1
+	.tmUnderlined resb 1
+	.tmStruckOut resb 1
+	.tmPitchAndFamily resb 1
+	.tmCharSet resb 1
+	.size equ $ - TEXTMETRICW
+endstruc
+
+%define GGO_METRICS        0
+%define GGO_BITMAP         1
+%define GGO_NATIVE         2
+%define GGO_BEZIER         3
+
+%define GGO_GRAY2_BITMAP   4
+%define GGO_GRAY4_BITMAP   5
+%define GGO_GRAY8_BITMAP   6
+%define GGO_GLYPH_INDEX    0x0080
 
 %define VK_LBUTTON        0x01
 %define VK_RBUTTON        0x02

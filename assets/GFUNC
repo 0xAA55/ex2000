@@ -1,5 +1,16 @@
 SelectObject
 DeleteObject
 GetStockObject
+GetCurrentObject
 ChoosePixelFormat
 SetPixelFormat
+GetTextMetricsW
+GetGlyphOutlineW
+GetTextExtentPoint32W
+CreateCompatibleDC
+CreateDIBSection
+DeleteDC
+SetBkColor
+SetTextColor
+SetBkMode
+ExtTextOutW
