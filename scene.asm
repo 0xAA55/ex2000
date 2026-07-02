@@ -485,22 +485,52 @@ extern _NumItemsToLoad
 _NumItemsToLoad equ ($ - .load_sequence) / 4
 
 DefFunc _SceneUnload
-	FrameBegin 0, ebx
+	FrameBegin 0, esi
 
-	xor ebx, ebx
+	invoke_cdecl _VBlankDeInit
 
-	invoke_cdecl _DestroyBitMap, [_TerrainBitmap]
 	invoke_cdecl _DeInitBuffer, _TerrainVerticesBuffer
 	invoke_cdecl _DeInitBuffer, _TerrainIndicesBuffer
 	invoke_cdecl _DeInitBuffer, _TerrainInstancesBuffer
 	invoke_cdecl _DeInitBuffer, _BillboardVerticesBuffer
 
-	mov [_TerrainBitmap], ebx
+	invoke_cdecl _DestroyBitMap, [_TerrainBitmap]
 
-	invoke_cdecl _VBlankDeInit
+	invoke_cdecl _OGLFC_Destroy, [_OGLFC]
+
+	invoke_dll_stdcall glDeleteProgram, [_DrawProgressProgram]
+	invoke_dll_stdcall glDeleteProgram, [_DrawBillboardProgram]
+	invoke_dll_stdcall glDeleteProgram, [_DrawTerrainProgram]
+
+	invoke_dll_stdcall glDeleteVertexArrays, 1, _DrawBillboardVAO
+	invoke_dll_stdcall glDeleteVertexArrays, 1, _DrawTerrainVAO
+
+	invoke_dll_stdcall glDeleteTextures, 1, _PerlinNoiseTexture
+	invoke_dll_stdcall glDeleteTextures, 1, _PerlinNoiseTextureMipLinear
+
+	xor edx, edx
+	mov ecx, .num_set_to_NULL
+	mov esi, .set_to_NULL
+.loop_set_to_NULL:
+	lodsd
+	mov [eax], edx
+	dec ecx
+	jnz .loop_set_to_NULL
 
 	FrameEnd
 	ret
+[segment .rdata]
+.set_to_NULL:
+	dd _TerrainBitmap
+	dd _OGLFC
+	dd _DrawProgressProgram
+	dd _DrawBillboardProgram
+	dd _DrawTerrainProgram
+	dd _DrawBillboardVAO
+	dd _DrawTerrainVAO
+	dd _PerlinNoiseTexture
+	dd _PerlinNoiseTextureMipLinear
+.num_set_to_NULL equ ($ - .set_to_NULL) / 4
 
 DefFunc _Scene
 	FrameBegin 12, ebx, esi, edi
