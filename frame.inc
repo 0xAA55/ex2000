@@ -58,7 +58,7 @@
 %macro AssignSizedVar 2
 	%define %1%[_Addr] AddrOfVariable(%[CurVarIndex])
 	%define %1 Variable(%[CurVarIndex])
-	%assign CurVarIndex CurVarIndex + RoundUp(%2, 4)
+	%assign CurVarIndex CurVarIndex + GetNumRooms(%2, 4)
 %endmacro
 
 %macro NameParams 1-*
