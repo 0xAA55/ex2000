@@ -7,7 +7,7 @@
 %include "shader.inc"
 %include "math.inc"
 
-%define TerrainBorderLen 7
+%define TerrainBorderLen 5
 
 extern _hWnd
 extern _hDC
@@ -276,7 +276,7 @@ DefFunc _SceneLoad00
 
 DefFunc _SceneLoad01
 	FrameBegin 0
-	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 8
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 512, 1.0f, 7
 	mov [_NoiseBitmap], eax
 	FrameEnd
 	ret
