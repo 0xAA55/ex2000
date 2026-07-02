@@ -37,6 +37,7 @@ DefFunc _AVLNewNode
 	mov [edi + AVLBST_Node.userdata], eax
 	mov [edi + AVLBST_Node.on_free], ecx
 	mov [edi + AVLBST_Node.keyops], ebx
+	inc dword[edi + AVLBST_Node.height]
 
 	mov eax, edi
 
@@ -223,7 +224,6 @@ DefFunc _AVLInsertRecursive
 	mov ecx, Param(3)
 	mov [esi + AVLBST_Node.userdata], eax
 	mov [esi + AVLBST_Node.on_free], ecx
-	mov [esi + AVLBST_Node.keyops], ebx
 	; Save existing node as the inserted node
 	mov edx, Param(5)
 	mov [edx], esi
@@ -288,18 +288,23 @@ DefFunc _AVLRemoveRecursive
 	mov byte[eax], 1
 
 	mov eax, [esi + AVLBST_Node.l_child]
-	and eax, [esi + AVLBST_Node.r_child]
-	jnz .2child
-
-	mov eax, [esi + AVLBST_Node.l_child]
 	test eax, eax
-	jnz .get_child
+	jz .no_lchild
+	mov eax, [esi + AVLBST_Node.r_child]
+	test eax, eax
+	jz .no_rchild
+	jmp .2child
+.no_lchild:
 	mov eax, [esi + AVLBST_Node.r_child]
 	test eax, eax
 	jz .no_child
+	jmp .get_child
+.no_rchild:
+	mov eax, [esi + AVLBST_Node.l_child]
 .get_child:
+	mov ebx, eax
 	invoke_cdecl _AVLDestroyNode, esi
-	mov esi, eax
+	mov esi, ebx
 	jmp .after_remove
 .no_child:
 	invoke_cdecl _AVLDestroyNode, esi

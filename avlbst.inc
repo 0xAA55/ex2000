@@ -25,10 +25,11 @@ struc AVLBST_Node
 	.size equ $ - AVLBST_Node
 endstruc
 
-; AVLBST_Node* AVLInsert(AVLBST_Node **ppn, void *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
+; AVLBST_Node* AVLInsert(AVLBST_Node **ppn, void *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps *compops);
 ; Returns the inserted node (new or existing) or NULL on failure.
 ; The key will be duplicated and `AVLBST_Node` owns the key.
 ; If key is already exist, free `userdata` and replace with new data
+; if `ppn` is NULL, the function triggers int3 infinitely
 extern _AVLInsert
 
 ; AVLBST_Node* AVLSearch(AVLBST_Node *n, void *key);
