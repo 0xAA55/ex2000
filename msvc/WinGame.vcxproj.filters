@@ -189,6 +189,9 @@
     <None Include="..\math\common.inc">
       <Filter>头文件\math</Filter>
     </None>
+    <None Include="..\fontgl.asm">
+      <Filter>源文件</Filter>
+    </None>
     <None Include="..\lfu.asm">
       <Filter>源文件</Filter>
     </None>
@@ -197,6 +200,9 @@
     </None>
     <None Include="..\vblank.asm">
       <Filter>源文件</Filter>
+    </None>
+    <None Include="..\fontgl.inc">
+      <Filter>头文件</Filter>
     </None>
     <None Include="..\lfu.inc">
       <Filter>头文件</Filter>

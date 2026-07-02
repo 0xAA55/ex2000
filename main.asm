@@ -165,7 +165,7 @@ DefFunc _WndProc@16
 	invoke_dll_stdcall GetDC, Param(0)
 	mov [_hDC], eax
 
-	invoke_dll_stdcall GetStockObject, OEM_FIXED_FONT
+	invoke_dll_stdcall GetStockObject, ANSI_VAR_FONT
 	invoke_dll_stdcall SelectObject, [_hDC], eax
 	invoke_dll_stdcall DeleteObject, eax
 

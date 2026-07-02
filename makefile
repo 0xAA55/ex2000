@@ -16,17 +16,19 @@ all: ex2000.exe
 
 loaddll.inc: frame.inc
 shader.inc: gl33.inc
+fontgl.inc: buffer.inc
 main.asm: loaddll.inc assets.inc math.inc tls.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
 tls.asm: loaddll.inc tls.inc
 timer.asm: loaddll.inc timer.inc
 avlbst.asm: loaddll.inc avlbst.inc
 lfu.asm: loaddll.inc avlbst.inc lfu.inc
+fontgl.asm: loaddll.inc fontgl.inc avlbst.inc lfu.inc math.inc gl33.inc shader.inc utf.inc
 loaddll.asm: loaddll.inc assets.inc
 buffer.asm: loaddll.inc buffer.inc gl33.inc
 gl33.asm: loaddll.inc gl33.inc assets.inc
 pool.asm: loaddll.inc pool.inc
-scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc
+scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc fontgl.inc
 vblank.asm: loaddll.inc vblank.inc
 shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
 utf.asm: loaddll.inc utf.inc

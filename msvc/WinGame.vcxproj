@@ -131,6 +131,8 @@
     <None Include="..\avlbst.inc" />
     <None Include="..\buffer.asm" />
     <None Include="..\buffer.inc" />
+    <None Include="..\fontgl.asm" />
+    <None Include="..\fontgl.inc" />
     <None Include="..\frame.inc" />
     <None Include="..\gl33.asm" />
     <None Include="..\gl33.inc" />
