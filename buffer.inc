@@ -40,7 +40,7 @@ extern _BufferFlush
 ; void BufferTrimExcess(GlBuffer *p_buffer);
 extern _BufferTrimExcess
 
-; vooid BufferResize(GlBuffer *p_buffer, size_t new_num_items);
+; void BufferResize(GlBuffer *p_buffer, size_t new_num_items);
 extern _BufferResize
 
 %endif
