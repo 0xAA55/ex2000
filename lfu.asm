@@ -59,7 +59,7 @@ DefFunc _LfuCreate
 
 ; void LfuIncreaseFreq(LfuCache *cache, void *user_key, DataNode *dn);
 DefFunc _LfuIncreaseFreq
-	FrameBegin FreqKey.size / 4, ebx, esi, edi
+	FrameBegin SizedVar(FreqKey.size), ebx, esi, edi
 	AssignVars _FreqKey
 
 	mov ebx, Param(0)
@@ -108,7 +108,7 @@ DefFunc _LfuGet
 
 ; void LfuPut(LfuCache *cache, void *key, void *value, void(*on_free)(void *userdata));
 DefFunc _LfuPut
-	FrameBegin FreqKey.size / 4, ebx, esi, edi
+	FrameBegin SizedVar(FreqKey.size), ebx, esi, edi
 	AssignVars _FreqKey
 
 	mov eax, Param(3)

@@ -128,7 +128,7 @@ extern _DDrawObjects
 _DDrawObjects resd 1
 
 DefFunc _VBlankInit
-	FrameBegin 6 + DXGI_OUTPUT_DESC.size / 4, ebx, esi, edi
+	FrameBegin 6 + SizedVar(DXGI_OUTPUT_DESC.size), ebx, esi, edi
 	AssignVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter, DXGIOutputDesc
 
 	xor eax, eax

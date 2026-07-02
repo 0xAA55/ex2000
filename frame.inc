@@ -43,12 +43,22 @@
 %define Variable(x) [AddrOfVariable(x)]
 %define CallParam(x) [AddrOfCallParam(x)]
 
+%define GetNumRooms(x, r) (((x) - 1) / (r) + 1)
+%define RoundUp(x, r) (GetNumRooms(x, r) * (r))
+%define SizedVar(x) GetNumRooms(x, 4)
+
 %macro AssignVars 1-*
 	%rep %0
 		%define %1 Variable(%[CurVarIndex])
 		%assign CurVarIndex CurVarIndex + 1
 		%rotate 1
 	%endrep
+%endmacro
+
+%macro AssignSizedVar 2
+	%define %1%[_Addr] AddrOfVariable(%[CurVarIndex])
+	%define %1 Variable(%[CurVarIndex])
+	%assign CurVarIndex CurVarIndex + RoundUp(%2, 4)
 %endmacro
 
 %macro NameParams 1-*
