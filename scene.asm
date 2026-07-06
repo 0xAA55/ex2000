@@ -176,16 +176,20 @@ segment .rdata
 extern _TerrainCurvePoints
 _TerrainCurvePoints:
 istruc CurvePoint
-	at .volume, dd 0.6
+	at .volume, dd 0.1
 	at .weight, dd 0.1
 iend
 istruc CurvePoint
-	at .volume, dd 0.1
-	at .weight, dd 0.6
+	at .volume, dd 0.05
+	at .weight, dd 0.3
 iend
 istruc CurvePoint
-	at .volume, dd 0.3
-	at .weight, dd 0.3
+	at .volume, dd 0.05
+	at .weight, dd 0.1
+iend
+istruc CurvePoint
+	at .volume, dd 0.5
+	at .weight, dd 0.5
 iend
 .num_points equ ($ - _TerrainCurvePoints) / CurvePoint.size
 
