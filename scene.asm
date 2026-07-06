@@ -847,13 +847,12 @@ __SECT__
 
 DefFunc _SwapBuffers
 	FrameBegin 0
+	invoke_dll_stdcall wglSwapBuffers, [_hDC]
+
 	mov eax, [_addr_of_wglSwapInterval]
 	test eax, eax
-	jnz .swap_buffers
-
+	jnz .after_wait_vsync
 	invoke_dll_stdcall WaitForVBlank
-
-.swap_buffers:
-	invoke_dll_stdcall wglSwapBuffers, [_hDC]
+.after_wait_vsync:
 	FrameEnd
 	ret
