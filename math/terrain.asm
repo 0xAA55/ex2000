@@ -159,7 +159,7 @@ DefFunc _AltitudeToTerrain
 	mulps xmm0, xmm7
 
 	movups [edi + SimpleVertex.nx], xmm0
-
+	mov dword[edi + SimpleVertex.ny], __?float32?__(2.0)
 	invoke_cdecl _VectorNormal, &[edi + SimpleVertex.nx], &[edi + SimpleVertex.nx], 3
 
 	movq xmm0, _X
@@ -172,7 +172,6 @@ DefFunc _AltitudeToTerrain
 	movss [edi + SimpleVertex.x], xmm0
 	movss [edi + SimpleVertex.y], xmm1
 	movss [edi + SimpleVertex.z], xmm2
-	mov dword[edi + SimpleVertex.ny], __?float32?__(1.0)
 	movq [edi + SimpleVertex.u], xmm3
 	add edi, SimpleVertex.size
 
