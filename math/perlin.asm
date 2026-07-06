@@ -405,8 +405,8 @@ DefFunc _GenPerlinLayerPoolProc
 	ret
 
 DefFunc _GenMultiLayerPerlinAltitude
-	FrameBegin 1, ebx, esi, edi
-	AssignVars _JOBS
+	FrameBegin 2, ebx, esi, edi
+	AssignVars _JOBS, CurLayer
 
 	mov eax, Param(0)
 	bsr ecx, eax
@@ -442,25 +442,36 @@ DefFunc _GenMultiLayerPerlinAltitude
 
 	xor eax, eax
 	inc eax
+	mov CurLayer, eax
 	mov ecx, Param(2)
-	movss xmm0, [_F1111]
-	shl eax, ecx
 	mov edx, 2
-	cvtsi2ss xmm1, eax
 	mov eax, Param(0)
-	divss xmm0, xmm1
 .setjobs1:
-	mulss xmm0, [_2.0f]
+	fld dword CurLayer
+	fdiv dword Param(2)
+	fld dword Param(3)
+	fyl2x
+	fld st0
+	frndint
+	fsub st1, st0
+	fxch st1
+	f2xm1
+	fld1
+	faddp st1, st0
+	fscale
+	fstp st1
+	fstp [esi + GenPerlinLayerData.amplitude]
 	shr eax, 1 ; perlin_border_len /= 2
 	mov [esi + GenPerlinLayerData.job_index], ecx
 	mov [esi + GenPerlinLayerData.perlin_border_len], eax
 	mov [esi + GenPerlinLayerData.ratio], edx
-	movss [esi + GenPerlinLayerData.amplitude], xmm0
 	shl edx, 1 ; ratio *= 2
 	mov [ebx], esi
 	add ebx, 4
 	add esi, GenPerlinLayerData.size
-	loop .setjobs1
+	inc dword CurLayer
+	dec ecx
+	jnz .setjobs1
 	mov ebx, ecx
 	inc ebx ; ebx = 1
 
@@ -482,10 +493,18 @@ DefFunc _GenMultiLayerPerlinAltitude
 	invoke_cdecl _free, _JOBS
 
 	%define _GAIN %[_JOBS]
+	%define _BIAS %[CurLayer]
 	%undef _JOBS
+	%undef CurLayer
 
 	mov ebx, [edi]
 	invoke_cdecl _free, edi
+
+	invoke_cdecl _FloatMapGetMinValue, ebx
+	fchs
+	fstp dword _BIAS
+
+	invoke_cdecl _BatchBias, [ebx + BitMap.data], _BIAS, [ebx + BitMap.num_floats]
 
 	invoke_cdecl _FloatMapGetMaxValue, ebx
 	fdivr dword Param(1)
@@ -497,3 +516,4 @@ DefFunc _GenMultiLayerPerlinAltitude
 	FrameEnd
 	ret
 	%undef _GAIN
+	%undef _BIAS
