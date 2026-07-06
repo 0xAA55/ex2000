@@ -69,8 +69,6 @@ _FailedToGet db "Failed to fetch OpenGL function pointers:"
 _NewLine db 0xd, 0xa, 0
 _TheseFunc db "These functions are unavailable.", 0
 
-def_dll_func_alias wglSwapInterval, "wglSwapIntervalEXT"
-
 dll_func_group_start_without_name WGLFunc
 def_dll_func_addr wglGetProcAddress
 def_dll_func_addr wglCreateContext
@@ -590,9 +588,6 @@ DefFunc _InitGL33
 	invoke_cdecl _malloc, 1024
 	mov [_FuncNameBuf], eax
 	mov [eax], 0
-
-	invoke_dll_stdcall wglGetProcAddress, _name_of_wglSwapInterval
-	mov [_addr_of_wglSwapInterval], eax
 
 	invoke_dll_stdcall ChoosePixelFormat, [_hDC], _PFD
 	invoke_dll_stdcall SetPixelFormat, [_hDC], eax, _PFD

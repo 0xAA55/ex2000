@@ -222,16 +222,6 @@ DefFunc _SceneInit
 	invoke_cdecl _InitTimer, _Timer
 	invoke_cdecl _VBlankInit
 
-	mov eax, [_addr_of_wglSwapInterval]
-	test eax, eax
-	jnz .use_swap_interval
-
-	jmp .load_scene
-.use_swap_interval:
-	invoke_dll_stdcall wglSwapInterval, 1
-	mov dword[_addr_of_WaitForVBlank], _FakeWaitForVBlank
-
-.load_scene:
 	fldpi
 	fdiv dword [_2.0f]
 	fst dword [_MaxPitch]
@@ -849,10 +839,6 @@ DefFunc _SwapBuffers
 	FrameBegin 0
 	invoke_dll_stdcall wglSwapBuffers, [_hDC]
 
-	mov eax, [_addr_of_wglSwapInterval]
-	test eax, eax
-	jnz .after_wait_vsync
 	invoke_dll_stdcall WaitForVBlank
-.after_wait_vsync:
 	FrameEnd
 	ret
