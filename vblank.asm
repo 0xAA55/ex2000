@@ -1,6 +1,7 @@
 %include "loaddll.inc"
 %include "vblank.inc"
 %include "avlbst.inc"
+%include "timer.inc"
 
 extern _hWnd
 extern _hDC
@@ -100,6 +101,15 @@ struc IDirectDraw
 	.WaitForVerticalBlank resd 1
 endstruc
 
+struc MonitorData
+	.IDXGIOutput resd 1
+	.IDirectDraw resd 1
+	.IsVRR resd 1
+	.RefreshRate resd 1
+	.RefreshIntervalMs resd 1
+	.size equ $ - MonitorData
+endstruc
+
 %define DDENUM_ATTACHEDSECONDARYDEVICES 0x00000001
 %define DDENUM_DETACHEDSECONDARYDEVICES 0x00000002
 %define DDENUM_NONDISPLAYDEVICES        0x00000004
@@ -119,18 +129,41 @@ _IID_IDXGIFactory:
 	db 0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69
 
 segment .bss
-extern _addr_of_WaitForVBlank
-_addr_of_WaitForVBlank resd 1
+extern _MonitorsData
+_MonitorsData resd 1
 
-extern _DXGIOutputs
-_DXGIOutputs resd 1
+extern _VBlankTimer
+_VBlankTimer:
+	InstTimer
 
-extern _DDrawObjects
-_DDrawObjects resd 1
+extern _VBlankTimeUsedMs
+_VBlankTimeUsedMs resd 1
+
+extern _LastFrameRenderTimeMs
+_LastFrameRenderTimeMs resd 1
+
+extern _FrameRenderDelayMs
+_FrameRenderDelayMs resd 1
+
+extern _VBlankFrameStartTime
+_VBlankFrameStartTime resq 1
+
+DefFunc _FreeMonitorData
+	FrameBegin 0, ebx
+
+	mov ebx, Param(0)
+	invoke_cdecl _SafeRelease, &[ebx + MonitorData.IDXGIOutput]
+	invoke_cdecl _SafeRelease, &[ebx + MonitorData.IDirectDraw]
+	invoke_cdecl _free, ebx
+
+	FrameEnd
+	ret
 
 DefFunc _VBlankInit
 	FrameBegin 6 + SizedVar(DXGI_OUTPUT_DESC.size), ebx, esi, edi
 	AssignVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter, DXGIOutputDesc
+
+	invoke_cdecl _InitTimer, _VBlankTimer
 
 	xor eax, eax
 	lea edi, DXGIFactory
@@ -169,8 +202,14 @@ DefFunc _VBlankInit
 	invoke_com DXGIAdapter, IDXGIAdapterVtbl.EnumOutputs, edi, &DXGIOutput
 	cmp eax, 0
 	jl .end_enum_outputs_dxgi
+
 	invoke_com DXGIOutput, IDXGIOutputVtbl.GetDesc, ebx
-	invoke_cdecl _AVLInsert, _DXGIOutputs, [ebx + DXGI_OUTPUT_DESC.HMonitor], DXGIOutput, _ReleaseComObj, _AVLOps_Integer
+
+	invoke_cdecl _calloc, 1, MonitorData.size
+	mov ecx, DXGIOutput
+	mov [eax + MonitorData.IDXGIOutput], ecx
+
+	invoke_cdecl _AVLInsert, _MonitorsData, [ebx + DXGI_OUTPUT_DESC.HMonitor], eax, _FreeMonitorData, _AVLOps_Integer
 	inc edi
 	jmp .loop_enum_outputs_dxgi
 
@@ -181,10 +220,9 @@ DefFunc _VBlankInit
 
 .end_enum_adapeters_dxgi:
 	invoke_cdecl _SafeRelease, &DXGIFactory
-	mov dword[_addr_of_WaitForVBlank], _WaitForVBlankD3D
 	xor eax, eax
 	inc eax
-	jmp .end
+	jmp .finish
 
 .no_dxgi:
 	load_dll DDraw
@@ -203,14 +241,13 @@ DefFunc _VBlankInit
 	cmp eax, 0
 	jl .no_ddraw
 
-	mov dword[_addr_of_WaitForVBlank], _WaitForVBlankDDraw
 	xor eax, eax
 	inc eax
-	jmp .end
+
+.finish:
+	invoke_cdecl _AVLIterate, [_MonitorsData], NULL, _SetupMonitorDataProc
 
 .no_ddraw:
-	; Fallback to `_FakeWaitForVBlank`
-	mov dword[_addr_of_WaitForVBlank], _FakeWaitForVBlank
 
 .end:
 	FrameEnd
@@ -241,7 +278,11 @@ DefFunc _DDEnumCallbackExA@20
 	cmp eax, 0
 	jl .fail
 
-	invoke_cdecl _AVLInsert, _DDrawObjects, Param(4), DDrawObj, _ReleaseComObj, _AVLOps_Integer
+	invoke_cdecl _calloc, 1, MonitorData.size
+	mov ecx, DDrawObj
+	mov [eax + MonitorData.IDirectDraw], ecx
+
+	invoke_cdecl _AVLInsert, _MonitorsData, Param(4), eax, _FreeMonitorData, _AVLOps_Integer
 	xor eax, eax
 	jmp .end
 
@@ -253,44 +294,53 @@ DefFunc _DDEnumCallbackExA@20
 	FrameEnd
 	ret 20
 
-DefFunc _WaitForVBlankD3D
-	FrameBegin 0
+DefFunc _SetupMonitorDataProc
+	FrameBegin SizedVar(MONITORINFOEXW.size) + SizedVar(DEVMODEW.size), ebx, edi
+	AssignSizedVar _MonitorInfoExW, MONITORINFOEXW.size
+	AssignSizedVar _DevModeW, DEVMODEW.size
 
-	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
-	invoke_cdecl _AVLSearch, [_DXGIOutputs], eax
+	xor eax, eax
+	lea edi, _MonitorInfoExW
+	mov ecx, Frame_NumLocals
+	rep stosd
+
+	mov ebx, Param(1)
+	mov byte[_MonitorInfoExW_Addr + MONITORINFOEXW.cbSize], MONITORINFOEXW.size
+	mov byte[_DevModeW_Addr + DEVMODEW.dmSize], DEVMODEW.size
+	mov byte[ebx + MonitorData.RefreshRate], 60
+	mov byte[ebx + MonitorData.RefreshIntervalMs], 16
+
+	invoke_dll_stdcall GetMonitorInfoW, Param(0), &_MonitorInfoExW
 	test eax, eax
-	jz .not_found
+	jz .end
+	invoke_dll_stdcall EnumDisplaySettingsW, &[_MonitorInfoExW_Addr + MONITORINFOEXW.szDevice], ENUM_CURRENT_SETTINGS, &_DevModeW
+	test eax, eax
+	jz .end
 
-	invoke_com [eax + AVLBST_Node.userdata], IDXGIOutputVtbl.WaitForVBlank
-	jmp .end
-.not_found:
-	invoke_cdecl _FakeWaitForVBlank
+	mov eax, 1000
+	mov ecx, [_DevModeW_Addr + DEVMODEW.dmDisplayFrequency]
+	div ecx
+	mov [ebx + MonitorData.RefreshRate], ecx
+	mov [ebx + MonitorData.RefreshIntervalMs], eax
 
 .end:
 	FrameEnd
 	ret
-
-DefFunc _WaitForVBlankDDraw
-	FrameBegin 0
-
-	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
-	invoke_cdecl _AVLSearch, [_DDrawObjects], eax
-	test eax, eax
-	jz .not_found
-
-	invoke_com [eax + AVLBST_Node.userdata], IDirectDraw.WaitForVerticalBlank, DDWAITVB_BLOCKEND, NULL
-	jmp .end
-.not_found:
-	invoke_cdecl _FakeWaitForVBlank
-
-.end:
-	FrameEnd
-	ret
+	%undef _MonitorInfoExW
+	%undef _MonitorInfoExW_Addr
+	%undef _DevModeW
+	%undef _DevModeW_Addr
 
 DefFunc _VBlankDeInit
 	FrameBegin 0
-	invoke_cdecl _AVLClear, _DXGIOutputs
-	invoke_cdecl _AVLClear, _DDrawObjects
+	invoke_cdecl _AVLClear, _MonitorsData
+	FrameEnd
+	ret
+
+DefFunc _VBlankReInit
+	FrameBegin 0
+	invoke_cdecl _VBlankInit
+	invoke_cdecl _VBlankDeInit
 	FrameEnd
 	ret
 
@@ -305,8 +355,80 @@ DefFunc _FakeWaitForVBlank
 	inc [.prompted]
 .end:
 	invoke_dll_stdcall Sleep, 1
+	xor eax, eax
 	FrameEnd
 	ret
 
 segment .bss
 .prompted resd 1
+
+DefFunc _WaitForVBlank
+	FrameBegin 4, ebx
+	AssignVars _VBlankStartTimeL, _VBlankStartTimeH, _NewFrameStartTimeL, _NewFrameStartTimeH
+
+	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
+	invoke_cdecl _AVLSearch, [_MonitorsData], eax
+	test eax, eax
+	jz .not_found
+	mov ebx, [eax + AVLBST_Node.userdata]
+
+	invoke_cdecl _UpdateTimer, _VBlankTimer
+	fst qword _VBlankStartTimeL
+	fsub qword [_VBlankFrameStartTime]
+	fimul word [_WThousand]
+	fistp dword [_LastFrameRenderTimeMs]
+
+	mov eax, [ebx + MonitorData.RefreshIntervalMs]
+	cmp [_LastFrameRenderTimeMs], eax
+	jae .overloaded
+
+.w_dxgi:
+	mov eax, [ebx + MonitorData.IDXGIOutput]
+	test eax, eax
+	jz .w_ddraw
+	invoke_com eax, IDXGIOutputVtbl.WaitForVBlank
+	jmp .w_after
+.w_ddraw:
+	mov eax, [ebx + MonitorData.IDirectDraw]
+	test eax, eax
+	jz .not_found
+	invoke_com eax, IDirectDraw.WaitForVerticalBlank, DDWAITVB_BLOCKEND, NULL
+.w_after:
+	cmp eax, 0
+	jl .not_found
+
+	invoke_cdecl _UpdateTimer, _VBlankTimer
+	fst qword _NewFrameStartTimeL
+	fsub qword _VBlankStartTimeL
+	fimul word [_WThousand]
+	fistp dword [_VBlankTimeUsedMs]
+
+	mov eax, [ebx + MonitorData.RefreshIntervalMs]
+	sub eax, [_LastFrameRenderTimeMs]
+	jbe .no_delay
+	dec eax
+	mov [_FrameRenderDelayMs], eax
+	invoke_cdecl _BusyWaitMs, eax
+
+	invoke_cdecl _UpdateTimer, _VBlankTimer
+	fstp qword [_VBlankFrameStartTime]
+	jmp .end
+.no_delay:
+	movq xmm0, _NewFrameStartTimeL
+	movq [_VBlankFrameStartTime], xmm0
+	jmp .end
+.overloaded:
+	movq xmm0, _VBlankStartTimeL
+	movq [_VBlankFrameStartTime], xmm0
+	xor eax, eax
+	mov [_VBlankTimeUsedMs], eax
+	mov [_FrameRenderDelayMs], eax
+
+.not_found:
+.end:
+	FrameEnd
+	ret
+	%undef _VBlankStartTimeL
+	%undef _VBlankStartTimeH
+	%undef _NewFrameStartTimeL
+	%undef _NewFrameStartTimeH

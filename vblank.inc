@@ -5,9 +5,13 @@
 
 extern _VBlankInit
 extern _VBlankDeInit
-extern _FakeWaitForVBlank
+extern _VBlankReInit
 
-import_dll_func WaitForVBlank
+extern _VBlankTimeUsedMs
+extern _FrameRenderDelayMs
+extern _LastFrameRenderTimeMs
+
+extern _WaitForVBlank
 
 %endif
 

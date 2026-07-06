@@ -847,6 +847,6 @@ DefFunc _SwapBuffers
 	FrameBegin 0
 	invoke_dll_stdcall wglSwapBuffers, [_hDC]
 
-	invoke_dll_stdcall WaitForVBlank
+	invoke_cdecl _WaitForVBlank
 	FrameEnd
 	ret
