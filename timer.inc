@@ -15,6 +15,7 @@ struc Timer
 endstruc
 
 ; double GetSysTimerVal();
+extern _GetSysTimerVal
 
 ; void InitTimer(Timer *t);
 extern _InitTimer
