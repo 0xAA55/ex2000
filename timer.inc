@@ -14,6 +14,9 @@ struc Timer
 	InstTimer
 endstruc
 
+;const short WThousand = 1000;
+extern _WThousand
+
 ; double GetSysTimerVal();
 extern _GetSysTimerVal
 

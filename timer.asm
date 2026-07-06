@@ -10,6 +10,10 @@ extern _SysTimerVal
 _PerfFreq resq 1
 _SysTimerVal resq 1
 
+segment .rdata
+extern _WThousand
+_WThousand dw 1000
+
 DefFunc _GetSysTimerVal
 	FrameBegin 0
 	invoke_dll_stdcall QueryPerformanceFrequency, _PerfFreq
