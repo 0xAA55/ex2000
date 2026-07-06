@@ -283,7 +283,7 @@ DefFunc _SceneLoad00
 
 DefFunc _SceneLoad01
 	FrameBegin 0
-	invoke_cdecl _GenMultiLayerPerlinAltitude, 512, 1.0f, 7, 500.0f
+	invoke_cdecl _GenMultiLayerPerlinAltitude, 512, 1.0f, 7, 200.0f
 	mov [_NoiseBitmap], eax
 	FrameEnd
 	ret
