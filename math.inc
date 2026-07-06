@@ -181,6 +181,9 @@ extern _MathDeInit
 ; void BatchAdd(float *dst, float *src, size_t num_floats);
 extern _BatchAdd
 
+; void BatchBias(float *dst, float bias, size_t num_floats);
+extern _BatchBias
+
 ; float BatchMax(float *data, size_t num_floats);
 extern _BatchMax
 
