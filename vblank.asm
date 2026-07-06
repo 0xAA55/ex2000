@@ -7,6 +7,7 @@ extern _hDC
 
 def_dll DXGI, "dxgi.dll"
 def_dll_func CreateDXGIFactory
+def_dll_func DXGIDisableVBlankVirtualization
 
 def_dll DDraw, "ddraw.dll"
 def_dll_func DirectDrawEnumerateExA
@@ -147,6 +148,13 @@ DefFunc _VBlankInit
 	test eax, eax
 	jz .no_dxgi
 
+	load_dll_func DXGI, DXGIDisableVBlankVirtualization
+	test eax, eax
+	jz .after_disable_virtvblank
+
+	invoke_dll_stdcall DXGIDisableVBlankVirtualization
+
+.after_disable_virtvblank:
 	invoke_dll_stdcall CreateDXGIFactory, _IID_IDXGIFactory, &DXGIFactory
 	cmp eax, 0
 	jl .no_dxgi
