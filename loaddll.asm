@@ -41,6 +41,8 @@ def_dll_func_addr CreateThread
 def_dll_func_addr CloseHandle
 def_dll_func_addr WaitForMultipleObjects
 def_dll_func_addr VirtualProtect
+def_dll_func_addr timeBeginPeriod
+def_dll_func_addr timeEndPeriod
 def_dll_func_addr TlsAlloc
 def_dll_func_addr TlsGetValue
 def_dll_func_addr TlsSetValue

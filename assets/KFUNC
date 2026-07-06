@@ -6,6 +6,8 @@ CreateThread
 CloseHandle
 WaitForMultipleObjects
 VirtualProtect
+timeBeginPeriod
+timeEndPeriod
 TlsAlloc
 TlsGetValue
 TlsSetValue

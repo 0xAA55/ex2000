@@ -240,6 +240,8 @@ DefFunc _SceneInit
 	test eax, eax
 	jz .end
 
+	invoke_dll_stdcall timeBeginPeriod, 1
+
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
@@ -480,6 +482,8 @@ _NumItemsToLoad equ ($ - .load_sequence) / 4
 
 DefFunc _SceneUnload
 	FrameBegin 0, esi
+
+	invoke_dll_stdcall timeEndPeriod, 1
 
 	invoke_cdecl _VBlankDeInit
 
