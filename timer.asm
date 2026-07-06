@@ -107,3 +107,26 @@ DefFunc _UnpauseTimer
 .end:
 	FrameEnd
 	ret
+
+DefFunc _BusyWaitMs
+	FrameBegin 2
+	AssignVars _TimeValL, _TimeValH
+
+	invoke_cdecl _GetSysTimerVal
+	fstp qword _TimeValL
+
+.again:
+	invoke_dll_stdcall Sleep, 0
+	invoke_cdecl _GetSysTimerVal
+	fsub qword _TimeValL
+	fimul word [_WThousand]
+	ficomp dword Param(0)
+	fstsw ax
+	sahf
+	jb .again
+
+.end:
+	FrameEnd
+	ret
+	%undef _TimeValL
+	%undef _TimeValH

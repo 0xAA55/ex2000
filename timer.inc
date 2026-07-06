@@ -38,6 +38,9 @@ extern _PauseTimer
 ; void PauseTimer(Timer *t);
 extern _UnpauseTimer
 
+; void BusyWaitMs(int ms);
+extern _BusyWaitMs
+
 %macro PerfStart 1
 	[segment .bss]
 	extern %1
