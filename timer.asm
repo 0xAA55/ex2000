@@ -30,7 +30,7 @@ DefFunc _GetTimerVal
 
 DefFunc _InitTimer
 	FrameBegin 0
-	call _GetSysTimerVal
+	invoke_cdecl _GetSysTimerVal
 	mov edx, Param(0)
 	fst qword [edx + Timer.PausedTime]
 	fstp qword [edx + Timer.StartTime]
@@ -47,7 +47,7 @@ DefFunc _UpdateTimer
 	test eax, eax
 	jnz .paused
 
-	call _GetSysTimerVal
+	invoke_cdecl _GetSysTimerVal
 	jmp .calc
 .paused:
 	fld qword [esi + Timer.PausedTime]
@@ -77,7 +77,7 @@ DefFunc _PauseTimer
 	inc eax
 	mov [esi + Timer.IsPaused], eax
 
-	call _GetSysTimerVal
+	invoke_cdecl _GetSysTimerVal
 	fstp qword [esi + Timer.PausedTime]
 
 .end:
@@ -95,7 +95,7 @@ DefFunc _UnpauseTimer
 	xor eax, eax
 	mov [esi + Timer.IsPaused], eax
 
-	call _GetSysTimerVal
+	invoke_cdecl _GetSysTimerVal
 	fsub qword [esi + Timer.PausedTime]
 	fadd qword [esi + Timer.StartTime]
 	fstp qword [esi + Timer.StartTime]
