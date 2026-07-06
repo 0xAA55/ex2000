@@ -321,6 +321,8 @@ import_dll_func ShowCursor
 import_dll_func GetAsyncKeyState
 import_dll_func GetForegroundWindow
 import_dll_func MonitorFromWindow
+import_dll_func GetMonitorInfoW
+import_dll_func EnumDisplaySettingsW
 
 import_dll_func SelectObject
 import_dll_func DeleteObject
@@ -557,6 +559,52 @@ endstruc
 %define GGO_GRAY4_BITMAP   5
 %define GGO_GRAY8_BITMAP   6
 %define GGO_GLYPH_INDEX    0x0080
+
+struc MONITORINFOEXW
+	.cbSize resd 1
+	.rcMonitor resd 4
+	.rcWork resd 4
+	.dwFlags resd 1
+	.szDevice resw 32
+	.size equ $ - MONITORINFOEXW
+endstruc
+
+struc DEVMODEW
+	.dmDeviceName resw 32
+	.dmSpecVersion resw 1
+	.dmDriverVersion resw 1
+	.dmSize resw 1
+	.dmDriverExtra resw 1
+	.dmFields resd 1
+	.dmPosition_x resd 1
+	.dmPosition_y resd 1
+	.dmDisplayOrientation resd 1
+	.dmDisplayFixedOutput resd 1
+	.dmColor resw 1
+	.dmDuplex resw 1
+	.dmYResolution resw 1
+	.dmTTOption resw 1
+	.dmCollate resw 1
+	.dmFormName resw 32
+	.dmLogPixels resw 1
+	.dmBitsPerPel resd 1
+	.dmPelsWidth resd 1
+	.dmPelsHeight resd 1
+	.dmDisplayFlags resd 1
+	.dmDisplayFrequency resd 1
+	.dmICMMethod resd 1
+	.dmICMIntent resd 1
+	.dmMediaType resd 1
+	.dmDitherType resd 1
+	.dmReserved1 resd 1
+	.dmReserved2 resd 1
+	.dmPanningWidth resd 1
+	.dmPanningHeight resd 1
+	.size equ $ - DEVMODEW
+endstruc
+
+%define ENUM_CURRENT_SETTINGS       0xFFFFFFFF
+%define ENUM_REGISTRY_SETTINGS      0xFFFFFFFE
 
 %define VK_LBUTTON        0x01
 %define VK_RBUTTON        0x02

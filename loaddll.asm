@@ -81,6 +81,8 @@ def_dll_func_addr ShowCursor
 def_dll_func_addr GetAsyncKeyState
 def_dll_func_addr GetForegroundWindow
 def_dll_func_addr MonitorFromWindow
+def_dll_func_addr GetMonitorInfoW
+def_dll_func_addr EnumDisplaySettingsW
 dll_func_group_end UFunc_DelayedLoad
 
 dll_func_group_start CFunc

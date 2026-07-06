@@ -22,3 +22,5 @@ ShowCursor
 GetAsyncKeyState
 GetForegroundWindow
 MonitorFromWindow
+GetMonitorInfoW
+EnumDisplaySettingsW
