@@ -817,7 +817,7 @@ __SECT__
 	fdiv qword DeltaTimeL
 	fstp dword FramesPerSec
 
-	GLPrintf [_OGLFC], 0, 0, `FPS: %.1f`, f2d FramesPerSec
+	GLPrintf [_OGLFC], 0, 0, `FPS: %.1f, V-Blank ms: %d, Render-delay ms: %d, Render time ms: %d`, f2d FramesPerSec, [_VBlankTimeUsedMs], [_FrameRenderDelayMs], [_LastFrameRenderTimeMs]
 
 .end_of_frame:
 	invoke_cdecl _SwapBuffers
