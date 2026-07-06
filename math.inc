@@ -326,6 +326,9 @@ extern _FloatMapGaussianBlur
 ; float FloatMapGetMaxValue(BitMap *src);
 extern _FloatMapGetMaxValue
 
+; float FloatMapGetMinValue(BitMap *src);
+extern _FloatMapGetMinValue
+
 ; void FloatMapClamp(BitMap *map, float max, float min);
 extern _FloatMapClamp
 
