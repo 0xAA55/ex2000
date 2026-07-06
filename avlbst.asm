@@ -365,6 +365,24 @@ DefFunc _AVLRemove
 .return:
 	ret
 
+; void AVLIterate(AVLBST_Node *root, void *context, void(on_iter)(void *key, void *userdata, void *context));
+DefFunc _AVLIterate
+	FrameBegin 0, ebx, esi, edi
+
+	mov ebx, Param(0)
+	test ebx, ebx
+	jz .end
+
+	mov esi, Param(1)
+	mov edi, Param(2)
+
+	invoke_cdecl _AVLIterate, [ebx + AVLBST_Node.l_child], esi, edi
+	invoke_cdecl edi, [ebx + AVLBST_Node.key], [ebx + AVLBST_Node.userdata], esi
+	invoke_cdecl _AVLIterate, [ebx + AVLBST_Node.r_child], esi, edi
+
+.end:
+	FrameEnd
+	ret
 
 ; AVLBST_Node* AVLSearch(AVLBST_Node *n, char *key);
 DefFunc _AVLSearch

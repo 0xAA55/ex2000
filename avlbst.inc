@@ -40,6 +40,9 @@ extern _AVLSearch
 ; `node->key` is auto freed by `keyops->on_free_key()`
 extern _AVLRemove
 
+; void AVLIterate(AVLBST_Node *root, void *context, void(on_iter)(void *key, void *userdata, void *context));
+extern _AVLIterate
+
 ; void AVLClear(AVLBST_Node **ppn);
 extern _AVLClear
 
