@@ -187,6 +187,9 @@ extern _BatchBias
 ; float BatchMax(float *data, size_t num_floats);
 extern _BatchMax
 
+; float BatchMin(float *data, size_t num_floats);
+extern _BatchMin
+
 struc CurvePoint
 	.volume resd 1
 	.weight resd 1
