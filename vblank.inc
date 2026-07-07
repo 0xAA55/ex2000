@@ -8,8 +8,11 @@ extern _VBlankDeInit
 extern _VBlankReInit
 
 extern _VBlankTimeUsedMs
+extern _VBlankTimeUsedUs
 extern _FrameRenderDelayMs
+extern _FrameRenderDelayUs
 extern _LastFrameRenderTimeMs
+extern _LastFrameRenderTimeUs
 
 extern _WaitForVBlank
 
