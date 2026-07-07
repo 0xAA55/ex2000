@@ -87,17 +87,22 @@ dll_func_group_end UFunc_DelayedLoad
 
 dll_func_group_start CFunc
 def_dll_func strcpy
-def_dll_func strcat
 def_dll_func strlen
 def_dll_func strcmp
 def_dll_func printf
-def_dll_func_alias vsnprintf, "_vsnprintf"
 def_dll_func memset
 def_dll_func memcpy
-def_dll_func memmove
-def_dll_func rand
-def_dll_func srand
 dll_func_group_end CFunc
+
+dll_func_group_start_without_name CFunc_DelayedLoad
+def_dll_func_addr rand
+def_dll_func_addr srand
+def_dll_func_addr strcat
+def_dll_func_addr strchr
+def_dll_func_addr strncpy
+def_dll_func_addr memmove
+def_dll_func_addr vsnprintf
+dll_func_group_end CFunc_DelayedLoad
 
 dll_func_group_start_without_name GFunc_DelayedLoad
 def_dll_func_addr SelectObject
@@ -324,6 +329,11 @@ DefFunc _LoadFuncsFromAssets
 DefFunc _InitDelayedLoadFunc
 	FrameBegin 1, ebx
 	AssignVars SizeOfFuncs
+
+	AssetsQuery 'assets\CFUNC', &SizeOfFuncs
+	mov ebx, eax
+	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	dll_func_group_load_alter_name MSVCRT, CFunc_DelayedLoad, ebx
 
 	AssetsQuery 'assets\KFUNC', &SizeOfFuncs
 	mov ebx, eax

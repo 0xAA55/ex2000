@@ -342,16 +342,19 @@ import_dll_func SetBkMode
 import_dll_func ExtTextOutW
 
 import_dll_func strcpy
-import_dll_func strcat
 import_dll_func strlen
 import_dll_func strcmp
 import_dll_func printf
-import_dll_func vsnprintf
 import_dll_func memset
 import_dll_func memcpy
-import_dll_func memmove
+
 import_dll_func rand
 import_dll_func srand
+import_dll_func strcat
+import_dll_func strchr
+import_dll_func strncpy
+import_dll_func memmove
+import_dll_func vsnprintf
 
 %define PAGE_NOACCESS           0x01
 %define PAGE_READONLY           0x02

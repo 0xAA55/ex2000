@@ -1,0 +1,7 @@
+rand
+srand
+strcat
+strchr
+strncpy
+memmove
+_vsnprintf
