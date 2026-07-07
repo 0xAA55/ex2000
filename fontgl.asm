@@ -316,6 +316,7 @@ DefFunc _OGLFC_Compose
 	add _Y, ecx
 	jmp .after_advance
 .tab:
+	xor edx, edx
 	mov ecx, [ebx + OGLFC.font_size]
 	shl ecx, 1
 	mov eax, _X
