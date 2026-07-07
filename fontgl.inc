@@ -11,6 +11,7 @@ struc OGLFC ;OpenGL Font Cache
 	.canvas_height resd 1
 	.canvas_pointer resd 1
 	.font_size resd 1 ;Height
+	.grid_size resd 1
 	.ascent resd 1 ;E.g. The upper part of Q is O, the height of O is ascent
 	.descent resd 1 ;`font_size` - `ascent` = `descent`
 	.font_map resd 1
@@ -19,7 +20,7 @@ struc OGLFC ;OpenGL Font Cache
 	.vacant_coords resd 1 ;AVLBST
 	.shader_program resd 1
 	.location_font_map resd 1
-	.location_font_size resd 1
+	.location_grid_size resd 1
 	.location_font_color resd 1
 	.location_resolution resd 1
 	.location_offset resd 1

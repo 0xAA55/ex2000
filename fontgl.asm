@@ -130,6 +130,10 @@ DefFunc _OGLFC_Create
 	mov [ebx + OGLFC.descent], edx
 	mov eax, [_TextMetrics_Addr + TEXTMETRICW.tmHeight]
 	mov [ebx + OGLFC.font_size], eax
+	mov ecx, eax
+	shl eax, 1
+	add eax, ecx
+	mov [ebx + OGLFC.grid_size], eax
 	mul dword _NumCharsInARow
 	bsr ecx, eax
 	inc edx ;edx = 1
@@ -141,7 +145,7 @@ DefFunc _OGLFC_Create
 	mov eax, edx
 	mov [ebx + OGLFC.font_map_size], edx
 	xor edx, edx
-	div dword[ebx + OGLFC.font_size]
+	div dword[ebx + OGLFC.grid_size]
 	mov _NumCharsInARow, eax
 	mul eax
 	mov [ebx + OGLFC.capacity], eax
@@ -188,8 +192,8 @@ DefFunc _OGLFC_Create
 
 	GetUniformLocation [ebx + OGLFC.shader_program], "font_map"
 	mov [ebx + OGLFC.location_font_map], eax
-	GetUniformLocation [ebx + OGLFC.shader_program], "font_size"
-	mov [ebx + OGLFC.location_font_size], eax
+	GetUniformLocation [ebx + OGLFC.shader_program], "grid_size"
+	mov [ebx + OGLFC.location_grid_size], eax
 	GetUniformLocation [ebx + OGLFC.shader_program], "font_color"
 	mov [ebx + OGLFC.location_font_color], eax
 	GetUniformLocation [ebx + OGLFC.shader_program], "resolution"
@@ -390,7 +394,7 @@ DefFunc _OGLFC_Compose
 	mov [edi + LfuData.x], eax
 	mov [edi + LfuData.y], edx
 	invoke_cdecl _AVLRemove, &[ebx + OGLFC.vacant_coords], [ecx + AVLBST_Node.key]
-	mov ecx, [ebx + OGLFC.font_size]
+	mov ecx, [ebx + OGLFC.grid_size]
 	mov eax, [edi + LfuData.x]
 	mul ecx
 	mov _SrcX, eax
@@ -399,8 +403,8 @@ DefFunc _OGLFC_Compose
 	mov _SrcY, eax
 	cmp dword _Buffer, 0
 	jnz .have_buffer
-	mov eax, [ebx + OGLFC.font_size]
-	shl eax, 3
+	mov eax, [ebx + OGLFC.grid_size]
+	shl eax, 1
 	mul eax
 	mov _BufferSize, eax
 	invoke_cdecl _malloc, eax
@@ -520,7 +524,7 @@ DefFunc _OGLFC_Present
 	invoke_dll_stdcall glGetIntegerv, GL_VIEWPORT, &_VPX
 	movq xmm0, Param(1)
 	movq xmm1, _VPW
-	cvtsi2ss xmm2, [ebx + OGLFC.font_size]
+	cvtsi2ss xmm2, [ebx + OGLFC.grid_size]
 	cvtdq2ps xmm0, xmm0
 	cvtdq2ps xmm1, xmm1
 	movq Param(1), xmm0
@@ -541,7 +545,7 @@ DefFunc _OGLFC_Present
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
 	invoke_dll_stdcall glUniform1i, [ebx + OGLFC.location_font_map], 0
-	invoke_dll_stdcall glUniform1f, [ebx + OGLFC.location_font_size], Variable(0)
+	invoke_dll_stdcall glUniform1f, [ebx + OGLFC.location_grid_size], Variable(0)
 	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_resolution], _VPW, _VPH
 	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_offset], Param(1), Param(2)
 	invoke_dll_stdcall glDrawArraysInstanced, GL_TRIANGLE_STRIP, 0, 4, [esi + GlBuffer.num_items]
