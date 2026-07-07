@@ -154,6 +154,7 @@ extern _name_of_GDI32
 extern _name_of_MSVCRT
 extern _name_of_OpenGL32
 extern _name_of_WinMM
+_FirstDllName:
 _name_of_User32   db "user32.dll", 0
 _name_of_GDI32    db "gdi32.dll", 0
 _name_of_MSVCRT   db "msvcrt.dll", 0
@@ -166,11 +167,13 @@ extern _addr_of_GDI32
 extern _addr_of_MSVCRT
 extern _addr_of_OpenGL32
 extern _addr_of_WinMM
+_FirstDllAddr:
 _addr_of_User32   resd 1
 _addr_of_GDI32    resd 1
 _addr_of_MSVCRT   resd 1
 _addr_of_OpenGL32 resd 1
 _addr_of_WinMM    resd 1
+_NumDlls equ ($ - _FirstDllAddr) / 4
 
 DefFunc _InitLoadLibrary
 	FrameBegin 1, ebx, esi, edi
@@ -238,9 +241,9 @@ DefFunc _InitLoadLibrary
 	mov [_addr_of_Kernel32], eax
 %endif
 
-	mov esi, _name_of_User32
-	mov edi, _addr_of_User32
-	mov ecx, 5
+	mov esi, _FirstDllName
+	mov edi, _FirstDllAddr
+	mov ecx, _NumDlls
 .loop_load_dll:
 	push ecx
 	invoke_dll_stdcall LoadLibraryA, esi
