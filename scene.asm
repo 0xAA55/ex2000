@@ -201,7 +201,7 @@ extern _DefaultMovementSpeed
 _DefaultMovementSpeed dd 100.0
 
 extern _TerrainMapScaling
-_TerrainMapScaling dd 500.0
+_TerrainMapScaling dd 1000.0
 
 extern _TerrainMapHeightAmplifier
 _TerrainMapHeightAmplifier dd 200.0
