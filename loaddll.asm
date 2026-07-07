@@ -33,16 +33,17 @@ def_dll_func HeapFree
 dll_func_group_end KFunc
 
 dll_func_group_start_without_name KFunc_DelayedLoad
+def_dll_func_addr GetCurrentProcess
+def_dll_func_addr SetProcessInformation
 def_dll_func_addr QueryPerformanceFrequency
 def_dll_func_addr QueryPerformanceCounter
 def_dll_func_addr Sleep
 def_dll_func_addr GetTickCount
 def_dll_func_addr CreateThread
 def_dll_func_addr CloseHandle
+def_dll_func_addr WaitForSingleObject
 def_dll_func_addr WaitForMultipleObjects
 def_dll_func_addr VirtualProtect
-def_dll_func_addr timeBeginPeriod
-def_dll_func_addr timeEndPeriod
 def_dll_func_addr TlsAlloc
 def_dll_func_addr TlsGetValue
 def_dll_func_addr TlsSetValue
@@ -50,6 +51,8 @@ def_dll_func_addr TlsFree
 def_dll_func_addr InterlockedIncrement
 def_dll_func_addr InterlockedDecrement
 def_dll_func_addr InterlockedExchange
+def_dll_func_addr CreateWaitableTimerExW
+def_dll_func_addr SetWaitableTimer
 dll_func_group_end KFunc_DelayedLoad
 
 dll_func_group_start UFunc

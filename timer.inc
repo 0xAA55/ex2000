@@ -17,6 +17,9 @@ endstruc
 ;const short WThousand = 1000;
 extern _WThousand
 
+;const int Million = 1000000;
+extern _Million
+
 ; double GetSysTimerVal();
 extern _GetSysTimerVal
 
@@ -38,11 +41,8 @@ extern _PauseTimer
 ; void PauseTimer(Timer *t);
 extern _UnpauseTimer
 
-; void BusyWaitMs(int ms);
-extern _BusyWaitMs
-
-; void HybridWaitMs(int ms);
-extern _HybridWaitMs
+; void HybridWaitUs(uint32_t us_l, uint32_t us_h);
+extern _HybridWaitUs
 
 %macro PerfStart 1
 	[segment .bss]

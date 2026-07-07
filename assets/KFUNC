@@ -1,13 +1,14 @@
+GetCurrentProcess
+SetProcessInformation
 QueryPerformanceFrequency
 QueryPerformanceCounter
 Sleep
 GetTickCount
 CreateThread
 CloseHandle
+WaitForSingleObject
 WaitForMultipleObjects
 VirtualProtect
-timeBeginPeriod
-timeEndPeriod
 TlsAlloc
 TlsGetValue
 TlsSetValue
@@ -15,3 +16,5 @@ TlsFree
 InterlockedIncrement
 InterlockedDecrement
 InterlockedExchange
+CreateWaitableTimerExW
+SetWaitableTimer

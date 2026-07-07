@@ -1,5 +1,6 @@
 %include "loaddll.inc"
 %include "timer.inc"
+%include "hrsleep.inc"
 
 import_dll_func QueryPerformanceFrequency
 import_dll_func QueryPerformanceCounter
@@ -13,6 +14,9 @@ _SysTimerVal resq 1
 segment .rdata
 extern _WThousand
 _WThousand dw 1000
+
+extern _Million
+_Million dd 1000000
 
 DefFunc _GetSysTimerVal
 	FrameBegin 0
@@ -108,32 +112,10 @@ DefFunc _UnpauseTimer
 	FrameEnd
 	ret
 
-DefFunc _BusyWaitMs
-	FrameBegin 2
-	AssignVars _TimeValL, _TimeValH
-
-	invoke_cdecl _GetSysTimerVal
-	fstp qword _TimeValL
-
-.again:
-	invoke_dll_stdcall Sleep, 0
-	invoke_cdecl _GetSysTimerVal
-	fsub qword _TimeValL
-	fimul word [_WThousand]
-	ficomp dword Param(0)
-	fstsw ax
-	sahf
-	jb .again
-
-.end:
-	FrameEnd
-	ret
-	%undef _TimeValL
-	%undef _TimeValH
-
-DefFunc _HybridWaitMs
-	FrameBegin 3
-	AssignVars _TimeValL, _TimeValH, _WaitedMs
+; void HybridWaitUs(uint32_t us_l, uint32_t us_h);
+DefFunc _HybridWaitUs
+	FrameBegin 4
+	AssignVars _TimeValL, _TimeValH, _WaitedUsL, _WaitedUsH
 
 	invoke_cdecl _GetSysTimerVal
 	fstp qword _TimeValL
@@ -141,14 +123,19 @@ DefFunc _HybridWaitMs
 .again:
 	invoke_cdecl _GetSysTimerVal
 	fsub qword _TimeValL
-	fimul word [_WThousand]
-	fistp dword _WaitedMs
-	mov eax, _WaitedMs
-	sub eax, Param(0)
-	jae .end
-	cmp eax, 1
-	jle .again
-	invoke_dll_stdcall Sleep, 1
+	fimul dword [_Million]
+	fistp qword _WaitedUsL
+	mov eax, Param(0)
+	mov edx, Param(1)
+	sub eax, _WaitedUsL
+	sbb edx, _WaitedUsH
+	jb .end
+	test edx, edx
+	jnz .sleep
+	cmp eax, 1000
+	jbe .again
+.sleep:
+	invoke_cdecl _HRSleep500us
 	jmp .again
 
 .end:
@@ -156,3 +143,7 @@ DefFunc _HybridWaitMs
 	ret
 	%undef _TimeValL
 	%undef _TimeValH
+	%undef _CurTimeL
+	%undef _CurTimeH
+	%undef _WaitedUsL
+	%undef _WaitedUsH

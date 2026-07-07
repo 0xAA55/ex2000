@@ -7,6 +7,7 @@
 %include "shader.inc"
 %include "math.inc"
 %include "fontgl.inc"
+%include "hrsleep.inc"
 
 %define TerrainBorderLen 5
 
@@ -244,8 +245,6 @@ DefFunc _SceneInit
 	test eax, eax
 	jz .end
 
-	invoke_dll_stdcall timeBeginPeriod, 1
-
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
@@ -263,6 +262,8 @@ DefFunc _SceneInit
 
 	invoke_cdecl _OGLFC_Create, [_hDC], 12
 	mov [_OGLFC], eax
+
+	invoke_cdecl _HRSleepInit
 
 	xor eax, eax
 	mov [_SceneLoadingProgress], eax
@@ -487,8 +488,7 @@ _NumItemsToLoad equ ($ - .load_sequence) / 4
 DefFunc _SceneUnload
 	FrameBegin 0, esi
 
-	invoke_dll_stdcall timeEndPeriod, 1
-
+	invoke_cdecl _HRSleepDeInit
 	invoke_cdecl _VBlankDeInit
 
 	invoke_cdecl _DeInitBuffer, _TerrainVerticesBuffer

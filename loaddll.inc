@@ -275,6 +275,9 @@ import_dll OpenGL32
 import_dll WinMM
 
 import_dll_func ExitProcess
+
+import_dll_func GetCurrentProcess
+import_dll_func SetProcessInformation
 import_dll_func QueryPerformanceFrequency
 import_dll_func QueryPerformanceCounter
 import_dll_func GetProcessHeap
@@ -285,10 +288,9 @@ import_dll_func Sleep
 import_dll_func GetTickCount
 import_dll_func CreateThread
 import_dll_func CloseHandle
+import_dll_func WaitForSingleObject
 import_dll_func WaitForMultipleObjects
 import_dll_func VirtualProtect
-import_dll_func timeBeginPeriod
-import_dll_func timeEndPeriod
 import_dll_func TlsAlloc
 import_dll_func TlsGetValue
 import_dll_func TlsSetValue
@@ -296,6 +298,8 @@ import_dll_func TlsFree
 import_dll_func InterlockedIncrement
 import_dll_func InterlockedDecrement
 import_dll_func InterlockedExchange
+import_dll_func CreateWaitableTimerExW
+import_dll_func SetWaitableTimer
 
 import_dll_func MessageBoxA
 import_dll_func MessageBoxW
