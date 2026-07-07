@@ -318,6 +318,7 @@ DefFunc _SetupMonitorDataProc
 	jz .end
 
 	mov eax, 1000
+	xor edx, edx
 	mov ecx, [_DevModeW_Addr + DEVMODEW.dmDisplayFrequency]
 	div ecx
 	mov [ebx + MonitorData.RefreshRate], ecx
@@ -408,7 +409,7 @@ DefFunc _WaitForVBlank
 	jbe .no_delay
 	dec eax
 	mov [_FrameRenderDelayMs], eax
-	invoke_cdecl _BusyWaitMs, eax
+	invoke_cdecl _HybridWaitMs, eax
 
 	invoke_cdecl _UpdateTimer, _VBlankTimer
 	fstp qword [_VBlankFrameStartTime]
