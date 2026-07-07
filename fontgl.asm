@@ -179,8 +179,8 @@ DefFunc _OGLFC_Create
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RED, [ebx + OGLFC.font_map_size], [ebx + OGLFC.font_map_size], 0, GL_RED, GL_UNSIGNED_BYTE, NULL
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 
 	SceneLoadShaderProgram &[ebx + OGLFC.shader_program], "assets\font.vsh", 0, "assets\font.fsh"
