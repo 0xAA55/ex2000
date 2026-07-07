@@ -174,11 +174,10 @@
 
 	__SECT__
 	%if %0 >= 2
-		invoke_stdcall _DebugMsg, %%format, %2
+		invoke_cdecl _DebugMsg, %%format, %2
 	%else
-		invoke_stdcall _DebugMsg, %%format
+		invoke_cdecl _DebugMsg, %%format
 	%endif
-	add esp, __ParamIndex * 4
 %endmacro
 
 %macro debug_printf 1-2+
@@ -187,11 +186,10 @@
 
 	__SECT__
 	%if %0 >= 2
-		invoke_dll_stdcall printf, %%format, %2
+		invoke_dll_cdecl printf, %%format, %2
 	%else
-		invoke_dll_stdcall printf, %%format
+		invoke_dll_cdecl printf, %%format
 	%endif
-	add esp, __ParamIndex * 4
 %endmacro
 
 %macro debug_show 3-4+
@@ -204,11 +202,10 @@
 
 	__SECT__
 	%if %0 >= 4
-		invoke_stdcall _DebugShow, %1, %2, %%format, %4
+		invoke_cdecl _DebugShow, %1, %2, %%format, %4
 	%else
-		invoke_stdcall _DebugShow, %1, %2, %%format
+		invoke_cdecl _DebugShow, %1, %2, %%format
 	%endif
-	add esp, __ParamIndex * 4
 %endmacro
 
 %macro snprintf 3-4+
