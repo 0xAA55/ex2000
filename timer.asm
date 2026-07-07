@@ -130,3 +130,29 @@ DefFunc _BusyWaitMs
 	ret
 	%undef _TimeValL
 	%undef _TimeValH
+
+DefFunc _HybridWaitMs
+	FrameBegin 3
+	AssignVars _TimeValL, _TimeValH, _WaitedMs
+
+	invoke_cdecl _GetSysTimerVal
+	fstp qword _TimeValL
+
+.again:
+	invoke_cdecl _GetSysTimerVal
+	fsub qword _TimeValL
+	fimul word [_WThousand]
+	fistp dword _WaitedMs
+	mov eax, _WaitedMs
+	sub eax, Param(0)
+	jae .end
+	cmp eax, 1
+	jle .again
+	invoke_dll_stdcall Sleep, 1
+	jmp .again
+
+.end:
+	FrameEnd
+	ret
+	%undef _TimeValL
+	%undef _TimeValH

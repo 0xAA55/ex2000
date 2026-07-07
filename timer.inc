@@ -41,6 +41,9 @@ extern _UnpauseTimer
 ; void BusyWaitMs(int ms);
 extern _BusyWaitMs
 
+; void HybridWaitMs(int ms);
+extern _HybridWaitMs
+
 %macro PerfStart 1
 	[segment .bss]
 	extern %1
