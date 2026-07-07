@@ -361,20 +361,35 @@ DefFunc _InitDelayedLoadFunc
 segment .bss
 extern _DebugMsgBuffer
 _DebugMsgBuffer resd 1
+
+extern _DebugConsoleBuffer
+_DebugConsoleBuffer resd 1
+
 _DebugShowRect resd 4
 
 DefFunc _InitDbg
 	FrameBegin 0
+
 	mov eax, [_DebugMsgBuffer]
 	test eax, eax
-	jnz .end
-	invoke_cdecl _calloc, _DebugMsgBufferSize, 1
+	jnz .dbgmsgbuf_ok
+	invoke_cdecl _calloc, _DebugMsgBufferSize + 1, 1
 	mov [_DebugMsgBuffer], eax
+.dbgmsgbuf_ok:
+
+	mov eax, [_DebugConsoleBuffer]
+	test eax, eax
+	jnz .dbgconbuf_ok
+	invoke_cdecl _calloc, _DebugConsoleBufferSize + 1, 1
+	mov [_DebugConsoleBuffer], eax
+.dbgconbuf_ok:
+
 %ifdef _DEBUG
 	cmp dword[_hDCDesktop], 0
-	jnz .end
+	jnz .hdcdesktop_ok
 	invoke_dll_stdcall GetDC, 0
 	mov [_hDCDesktop], eax
+.hdcdesktop_ok:
 %endif
 .end:
 	FrameEnd
@@ -383,10 +398,23 @@ DefFunc _InitDbg
 DefFunc _DeInitDbg
 	FrameBegin 0
 
+%ifdef _DEBUG
+	mov eax, [_hDCDesktop]
+	test eax, eax
+	jz .hdcdesktop_ok
+	invoke_dll_stdcall ReleaseDC, eax, 0
+.hdcdesktop_ok:
+%endif
+
+	invoke_cdecl _free, [_DebugConsoleBuffer]
 	invoke_cdecl _free, [_DebugMsgBuffer]
 
 	xor eax, eax
 	mov [_DebugMsgBuffer], eax
+	mov [_DebugConsoleBuffer], eax
+%ifdef _DEBUG
+	mov [_hDCDesktop], eax
+%endif
 
 	FrameEnd
 	ret

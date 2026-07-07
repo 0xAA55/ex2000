@@ -557,15 +557,50 @@ DefFunc _OGLFC_Present
 
 ;int GLPrintf(OGLFC *oglfc, int x, int y, const char *fmt, ...);
 DefFunc _GLPrintf
-	FrameBegin 0, ebx
+	FrameBegin 2, ebx, esi, edi
+	AssignVars _ConLengthAll, _PrintfLength
 
+	mov ebx, Param(0)
 	lea eax, Param(4)
+	mov edi, [_DebugConsoleBuffer]
 	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(3), eax
-	mov ebx, eax
+	mov _PrintfLength, eax
 
-	invoke_cdecl _OGLFC_Compose, Param(0), 0xFFFFFFFF, 0xFFFFFFFF, [_DebugMsgBuffer]
-	invoke_cdecl _OGLFC_Present, Param(0), Param(1), Param(2)
+	invoke_dll_cdecl strlen, edi
+	mov _ConLengthAll, eax
+	mov ecx, eax
+	add ecx, _PrintfLength
+	cmp ecx, _DebugConsoleBufferSize
+	jb .eat_console
+	mov byte[edi], 0
+	jmp .ready_to_concat
+
+.eat_console:
+	lea esi, [edi + eax]
+
+	xor ecx, ecx
+.find_last_lines:
+	cmp esi, edi
+	jz .ready_to_concat
+	dec esi
+	cmp byte[esi], `\n`
+	jnz .find_last_lines
+	inc ecx
+	cmp ecx, _DebugConsoleMaxLines
+	jb .find_last_lines
+	inc esi
+
+	invoke_dll_cdecl strlen, esi
+	invoke_dll_cdecl memmove, edi, esi, &[eax + 1]
+
+.ready_to_concat:
+	invoke_dll_cdecl strcat, edi, [_DebugMsgBuffer]
+
+	invoke_cdecl _OGLFC_Compose, ebx, 0xFFFFFFFF, 0xFFFFFFFF, edi
+	invoke_cdecl _OGLFC_Present, ebx, Param(1), Param(2)
 
 	mov eax, ebx
 	FrameEnd
 	ret
+	%undef _ConLengthAll
+	%undef _PrintfLength

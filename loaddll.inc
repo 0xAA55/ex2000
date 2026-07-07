@@ -257,6 +257,7 @@ extern _aligned_free
 
 extern _NLtoNUL
 extern _DebugMsgBuffer
+extern _DebugConsoleBuffer
 extern _InitDbg
 extern _DeInitDbg
 
@@ -264,11 +265,14 @@ extern _ReleaseComObj
 extern _SafeRelease
 
 %define _DebugMsgBufferSize 4096
+%define _DebugConsoleBufferSize ((1024 / 6) * (768 / 12) * 4)
+%define _DebugConsoleMaxLines 64
 
 import_dll User32
 import_dll GDI32
 import_dll MSVCRT
 import_dll OpenGL32
+import_dll WinMM
 
 import_dll_func ExitProcess
 import_dll_func QueryPerformanceFrequency
