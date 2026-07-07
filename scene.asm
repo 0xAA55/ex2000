@@ -729,7 +729,6 @@ __SECT__
 	invoke_dll_stdcall glUseProgram, 0
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
-	;invoke_dll_stdcall glPolygonMode, GL_FRONT_AND_BACK, GL_LINE
 
 	invoke_cdecl _BufferResize, _TerrainInstancesBuffer, TerrainBorderLen * TerrainBorderLen
 	xor eax, eax
