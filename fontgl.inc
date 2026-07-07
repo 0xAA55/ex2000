@@ -34,7 +34,8 @@ extern _OGLFC_Create
 ;void OGLFC_Destroy(OGLFC *oglfc);
 extern _OGLFC_Destroy
 
-;void OGLFC_Compose(OGLFC *oglfc, const char *text);
+;uint64_t OGLFC_Compose(OGLFC *oglfc, const char *text);
+;// The returned `uint64_t` is actually a `struct {uint32_t w, h;};`
 extern _OGLFC_Compose
 
 ;int GLPrintf(OGLFC *oglfc, int x, int y, const char *fmt, ...);

@@ -271,11 +271,11 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 
 ;void OGLFC_Compose(OGLFC *oglfc, int w, int h, const char *text);
 DefFunc _OGLFC_Compose
-	FrameBegin 15 + SizedVar(InstBufferData.size) + SizedVar(GLYPHMETRICS.size), ebx, esi, edi
+	FrameBegin 17 + SizedVar(InstBufferData.size) + SizedVar(GLYPHMETRICS.size), ebx, esi, edi
 	AssignVars _PointerToChar, _X, _Y, _Buffer
 	AssignVars _BufferSize, _FontVacKey, _WCharBuf, _WCharPtr, _WCharLen
 	AssignVars _SizeW, _SizeH, _CanvasW, _CanvasH
-	AssignVars _SrcX, _SrcY
+	AssignVars _SrcX, _SrcY, _MaxX, _MaxY
 	AssignSizedVar _InstBufferData, InstBufferData.size
 	AssignSizedVar _GlyphMetrics, GLYPHMETRICS.size
 
@@ -355,6 +355,18 @@ DefFunc _OGLFC_Compose
 	add _X, eax
 	add _Y, ecx
 .after_advance:
+	mov eax, _X
+	mov ecx, _Y
+	push ebx
+	mov edx, _MaxX
+	mov ebx, _MaxY
+	cmp eax, edx
+	cmova edx, eax
+	cmp ecx, ebx
+	cmova ebx, ecx
+	mov _MaxX, edx
+	mov _MaxY, ebx
+	pop ebx
 	cmp eax, Param(1)
 	jb .loop_compose
 	xor eax, eax
@@ -362,7 +374,7 @@ DefFunc _OGLFC_Compose
 	mov eax, [ebx + OGLFC.font_size]
 	add _Y, eax
 	mov eax, Param(2)
-	cmp dword _Y, eax
+	cmp _Y, eax
 	jae .loop_end
 
 	jmp .loop_compose
@@ -467,6 +479,8 @@ DefFunc _OGLFC_Compose
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _free, _Buffer
 
+	mov eax, _MaxX
+	mov edx, _MaxY
 	FrameEnd
 	ret
 [segment .rdata]
@@ -488,6 +502,8 @@ DefFunc _OGLFC_Compose
 	%undef _CanvasH
 	%undef _SrcX
 	%undef _SrcY
+	%undef _MaxX
+	%undef _MaxY
 	%undef _InstBufferData
 	%undef _InstBufferData_Addr
 	%undef _GlyphMetrics
