@@ -403,7 +403,42 @@ import_dll_func vsnprintf
 
 %define CW_USEDEFAULT 0x80000000
 
+%macro InstWNDCLASSEX 0
+	.cbSize resd 1
+	.style resd 1
+	.lpfnWndProc resd  1
+	.cbClsExtra resd 1
+	.cbWndExtra resd 1
+	.hInstance resd 1
+	.hIcon resd 1
+	.hCursor resd 1
+	.hbrBackground resd 1
+	.lpszMenuName resd 1
+	.lpszClassName resd 1
+	.hIconSm resd 1
+	.size equ $ - .cbSize
+%endmacro
+
+struc WNDCLASSEX
+	InstWNDCLASSEX
+endstruc
+
 %define PM_REMOVE 1
+
+%macro InstMSG 0
+	.hwnd resd 1
+	.message resd 1
+	.wParam resd 1
+	.lParam resd 1
+	.time resd 1
+	.pt_x resd 1
+	.pt_y resd 1
+	.size equ $ - .hwnd
+%endmacro
+
+struc MSG
+	InstMSG
+endstruc
 
 %define WHITE_BRUSH         0
 %define LTGRAY_BRUSH        1

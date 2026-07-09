@@ -11,41 +11,6 @@ extern _Scene
 extern _SceneInit
 extern _SceneUnload
 
-%macro InstWNDCLASSEX 0
-	.cbSize resd 1
-	.style resd 1
-	.lpfnWndProc resd  1
-	.cbClsExtra resd 1
-	.cbWndExtra resd 1
-	.hInstance resd 1
-	.hIcon resd 1
-	.hCursor resd 1
-	.hbrBackground resd 1
-	.lpszMenuName resd 1
-	.lpszClassName resd 1
-	.hIconSm resd 1
-    .size equ $ - .cbSize
-%endmacro
-
-%macro InstMSG 0
-    .hwnd resd 1
-    .message resd 1
-    .wParam resd 1
-    .lParam resd 1
-    .time resd 1
-    .pt_x resd 1
-    .pt_y resd 1
-    .size equ $ - .hwnd
-%endmacro
-
-struc WNDCLASSEX
-	InstWNDCLASSEX
-endstruc
-
-struc MSG
-	InstMSG
-endstruc
-
 segment .rdata
 _ClassName db "EX2000_DemoWindow", 0
 _WindowTitle db "EX2000", 0
