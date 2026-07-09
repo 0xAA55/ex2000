@@ -2,6 +2,7 @@
 %include "assets.inc"
 %include "math.inc"
 %include "tls.inc"
+%include "vblank.inc"
 
 extern _InitLoadLibrary
 extern _InitDelayedLoadFunc
@@ -124,7 +125,8 @@ DefFunc _DoEvents
 
 DefFunc _WndProc@16
 	FrameBegin 0
-	cmp dword Param(1), WM_CREATE
+	mov eax, Param(1)
+	cmp eax, WM_CREATE
 	jnz .other_than_WM_CREATE
 
 	invoke_dll_stdcall GetDC, Param(0)
@@ -144,7 +146,7 @@ DefFunc _WndProc@16
 	dec eax
 	jmp .end
 .other_than_WM_CREATE:
-	cmp dword Param(1), WM_DESTROY
+	cmp eax, WM_DESTROY
 	jnz .other_than_WM_DESTROY
 
 	invoke_cdecl _SceneUnload
@@ -156,6 +158,14 @@ DefFunc _WndProc@16
 	xor eax, eax
 	jmp .end
 .other_than_WM_DESTROY:
+	cmp eax, WM_DISPLAYCHANGE
+	jnz .other_than_WM_DISPLAYCHANGE
+
+	invoke_cdecl _VBlankReInit
+
+	xor eax, eax
+	jmp .end
+.other_than_WM_DISPLAYCHANGE:
 	FrameEnd
 	jmp [_addr_of_DefWindowProcA]
 .end:
