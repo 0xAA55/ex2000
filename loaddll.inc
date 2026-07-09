@@ -71,6 +71,11 @@
 	%endif
 %endmacro
 
+%macro dont_load_dll 1
+	xor eax, eax
+	mov [_addr_of_ %+ %1], eax
+%endmacro
+
 %macro load_dll_func 2
 	push _name_of_ %+ %2
 	push [_addr_of_ %+ %1]
