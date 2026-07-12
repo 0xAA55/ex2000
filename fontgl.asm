@@ -111,6 +111,8 @@ DefFunc _OGLFC_Create
 	invoke_cdecl _calloc, 1, OGLFC.size
 	mov ebx, eax
 
+	mov byte[ebx + OGLFC.tab_width], 8
+
 	invoke_dll_stdcall CreateCompatibleDC, 0
 	mov [ebx + OGLFC.hdc_canvas], eax
 
@@ -130,10 +132,13 @@ DefFunc _OGLFC_Create
 	mov [ebx + OGLFC.descent], edx
 	mov eax, [_TextMetrics_Addr + TEXTMETRICW.tmHeight]
 	mov [ebx + OGLFC.font_size], eax
+	mov edx, eax
 	mov ecx, eax
+	shr edx, 1
 	shl eax, 1
 	add eax, ecx
 	mov [ebx + OGLFC.grid_size], eax
+	mov [ebx + OGLFC.space_size], edx
 	mul dword _NumCharsInARow
 	bsr ecx, eax
 	inc edx ;edx = 1
@@ -288,6 +293,10 @@ DefFunc _OGLFC_Compose
 	mov ecx, Frame_NumLocals
 	rep stosd
 
+	mov eax, [ebx + OGLFC.space_size]
+	mul dword[ebx + OGLFC.tab_width]
+	mov [ebx + OGLFC.tab_width_px], eax
+
 	mov ebx, Param(0)
 	mov eax, Param(3)
 	mov _PointerToChar, eax
@@ -309,8 +318,7 @@ DefFunc _OGLFC_Compose
 	jb .loop_compose
 	jmp .draw_glyph
 .space:
-	mov eax, [ebx + OGLFC.font_size]
-	shr eax, 1
+	mov eax, [ebx + OGLFC.space_size]
 	add _X, eax
 	jmp .after_advance
 .newline:
@@ -321,8 +329,7 @@ DefFunc _OGLFC_Compose
 	jmp .after_advance
 .tab:
 	xor edx, edx
-	mov ecx, [ebx + OGLFC.font_size]
-	shl ecx, 1
+	mov ecx, [ebx + OGLFC.tab_width_px]
 	mov eax, _X
 	dec eax
 	div ecx
