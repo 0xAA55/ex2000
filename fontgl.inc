@@ -4,16 +4,24 @@
 %include "buffer.inc"
 
 struc OGLFC ;OpenGL Font Cache
+.public_rw:
+	.space_size resd 1
+	.tab_width resd 1
+	.ascent resd 1 ;E.g. The upper part of Q is O, the height of O is ascent
+	.descent resd 1 ;`font_size` - `ascent` = `descent`
+
+.public_ro:
 	.capacity resd 1
+	.font_size resd 1 ;Height
+	.grid_size resd 1
+	.tab_width_px resd 1
+
+.protected:
 	.hdc_font resd 1
 	.hdc_canvas resd 1
 	.canvas_width resd 1
 	.canvas_height resd 1
 	.canvas_pointer resd 1
-	.font_size resd 1 ;Height
-	.grid_size resd 1
-	.ascent resd 1 ;E.g. The upper part of Q is O, the height of O is ascent
-	.descent resd 1 ;`font_size` - `ascent` = `descent`
 	.font_map resd 1
 	.font_map_size resd 1
 	.lfu resd 1 ;LfuCache
