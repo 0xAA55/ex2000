@@ -35,7 +35,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 	float step_modifier = 2.0;
 	float last_dir = 1.0;
 	float is_hit = 0.0;
-	for(int i = 0; i < 256; i++)
+	for(int i = 0; i < 384; i++)
 	{
 		float step = 1.0 / step_modifier;
 		pos = start + dir * dist;
@@ -45,6 +45,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 			is_hit = 1.0;
 			dist -= (height - pos.y) * step;
 			if (dist <= 0.0) return vec2(0.0, 1.0);
+			if (step_modifier >= 8.0) return vec2(dist, 1.0);
 			if (last_dir >= 0.0)
 			{
 				last_dir = -1.0;
@@ -55,6 +56,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 		{
 			if (height + 0.01 >= pos.y) return vec2(dist, 1.0);
 			dist += (pos.y - height) * step;
+			if (dist >= max_dist) return vec2(max_dist, 0.0);
 			if (last_dir <= 0.0)
 			{
 				last_dir = 1.0;
@@ -62,7 +64,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 			}
 		}
 	}
-	if (dir.y <= 0.0) is_hit = 1.0;
+	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
 	return vec2(dist, is_hit);
 }
 
