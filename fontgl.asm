@@ -571,16 +571,15 @@ DefFunc _OGLFC_Present
 	%undef _VPW
 	%undef _VPH
 
-
-;int GLPrintf(OGLFC *oglfc, int x, int y, const char *fmt, ...);
+;int GLPrintf(OGLFC *oglfc, const char *fmt, ...);
 DefFunc _GLPrintf
 	FrameBegin 2, ebx, esi, edi
 	AssignVars _ConLengthAll, _PrintfLength
 
 	mov ebx, Param(0)
-	lea eax, Param(4)
+	lea eax, Param(2)
 	mov edi, [_DebugConsoleBuffer]
-	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(3), eax
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(1), eax
 	mov _PrintfLength, eax
 
 	invoke_dll_cdecl strlen, edi
@@ -614,6 +613,26 @@ DefFunc _GLPrintf
 
 .ready_to_concat:
 	invoke_dll_cdecl strcat, edi, [_DebugMsgBuffer]
+
+	invoke_cdecl _OGLFC_Compose, ebx, 0xFFFFFFFF, 0xFFFFFFFF, edi
+	invoke_cdecl _OGLFC_Present, ebx, 0, 0
+
+	mov eax, ebx
+	FrameEnd
+	ret
+	%undef _ConLengthAll
+	%undef _PrintfLength
+
+
+;int GLPrintfXY(OGLFC *oglfc, int x, int y, const char *fmt, ...);
+DefFunc _GLPrintfXY
+	FrameBegin 2, ebx, esi, edi
+	AssignVars _ConLengthAll, _PrintfLength
+
+	mov ebx, Param(0)
+	lea eax, Param(4)
+	mov edi, [_DebugMsgBuffer]
+	invoke_dll_cdecl vsnprintf, edi, _DebugMsgBufferSize, Param(3), eax
 
 	invoke_cdecl _OGLFC_Compose, ebx, 0xFFFFFFFF, 0xFFFFFFFF, edi
 	invoke_cdecl _OGLFC_Present, ebx, Param(1), Param(2)

@@ -47,20 +47,34 @@ extern _OGLFC_Destroy
 ;// The returned `uint64_t` is actually a `struct {uint32_t w, h;};`
 extern _OGLFC_Compose
 
-;int GLPrintf(OGLFC *oglfc, int x, int y, const char *fmt, ...);
+;int GLPrintf(OGLFC *oglfc, const char *fmt, ...);
 extern _GLPrintf
 
-%macro GLPrintf 4-5+
+;int GLPrintfXY(OGLFC *oglfc, int x, int y, const char *fmt, ...);
+extern _GLPrintfXY
+
+%macro GLPrintf 2-3+
+	[segment .rdata]
+	%%format db %2, 0
+
+	__SECT__
+	%if %0 >= 3
+		invoke_cdecl _GLPrintf, %1, %%format, %3
+	%else
+		invoke_cdecl _GLPrintf, %1, %%format
+	%endif
+%endmacro
+
+%macro GLPrintfXY 4-5+
 	[segment .rdata]
 	%%format db %4, 0
 
 	__SECT__
 	%if %0 >= 5
-		invoke_stdcall _GLPrintf, %1, %2, %3, %%format, %5
+		invoke_cdecl _GLPrintfXY, %1, %2, %3, %%format, %5
 	%else
-		invoke_stdcall _GLPrintf, %1, %2, %3, %%format
+		invoke_cdecl _GLPrintfXY, %1, %2, %3, %%format
 	%endif
-	add esp, __ParamIndex * 4
 %endmacro
 
 %endif
