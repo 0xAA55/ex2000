@@ -264,6 +264,11 @@ extern _FrameRenderDelayUs
 _FrameRenderDelayMs resd 1
 _FrameRenderDelayUs resd 1
 
+extern _VBlankWithDelayTimeUsedMs
+extern _VBlankWithDelayTimeUsedUs
+_VBlankWithDelayTimeUsedMs resd 1
+_VBlankWithDelayTimeUsedUs resd 1
+
 extern _VBlankFrameStartTime
 _VBlankFrameStartTime resq 1
 
@@ -571,6 +576,13 @@ DefFunc _WaitForVBlank
 	fidiv word[_WThousand]
 	fist dword[_FrameRenderDelayMs]
 
+	mov eax, [_FrameRenderDelayMs]
+	mov ecx, [_FrameRenderDelayUs]
+	add eax, [_VBlankTimeUsedMs]
+	add ecx, [_VBlankTimeUsedUs]
+	mov [_VBlankWithDelayTimeUsedMs], eax
+	mov [_VBlankWithDelayTimeUsedUs], ecx
+
 	invoke_cdecl _UpdateTimer, _VBlankTimer
 	fstp qword [_VBlankFrameStartTime]
 	jmp .end
@@ -587,6 +599,8 @@ DefFunc _WaitForVBlank
 	mov [_VBlankTimeUsedUs], eax
 	mov [_FrameRenderDelayMs], eax
 	mov [_FrameRenderDelayUs], eax
+	mov [_VBlankWithDelayTimeUsedMs], eax
+	mov [_VBlankWithDelayTimeUsedUs], eax
 
 .not_found:
 .end:

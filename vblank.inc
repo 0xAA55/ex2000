@@ -13,6 +13,8 @@ extern _FrameRenderDelayMs
 extern _FrameRenderDelayUs
 extern _LastFrameRenderTimeMs
 extern _LastFrameRenderTimeUs
+extern _VBlankWithDelayTimeUsedMs
+extern _VBlankWithDelayTimeUsedUs
 
 extern _WaitForVBlank
 
