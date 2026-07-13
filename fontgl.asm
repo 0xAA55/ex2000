@@ -310,6 +310,8 @@ DefFunc _OGLFC_Compose
 	jz .loop_end
 	cmp eax, ` `
 	jz .space
+	cmp eax, `\r`
+	jz .cr
 	cmp eax, `\n`
 	jz .newline
 	cmp eax, `\t`
@@ -326,6 +328,9 @@ DefFunc _OGLFC_Compose
 	mov ecx, [ebx + OGLFC.font_size]
 	mov _X, eax
 	add _Y, ecx
+	jmp .after_advance
+.cr:
+	mov dword _X, 0
 	jmp .after_advance
 .tab:
 	xor edx, edx
@@ -595,6 +600,8 @@ DefFunc _GLPrintf
 	cmp esi, edi
 	jz .ready_to_concat
 	dec esi
+	cmp byte[esi], `\r`
+	jnz .find_last_lines
 	cmp byte[esi], `\n`
 	jnz .find_last_lines
 	inc ecx
