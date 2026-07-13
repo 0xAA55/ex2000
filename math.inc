@@ -320,9 +320,6 @@ endstruc
 ; // The `index` param for `work_proc()` is the row number of the bitmap
 extern _BitMapMTPool
 
-; BitMap *FloatMapGaussianBlur(BitMap *src, int16_t blur_radius);
-extern _FloatMapGaussianBlur
-
 ; float FloatMapGetMaxValue(BitMap *src);
 extern _FloatMapGetMaxValue
 
