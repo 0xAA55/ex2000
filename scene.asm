@@ -343,7 +343,7 @@ DefFunc _SceneLoad06
 
 DefFunc _SceneLoad07
 	FrameBegin 0
-	SceneLoadShaderProgram _DrawBillboardProgram, "assets\skybill.vsh", 0, "assets\skybill.fsh"
+	SceneLoadShaderProgram _DrawBillboardProgram, "assets\billboard.vsh", 0, "assets\skybill.fsh"
 	test eax, eax
 	jz .bad_end
 
