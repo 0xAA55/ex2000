@@ -1,6 +1,6 @@
 %include "common.inc"
 
-DefFunc _FloatMapDownScale
+DefFunc _FloatMapNextMip
 	FrameBegin 2, ebx, esi, edi
 
 	mov ebx, Param(0)
@@ -29,7 +29,7 @@ DefFunc _FloatMapDownScale
 	rep stosd
 	pop edi
 
-	invoke_cdecl _PoolRun, _FloatMapDownScalePoolProc, 8, [edi + BitMap.border_len], esi, 0
+	invoke_cdecl _PoolRun, _FloatMapNextMipPoolProc, 8, [edi + BitMap.border_len], esi, 0
 	invoke_cdecl _free, eax
 	invoke_cdecl _free, &[esi - 8]
 
@@ -38,7 +38,7 @@ DefFunc _FloatMapDownScale
 	FrameEnd
 	ret
 
-DefFunc _FloatMapDownScalePoolProc
+DefFunc _FloatMapNextMipPoolProc
 	FrameBegin 0, ebx, edi
 
 	mov ebx, Param(0)
