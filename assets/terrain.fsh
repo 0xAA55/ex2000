@@ -183,6 +183,26 @@ float caustic_intensity(vec2 pos, float depth)
 	return exp(exponent);
 }
 
+vec2 raymarch_water(vec3 start, vec3 dir, float max_dist)
+{
+	if (start.y > sea_level && dir.y > 0.0) return vec2(max_dist, 0.0);
+	vec3 top_pos = start + dir * ((start.y - sea_level) / dir.y);
+	float dist = 0.0;
+	if (start.y >= sea_level) dist = distance(start, top_pos);
+	float is_hit = 0.0;
+	for(int i = 0; i < 64; i++)
+	{
+		vec3 pos = start + dir * dist;
+		float height = get_water_height(pos.xz, num_waves_surface, 0.0);
+		if (height + 0.01 >= pos.y) return vec2(dist, 1.0);
+		dist += pos.y - height;
+		if (dist >= max_dist) return vec2(max_dist, 0.0);
+	}
+	if (dir.y <= 0.0) is_hit = 1.0;
+	if (is_hit < 0.5) dist = max_dist;
+	return vec2(dist, is_hit);
+}
+
 float cloud_tadj(float sampled)
 {
 	float ret = 0.0;
