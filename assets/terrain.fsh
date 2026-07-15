@@ -35,6 +35,7 @@ uniform float sea_wave_size = 2.0;
 in vec2 texcoord;
 out vec4 color;
 
+vec3 water_attenuation = water_attenuation_baseval * water_attenuation_density;
 float zdepth_out = 1.0;
 vec4 ambcolor = vec4(fogcolor.xyz * 0.5, 1.0);
 float cloud_size = cloud_size_mod * cloud_height;
