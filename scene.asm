@@ -50,6 +50,7 @@ _BillboardProgramLocations:
 	.Terrain resd 1
 	.TerrainHeight resd 1
 	.TerrainScaling resd 1
+	.SeaLevel resd 1
 
 extern _TerrainProgramLocations
 _TerrainProgramLocations:
@@ -84,6 +85,9 @@ _Aspect resd 1
 
 extern _FovY
 _FovY resd 1
+
+extern _SeaLevel
+_SeaLevel resd 1
 
 extern _OGLFC
 _OGLFC resd 1
@@ -180,6 +184,9 @@ _TerrainMapScaling dd 2000.0
 extern _TerrainMapHeight
 _TerrainMapHeight dd 200.0
 
+extern _CurveToSeaLevel
+_CurveToSeaLevel dd 0.62
+
 extern _FovDegree
 _FovDegree dw 60
 extern _PiDegree
@@ -211,6 +218,10 @@ DefFunc _SceneInit
 	fldpi
 	fmul
 	fstp dword [_FovY]
+
+	fld dword [_TerrainMapHeight]
+	fmul dword [_CurveToSeaLevel]
+	fstp dword [_SeaLevel]
 
 	SceneLoadShaderProgram _DrawProgressProgram, "assets\loading.vsh", 0, "assets\loading.fsh"
 	test eax, eax
@@ -331,6 +342,8 @@ DefFunc _SceneLoad05
 	mov [_BillboardProgramLocations.TerrainHeight], eax
 	GetUniformLocation [_DrawBillboardProgram], "terrain_scaling"
 	mov [_BillboardProgramLocations.TerrainScaling], eax
+	GetUniformLocation [_DrawBillboardProgram], "sea_level"
+	mov [_BillboardProgramLocations.SeaLevel], eax
 	jmp .end
 .bad_end:
 	dec eax
@@ -642,6 +655,7 @@ __SECT__
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.Time], TimerValue32
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.TerrainHeight], [_TerrainMapHeight]
 	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.TerrainScaling], [_TerrainMapScaling]
+	invoke_dll_stdcall glUniform1f, [_BillboardProgramLocations.SeaLevel], [_SeaLevel]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
