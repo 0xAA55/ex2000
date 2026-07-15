@@ -127,6 +127,35 @@ vec3 terrain_normal(vec3 pos, float e)
 	);
 }
 
+float get_water_height(vec2 pos, int num_waves, float phase_shift)
+{
+	float phase_shift_on_pos = length(pos) * PI * 0.1;
+	float iter = 0.0;
+	float frequency = 1.0 / sea_wave_size;
+	float time_mod = 2.0;
+	float weight = 1.0;
+	float sum_of_values = 0.0;
+	float sum_of_weights = 0.0;
+	float drag_mult = 0.1;
+	for(int i = 0; i < num_waves; i++)
+	{
+		vec2 p = vec2(sin(iter), cos(iter));
+		float wave_x = dot(p, pos) * frequency + time * time_mod + phase_shift_on_pos + phase_shift * frequency;
+		float wave = 1.0 - exp(sin(wave_x) - 1.0);
+		float wave_dx = -wave * cos(wave_x);
+		sum_of_values += wave * weight;
+		sum_of_weights += weight;
+
+		pos += p * wave_dx * weight * drag_mult;
+
+		weight *= 0.8;
+		frequency *= 1.28;
+		time_mod *= 1.08;
+		iter += 1.399;
+	}
+	return sea_level - abs(sum_of_values * sea_wave_height / sum_of_weights);
+}
+
 float cloud_tadj(float sampled)
 {
 	float ret = 0.0;
