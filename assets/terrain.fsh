@@ -381,3 +381,30 @@ float get_z(vec3 ray, float dist)
 	return ndc_z * 0.5 + 0.5;
 }
 
+bool draw_abovewater(vec3 pos, vec3 dir, bool z_check)
+{
+	vec2 rayterrain = raymarch_terrain(pos, dir, fog_distance);
+	vec2 raywater = raymarch_water(pos, dir, fog_distance);
+	float dist_min = min(rayterrain.x, raywater.x);
+	vec3 hitpos = pos + dir * dist_min;
+
+	if (rayterrain.y < 0.5 && raywater.y < 0.5) return false;
+
+	if (z_check)
+	{
+		float z = get_z(dir, dist_min);
+		if (z > zdepth_out) return false;
+		zdepth_out = z;
+	}
+
+	if (rayterrain.x <= raywater.x)
+	{
+		color.xyz = get_terrain_color_dry(hitpos, dir, dist_min);
+	}
+	else
+	{
+		color.xyz = get_water_color_abovewater(pos, hitpos);
+	}
+	return true;
+}
+
