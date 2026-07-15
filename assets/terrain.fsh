@@ -321,3 +321,15 @@ vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float distance)
 	return floor_color * scattered_light;
 }
 
+vec3 sky_terrain_rough_color(vec3 pos, vec3 ray)
+{
+	vec3 ret = sky_color(pos, ray);
+	vec2 rayterrain = raymarch_terrain_rough(pos, ray, fog_distance);
+	if (rayterrain.y > 0.5)
+	{
+		vec3 terrain_hit_pos = pos + ray * rayterrain.x;
+		ret = get_terrain_color_dry(terrain_hit_pos, ray, rayterrain.x);
+	}
+	return ret;
+}
+
