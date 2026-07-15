@@ -150,23 +150,23 @@ segment .rdata
 extern _TerrainCurvePoints
 _TerrainCurvePoints:
 istruc CurvePoint
-	at .volume, dd 0.45
+	at .volume, dd 0.45 ;Deep pit
 	at .weight, dd 0.1
 iend
 istruc CurvePoint
-	at .volume, dd 0.1
+	at .volume, dd 0.1 ;Slope to the pit
 	at .weight, dd 0.1
 iend
 istruc CurvePoint
-	at .volume, dd 0.05
+	at .volume, dd 0.05 ;Seabed
 	at .weight, dd 0.2
 iend
 istruc CurvePoint
-	at .volume, dd 0.1
+	at .volume, dd 0.1 ;Shore
 	at .weight, dd 0.3
 iend
 istruc CurvePoint
-	at .volume, dd 0.3
+	at .volume, dd 0.3 ;Mountains
 	at .weight, dd 0.3
 iend
 .num_points equ ($ - _TerrainCurvePoints) / CurvePoint.size
