@@ -408,3 +408,51 @@ bool draw_abovewater(vec3 pos, vec3 dir, bool z_check)
 	return true;
 }
 
+bool draw_underwater(vec3 pos, vec3 dir, bool z_check)
+{
+	vec2 rayterrain = raymarch_terrain(pos, dir, fog_distance);
+	vec2 raywater = raymarch_water_underwater(pos, dir, fog_distance);
+	float dist_min = min(rayterrain.x, raywater.x);
+	vec3 hitpos = pos + dir * dist_min;
+
+	if (rayterrain.y < 0.5 && raywater.y < 0.5) return false;
+
+	if (z_check)
+	{
+		float z = get_z(dir, dist_min);
+		if (z > zdepth_out) return false;
+		zdepth_out = z;
+	}
+
+	if (rayterrain.x <= raywater.x)
+	{
+		color.xyz = get_terrain_color_underwater(hitpos, dir, dist_min);
+	}
+	else
+	{
+		vec3 wnormal = -water_normal(hitpos, 0.1, num_waves_normal, 0.0);
+		vec3 refraction = refract(dir, wnormal, water_refraction);
+		if (length(refraction) > 0.001)
+		{
+			vec3 refr_color = sky_terrain_rough_color(hitpos, refraction);
+			vec3 scattered_light = exp(-water_attenuation * dist_min);
+			color.xyz = refr_color * scattered_light;
+		}
+		else
+		{
+			vec3 reflection = reflect(dir, wnormal);
+			rayterrain = raymarch_terrain_rough(hitpos, reflection, fog_distance);
+			if (rayterrain.y > 0.5)
+			{
+				vec3 terrain_pos = hitpos + reflection * rayterrain.x;
+				color.xyz = get_terrain_color_underwater(terrain_pos, -reflection, dist_min + rayterrain.x);
+			}
+			else
+			{
+				color.xyz = vec3(0.0);
+			}
+		}
+	}
+
+	return true;
+}
