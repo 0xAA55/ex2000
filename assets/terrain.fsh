@@ -228,6 +228,19 @@ vec2 raymarch_water_underwater(vec3 start, vec3 dir, float max_dist)
 	return vec2(dist, is_hit);
 }
 
+vec3 water_normal(vec3 pos, float e, int num_waves, float phase_shift)
+{
+	vec2 ex = vec2(e, 0);
+	float H = get_water_height(pos.xz, num_waves, phase_shift);
+	vec3 a = vec3(pos.x, H, pos.z);
+	return normalize(
+		cross(
+			a - vec3(pos.x - e, get_water_height(pos.xz - ex.xy, num_waves, phase_shift), pos.z),
+			a - vec3(pos.x, get_water_height(pos.xz + ex.yx, num_waves, phase_shift), pos.z + e)
+		)
+	);
+}
+
 float cloud_tadj(float sampled)
 {
 	float ret = 0.0;
