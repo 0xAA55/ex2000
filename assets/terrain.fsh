@@ -373,3 +373,11 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	}
 }
 
+float get_z(vec3 ray, float dist)
+{
+	vec3 zdir = view_rot_inv * (ray * dist);
+	vec4 clip = proj * vec4(zdir, 1.0);
+	float ndc_z = clip.z / clip.w;
+	return ndc_z * 0.5 + 0.5;
+}
+
