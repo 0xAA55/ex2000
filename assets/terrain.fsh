@@ -342,3 +342,34 @@ vec3 sky_terrain_rough_color(vec3 pos, vec3 ray)
 	return ret;
 }
 
+vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
+{
+	float water_dist = distance(eyepos, water_pos);
+	vec3 dir = (water_pos - eyepos) / water_dist;
+	float cloud_shade = get_cloud_shade(water_pos);
+	vec3 wnormal = water_normal(water_pos, 0.1, num_waves_normal, 0.0);
+	vec3 refraction_fragdir = refract(dir, wnormal, water_ETA);
+	vec3 refraction_lightdir = -refract(-sunpos, wnormal, water_ETA);
+	vec2 rayterrain = raymarch_terrain_rough(water_pos, refraction_fragdir, fog_distance);
+	vec3 reflection = reflect(dir, wnormal);
+	vec3 half_way = normalize(sunpos + reflection);
+	float fresnel = (0.04 + (1.0 - 0.04) * pow(1.0 - max(0.0, dot(-wnormal, dir)), 5.0));
+	vec4 specular = water_specular;
+	vec3 refl_color = sky_terrain_rough_color(water_pos, reflection);
+	vec3 specolor = refl_color * specular.xyz + specular.xyz * cloud_shade * pow(max(0.0, dot(half_way, wnormal)), specular.w);
+	if (rayterrain.y > 0.5)
+	{
+		vec3 seabed_rel_surface = refraction_fragdir * rayterrain.x;
+		vec3 terrain_hit_pos = water_pos + seabed_rel_surface;
+		vec3 underwater_color = get_terrain_color_underwater(terrain_hit_pos, refraction_fragdir, rayterrain.x);
+
+		vec3 objcolor = mix(underwater_color, specolor, fresnel);
+		return mix(objcolor, fogcolor.xyz, min(water_dist / fog_distance, 1.0));
+	}
+	else
+	{
+		vec3 objcolor = specolor;
+		return mix(objcolor, fogcolor.xyz, min(water_dist / fog_distance, 1.0));
+	}
+}
+
