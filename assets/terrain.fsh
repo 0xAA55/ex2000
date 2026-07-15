@@ -10,7 +10,8 @@ uniform vec4 fogcolor = vec4(0.8, 0.9, 1.0, 1.0);
 uniform vec4 skycolor = vec4(0.3, 0.4, 0.9, 1.0);
 uniform vec4 suncolor = vec4(1.0, 0.9, 0.8, 1.0);
 uniform vec3 sunpos = normalize(vec3(1.0, 1.0, 1.0));
-uniform float sunsize = 1000.0;
+uniform float sun_size_shrink = 10000.0;
+uniform float sun_brightness = 100000.0;
 uniform float cloud_size_mod = 5.0;
 uniform float cloud_height = 1000.0;
 uniform float terrain_height = 200.0;
@@ -265,4 +266,19 @@ float get_cloud_shade(vec3 pos)
 {
 	if (pos.y >= cloud_height) return 0.0;
 	return raycast_cloud(pos, sunpos).x;
+}
+
+vec3 sky_color(vec3 pos, vec3 ray)
+{
+	vec2 see_cloud = raycast_cloud(pos, ray);
+	float cloud_in_eye = see_cloud.x;
+	float cloud_dist = see_cloud.y;
+	cloud_in_eye *= 1.0 - min(1.0, cloud_dist / cloud_fadeout_dist);
+	if (cloud_dist <= 0.0) cloud_in_eye = 0.0;
+	vec3 ret = mix(fogcolor.xyz, skycolor.xyz, ray.y);
+	ret = mix(ret, vec3(1.0), cloud_in_eye);
+	float sun_occl = get_cloud_shade(pos);
+	vec3 sun = suncolor.xyz * pow(max(dot(ray, sunpos), 0.0), sun_size_shrink) * sun_brightness * (1.0 - sun_occl);
+	ret += sun;
+	return ret;
 }
