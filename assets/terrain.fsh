@@ -27,18 +27,17 @@ vec2 cloud_movement = vec2(time * 0.005);
 
 vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 {
-	if (start.y >= terrain_height && dir.y >= 0.0) return vec2(max_dist, 0.0);
+	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
 	vec3 top_pos = start + dir * ((start.y - terrain_height) / dir.y);
-	vec3 pos = start;
-	if (start.y >= terrain_height) pos = top_pos;
-	float dist = distance(start, pos);
+	float dist = 0.0;
+	if (start.y >= terrain_height) dist = distance(start, top_pos);
 	float step_modifier = 2.0;
 	float last_dir = 1.0;
 	float is_hit = 0.0;
 	for(int i = 0; i < 384; i++)
 	{
 		float step = 1.0 / step_modifier;
-		pos = start + dir * dist;
+		vec3 pos = start + dir * dist;
 		float height = texture2D(terrain, pos.xz / terrain_scaling).r * terrain_height;
 		if (pos.y < height)
 		{
@@ -65,6 +64,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 		}
 	}
 	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
+	if (is_hit < 0.5) dist = max_dist;
 	return vec2(dist, is_hit);
 }
 
