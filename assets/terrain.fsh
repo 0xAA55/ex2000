@@ -1,5 +1,6 @@
 #version 330
 
+const float PI = 3.14159265358979;
 const int num_waves_surface = 16;
 const int num_waves_normal = num_waves_surface + 4;
 const int num_waves_simple = num_waves_surface / 2;
