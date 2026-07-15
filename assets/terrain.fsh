@@ -298,3 +298,9 @@ vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 r_light_dir, v
 	vec3 specolor = specular.xyz * cloud_shade * dspecular_lit;
 	return mix(objcolor + specolor, fogcolor.xyz, min(distance / fog_distance, 1.0));
 }
+
+vec3 get_terrain_color_dry(vec3 pos, vec3 dir, float distance)
+{
+	return get_terrain_color_base(suncolor.xyz, suncolor.xyz, sunpos, pos, dir, distance);
+}
+
