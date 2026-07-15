@@ -156,6 +156,33 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	return sea_level - abs(sum_of_values * sea_wave_height / sum_of_weights);
 }
 
+float laplacian_depth(vec2 pos, float depth, float eps)
+{
+	float depth_phase = depth;
+
+	float h0 = get_water_height(pos, num_waves_caustic, depth_phase);
+
+	float hx1 = get_water_height(pos + vec2( eps, 0.0), num_waves_caustic, depth_phase);
+	float hx2 = get_water_height(pos + vec2(-eps, 0.0), num_waves_caustic, depth_phase);
+	float hz1 = get_water_height(pos + vec2(0.0,  eps), num_waves_caustic, depth_phase);
+	float hz2 = get_water_height(pos + vec2(0.0, -eps), num_waves_caustic, depth_phase);
+
+	return (hx1 + hx2 + hz1 + hz2 - 4.0 * h0) / (eps * eps);
+}
+
+float caustic_intensity(vec2 pos, float depth)
+{
+	depth *= abs(1.0 - water_ETA) * water_attenuation_density;
+	float lap = laplacian_depth(pos, depth, 1.0);
+	float C = 2.5;
+	float compressed = C * tanh(depth * lap / C);
+	return exp(-compressed);
+
+	float scale = depth * (1.0 - water_ETA);
+	float exponent = scale * lap;
+	return exp(exponent);
+}
+
 float cloud_tadj(float sampled)
 {
 	float ret = 0.0;
