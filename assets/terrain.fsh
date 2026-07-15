@@ -1,5 +1,8 @@
 #version 330
 
+const float water_refraction = 1.4;
+const float water_ETA = 1.0 / water_refraction;
+
 uniform mat4 camorient;
 uniform mat4 proj;
 uniform vec3 campos;
