@@ -1,5 +1,9 @@
 #version 330
 
+const int num_waves_surface = 16;
+const int num_waves_normal = num_waves_surface + 4;
+const int num_waves_simple = num_waves_surface / 2;
+const int num_waves_caustic = num_waves_normal;
 const float water_refraction = 1.4;
 const float water_ETA = 1.0 / water_refraction;
 
