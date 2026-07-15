@@ -282,3 +282,19 @@ vec3 sky_color(vec3 pos, vec3 ray)
 	ret += sun;
 	return ret;
 }
+
+vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float distance)
+{
+	vec3 ambient = light_mask * ambcolor.xyz;
+	vec3 diffuse = light_mask; // TODO
+	vec4 specular = vec4(0.0, 0.0, 0.0, 1.0); // TODO
+	float cloud_shade = mix(0.5, 1.0, get_cloud_shade(pos));
+	vec3 normal = terrain_normal(pos, 1.0);
+	vec3 reflection = reflect(dir, normal);
+	vec3 half_way = normalize(r_light_dir + reflection);
+	float diffuse_lit = max(0.0, dot(r_light_dir, normal));
+	float dspecular_lit = pow(max(0.0, dot(half_way, normal)), specular.w);
+	vec3 objcolor = mix(ambient, diffuse.xyz, diffuse_lit);
+	vec3 specolor = specular.xyz * cloud_shade * dspecular_lit;
+	return mix(objcolor + specolor, fogcolor.xyz, min(distance / fog_distance, 1.0));
+}
