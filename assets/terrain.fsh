@@ -203,6 +203,31 @@ vec2 raymarch_water(vec3 start, vec3 dir, float max_dist)
 	return vec2(dist, is_hit);
 }
 
+vec2 raymarch_water_underwater(vec3 start, vec3 dir, float max_dist)
+{
+	float dist = 0.0;
+	float wave_btm = sea_level - sea_wave_height;
+	if (start.y > sea_level) return vec2(max_dist, 0.0);
+	if (start.y < wave_btm)
+	{
+		if (dir.y < 0) return vec2(max_dist, 0.0);
+		vec3 btm_pos = start + dir * ((start.y - wave_btm) / dir.y);
+		dist = distance(start, btm_pos);
+	}
+	float is_hit = 0.0;
+	for(int i = 0; i < 64; i++)
+	{
+		vec3 pos = start + dir * dist;
+		float height = get_water_height(pos.xz, num_waves_surface, 0.0);
+		if (pos.y + 0.01 >= height) return vec2(dist, 1.0);
+		dist += height - pos.y;
+		if (dist >= max_dist) return vec2(max_dist, 0.0);
+	}
+	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
+	if (is_hit < 0.5) dist = max_dist;
+	return vec2(dist, is_hit);
+}
+
 float cloud_tadj(float sampled)
 {
 	float ret = 0.0;
