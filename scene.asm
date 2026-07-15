@@ -394,6 +394,8 @@ DefFunc _SceneLoadProgressive
 	jge .end
 .load:
 	invoke_cdecl [.load_sequence + ebx * 4]
+	cmp eax, 0
+	jl .end
 	inc ebx
 	mov [_SceneLoadingProgress], ebx
 .end:
