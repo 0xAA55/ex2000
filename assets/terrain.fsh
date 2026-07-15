@@ -23,10 +23,16 @@ uniform float sea_wave_size = 2.0;
 in vec2 texcoord;
 out vec4 color;
 
+float zdepth_out = 1.0;
 vec4 ambcolor = vec4(fogcolor.xyz * 0.5, 1.0);
 float cloud_size = cloud_size_mod * cloud_height;
 float cloud_fadeout_dist = cloud_size * 5.0;
 vec2 cloud_movement = vec2(time * 0.005);
+mat3 view_rot_inv = inverse(mat3(camorient));
+vec4 ndc = vec4(texcoord * 2.0 - 1.0, 1.0, 1.0);
+vec4 camdir_z = inverse(proj) * ndc;
+vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
+bool is_underwater = false;
 
 vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 {
@@ -259,50 +265,4 @@ float get_cloud_shade(vec3 pos)
 {
 	if (pos.y >= cloud_height) return 0.0;
 	return raycast_cloud(pos, sunpos).x;
-}
-
-void main()
-{
-	vec4 ndc = vec4(texcoord * 2.0 - 1.0, 1.0, 1.0);
-	vec4 camdir_z = inverse(proj) * ndc;
-	vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
-	mat3 view_rot_inv = inverse(mat3(camorient));
-
-	gl_FragDepth = 1.0;
-
-	vec2 see_cloud = raycast_cloud(campos, fragdir);
-	float cloud_in_eye = see_cloud.x;
-	float cloud_dist = see_cloud.y;
-	cloud_in_eye *= 1.0 - min(1.0, cloud_dist / cloud_fadeout_dist);
-	if (cloud_dist <= 0.0) cloud_in_eye = 0.0;
-
-	vec2 raymarch = raymarch_terrain(campos, fragdir, fog_distance);
-	if (raymarch.y >= 0.5)
-	{
-		float dist = raymarch.x;
-		vec3 pos_rel_cam = fragdir * dist;
-		vec3 zdir = view_rot_inv * pos_rel_cam;
-		vec4 clip = proj * vec4(zdir, 1.0);
-		float ndc_z = clip.z / clip.w;
-		gl_FragDepth = ndc_z * 0.5 + 0.5;
-		cloud_in_eye = 0.0;
-
-		vec3 terrain_hit_pos = campos + pos_rel_cam;
-		float cloud_shade = get_cloud_shade(terrain_hit_pos);
-		vec3 normal = terrain_normal(terrain_hit_pos, 1.0);
-		float light = max(0.0, dot(sunpos, normal)) * mix(0.5, 1.0, cloud_shade);
-		vec3 diffuse = suncolor.xyz;
-		vec3 objcolor = mix(ambcolor.xyz, diffuse.xyz, light);
-		color = mix(vec4(objcolor, 1.0), fogcolor, min(dist / fog_distance, 1.0));
-	}
-	else
-	{
-		color = mix(fogcolor, skycolor, fragdir.y);
-		float sun_occl = get_cloud_shade(campos);
-		color = mix(color, vec4(1.0), cloud_in_eye);
-		vec4 sun = suncolor * pow(max(dot(fragdir, sunpos), 0.0), sunsize) * (1.0 - sun_occl);
-		color += sun;
-	}
-
-	color = min(color, vec4(1.0));
 }
