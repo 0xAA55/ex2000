@@ -304,3 +304,17 @@ vec3 get_terrain_color_dry(vec3 pos, vec3 dir, float distance)
 	return get_terrain_color_base(suncolor.xyz, suncolor.xyz, sunpos, pos, dir, distance);
 }
 
+vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float distance)
+{
+	float water_surface = get_water_height(pos.xz, num_waves_surface, 0.0);
+	float floor_depth = water_surface - pos.y;
+
+	float caustic = caustic_intensity(pos.xz, floor_depth);
+	vec3 absorbed_light = exp(-water_attenuation * floor_depth);
+	vec3 water_lighting = suncolor.xyz * caustic * absorbed_light;
+
+	vec3 scattered_light = exp(-water_attenuation * distance);
+	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), vec3(0.0, 1.0, 0.0), pos, dir, 0.0);
+	return floor_color * scattered_light;
+}
+
