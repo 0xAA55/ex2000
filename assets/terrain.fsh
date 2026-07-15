@@ -456,3 +456,27 @@ bool draw_underwater(vec3 pos, vec3 dir, bool z_check)
 
 	return true;
 }
+
+void main()
+{
+	vec4 specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+	if (campos.y <= get_water_height(campos.xz, num_waves_surface, 0.0))
+	{
+		is_underwater = true;
+	}
+	if (!is_underwater)
+	{
+		if (!draw_abovewater(campos, fragdir, true))
+		{
+			color.xyz = sky_color(campos, fragdir);
+		}
+	}
+	else
+	{
+		draw_underwater(campos, fragdir, true);
+	}
+
+	color.w = 1.0;
+	gl_FragDepth = zdepth_out;
+}
