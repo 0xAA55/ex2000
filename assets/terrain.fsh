@@ -192,14 +192,8 @@ float laplacian_depth(vec2 pos, float depth, float eps)
 float caustic_intensity(vec2 pos, float depth)
 {
 	depth *= abs(1.0 - water_ETA) * water_attenuation_density;
-	float lap = laplacian_depth(pos, depth, 1.0);
-	float C = 2.5;
-	float compressed = C * tanh(depth * lap / C);
-	return exp(-compressed);
-
-	float scale = depth * (1.0 - water_ETA);
-	float exponent = scale * lap;
-	return exp(exponent);
+	float lap = laplacian_depth(pos, depth, sea_wave_size) + 1.0;
+	return lap;
 }
 
 vec2 raymarch_water(vec3 start, vec3 dir, float max_dist)
