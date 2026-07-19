@@ -308,6 +308,8 @@ import_dll_func SetWaitableTimer
 
 import_dll_func MessageBoxA
 import_dll_func MessageBoxW
+import_dll_func AdjustWindowRect
+import_dll_func MoveWindow
 import_dll_func DrawTextA
 import_dll_func LoadIconA
 import_dll_func LoadCursorA
@@ -445,6 +447,13 @@ endstruc
 struc MSG
 	InstMSG
 endstruc
+
+%macro InstRECT 0
+	.left resd 1
+	.top resd 1
+	.right resd 1
+	.bottom resd 1
+%endmacro
 
 %define WHITE_BRUSH         0
 %define LTGRAY_BRUSH        1

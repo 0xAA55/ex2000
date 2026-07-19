@@ -12,21 +12,34 @@ extern _Scene
 extern _SceneInit
 extern _SceneUnload
 
+%define DESIRED_WIDTH 1920
+%define DESIRED_HEIGHT 1080
+
 segment .rdata
 _ClassName db "EX2000_DemoWindow", 0
 _WindowTitle db "EX2000", 0
 
 segment .bss
-extern _hWnd
-extern _hDC
-extern _MSG
+extern _WCEx
 _WCEx:
 	InstWNDCLASSEX
+
+extern _ClassAtom
 _ClassAtom resd 1
+
+extern _hWnd
 _hWnd resd 1
+
+extern _hDC
 _hDC resd 1
+
+extern _MSG
 _MSG:
 	InstMSG
+
+extern _TempRect
+_TempRect:
+	InstRECT
 
 segment .bss
 _LastUFunc:
@@ -75,9 +88,23 @@ DefFunc _main
 
 	invoke_dll_stdcall CreateWindowExA, \
 		0, _ClassName, _WindowTitle, WS_OVERLAPPEDWINDOW, \
-		CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, \
+		CW_USEDEFAULT, CW_USEDEFAULT, DESIRED_WIDTH, DESIRED_HEIGHT, \
 		0, 0, [_hInstance], 0
 	mov [_hWnd], eax
+
+	invoke_dll_stdcall GetWindowRect, [_hWnd], _TempRect
+	mov eax, [_TempRect.left]
+	mov ecx, [_TempRect.top]
+	add eax, DESIRED_WIDTH
+	add ecx, DESIRED_HEIGHT
+	mov [_TempRect.right], eax
+	mov [_TempRect.bottom], ecx
+	invoke_dll_stdcall AdjustWindowRect, _TempRect, WS_OVERLAPPEDWINDOW, 0
+	mov eax, [_TempRect.right]
+	mov ecx, [_TempRect.bottom]
+	sub eax, [_TempRect.left]
+	sub ecx, [_TempRect.top]
+	invoke_dll_stdcall MoveWindow, [_hWnd], [_TempRect.left], [_TempRect.top], eax, ecx, 0
 
 	invoke_dll_stdcall ShowWindow, [_hWnd], 1
 	invoke_dll_stdcall UpdateWindow, [_hWnd]

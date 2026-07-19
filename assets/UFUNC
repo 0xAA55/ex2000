@@ -1,4 +1,6 @@
 MessageBoxW
+AdjustWindowRect
+MoveWindow
 DrawTextA
 LoadIconA
 LoadCursorA

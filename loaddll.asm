@@ -61,6 +61,8 @@ dll_func_group_end UFunc
 
 dll_func_group_start_without_name UFunc_DelayedLoad
 def_dll_func_addr MessageBoxW
+def_dll_func_addr AdjustWindowRect
+def_dll_func_addr MoveWindow
 def_dll_func_addr DrawTextA
 def_dll_func_addr LoadIconA
 def_dll_func_addr LoadCursorA
