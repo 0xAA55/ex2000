@@ -39,7 +39,7 @@ out vec4 color;
 vec3 suncolor_hdr = suncolor * sun_brightness;
 vec3 skycolor_hdr = skycolor * sky_brightness;
 vec3 fogcolor_hdr = fogcolor * sky_brightness;
-float cloud_brightness = sun_brightness;
+float cloud_brightness = sky_brightness;
 vec3 water_attenuation = water_attenuation_baseval * water_attenuation_density;
 float zdepth_out = 1.0;
 vec4 ambcolor = vec4(fogcolor * sun_brightness, 1.0);
