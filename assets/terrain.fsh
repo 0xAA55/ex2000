@@ -14,30 +14,35 @@ uniform vec3 campos;
 uniform float time;
 uniform sampler2D cloud;
 uniform sampler2D terrain;
-uniform vec4 fogcolor = vec4(0.8, 0.9, 1.0, 1.0);
-uniform vec4 skycolor = vec4(0.3, 0.4, 0.9, 1.0);
-uniform vec4 suncolor = vec4(1.0, 0.9, 0.8, 1.0);
-uniform vec4 water_specular = vec4(1.0, 1.0, 1.0, 100.0);
+uniform float sun_size_shrink = 10000.0;
+uniform float sun_brightness = 5.0;
+uniform float sky_brightness = 20.0;
+uniform float sun_staring_brightness = 1000.0;
+uniform vec3 fogcolor = vec3(0.8, 0.9, 1.0);
+uniform vec3 skycolor = vec3(0.1, 0.2, 0.9);
+uniform vec3 suncolor = vec3(1.0, 0.9, 0.8);
+uniform vec4 water_specular = vec4(1.0, 1.0, 1.0, 10000.0);
 uniform float water_attenuation_density = 0.05;
 uniform vec3 water_attenuation_baseval = vec3(0.133991590885, 0.119268072602, 0.118039853847);
 uniform vec3 sunpos = normalize(vec3(1.0, 1.0, 1.0));
-uniform float sun_size_shrink = 10000.0;
-uniform float sun_brightness = 100000.0;
 uniform float cloud_size_mod = 5.0;
 uniform float cloud_height = 1000.0;
 uniform float terrain_height = 200.0;
 uniform float terrain_scaling = 1000.0;
 uniform float fog_distance = 3000.0;
-uniform float cloud_border = 0.2;
 uniform float sea_level = 0.6 * 200.0;
-uniform float sea_wave_height = 2.0;
+uniform float sea_wave_height = 1.0;
 uniform float sea_wave_size = 2.0;
 in vec2 texcoord;
 out vec4 color;
 
+vec3 suncolor_hdr = suncolor * sun_brightness;
+vec3 skycolor_hdr = skycolor * sky_brightness;
+vec3 fogcolor_hdr = fogcolor * sky_brightness;
+float cloud_brightness = sun_brightness;
 vec3 water_attenuation = water_attenuation_baseval * water_attenuation_density;
 float zdepth_out = 1.0;
-vec4 ambcolor = vec4(fogcolor.xyz * 0.5, 1.0);
+vec4 ambcolor = vec4(fogcolor * sun_brightness, 1.0);
 float cloud_size = cloud_size_mod * cloud_height;
 float cloud_fadeout_dist = cloud_size * 5.0;
 vec2 cloud_movement = vec2(time * 0.005);
@@ -191,9 +196,10 @@ float laplacian_depth(vec2 pos, float depth, float eps)
 
 float caustic_intensity(vec2 pos, float depth)
 {
-	depth *= abs(1.0 - water_ETA) * water_attenuation_density;
-	float lap = laplacian_depth(pos, depth, sea_wave_size) + 1.0;
-	return lap;
+	float depth_mod = depth * abs(1.0 - water_ETA) * water_attenuation_density;
+	float lap = (laplacian_depth(pos, depth_mod, sea_wave_size));
+	float exponent = -lap;
+	return exp(exponent);
 }
 
 vec2 raymarch_water(vec3 start, vec3 dir, float max_dist)
@@ -254,18 +260,11 @@ vec3 water_normal(vec3 pos, float e, int num_waves, float phase_shift)
 	);
 }
 
-float cloud_tadj(float sampled)
-{
-	float ret = 0.0;
-	if (sampled > cloud_border) ret = (sampled - cloud_border) / (1.0 - cloud_border);
-	return ret;
-}
-
 vec2 raycast_cloud(vec3 pos, vec3 dir)
 {
 	float cloud_dist = (cloud_height - pos.y) / dir.y;
 	vec2 cloud_uv = (pos.xz + dir.xz * cloud_dist) / cloud_size;
-	return vec2(cloud_tadj(texture2D(cloud, cloud_uv + cloud_movement).r), cloud_dist);
+	return vec2(texture2D(cloud, cloud_uv + cloud_movement).r, cloud_dist);
 }
 
 float get_cloud_shade(vec3 pos)
@@ -281,17 +280,17 @@ vec3 sky_color(vec3 pos, vec3 ray)
 	float cloud_dist = see_cloud.y;
 	cloud_in_eye *= 1.0 - min(1.0, cloud_dist / cloud_fadeout_dist);
 	if (cloud_dist <= 0.0) cloud_in_eye = 0.0;
-	vec3 ret = mix(fogcolor.xyz, skycolor.xyz, ray.y);
-	ret = mix(ret, vec3(1.0), cloud_in_eye);
+	vec3 ret = mix(fogcolor_hdr, skycolor_hdr, ray.y);
+	ret = mix(ret, vec3(cloud_brightness), cloud_in_eye);
 	float sun_occl = get_cloud_shade(pos);
-	vec3 sun = suncolor.xyz * pow(max(dot(ray, sunpos), 0.0), sun_size_shrink) * sun_brightness * (1.0 - sun_occl);
+	vec3 sun = suncolor * pow(max(dot(ray, sunpos), 0.0), sun_size_shrink) * sun_staring_brightness * (1.0 - sun_occl);
 	ret += sun;
 	return ret;
 }
 
-vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float distance)
+vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float distance)
 {
-	vec3 ambient = light_mask * ambcolor.xyz;
+	vec3 ambient = light_mask * ambcolor.xyz * amb_mask;
 	vec3 diffuse = light_mask; // TODO
 	vec4 specular = vec4(0.0, 0.0, 0.0, 1.0); // TODO
 	float cloud_shade = mix(0.5, 1.0, get_cloud_shade(pos));
@@ -300,14 +299,14 @@ vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 r_light_dir, v
 	vec3 half_way = normalize(r_light_dir + reflection);
 	float diffuse_lit = max(0.0, dot(r_light_dir, normal));
 	float dspecular_lit = pow(max(0.0, dot(half_way, normal)), specular.w);
-	vec3 objcolor = mix(ambient, diffuse.xyz, diffuse_lit);
+	vec3 objcolor = mix(ambient, diffuse, diffuse_lit);
 	vec3 specolor = specular.xyz * cloud_shade * dspecular_lit;
-	return mix(objcolor + specolor, fogcolor.xyz, min(distance / fog_distance, 1.0));
+	return mix(objcolor + specolor, fogcolor_hdr, min(distance / fog_distance, 1.0));
 }
 
 vec3 get_terrain_color_dry(vec3 pos, vec3 dir, float distance)
 {
-	return get_terrain_color_base(suncolor.xyz, suncolor.xyz, sunpos, pos, dir, distance);
+	return get_terrain_color_base(suncolor_hdr, suncolor_hdr, vec3(1.0), sunpos, pos, dir, distance);
 }
 
 vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float distance)
@@ -317,10 +316,10 @@ vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float distance)
 
 	float caustic = caustic_intensity(pos.xz, floor_depth);
 	vec3 absorbed_light = exp(-water_attenuation * floor_depth);
-	vec3 water_lighting = suncolor.xyz * caustic * absorbed_light;
+	vec3 water_lighting = suncolor_hdr * caustic * absorbed_light;
 
 	vec3 scattered_light = exp(-water_attenuation * distance);
-	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), vec3(0.0, 1.0, 0.0), pos, dir, 0.0);
+	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), vec3(0.0), vec3(0.0, 1.0, 0.0), pos, dir, 0.0);
 	return floor_color * scattered_light;
 }
 
@@ -348,9 +347,9 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	vec3 reflection = reflect(dir, wnormal);
 	vec3 half_way = normalize(sunpos + reflection);
 	float fresnel = (0.04 + (1.0 - 0.04) * pow(1.0 - max(0.0, dot(-wnormal, dir)), 5.0));
-	vec4 specular = water_specular;
+	vec4 specular = vec4(water_specular.xyz * sun_brightness, water_specular.w);
 	vec3 refl_color = sky_terrain_rough_color(water_pos, reflection);
-	vec3 specolor = refl_color * specular.xyz + specular.xyz * cloud_shade * pow(max(0.0, dot(half_way, wnormal)), specular.w);
+	vec3 specolor = refl_color;// * water_specular.xyz;// + specular.xyz * cloud_shade * pow(max(0.0, dot(half_way, wnormal)), specular.w);
 	if (rayterrain.y > 0.5)
 	{
 		vec3 seabed_rel_surface = refraction_fragdir * rayterrain.x;
@@ -358,12 +357,12 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 		vec3 underwater_color = get_terrain_color_underwater(terrain_hit_pos, refraction_fragdir, rayterrain.x);
 
 		vec3 objcolor = mix(underwater_color, specolor, fresnel);
-		return mix(objcolor, fogcolor.xyz, min(water_dist / fog_distance, 1.0));
+		return mix(objcolor, fogcolor_hdr, min(water_dist / fog_distance, 1.0));
 	}
 	else
 	{
 		vec3 objcolor = specolor;
-		return mix(objcolor, fogcolor.xyz, min(water_dist / fog_distance, 1.0));
+		return mix(objcolor, fogcolor_hdr, min(water_dist / fog_distance, 1.0));
 	}
 }
 
