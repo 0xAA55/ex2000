@@ -35,4 +35,12 @@ extern _SceneLoadShaderProgram
 	invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
 %endmacro
 
+%macro GetFragDataLocation 2
+	[segment .rdata]
+	%%FragDataName db %2, 0
+
+	__SECT__
+	invoke_dll_stdcall glGetFragDataLocation, %1, %%FragDataName
+%endmacro
+
 %endif
