@@ -12,7 +12,7 @@ void main()
 {
 	vec2 texture_size = textureSize(hdr_texture, 0);
 	vec2 standard_size_mod = vec2(standard_size.x, standard_size.x * texture_size.y / texture_size.x);
-	float avr_brightness = length(textureLod(hdr_texture, vec2(0.5), 10000.0).rgb);
+	float avr_brightness = length(textureLod(hdr_texture, vec2(0.5), 1000.0).rgb);
 	color = texture2D(hdr_texture, texcoord);
 	float color_brightness = length(color);
 	float count = 0.0;
