@@ -345,17 +345,14 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	vec3 refraction_lightdir = -refract(-sunpos, wnormal, water_ETA);
 	vec2 rayterrain = raymarch_terrain_rough(water_pos, refraction_fragdir, fog_distance);
 	vec3 reflection = reflect(dir, wnormal);
-	vec3 half_way = normalize(sunpos + reflection);
 	float fresnel = min(1.0, (0.04 + (1.0 - 0.04) * pow(1.0 - max(0.0, dot(-wnormal, dir)), 5.0)));
-	vec4 specular = vec4(water_specular.xyz * sun_brightness, water_specular.w);
 	vec3 refl_color = sky_terrain_rough_color(water_pos, reflection);
-	vec3 specolor = refl_color;// * water_specular.xyz;// + specular.xyz * cloud_shade * pow(max(0.0, dot(half_way, wnormal)), specular.w);
+	vec3 specolor = refl_color;
 	if (rayterrain.y > 0.5)
 	{
 		vec3 seabed_rel_surface = refraction_fragdir * rayterrain.x;
 		vec3 terrain_hit_pos = water_pos + seabed_rel_surface;
 		vec3 underwater_color = get_terrain_color_underwater(terrain_hit_pos, refraction_fragdir, rayterrain.x);
-
 		vec3 objcolor = mix(underwater_color, specolor, fresnel);
 		return mix(objcolor, fogcolor_hdr, min(water_dist / fog_distance, 1.0));
 	}
