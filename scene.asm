@@ -870,7 +870,6 @@ __SECT__
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	invoke_dll_stdcall glFinish
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
 	mov eax, [_DrawBlurProgramLocations.OutColor]
@@ -893,7 +892,6 @@ __SECT__
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
-	invoke_dll_stdcall glFinish
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
 	call .clear_buffers
