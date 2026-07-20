@@ -567,7 +567,11 @@ DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 	FrameBegin 0
 	invoke_dll_cdecl strcpy, [_FuncNameBuf], Param(0)
 	invoke_dll_stdcall wglGetProcAddress, [_FuncNameBuf]
+	test eax, eax
+	jnz .end
+	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
 	invoke_cdecl _CheckOpenGLProcAddress, eax
+.end:
 	FrameEnd
 	ret
 
