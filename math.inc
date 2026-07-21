@@ -98,12 +98,12 @@
 	.row_ptr:
 %endmacro
 
-; Must be 16-byte aligned
+;Must be 16-byte aligned
 struc Vector
 	InstVector
 endstruc
 
-; Must be 16-byte aligned
+;Must be 16-byte aligned
 struc Matrix
 	InstMatrix
 endstruc
@@ -164,30 +164,30 @@ extern _FP5P5P5P5
 extern _point_001_vector
 extern _IdentityMatrix
 
-; void MathInit();
+;void MathInit();
 extern _MathInit
 
-; void MathDeInit();
+;void MathDeInit();
 extern _MathDeInit
 
 %ifdef _DEBUG
-	; void FMatrix2DMatrix(DMatrix *out, Matrix *m);
+	;void FMatrix2DMatrix(DMatrix *out, Matrix *m);
 	extern _FMatrix2DMatrix
 
-	; void DebugMatrix(int x, int y, Matrix *m);
+	;void DebugMatrix(int x, int y, Matrix *m);
 	extern _DebugMatrix
 %endif
 
-; void BatchAdd(float *dst, float *src, size_t num_floats);
+;void BatchAdd(float *dst, float *src, size_t num_floats);
 extern _BatchAdd
 
-; void BatchBias(float *dst, float bias, size_t num_floats);
+;void BatchBias(float *dst, float bias, size_t num_floats);
 extern _BatchBias
 
-; float BatchMax(float *data, size_t num_floats);
+;float BatchMax(float *data, size_t num_floats);
 extern _BatchMax
 
-; float BatchMin(float *data, size_t num_floats);
+;float BatchMin(float *data, size_t num_floats);
 extern _BatchMin
 
 struc CurvePoint
@@ -195,108 +195,108 @@ struc CurvePoint
 	.weight resd 1
 	.size equ $ - .volume
 endstruc
-; typedef struct CurvePoints_s
-; {
-; 	float volume;
-; 	float weight;
-; } CurvePoints_t, *CurvePoints_p;
-; void BatchCurve(float *data, size_t num_data, CurvePoints_p curve, size_t num_curve_points);
+;typedef struct CurvePoints_s
+;{
+;	float volume;
+;	float weight;
+;} CurvePoints_t, *CurvePoints_p;
+;void BatchCurve(float *data, size_t num_data, CurvePoints_p curve, size_t num_curve_points);
 extern _BatchCurve
 
-; void CreateSeedVector(int128_t *)
+;void CreateSeedVector(int128_t *)
 extern _CreateSeedVector
 
-; void VectorCross(Vector *out, Vector *v1, Vector *v2);
+;void VectorCross(Vector *out, Vector *v1, Vector *v2);
 extern _VectorCross
 
-; void VectorLength(float *out, Vector *v, int dim);
+;void VectorLength(float *out, Vector *v, int dim);
 extern _VectorLength
 
-; void _VectorDot(float *out, Vector *v1, Vector *v2, int dim);
+;void _VectorDot(float *out, Vector *v1, Vector *v2, int dim);
 extern _VectorDot
 
-; void VectorNormal(Vector *out, Vector *v, int dim);
+;void VectorNormal(Vector *out, Vector *v, int dim);
 extern _VectorNormal
 
-; void VectorMultMatrix(Vector *out, Vector *v, Matrix *m);
+;void VectorMultMatrix(Vector *out, Vector *v, Matrix *m);
 extern _VectorMultMatrix
 
-; void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
+;void MatrixRotationEuler(Matrix *out, float yaw, float pitch, float roll);
 extern _MatrixRotationEuler
 
-; void MatrixEulerTranslated(Matrix *out, Vector *pos, float yaw, float pitch, float roll);
+;void MatrixEulerTranslated(Matrix *out, Vector *pos, float yaw, float pitch, float roll);
 extern _MatrixEulerTranslated
 
-; void MatrixViewEuler(Matrix *out, Vector *eye, float yaw, float pitch, float roll);
+;void MatrixViewEuler(Matrix *out, Vector *eye, float yaw, float pitch, float roll);
 extern _MatrixViewEuler
 
-; void MatrixProjection(Matrix *out, float fovy, float aspect, float zn, float zf);
+;void MatrixProjection(Matrix *out, float fovy, float aspect, float zn, float zf);
 extern _MatrixProjection
 
-; void MatrixTranspose(Matrix *out, Matrix *m);
+;void MatrixTranspose(Matrix *out, Matrix *m);
 extern _MatrixTranspose
 
-; void MatrixMultiply(Matrix *out, Matrix *l, Matrix *r);
+;void MatrixMultiply(Matrix *out, Matrix *l, Matrix *r);
 extern _MatrixMultiply
 
-; void MatrixMultiplyTo(Matrix *out_l, Matrix *r);
+;void MatrixMultiplyTo(Matrix *out_l, Matrix *r);
 extern _MatrixMultiplyTo
 
-; BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
+;BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
 extern _CreateBitMap
 
-; BitMap *DuplicateBitMap(BitMap *src);
+;BitMap *DuplicateBitMap(BitMap *src);
 extern _DuplicateBitMap
 
-; void DestroyBitMap(BitMap *map);
+;void DestroyBitMap(BitMap *map);
 extern _DestroyBitMap
 
-; void WarpBitMap(BitMap *dst, BitMap *src, int x, int y);
+;void WarpBitMap(BitMap *dst, BitMap *src, int x, int y);
 extern _WarpBitMap
 
-; float SmootherStep(float x);
+;float SmootherStep(float x);
 extern _SmootherStep
 
-; BitMap *CreatePerlinMap2D(int border_len);
+;BitMap *CreatePerlinMap2D(int border_len);
 extern _CreatePerlinMap2D
 
-; float *GetBitmapPixelAddress(int x, int y, BitMap *map);
+;float *GetBitmapPixelAddress(int x, int y, BitMap *map);
 extern _GetBitmapPixelAddress
 
-; BitMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, BitMap *src);
+;BitMap *ConvertPerlinMapToAltitude(int ratio, float amplitude, BitMap *src);
 extern _ConvertPerlinMapToAltitude
 
-; BitMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
+;BitMap *GenPerlinAltitude(int perlin_border_len, int ratio, float amplitude);
 extern _GenPerlinAltitude
 
-; void AccumulateFloatMap(BitMap *accum_to, BitMap *src);
+;void AccumulateFloatMap(BitMap *accum_to, BitMap *src);
 extern _AccumulateFloatMap
 
-; void MultiplyFloatMap(BitMap *mult_to, BitMap *src);
+;void MultiplyFloatMap(BitMap *mult_to, BitMap *src);
 extern _MultiplyFloatMap
 
-; void FloatMapDivide(BitMap *dst, BitMap *src);
+;void FloatMapDivide(BitMap *dst, BitMap *src);
 extern _FloatMapDivide
 
-; void FloatMapApplyGain(BitMap *map, float gain);
+;void FloatMapApplyGain(BitMap *map, float gain);
 extern _FloatMapApplyGain
 
-; BitMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers, float curve);
+;BitMap *GenMultiLayerPerlinAltitude(int size, float amplitude, int num_layers, float curve);
 extern _GenMultiLayerPerlinAltitude
 
-; typedef struct radmap_s
-; {
-; 	size_t items;
-; 	struct item
-; 	{
-;  		int16_t x, y;
-;  	}[0];
-; } radmap_t, *radmap_p;
-; radmap_p GenRadiusMap(int16_t radius);
-; // The returned pointer should be `free()`d.
+;typedef struct radmap_s
+;{
+;	size_t items;
+;	struct item
+;	{
+; 		int16_t x, y;
+; 	}[0];
+;} radmap_t, *radmap_p;
+;radmap_p GenRadiusMap(int16_t radius);
+;// The returned pointer should be `free()`d.
 extern _GenRadiusMap
 
-; BitMap *GenDistanceMap(int size);
+;BitMap *GenDistanceMap(int size);
 extern _GenDistanceMap
 
 %macro InstBMDataCmn 0
@@ -310,45 +310,45 @@ struc BMDataCmn
 	InstBMDataCmn
 endstruc
 
-; BitMap *BitMapMTPool(
-; 	BitMap *src,
-; 	int num_workers,
-; 	void *userdata,
-; 	int(*work_proc)(BMDataCmn *param, size_t index),
-; 	size_t stack_size);
-; // Each line of the bitmap were processed by `work_proc()`
-; // The `index` param for `work_proc()` is the row number of the bitmap
+;BitMap *BitMapMTPool(
+;	BitMap *src,
+;	int num_workers,
+;	void *userdata,
+;	int(*work_proc)(BMDataCmn *param, size_t index),
+;	size_t stack_size);
+;// Each line of the bitmap were processed by `work_proc()`
+;// The `index` param for `work_proc()` is the row number of the bitmap
 extern _BitMapMTPool
 
-; float FloatMapGetMaxValue(BitMap *src);
+;float FloatMapGetMaxValue(BitMap *src);
 extern _FloatMapGetMaxValue
 
-; float FloatMapGetMinValue(BitMap *src);
+;float FloatMapGetMinValue(BitMap *src);
 extern _FloatMapGetMinValue
 
-; void FloatMapClamp(BitMap *map, float max, float min);
+;void FloatMapClamp(BitMap *map, float max, float min);
 extern _FloatMapClamp
 
-; void BitMapBlt(
-; 	BitMap *dst,
-; 	int dst_x, int dst_y,
-; 	int dst_w, int dst_h,
-; 	BitMap *src,
-; 	int src_x, int src_y,
-; 	void *userdata,
-; 	void (*line_proc)(
-; 		float *dst,
-; 		const float *src,
-; 		size_t num_pixels,
-; 		void *userdata
-; 	)
-; );
+;void BitMapBlt(
+;	BitMap *dst,
+;	int dst_x, int dst_y,
+;	int dst_w, int dst_h,
+;	BitMap *src,
+;	int src_x, int src_y,
+;	void *userdata,
+;	void (*line_proc)(
+;		float *dst,
+;		const float *src,
+;		size_t num_pixels,
+;		void *userdata
+;	)
+;);
 extern _BitMapBlt
 
-; void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
+;void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
 extern _FloatMapCurve
 
-; BitMap *FloatMapNextMip(BitMap *map);
+;BitMap *FloatMapNextMip(BitMap *map);
 extern _FloatMapNextMip
 
 %macro InstSimpleVertex 0
@@ -368,14 +368,15 @@ extern _FloatMapNextMip
 struc SimpleVertex
 	InstSimpleVertex
 endstruc
-struc SimpleMesh ; All data of a `SimpleMesh` must be `malloc()` once
+struc SimpleMesh ;All data of a `SimpleMesh` must be `malloc()` once
 	.vertices resd 1
 	.indices resd 1
 	.num_vertices resd 1
 	.num_indices resd 1
 	.size equ $ - SimpleMesh
 endstruc
-; SimpleMesh *AltitudeToTerrain(BitMap *src, float height_mod, float size_mod);
+
+;SimpleMesh *AltitudeToTerrain(BitMap *src, float height_mod, float size_mod);
 extern _AltitudeToTerrain
 
 %endif
