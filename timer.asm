@@ -143,7 +143,5 @@ DefFunc _HybridWaitUs
 	ret
 	%undef _TimeValL
 	%undef _TimeValH
-	%undef _CurTimeL
-	%undef _CurTimeH
 	%undef _WaitedUsL
 	%undef _WaitedUsH
