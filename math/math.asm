@@ -26,6 +26,7 @@ MakeVector _Rand4AndVal
 MakeVector _FPMPM
 MakeVector _FMPMP
 MakeVector _FMMMM
+MakeVector _I1111
 MakeVector _F1111
 MakeVector _F2222
 MakeVector _F3333
@@ -126,6 +127,7 @@ DefFunc _MathInit
 	mov dword [_Rand4MulVal + (ecx - 1) * 4], 0x343fD
 	mov dword [_Rand4AddVal + (ecx - 1) * 4], 0x269EC3
 	mov word  [_Rand4AndVal + (ecx - 1) * 4], 0x7FFF
+	mov byte  [_I1111 + (ecx - 1) * 4], 1
 	add edx, 20
 	loop .init_math_loop
 	xorps xmm0, xmm0

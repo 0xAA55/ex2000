@@ -134,6 +134,7 @@ extern _HaveSSE3
 extern _HaveSSE41
 extern _FMAX
 extern _FMIN
+extern _I1111
 extern _F1000
 extern _F0100
 extern _F0010
