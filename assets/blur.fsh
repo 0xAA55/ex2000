@@ -10,7 +10,7 @@ const float min_attenuation = 2.0;
 
 void main()
 {
-	vec2 texture_size = textureSize(hdr_texture, 0);
+	vec2 texture_size = vec2(textureSize(hdr_texture, 0));
 	vec2 standard_size_mod = vec2(standard_size.x, standard_size.x * texture_size.y / texture_size.x);
 	float avr_brightness = length(textureLod(hdr_texture, vec2(0.5), 1000.0).rgb);
 	color = texture2D(hdr_texture, texcoord);
