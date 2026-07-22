@@ -4,6 +4,7 @@ OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
 OBJS_D=$(patsubst %.asm, $(OBJ_DIR)/%_d.obj, $(SRCS))
 LIBS=out/math.lib lib/kernel32.lib
 DEFS:=
+ASMFLAGS=
 
 all: ex2000.exe
 .PHONY: clean again
@@ -38,10 +39,10 @@ out/stub.bin: stub.asm
 	nasm $^ -o $@
 out/%_d.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-	nasm -f win32 -g -D_DEBUG $(DEFS) $^ -o $@
+	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) $^ -o $@
 out/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-	nasm -f win32 -g $(DEFS) $^ -o $@
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
 out/assets.cab: $(wildcard assets/*)
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\*
