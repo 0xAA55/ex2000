@@ -46,7 +46,7 @@ out/%.obj: %.asm
 out/assets.cab: $(wildcard assets/*)
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\*
-out/math.lib: $(wildcard math/*)
+out/math.lib: $(wildcard math/*) loaddll.inc pool.inc math.inc
 	make -C math
 
 ex2000.exe: $(OBJS) $(LIBS) out/stub.bin

@@ -11,7 +11,8 @@ ASMFLAGS=
 	copy $@+
 
 all: ../out/math.lib
-common.inc: ../math.inc ../pool.inc
+../loaddll.inc: ../frame.inc
+common.inc: ../math.inc ../pool.inc ../loaddll.inc
 dmap.asm: common.inc
 batchadd.asm: common.inc
 batchmax.asm: common.inc
