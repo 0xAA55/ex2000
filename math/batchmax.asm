@@ -2,7 +2,8 @@
 %include "avlbst.inc"
 
 DefFunc _BatchMax
-	FrameBegin 8, ebx, esi, edi
+	FrameBegin ebx, esi, edi
+	DefSizedVar %$VectorBuffer, 32
 
 	lea edi, Variable(4)
 	and edi, 0xFFFFFFF0

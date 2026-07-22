@@ -4,8 +4,8 @@
 
 %ifndef _EULER_DEBUG
 DefFunc _MatrixRotationEuler
-	FrameBegin 6
-	AssignVars _CY, _SY, _CP, _SP, _CR, _SR
+	FrameBegin
+	DefVars %$CosY, %$SinY, %$CosP, %$SinP, %$CosR, %$SinR
 
 	xor eax, eax
 	mov ecx, 3
@@ -37,23 +37,23 @@ DefFunc _MatrixRotationEuler
 	;zz = cy * cp
 	;ww = 1.0
 
-	movss xmm0, _SP
-	movss xmm1, _SP
-	movss xmm2, _CY
-	movss xmm4, _CP
-	movss xmm5, _SY
-	movss xmm7, _CY
-	mulss xmm0, _SR ;SPSR
-	mulss xmm1, _CR ;SPCR
-	mulss xmm2, _CR
+	movss xmm0, %$SinP
+	movss xmm1, %$SinP
+	movss xmm2, %$CosY
+	movss xmm4, %$CosP
+	movss xmm5, %$SinY
+	movss xmm7, %$CosY
+	mulss xmm0, %$SinR ;SPSR
+	mulss xmm1, %$CosR ;SPCR
+	mulss xmm2, %$CosR
 	movss xmm3, xmm0
 	movss xmm6, xmm1
-	mulss xmm7, _SR
-	mulss xmm4, _SR ;xy
-	mulss xmm3, _SY
-	mulss xmm0, _CY
-	mulss xmm5, _CR
-	mulss xmm6, _SY
+	mulss xmm7, %$SinR
+	mulss xmm4, %$SinR ;xy
+	mulss xmm3, %$SinY
+	mulss xmm0, %$CosY
+	mulss xmm5, %$CosR
+	mulss xmm6, %$SinY
 	addss xmm2, xmm3 ;xx
 	subss xmm0, xmm5 ;xz
 	subss xmm6, xmm7 ;yx
@@ -62,17 +62,17 @@ DefFunc _MatrixRotationEuler
 	movss [eax + Matrix.xz], xmm0
 	movss [eax + Matrix.yx], xmm6
 
-	movss xmm0, _CR
-	mulss xmm1, _CY
-	movss xmm2, _SR
-	movss xmm3, _SY
+	movss xmm0, %$CosR
+	mulss xmm1, %$CosY
+	movss xmm2, %$SinR
+	movss xmm3, %$SinY
 	xorps xmm4, xmm4
-	movss xmm5, _CY
-	mulss xmm0, _CP ;yy
-	mulss xmm2, _SY
-	mulss xmm3, _CP ;zx
-	subss xmm4, _SP ;zy
-	mulss xmm5, _CP ;zz
+	movss xmm5, %$CosY
+	mulss xmm0, %$CosP ;yy
+	mulss xmm2, %$SinY
+	mulss xmm3, %$CosP ;zx
+	subss xmm4, %$SinP ;zy
+	mulss xmm5, %$CosP ;zz
 	addss xmm1, xmm2 ;yz
 	movss [eax + Matrix.yy], xmm0
 	movss [eax + Matrix.zx], xmm3
@@ -83,12 +83,6 @@ DefFunc _MatrixRotationEuler
 
 	FrameEnd
 	ret
-	%undef _CY
-	%undef _SY
-	%undef _CP
-	%undef _SP
-	%undef _CR
-	%undef _SR
 %else
 DefFunc _MakeIdentity
 	movaps xmm0, [_IdentityMatrix + Matrix.x]
@@ -102,7 +96,7 @@ DefFunc _MakeIdentity
 	ret
 
 DefFunc _MatrixRotationX
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	call _MakeIdentity
@@ -119,7 +113,7 @@ DefFunc _MatrixRotationX
 	ret
 
 DefFunc _MatrixRotationY
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	call _MakeIdentity
@@ -136,7 +130,7 @@ DefFunc _MatrixRotationY
 	ret
 
 DefFunc _MatrixRotationZ
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	call _MakeIdentity
@@ -153,7 +147,8 @@ DefFunc _MatrixRotationZ
 	ret
 
 DefFunc _MatrixRotationEuler
-	FrameBegin 0x44, ebx
+	FrameBegin ebx
+	DefSizedVar %$MatrixBuffer, 0x10 + Matrix.size * 4
 
 	lea ebx, Variable(4)
 	and ebx, 0xFFFFFFF0

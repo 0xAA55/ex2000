@@ -78,7 +78,7 @@ extern _W15
 _W15 dw 15
 
 DefFunc _MathInit
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	xor eax, eax
 	inc eax
@@ -176,13 +176,13 @@ DefFunc _MathInit
 	ret
 
 DefFunc _MathDeInit
-	FrameBegin 0
+	FrameBegin
 	FrameEnd
 	ret
 
 %ifdef _DEBUG
 	DefFunc _FMatrix2DMatrix
-		FrameBegin 0, ebx, esi
+		FrameBegin ebx, esi
 
 		mov esi, Param(1)
 		mov edi, Param(0)
@@ -219,7 +219,7 @@ DefFunc _MathDeInit
 		ret
 
 	DefFunc _DebugMatrix
-		FrameBegin 0, ebx
+		FrameBegin ebx
 		invoke_cdecl _aligned_malloc, Matrix.size * 2, 0x10
 		mov ebx, eax
 		invoke_cdecl _FMatrix2DMatrix, ebx, Param(2)

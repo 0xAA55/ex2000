@@ -2,7 +2,7 @@
 
 ; BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
 DefFunc _CreateBitMap
-	FrameBegin 1, ebx, edi
+	FrameBegin ebx, edi
 
 	mov eax, Param(0)
 	invoke_cdecl _malloc, &[eax * 4 + BitMap.head_size]
@@ -48,7 +48,7 @@ DefFunc _CreateBitMap
 	ret
 
 DefFunc _DestroyBitMap
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	test ebx, ebx
@@ -62,7 +62,7 @@ DefFunc _DestroyBitMap
 
 ; float *GetBitmapPixelAddress(int x, int y, BitMap *map);
 DefFunc _GetBitmapPixelAddress
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(2)
 

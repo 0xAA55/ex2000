@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _VectorLength
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _VectorDot, ebx, Param(1), Param(1), Param(2)

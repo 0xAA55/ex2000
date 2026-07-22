@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _SmootherStep
-	FrameBegin 0
+	FrameBegin
 
 	fld dword Param(0)
 	fimul word [_W6]

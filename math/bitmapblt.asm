@@ -1,8 +1,8 @@
 %include "common.inc"
 
 DefFunc _BitMapBlt
-	FrameBegin 8, ebx, esi, edi
-	AssignVars _DX, _DY, _DW, _DH, _DR, _DB, _SX, _SY
+	FrameBegin ebx, esi, edi
+	DefVars %$DX, %$DY, %$DW, %$DH, %$DR, %$DB, %$SX, %$SY
 
 	mov eax, Param(9)
 	mov ecx, _BitMapBltDefLineProc
@@ -50,8 +50,8 @@ DefFunc _BitMapBlt
 	paddd xmm4, xmm1 ;(dw, dh) += (dmx, dmy)
 	movd xmm0, [esi + BitMap.border_len]
 	movd xmm1, [edi + BitMap.border_len]
-	movq _SX, xmm2
-	movq _DX, xmm3
+	movq %$SX, xmm2
+	movq %$DX, xmm3
 	pshufd xmm0, xmm0, 0 ;sl, sl, sl, sl
 	pshufd xmm1, xmm1, 0 ;dl, dl, dl, dl
 	movq xmm5, xmm2
@@ -67,7 +67,7 @@ DefFunc _BitMapBlt
 	pmovmskb eax, xmm2
 	test eax, eax ;if (se) return 0;
 	jnz .no_pixels_todo_ret
-	movq xmm5, _DX
+	movq xmm5, %$DX
 	paddd xmm4, xmm5 ;(dr, db) = (dx, dy) + (dw, dh)
 	pxor xmm2, xmm2
 	pxor xmm3, xmm3
@@ -84,8 +84,8 @@ DefFunc _BitMapBlt
 	pand xmm2, xmm1 ;f ? (dl, dl) : (0, 0)
 	pandn xmm3, xmm4 ;f ? (0, 0) : (dr, db)
 	por xmm2, xmm3 ;(dr, db) = min((dr, db), (dl, dl))
-	movq _DR, xmm2
-	movq xmm1, _DX
+	movq %$DR, xmm2
+	movq xmm1, %$DX
 	psubd xmm2, xmm1 ;(dw, dh) = (dr, db) - (dx, dy)
 	movq xmm4, xmm2 ;(dw, dh)
 	pcmpgtd xmm2, xmm0 ;if ((dw, dh) > (sl, sl)) f = 1;
@@ -93,37 +93,37 @@ DefFunc _BitMapBlt
 	pand xmm2, xmm0 ;f ? (sl, sl) : (0, 0)
 	pandn xmm3, xmm4 ;f ? (0, 0) : (dw, dh)
 	por xmm2, xmm3 ;(dw, dh) = min((dw, dh), (sl, sl))
-	movq _DW, xmm2
+	movq %$DW, xmm2
 
-	mov eax, _DX
+	mov eax, %$DX
 	mul dword [edi + BitMap.bytes_per_pixel]
-	mov _DX, eax
+	mov %$DX, eax
 
-	mov eax, _SX
+	mov eax, %$SX
 	mul dword [esi + BitMap.bytes_per_pixel]
-	mov _SX, eax
+	mov %$SX, eax
 
 	xor eax, eax
-	mov _DY, eax
+	mov %$DY, eax
 .loopy:
-	mov ecx, _SY
+	mov ecx, %$SY
 	mov eax, [edi + BitMap.row_ptr + eax * 4]
 	mov edx, [esi + BitMap.row_ptr + ecx * 4]
 	inc ecx
-	mov _SY, ecx
+	mov %$SY, ecx
 
-	add eax, _DX
-	add edx, _SX
-	invoke_cdecl Param(9), eax, edx, _DW, ebx
+	add eax, %$DX
+	add edx, %$SX
+	invoke_cdecl Param(9), eax, edx, %$DW, ebx
 
-	mov eax, _DY
+	mov eax, %$DY
 	inc eax
-	mov _DY, eax
-	cmp eax, _DH
+	mov %$DY, eax
+	cmp eax, %$DH
 	jb .loopy
 
-	mov eax, _DW
-	mul dword _DH
+	mov eax, %$DW
+	mul dword %$DH
 	jmp .end
 .no_pixels_todo_ret:
 	xor eax, eax
@@ -131,17 +131,9 @@ DefFunc _BitMapBlt
 .end:
 	FrameEnd
 	ret
-	%undef _DX
-	%undef _DY
-	%undef _DW
-	%undef _DH
-	%undef _DR
-	%undef _DB
-	%undef _SX
-	%undef _SY
 
 DefFunc _BitMapBltDefLineProc
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(3)
 	mov eax, [ebx + BitMap.dims]

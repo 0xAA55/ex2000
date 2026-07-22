@@ -234,7 +234,7 @@ _BillBoardVertices:
 
 ;int SceneInit();
 DefFunc _SceneInit
-	FrameBegin 0, ebx, esi
+	FrameBegin ebx, esi
 
 	invoke_cdecl _InitTimer, _Timer
 	invoke_cdecl _VBlankInit
@@ -289,28 +289,28 @@ DefFunc _SceneInit
 	ret
 
 DefFunc _SceneLoad00
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _GenMultiLayerPerlinAltitude, 1024, 1.0f, 7, 200.0f
 	mov [_NoiseBitmap], eax
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad01
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _DuplicateBitMap, [_NoiseBitmap]
 	mov [_TerrainBitmap], eax
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad02
-	FrameBegin 0, ebx
+	FrameBegin ebx
 	mov ebx, [_TerrainBitmap]
 	invoke_cdecl _FloatMapCurve, ebx, _TerrainCurvePoints, _TerrainCurvePoints.num_points
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad03
-	FrameBegin 0, ebx
+	FrameBegin ebx
 	mov ebx, [_TerrainBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _TerrainTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
@@ -327,7 +327,7 @@ DefFunc _SceneLoad03
 	ret
 
 DefFunc _SceneLoad04
-	FrameBegin 0, ebx
+	FrameBegin ebx
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _TerrainTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
@@ -345,7 +345,7 @@ DefFunc _SceneLoad04
 	ret
 
 DefFunc _SceneLoad05
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 	mov ebx, _DrawSceneProgram
 	SceneLoadShaderProgram ebx, "assets\billboard.vsh", 0, "assets\terrain.fsh"
 	test eax, eax
@@ -390,7 +390,7 @@ DefFunc _SceneLoad05
 	ret
 
 DefFunc _SceneLoad06
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 	invoke_dll_stdcall glGenFramebuffers, 1, _RTTFramebuffer
 	mov ebx, _DrawBlurProgram
 	SceneLoadShaderProgram ebx, "assets\billboard.vsh", 0, "assets\blur.fsh"
@@ -420,7 +420,7 @@ DefFunc _SceneLoad06
 	ret
 
 DefFunc _SceneLoad07
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 	invoke_dll_stdcall glGenFramebuffers, 1, _RTTFramebuffer
 	mov ebx, _DrawHDR2LDRProgram
 	SceneLoadShaderProgram ebx, "assets\billboard.vsh", 0, "assets\hdr2ldr.fsh"
@@ -452,27 +452,27 @@ DefFunc _SceneLoad07
 	ret
 
 DefFunc _SceneLoad08
-	FrameBegin 0
+	FrameBegin
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad09
-	FrameBegin 0
+	FrameBegin
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad0A
-	FrameBegin 0
+	FrameBegin
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad0B
-	FrameBegin 0
+	FrameBegin
 	FrameEnd
 	ret
 
 DefFunc _SceneLoadProgressive
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, [_SceneLoadingProgress]
 	cmp ebx, 0
@@ -507,7 +507,7 @@ extern _NumItemsToLoad
 _NumItemsToLoad equ ($ - .load_sequence) / 4
 
 DefFunc _SceneUnload
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	invoke_cdecl _HRSleepDeInit
 	invoke_cdecl _VBlankDeInit
@@ -566,24 +566,24 @@ DefFunc _Scene
 .num_keys_to_detect equ $ - .keys_to_detect
 __SECT__
 
-	FrameBegin 19, ebx, esi, edi
-	AssignVars TimerValue32, DeltaTimeL, DeltaTimeH, DeltaTime32 ;4
-	AssignVars KeyW, KeyS, KeyA, KeyD, KeySpace, KeyCtrl, KeyEscape ;7
-	AssignVars VPWidth, VPHeight, VPSize, VPWidthLow, VPHeightLow, VPSizeLow ;6
-	AssignVars CurMovementSpeed, FramesPerSec ;2
+	FrameBegin ebx, esi, edi
+	DefVars %$TimerValue32, %$DeltaTimeL, %$DeltaTimeH, %$DeltaTime32 ;4
+	DefVars %$KeyW, %$KeyS, %$KeyA, %$KeyD, %$KeySpace, %$KeyCtrl, %$KeyEscape ;7
+	DefVars %$VPWidth, %$VPHeight, %$VPSize, %$VPWidthLow, %$VPHeightLow, %$VPSizeLow ;6
+	DefVars %$CurMovementSpeed, %$FramesPerSec ;2
 
 	xor eax, eax
-	mov ecx, Frame_NumLocals
-	lea edi, TimerValue32
+	mov ecx, %$Frame_NumLocals
+	lea edi, %$TimerValue32
 	rep stosd
 
 	fld qword [_Timer.TimerVal]
-	fstp qword DeltaTimeL
+	fstp qword %$DeltaTimeL
 	invoke_cdecl _UpdateTimer, _Timer
-	fst dword TimerValue32
-	fsub qword DeltaTimeL
-	fst qword DeltaTimeL
-	fstp dword DeltaTime32
+	fst dword %$TimerValue32
+	fsub qword %$DeltaTimeL
+	fst qword %$DeltaTimeL
+	fstp dword %$DeltaTime32
 
 	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
 	movq xmm0, [_ClientRect.left]
@@ -598,7 +598,7 @@ __SECT__
 	cmp eax, [_hWnd]
 	jnz .after_check_input
 	mov esi, .keys_to_detect
-	lea edi, KeyW
+	lea edi, %$KeyW
 .loop_check_keys:
 	xor eax, eax
 	lodsb
@@ -608,7 +608,7 @@ __SECT__
 	stosd
 	jmp .loop_check_keys
 .after_check_keys:
-	cmp dword KeyEscape, 0
+	cmp dword %$KeyEscape, 0
 	jnz .quit
 
 	movq xmm1, [_WindowRect.right]
@@ -650,29 +650,29 @@ __SECT__
 	sub ecx, [_ClientRect.top]
 	cvtsi2ss xmm0, eax
 	cvtsi2ss xmm1, ecx
-	mov VPWidth, eax
-	mov VPHeight, ecx
+	mov %$VPWidth, eax
+	mov %$VPHeight, ecx
 	divss xmm0, xmm1
 	movss [_Aspect], xmm0
 	shl ecx, 16
 	or eax, ecx
-	mov VPSize, eax
+	mov %$VPSize, eax
 	xor edx, edx
 	inc edx
-	mov eax, VPWidth
-	mov ecx, VPHeight
+	mov eax, %$VPWidth
+	mov ecx, %$VPHeight
 	shr eax, 2
 	shr ecx, 2
 	cmp eax, edx
 	cmovb eax, edx
 	cmp ecx, edx
 	cmovb ecx, edx
-	mov VPWidthLow, eax
-	mov VPHeightLow, ecx
+	mov %$VPWidthLow, eax
+	mov %$VPHeightLow, ecx
 	shl ecx, 16
 	or eax, ecx
-	mov VPSizeLow, eax
-	mov eax, VPSize
+	mov %$VPSizeLow, eax
+	mov eax, %$VPSize
 	cmp eax, [_HDRLensTextureSize]
 	jz .hdr_texture_size_good
 
@@ -686,18 +686,18 @@ __SECT__
 
 	invoke_dll_stdcall glGenTextures, 1, ebx
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, VPWidth, VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 
-	mov eax, VPSize
+	mov eax, %$VPSize
 	mov [_HDRLensTextureSize], eax
 
 .hdr_texture_good:
-	mov eax, VPSize
+	mov eax, %$VPSize
 	mov ebx, _RTTDepthBuffer
 	cmp eax, [_RTTDepthBufferSize]
 	jz .depth_buffer_size_good
@@ -712,14 +712,14 @@ __SECT__
 
 	invoke_dll_stdcall glGenRenderbuffers, 1, ebx
 	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [ebx]
-	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, VPWidth, VPHeight
+	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, %$VPWidth, %$VPHeight
 	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, 0
 
-	mov eax, VPSize
+	mov eax, %$VPSize
 	mov [_RTTDepthBufferSize], eax
 
 .depth_buffer_good:
-	mov eax, VPSizeLow
+	mov eax, %$VPSizeLow
 	mov ebx, _HDRBlurTexture
 	cmp eax, [_HDRBlurTextureSize]
 	jz .hdr_blur_texture_size_good
@@ -734,14 +734,14 @@ __SECT__
 
 	invoke_dll_stdcall glGenTextures, 1, ebx
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, VPWidthLow, VPHeightLow, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidthLow, %$VPHeightLow, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 
-	mov eax, VPSizeLow
+	mov eax, %$VPSizeLow
 	mov [_HDRBlurTextureSize], eax
 
 .hdr_blur_texture_good:
@@ -775,7 +775,7 @@ __SECT__
 	mov edx, eax
 	dec eax
 	movaps xmm0, [_MovementSpeed]
-	movss xmm1, DeltaTime32
+	movss xmm1, %$DeltaTime32
 	mulss xmm1, [_DefaultMovementSpeed]
 	addss xmm1, xmm1
 	shufps xmm1, xmm1, 0
@@ -785,34 +785,34 @@ __SECT__
 	mulps xmm2, xmm1
 	mulps xmm3, xmm1
 	mulps xmm4, xmm1
-	test eax, KeyW
+	test eax, %$KeyW
 	jz .no_w
 	subps xmm0, xmm2
 .no_w:
-	test eax, KeyS
+	test eax, %$KeyS
 	jz .no_s
 	addps xmm0, xmm2
 .no_s:
-	test eax, KeyA
+	test eax, %$KeyA
 	jz .no_a
 	subps xmm0, xmm3
 .no_a:
-	test eax, KeyD
+	test eax, %$KeyD
 	jz .no_d
 	addps xmm0, xmm3
 .no_d:
-	test eax, KeySpace
+	test eax, %$KeySpace
 	jz .no_space
 	addps xmm0, xmm4
 .no_space:
-	test eax, KeyCtrl
+	test eax, %$KeyCtrl
 	jz .no_ctrl
 	subps xmm0, xmm4
 .no_ctrl:
 	movaps [_MovementSpeed], xmm0
-	invoke_cdecl _VectorLength, &CurMovementSpeed, _MovementSpeed, 3
+	invoke_cdecl _VectorLength, &%$CurMovementSpeed, _MovementSpeed, 3
 	mov eax, __?float32?__(0.00001)
-	movss xmm1, CurMovementSpeed
+	movss xmm1, %$CurMovementSpeed
 	movd xmm2, eax
 	ucomiss xmm1, xmm2
 	jbe .no_decel
@@ -820,16 +820,16 @@ __SECT__
 	shufps xmm1, xmm1, 0
 	rcpps xmm1, xmm1
 	mulps xmm0, xmm1 ;xmm0 = normalize(_MovementSpeed)
-	movss xmm1, CurMovementSpeed
+	movss xmm1, %$CurMovementSpeed
 	xorps xmm2, xmm2
 	movss xmm3, [_DefaultMovementSpeed]
-	mulss xmm3, DeltaTime32
+	mulss xmm3, %$DeltaTime32
 	subss xmm1, xmm3
 	maxps xmm1, xmm2
 	shufps xmm1, xmm1, 0 ;xmm1 = CurSpeed - DefSpeed * DeltaTime
 	mulps xmm0, xmm1 ;xmm0 = NormalizedSpeed * xmm1
 	movaps [_MovementSpeed], xmm0
-	movss xmm1, DeltaTime32
+	movss xmm1, %$DeltaTime32
 	shufps xmm1, xmm1, 0
 	mulps xmm0, xmm1
 	addps xmm0, [_CameraPos]
@@ -847,7 +847,7 @@ __SECT__
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_RTTDepthBuffer]
 	call .check_fbo
 
-	invoke_dll_stdcall glViewport, 0, 0, VPWidth, VPHeight
+	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
 	call .clear_buffers
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
@@ -857,7 +857,7 @@ __SECT__
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawSceneProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawSceneProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform3fv, [_DrawSceneProgramLocations.CameraPosition], 1, _CameraPos
-	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.Time], TimerValue32
+	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.Time], %$TimerValue32
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainHeight], [_TerrainMapHeight]
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainScaling], [_TerrainMapScaling]
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.SeaLevel], [_SeaLevel]
@@ -876,7 +876,7 @@ __SECT__
 	add eax, GL_COLOR_ATTACHMENT0
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRBlurTexture], 0
 	call .check_fbo
-	invoke_dll_stdcall glViewport, 0, 0, VPWidthLow, VPHeightLow
+	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthLow, %$VPHeightLow
 	call .clear_buffers
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
@@ -913,10 +913,10 @@ __SECT__
 	invoke_dll_stdcall glUseProgram, 0
 
 	fld1
-	fdiv qword DeltaTimeL
-	fstp dword FramesPerSec
+	fdiv qword %$DeltaTimeL
+	fstp dword %$FramesPerSec
 
-	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %d us\t渲染耗时：%d us\n`, f2d FramesPerSec, [_VBlankWithDelayTimeUsedUs], [_LastFrameRenderTimeUs]
+	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %d us\t渲染耗时：%d us\n`, f2d %$FramesPerSec, [_VBlankWithDelayTimeUsedUs], [_LastFrameRenderTimeUs]
 
 .end_of_frame:
 	invoke_cdecl _SwapBuffers
@@ -944,34 +944,15 @@ __SECT__
 	invoke_dll_stdcall glClearDepth, 1.0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 	ret
-	%undef TimerValue32
-	%undef DeltaTimeL
-	%undef DeltaTimeH
-	%undef DeltaTime32
-	%undef KeyW
-	%undef KeyS
-	%undef KeyA
-	%undef KeyD
-	%undef KeySpace
-	%undef KeyCtrl
-	%undef KeyEscape
-	%undef VPWidth
-	%undef VPHeight
-	%undef VPSize
-	%undef VPWidthLow
-	%undef VPHeightLow
-	%undef VPSizeLow
-	%undef CurMovementSpeed
-	%undef FramesPerSec
 
 DefFunc _SwapBuffersNoVSync
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_stdcall wglSwapBuffers, [_hDC]
 	FrameEnd
 	ret
 
 DefFunc _SwapBuffers
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _SwapBuffersNoVSync
 	invoke_cdecl _WaitForVBlank
 	FrameEnd

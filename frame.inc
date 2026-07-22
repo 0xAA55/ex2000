@@ -5,37 +5,36 @@
 ; %define INVOKE_CHECK
 
 %macro DefFunc 1
+	extern %1
 	%xdefine CurFuncName %1
+	segment .stack_of_ %+ CurFuncName info
 	segment .text
-	extern %1:
 	%1:
+	[segment %[.stack_of_ %+ CurFuncName]]
+	.stack_begin:
+	__SECT__
 %endmacro
 
-%macro FrameBegin 1-2+
-	%assign Frame_NumVariables %1
-	%assign Frame_NumLocals Frame_NumVariables
-	%assign Frame_NumSavedRegs 0
+%macro FrameBegin 0-1+
+	%push StackFrame
+	%assign %$Frame_NumVariables 0
+	%define %$Frame_NumLocals ((.stack_end - .stack_begin) / 4)
+	%assign %$Frame_NumSavedRegs 0
 	%ifdef Frame_UseEBP
 		push ebp
 		mov ebp, esp
 	%endif
-	%if %0 > 1
-		%xdefine Frame_SavedRegs %2
-		FrameSaveRegs Frame_SavedRegs
-	%else
-		%undef Frame_SavedRegs
+	%if %0 > 0
+		%xdefine %$Frame_SavedRegs %1
+		FrameSaveRegs %$Frame_SavedRegs
 	%endif
-	%if Frame_NumLocals != 0
-		sub esp, Frame_NumLocals * 4
-	%endif
-	%assign CurVarIndex 0
-	%assign CurPrmIndex 0
+	%assign %$CurPrmIndex 0
 %endmacro
 
 %ifdef Frame_UseEBP
 	%define AddrOfParam(x) (ebp + (x + 2) * 4)
 %else
-	%define AddrOfParam(x) (esp + (Frame_NumSavedRegs + Frame_NumLocals + (x) + 1) * 4)
+	%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + (x) + 1) * 4)
 %endif
 %define AddrOfVariable(x) (esp + (x) * 4)
 %define AddrOfCallParam(x) %error There are no addresses for call params
@@ -47,44 +46,65 @@
 %define RoundUp(x, r) (GetNumRooms(x, r) * (r))
 %define SizedVar(x) GetNumRooms(x, 4)
 
-%macro AssignVars 1-*
+%macro DefVars 1-*
+	%if %$Frame_NumVariables == 0
+		sub esp, %$Frame_NumLocals * 4
+	%endif
+	[segment %[.stack_of_ %+ CurFuncName]]
+	[warning -zeroing]
 	%rep %0
-		%define %1 Variable(%[CurVarIndex])
-		%assign CurVarIndex CurVarIndex + 1
+		%[.var_ %+ %$Frame_NumVariables] resd 1
+		%xdefine %1 Variable(%[%$Frame_NumVariables])
+		%assign %$Frame_NumVariables %$Frame_NumVariables + 1
 		%rotate 1
 	%endrep
+	[warning +zeroing]
+	__SECT__
 %endmacro
 
-%macro AssignSizedVar 2
-	%define %1%[_Addr] AddrOfVariable(%[CurVarIndex])
-	%define %1 Variable(%[CurVarIndex])
-	%assign CurVarIndex CurVarIndex + GetNumRooms(%2, 4)
+%macro DefSizedVar 2
+	%if %$Frame_NumVariables == 0
+		sub esp, %$Frame_NumLocals * 4
+	%endif
+	%assign %%NumRooms GetNumRooms(%2, 4)
+	%xdefine %1%[_Addr] AddrOfVariable(%[%$Frame_NumVariables])
+	%xdefine %1 Variable(%[%$Frame_NumVariables])
+	[segment %[.stack_of_ %+ CurFuncName]]
+	[warning -zeroing]
+	%[.var_ %+ %$Frame_NumVariables] resd %%NumRooms
+	%assign %$Frame_NumVariables %$Frame_NumVariables + %%NumRooms
+	[warning +zeroing]
+	__SECT__
 %endmacro
 
 %macro NameParams 1-*
 	%rep %0
-		%define %1 Param(%[CurPrmIndex])
-		%assign CurPrmIndex CurPrmIndex + 1
+		%define %1 Param(%[%$CurPrmIndex])
+		%assign %$CurPrmIndex %$CurPrmIndex + 1
 		%rotate 1
 	%endrep
 %endmacro
 
 %macro FrameEnd 0
-	%if Frame_NumLocals != 0
-		add esp, Frame_NumLocals * 4
+	[segment %[.stack_of_ %+ CurFuncName]]
+	.stack_end:
+	__SECT__
+	%if %$Frame_NumLocals != 0
+		add esp, %$Frame_NumLocals * 4
 	%endif
-	%ifdef Frame_SavedRegs
-		FrameStoreRegs Frame_SavedRegs
+	%ifdef %$Frame_SavedRegs
+		FrameStoreRegs %$Frame_SavedRegs
 	%endif
 	%ifdef Frame_UseEBP
 		pop ebp
 	%endif
+	%pop
 %endmacro
 
 %macro FrameSaveRegs 1-*
 	%rep %0
 		push %1
-		%assign Frame_NumSavedRegs Frame_NumSavedRegs + 1
+		%assign %$Frame_NumSavedRegs %$Frame_NumSavedRegs + 1
 		%rotate 1
 	%endrep
 %endmacro
@@ -93,7 +113,7 @@
 	%rep %0
 		%rotate -1
 		pop %1
-		%assign Frame_NumSavedRegs Frame_NumSavedRegs - 1
+		%assign %$Frame_NumSavedRegs %$Frame_NumSavedRegs - 1
 	%endrep
 %endmacro
 

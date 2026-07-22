@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _MatrixProjection
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	xorps xmm0, xmm0

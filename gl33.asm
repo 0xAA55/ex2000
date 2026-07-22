@@ -542,7 +542,7 @@ DefFunc _isdigit_al
 	ret
 
 DefFunc _CheckOpenGLProcAddress
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	test eax, eax
@@ -564,7 +564,7 @@ DefFunc _CheckOpenGLProcAddress
 	ret
 
 DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_cdecl strcpy, [_FuncNameBuf], Param(0)
 	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
 	test eax, eax
@@ -576,8 +576,8 @@ DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 	ret
 
 DefFunc _InitGL33
-	FrameBegin 2, esi, edi
-	AssignVars EcxHome, AssetLength
+	FrameBegin esi, edi
+	DefVars %$RegHome, %$AssetLength
 
 	LoadFuncsFromAssets _FirstWGLFuncAddr, [_addr_of_OpenGL32], 'assets\WGLFUNC', (_LastWGLFuncAddr - _FirstWGLFuncAddr) / 4
 
@@ -655,17 +655,17 @@ DefFunc _InitGL33
 	mov [_OpenGL_Ver_Release], eax
 
 .version_parsed:
-	AssetsQuery 'assets\GL33FUNC', &AssetLength
+	AssetsQuery 'assets\GL33FUNC', &%$AssetLength
 	mov esi, eax
-	invoke_cdecl _NLtoNUL, eax, AssetLength
+	invoke_cdecl _NLtoNUL, eax, %$AssetLength
 	mov ecx, (_LastGL33FuncAddr - _FirstGL33FuncAddr) / 4
 	mov edi, _FirstGL33FuncAddr
 .loop_init_gl:
-	mov EcxHome, ecx
+	mov %$RegHome, ecx
 	invoke_cdecl _GetGLProcAddress, esi
 	stosd
 	call _NextString
-	mov ecx, EcxHome
+	mov ecx, %$RegHome
 	loop .loop_init_gl
 
 	invoke_dll_cdecl strlen, [_OpenGLNullFunctions]
@@ -680,18 +680,18 @@ DefFunc _InitGL33
 	inc eax
 
 .exit:
-	mov Variable(0), eax
+	mov %$RegHome, eax
 	invoke_cdecl _free, [_OpenGLNullFunctions]
 	invoke_cdecl _free, [_FailInfoBuffer]
 	invoke_cdecl _free, [_FuncNameBuf]
 	xor eax, eax
 	mov [_OpenGLNullFunctions], eax
-	mov eax, Variable(0)
+	mov eax, %$RegHome
 	FrameEnd
 	ret
 
 DefFunc _DeInitGL33
-	FrameBegin 0
+	FrameBegin
 
 	xor eax, eax
 	invoke_dll_stdcall wglMakeCurrent, eax, eax

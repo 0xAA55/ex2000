@@ -181,8 +181,8 @@ _addr_of_WinMM    resd 1
 _NumDlls equ ($ - _FirstDllAddr) / 4
 
 DefFunc _InitLoadLibrary
-	FrameBegin 1, ebx, esi, edi
-	AssignVars Index
+	FrameBegin ebx, esi, edi
+	DefVars %$Index
 	mov eax, [fs:0x30]		; EAX = &PEB
 	mov eax, [eax + 0x0C]	; EAX = &(PEB->Ldr)
 	mov eax, [eax + 0x14]	; EAX = PEB->Ldr.InMemOrder.Flink (Current EXE)
@@ -205,9 +205,9 @@ DefFunc _InitLoadLibrary
 
 	; Get index of GetProcAddress
 	xor ecx, ecx
-	mov Index, ecx
+	mov %$Index, ecx
 .loop_get_func:
-	inc dword Index
+	inc dword %$Index
 	mov esi, [eax]
 	add esi, ebx
 	mov edi, .get_proc_address
@@ -217,7 +217,7 @@ DefFunc _InitLoadLibrary
 	add eax, 4
 	jmp .loop_get_func
 .found:
-	mov ecx, Index
+	mov ecx, %$Index
 
 	; Get the address of GetProcAddress by the index
 	mov esi, [edx + 0x24]    ; ESI = Offset of Index Table
@@ -266,7 +266,6 @@ DefFunc _InitLoadLibrary
 
 	FrameEnd
 	ret
-	%undef Index
 
 segment .rdata
 	.get_proc_address db 'GetProcAddress', 0
@@ -300,7 +299,7 @@ DefFunc _NextString
 	ret
 
 DefFunc _NLtoNUL
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov esi, Param(0)
 	mov ecx, Param(1)
@@ -318,49 +317,48 @@ DefFunc _NLtoNUL
 
 ; void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
 DefFunc _LoadFuncsFromAssets
-	FrameBegin 1, ebx, esi, edi
-	AssignVars SizeOfNames
+	FrameBegin ebx, esi, edi
+	DefVars %$SizeOfNames
 
 	mov edi, Param(0)
 	mov ebx, Param(1)
-	invoke_cdecl _AssetsQuery, Param(2), &SizeOfNames
+	invoke_cdecl _AssetsQuery, Param(2), & %$SizeOfNames
 	mov esi, eax
-	invoke_cdecl _NLtoNUL, esi, SizeOfNames
+	invoke_cdecl _NLtoNUL, esi, %$SizeOfNames
 
 	mov ecx, Param(3)
 	call _LoadFuncGroup
 
 	FrameEnd
 	ret
-	%undef SizeOfNames
 
 DefFunc _InitDelayedLoadFunc
-	FrameBegin 1, ebx
-	AssignVars SizeOfFuncs
+	FrameBegin ebx
+	DefVars %$SizeOfFuncs
 
-	AssetsQuery 'assets\CFUNC', &SizeOfFuncs
+	AssetsQuery 'assets\CFUNC', & %$SizeOfFuncs
 	mov ebx, eax
-	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	invoke_cdecl _NLtoNUL, ebx, %$SizeOfFuncs
 	dll_func_group_load_alter_name MSVCRT, CFunc_DelayedLoad, ebx
 
-	AssetsQuery 'assets\KFUNC', &SizeOfFuncs
+	AssetsQuery 'assets\KFUNC', & %$SizeOfFuncs
 	mov ebx, eax
-	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	invoke_cdecl _NLtoNUL, ebx, %$SizeOfFuncs
 	dll_func_group_load_alter_name Kernel32, KFunc_DelayedLoad, ebx
 
-	AssetsQuery 'assets\UFUNC', &SizeOfFuncs
+	AssetsQuery 'assets\UFUNC', & %$SizeOfFuncs
 	mov ebx, eax
-	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	invoke_cdecl _NLtoNUL, ebx, %$SizeOfFuncs
 	dll_func_group_load_alter_name User32, UFunc_DelayedLoad, ebx
 
-	AssetsQuery 'assets\GFUNC', &SizeOfFuncs
+	AssetsQuery 'assets\GFUNC', & %$SizeOfFuncs
 	mov ebx, eax
-	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	invoke_cdecl _NLtoNUL, ebx, %$SizeOfFuncs
 	dll_func_group_load_alter_name GDI32, GFunc_DelayedLoad, ebx
 
-	AssetsQuery 'assets\WFUNC', &SizeOfFuncs
+	AssetsQuery 'assets\WFUNC', & %$SizeOfFuncs
 	mov ebx, eax
-	invoke_cdecl _NLtoNUL, ebx, SizeOfFuncs
+	invoke_cdecl _NLtoNUL, ebx, %$SizeOfFuncs
 	dll_func_group_load_alter_name WinMM, WFunc_DelayedLoad, ebx
 
 	FrameEnd
@@ -376,7 +374,7 @@ _DebugConsoleBuffer resd 1
 _DebugShowRect resd 4
 
 DefFunc _InitDbg
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, [_DebugMsgBuffer]
 	test eax, eax
@@ -404,7 +402,7 @@ DefFunc _InitDbg
 	ret
 
 DefFunc _DeInitDbg
-	FrameBegin 0
+	FrameBegin
 
 %ifdef _DEBUG
 	mov eax, [_hDCDesktop]
@@ -428,7 +426,7 @@ DefFunc _DeInitDbg
 	ret
 
 DefFunc _DebugMsg
-	FrameBegin 0
+	FrameBegin
 
 	lea eax, Param(1)
 	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(0), eax
@@ -441,7 +439,7 @@ DefFunc _DebugMsg
 
 %ifdef _DEBUG
 DefFunc _DebugShow
-	FrameBegin 0
+	FrameBegin
 
 	movq xmm0, Param(0)
 	movq [_DebugShowRect], xmm0
@@ -460,7 +458,7 @@ DefFunc _DebugShow
 	ret
 
 DefFunc _DebugShowV
-	FrameBegin 0
+	FrameBegin
 
 	movq xmm0, Param(0)
 	movq [_DebugShowRect], xmm0
@@ -480,7 +478,7 @@ DefFunc _DebugShowV
 %endif
 
 DefFunc _snprintf
-	FrameBegin 0
+	FrameBegin
 
 	lea eax, Param(3)
 	invoke_dll_cdecl vsnprintf, Param(0), Param(1), Param(2), eax
@@ -490,13 +488,13 @@ DefFunc _snprintf
 	ret
 
 DefFunc _malloc
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
 
 DefFunc _calloc
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	mul dword Param(1)
@@ -506,7 +504,7 @@ DefFunc _calloc
 	ret
 
 DefFunc _realloc
-	FrameBegin 0
+	FrameBegin
 	mov eax, Param(0)
 	test eax, eax
 	jz .ptr_is_null
@@ -519,13 +517,13 @@ DefFunc _realloc
 	ret
 
 DefFunc _free
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
 	FrameEnd
 	ret
 
 DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(1)
 	cmp eax, 8
@@ -549,7 +547,7 @@ DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
 	ret
 
 DefFunc _aligned_free
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	test eax, eax
@@ -562,13 +560,13 @@ DefFunc _aligned_free
 	ret
 
 DefFunc _ReleaseComObj
-	FrameBegin 0
+	FrameBegin
 	invoke_com Param(0), IUnknown.Release
 	FrameEnd
 	ret
 
 DefFunc _SafeRelease
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	mov eax, [ebx]

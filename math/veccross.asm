@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _VectorCross
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(1)
 	mov ecx, Param(2)

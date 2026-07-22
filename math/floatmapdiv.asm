@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _FloatMapDivide
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov edi, Param(0)
 	mov esi, Param(1)

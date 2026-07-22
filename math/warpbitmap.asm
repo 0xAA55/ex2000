@@ -1,21 +1,21 @@
 %include "common.inc"
 
 DefFunc _WarpBitMap
-	FrameBegin 6, ebx, esi, edi
-	AssignVars _Y, _BITMASK, _SRC_ROWPTR, _DST_ROWPTR, _FIRST_COPY_LEN, _SECOND_COPY_LEN
+	FrameBegin ebx, esi, edi
+	DefVars %$Y, %$BitMask, %$SrcRowPtr, %$DstRowPtr, %$FirstCopyLen, %$SecondCopyLen
 
 	mov esi, Param(1)
 
 	mov eax, [esi + BitMap.border_len]
 	dec eax
-	mov _BITMASK, eax
+	mov %$BitMask, eax
 
 	mov eax, [esi + BitMap.bytes_per_pixel]
 	imul dword[esi + BitMap.border_len]
 	mov edi, eax
 
 	mov eax, Param(2)
-	and eax, _BITMASK
+	and eax, %$BitMask
 	imul dword[esi + BitMap.bytes_per_pixel]
 	mov ebx, eax ; src_x_offset
 
@@ -23,43 +23,37 @@ DefFunc _WarpBitMap
 	mov edx, edi
 	sub ecx, eax
 	sub edx, ecx
-	mov _FIRST_COPY_LEN, ecx
-	mov _SECOND_COPY_LEN, edx
+	mov %$FirstCopyLen, ecx
+	mov %$SecondCopyLen, edx
 
 	mov edi, Param(0)
 
 	xor eax, eax
-	mov _Y, eax
+	mov %$Y, eax
 .loopy:
 	add eax, Param(3)
-	and eax, _BITMASK
+	and eax, %$BitMask
 	mov ecx, [esi + BitMap.row_ptr + eax * 4]
 	mov edx, [edi + BitMap.row_ptr + eax * 4]
-	mov _SRC_ROWPTR, ecx
-	mov _DST_ROWPTR, edx
+	mov %$SrcRowPtr, ecx
+	mov %$DstRowPtr, edx
 
-	invoke_dll_cdecl memcpy, edx, &[ecx + ebx], _FIRST_COPY_LEN
+	invoke_dll_cdecl memcpy, edx, &[ecx + ebx], %$FirstCopyLen
 
-	mov eax, _SECOND_COPY_LEN
+	mov eax, %$SecondCopyLen
 	test eax, eax
 	jz .next_y
 
-	mov edx, _DST_ROWPTR
-	add edx, _FIRST_COPY_LEN
-	invoke_dll_cdecl memcpy, edx, _SRC_ROWPTR, _SECOND_COPY_LEN
+	mov edx, %$DstRowPtr
+	add edx, %$FirstCopyLen
+	invoke_dll_cdecl memcpy, edx, %$SrcRowPtr, %$SecondCopyLen
 
 .next_y:
-	mov eax, _Y
+	mov eax, %$Y
 	inc eax
-	mov _Y, eax
+	mov %$Y, eax
 	cmp eax, [esi + BitMap.border_len]
 	jb .loopy
 
 	FrameEnd
 	ret
-	%undef _Y
-	%undef _BITMASK
-	%undef _SRC_ROWPTR
-	%undef _DST_ROWPTR
-	%undef _FIRST_COPY_LEN
-	%undef _SECOND_COPY_LEN

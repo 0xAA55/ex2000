@@ -1,8 +1,8 @@
 %include "common.inc"
 
 DefFunc _BitMapMTPool
-	FrameBegin 1, ebx, esi, edi
-	AssignVars _JOBS
+	FrameBegin ebx, esi, edi
+	DefVars %$Jobs
 
 	; ebx = src_map
 	; edi = dst_map
@@ -23,7 +23,7 @@ DefFunc _BitMapMTPool
 
 	mov eax, [ebx + BitMap.border_len]
 	invoke_cdecl _malloc, &[eax * 4]
-	mov _JOBS, eax
+	mov %$Jobs, eax
 
 	push edi
 	mov edi, eax
@@ -32,13 +32,12 @@ DefFunc _BitMapMTPool
 	rep stosd
 	pop edi
 
-	invoke_cdecl _PoolRun, Param(3), Param(1), [ebx + BitMap.border_len], _JOBS, Param(4)
+	invoke_cdecl _PoolRun, Param(3), Param(1), [ebx + BitMap.border_len], %$Jobs, Param(4)
 
 	invoke_cdecl _free, eax
 	invoke_cdecl _free, esi
-	invoke_cdecl _free, _JOBS
+	invoke_cdecl _free, %$Jobs
 
 	mov eax, edi
 	FrameEnd
 	ret
-	%undef _JOBS

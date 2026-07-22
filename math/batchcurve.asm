@@ -41,8 +41,8 @@
 ;}
 
 DefFunc _BatchCurve
-	FrameBegin 1, ebx, esi, edi
-	AssignVars DATA_TO_PROC
+	FrameBegin ebx, esi, edi
+	DefVars %$DataToProc
 
 	mov edi, Param(0)
 	mov eax, Param(1)
@@ -56,7 +56,7 @@ DefFunc _BatchCurve
 	loop .sum_weights
 	shufps xmm5, xmm5, 0
 	rcpps xmm5, xmm5
-	mov DATA_TO_PROC, eax
+	mov %$DataToProc, eax
 	xorps xmm4, xmm4
 .main_loop:
 	test eax, eax

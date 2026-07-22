@@ -2,8 +2,8 @@
 %include "buffer.inc"
 
 DefFunc _AltitudeToTerrain
-	FrameBegin 8, ebx, esi, edi
-	AssignVars _X, _Y, _NUM_V, _NUM_I, _CB_V, _BM, _YI, _YI2
+	FrameBegin ebx, esi, edi
+	DefVars %$X, %$Y, %$NumVertices, %$NumIndices, %$CbVertices, %$BitMask, %$YI, _YI2
 
 	mov esi, Param(0)
 	cmp dword[esi + BitMap.dims], 1
@@ -15,35 +15,35 @@ DefFunc _AltitudeToTerrain
 
 	mov eax, [esi + BitMap.border_len]
 	dec eax
-	mov _BM, eax ; bitmask for wrapping sampling
+	mov %$BitMask, eax ; bitmask for wrapping sampling
 	mov eax, [esi + BitMap.border_len]
 	mov ecx, 6
 	inc eax ; Extra vertices for seamless combinations
 	mul eax
-	mov _NUM_V, eax
+	mov %$NumVertices, eax
 	mov eax, [esi + BitMap.num_pixels]
 	mul ecx
-	mov _NUM_I, eax
+	mov %$NumIndices, eax
 	mov eax, SimpleVertex.size
-	mul dword _NUM_V
-	mov _CB_V, eax ;cbVertices
-	mov ecx, _NUM_I
+	mul dword %$NumVertices
+	mov %$CbVertices, eax ;cbVertices
+	mov ecx, %$NumIndices
 	invoke_cdecl _malloc, &[eax + ecx * 4 + SimpleMesh.size]
 	mov ebx, eax
 	lea eax, [ebx + SimpleMesh.size]
 	mov [ebx + SimpleMesh.vertices], eax
-	add eax, _CB_V ;cbVertices
-	mov ecx, _NUM_V
-	mov edx, _NUM_I
+	add eax, %$CbVertices ;cbVertices
+	mov ecx, %$NumVertices
+	mov edx, %$NumIndices
 	mov [ebx + SimpleMesh.indices], eax
 	mov [ebx + SimpleMesh.num_vertices], ecx
 	mov [ebx + SimpleMesh.num_indices], edx
 
 .gen_indices:
-	%define _T1 %[_NUM_V]
-	%define _T2 %[_NUM_I]
-	%undef _NUM_V
-	%undef _NUM_I
+	%define _T1 %[%$NumVertices]
+	%define _T2 %[%$NumIndices]
+	%undef %$NumVertices
+	%undef %$NumIndices
 
 	xor eax, eax
 	mov edi, [ebx + SimpleMesh.indices]
@@ -51,18 +51,18 @@ DefFunc _AltitudeToTerrain
 	inc ecx
 	movd xmm5, ecx
 	pshufd xmm5, xmm5, 0x00
-	mov _Y, eax
+	mov %$Y, eax
 .loopy_i:
-	mov _YI, eax
+	mov %$YI, eax
 	inc eax
 	mov _YI2, eax
-	movq xmm4, _YI
+	movq xmm4, %$YI
 	unpcklps xmm4, xmm4 ;yi, yi, yi1, yi1
 	pmuludq xmm4, xmm5 ;yi * w, yi1 * w
 	pshufd xmm4, xmm4, _MM_SHUFFLE(2, 2, 0, 0) ;yi * w, yi * w, yi1 * w, yi1 * w
 
 	xor eax, eax
-	mov _X, eax
+	mov %$X, eax
 .loopx_i:
 	mov _T1, eax
 	inc eax
@@ -75,28 +75,28 @@ DefFunc _AltitudeToTerrain
 	movdqu [edi + 8], xmm1
 	add edi, 6 * 4
 
-	mov eax, _X
+	mov eax, %$X
 	inc eax
-	mov _X, eax
+	mov %$X, eax
 	cmp eax, [esi + BitMap.border_len]
 	jb .loopx_i
 
-	mov eax, _Y
+	mov eax, %$Y
 	inc eax
-	mov _Y, eax
+	mov %$Y, eax
 	cmp eax, [esi + BitMap.border_len]
 	jb .loopy_i
 
 .gen_vertices:
 	%define _CURR_ROW %[_T1]
 	%define _PREV_ROW %[_T2]
-	%define _NEXT_ROW %[_CB_V]
-	%define _NXZ_MOD %[_YI]
+	%define _NEXT_ROW %[%$CbVertices]
+	%define _NXZ_MOD %[%$YI]
 	%define _CUR_HEIGHT %[_YI2]
 	%undef _T1
 	%undef _T2
-	%undef _CB_V
-	%undef _YI
+	%undef %$CbVertices
+	%undef %$YI
 	%undef _YI2
 
 	mov edi, [ebx + SimpleMesh.vertices]
@@ -116,13 +116,13 @@ DefFunc _AltitudeToTerrain
 	movss _NXZ_MOD, xmm7
 
 	xor eax, eax
-	mov _Y, eax
+	mov %$Y, eax
 .loopy_v:
-	and eax, _BM
+	and eax, %$BitMask
 	lea ecx, [eax - 1]
 	lea edx, [eax + 1]
-	and ecx, _BM
-	and edx, _BM
+	and ecx, %$BitMask
+	and edx, %$BitMask
 	mov eax, [esi + BitMap.row_ptr + eax * 4]
 	mov ecx, [esi + BitMap.row_ptr + ecx * 4]
 	mov edx, [esi + BitMap.row_ptr + edx * 4]
@@ -130,9 +130,9 @@ DefFunc _AltitudeToTerrain
 	mov _PREV_ROW, ecx ; y - 1
 	mov _NEXT_ROW, edx ; y + 1
 	xor eax, eax
-	mov _X, eax
+	mov %$X, eax
 .loopx_v:
-	and eax, _BM
+	and eax, %$BitMask
 	mov ecx, _PREV_ROW
 	mov edx, _NEXT_ROW
 	lea ecx, [ecx + eax * 4]
@@ -147,8 +147,8 @@ DefFunc _AltitudeToTerrain
 	mulss xmm0, Param(1)
 	movss _CUR_HEIGHT, xmm0
 	mov eax, _CURR_ROW
-	and ecx, _BM
-	and edx, _BM
+	and ecx, %$BitMask
+	and edx, %$BitMask
 	lea ecx, [eax + ecx * 4]
 	lea edx, [eax + edx * 4]
 	movd xmm0, [ecx] ;(x-1, y)
@@ -162,7 +162,7 @@ DefFunc _AltitudeToTerrain
 	mov dword[edi + SimpleVertex.ny], __?float32?__(2.0)
 	invoke_cdecl _VectorNormal, &[edi + SimpleVertex.nx], &[edi + SimpleVertex.nx], 3
 
-	movq xmm0, _X
+	movq xmm0, %$X
 	movd xmm1, _CUR_HEIGHT
 	cvtdq2ps xmm0, xmm0
 	movaps xmm3, xmm0
@@ -175,26 +175,18 @@ DefFunc _AltitudeToTerrain
 	movq [edi + SimpleVertex.u], xmm3
 	add edi, SimpleVertex.size
 
-	mov eax, _X
+	mov eax, %$X
 	inc eax
-	mov _X, eax
+	mov %$X, eax
 	cmp eax, [esi + BitMap.border_len]
 	jbe .loopx_v
 
-	mov eax, _Y
+	mov eax, %$Y
 	inc eax
-	mov _Y, eax
+	mov %$Y, eax
 	cmp eax, [esi + BitMap.border_len]
 	jbe .loopy_v
 
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _X
-	%undef _Y
-	%undef _CURR_ROW
-	%undef _PREV_ROW
-	%undef _NEXT_ROW
-	%undef _BM
-	%undef _NXZ_MOD
-	%undef _CUR_HEIGHT

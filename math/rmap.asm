@@ -1,8 +1,8 @@
 %include "common.inc"
 
 DefFunc _GenRadiusMap
-	FrameBegin 2, ebx, esi, edi
-	AssignVars DistSq, Y_Y
+	FrameBegin ebx, esi, edi
+	DefVars %$DistSq, %$Y_Y
 
 	mov eax, Param(0)
 	test eax, eax
@@ -12,7 +12,7 @@ DefFunc _GenRadiusMap
 	jmp .bad_param1
 .good_param1:
 	mul eax
-	mov DistSq, eax
+	mov %$DistSq, eax
 	shl eax, 2
 	invoke_cdecl _malloc, &[eax * 4 + 4]
 	mov ebx, eax
@@ -25,15 +25,15 @@ DefFunc _GenRadiusMap
 .loopy:
 	mov eax, edi
 	mul eax
-	mov Y_Y, eax ; y * y
+	mov %$Y_Y, eax ; y * y
 	xor eax, eax
 	inc eax
 	mov esi, eax
 .loopx:
 	mov eax, esi
 	mul eax
-	add eax, Y_Y ; x * x + y * y
-	cmp eax, DistSq
+	add eax, %$Y_Y ; x * x + y * y
+	cmp eax, %$DistSq
 	jg .continue
 
 	mov eax, [ebx]
@@ -73,5 +73,3 @@ DefFunc _GenRadiusMap
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef DistSq
-	%undef Y_Y

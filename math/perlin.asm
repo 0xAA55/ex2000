@@ -5,7 +5,8 @@ extern _PerlinNumWorkers
 _PerlinNumWorkers resd 1
 
 DefFunc _CreatePerlinMap2D
-	FrameBegin 8, ebx, esi
+	FrameBegin ebx, esi
+	DefSizedVar %$VectorBuffer, 0x20
 
 	invoke_cdecl _CreateBitMap, Param(0), 2, 8
 	mov ebx, eax
@@ -78,15 +79,15 @@ DefFunc _CreatePerlinMap2D
 	ret
 
 DefFunc _ConvertPerlinMapToAltitude
-	FrameBegin 9, ebx, esi, edi
-	AssignVars _STEPS, _RECIPROCAL, _MATRIX
-	AssignVars _X, _Y, _BX, _BY, _IX, _IY
-	%define _P00XY_P10XY ebx + 0x00
-	%define _P01XY_P11XY ebx + 0x10
-	%define _UV1 ebx + 0x20
-	%define _UV1M ebx + 0x30
-	%define _UV2M ebx + 0x40
-	%define _DP_00_10_01_11 ebx + 0x50
+	FrameBegin ebx, esi, edi
+	DefVars %$Steps, %$Reciprocal, %$Matrix
+	DefVars %$X, %$Y, %$BX, %$BY, %$IX, %$IY
+	%define %$_P00XY_P10XY ebx + 0x00
+	%define %$_P01XY_P11XY ebx + 0x10
+	%define %$_UV1 ebx + 0x20
+	%define %$_UV1M ebx + 0x30
+	%define %$_UV2M ebx + 0x40
+	%define %$_DP_00_10_01_11 ebx + 0x50
 
 	mov esi, Param(2)
 	mov eax, Param(0)
@@ -95,104 +96,104 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov edi, eax
 
 	invoke_cdecl _aligned_malloc, 6 * 0x10, 0x10
-	mov _MATRIX, eax
+	mov %$Matrix, eax
 
 	mov eax, Param(0)
 	invoke_cdecl _malloc, &[eax * 4]
-	mov _STEPS, eax
+	mov %$Steps, eax
 	xor eax, eax
-	mov _X, eax
+	mov %$X, eax
 	fld1
 	fidiv dword Param(0)
-	fst dword _RECIPROCAL
-	mov ebx, _MATRIX
-	mov eax, _RECIPROCAL
+	fst dword %$Reciprocal
+	mov ebx, %$Matrix
+	mov eax, %$Reciprocal
 	pxor xmm0, xmm0
 	movaps xmm1, [_F1111]
 	mov ecx, 4
-	movaps [_UV1M], xmm0
-	movaps [_UV2M], xmm1
+	movaps [%$_UV1M], xmm0
+	movaps [%$_UV2M], xmm1
 .init_uv:
-	mov [_UV1 + (ecx - 1) * 4], eax
+	mov [%$_UV1 + (ecx - 1) * 4], eax
 	loop .init_uv
-	mov dword[_UV1M + Vector.z], 0x3F800000
-	mov [_UV2M + Vector.x], ecx
+	mov dword[%$_UV1M + Vector.z], 0x3F800000
+	mov [%$_UV2M + Vector.x], ecx
 
-	mov ebx, _STEPS
+	mov ebx, %$Steps
 .get_steps:
-	fild dword _X
-	fmul dword _RECIPROCAL
+	fild dword %$X
+	fmul dword %$Reciprocal
 	invoke_cdecl _SmootherStep, st0
 	fstp dword [ebx]
 	add ebx, 4
-	mov eax, _X
+	mov eax, %$X
 	inc eax
-	mov _X, eax
+	mov %$X, eax
 	cmp eax, Param(0)
 	jb .get_steps
 
-	mov ebx, _MATRIX
+	mov ebx, %$Matrix
 	xor eax, eax
-	mov _Y, eax
+	mov %$Y, eax
 .loopy:
-	mov eax, _Y
+	mov eax, %$Y
 	mul eax, Param(0)
-	mov _BY, eax
+	mov %$BY, eax
 	xor eax, eax
-	mov _X, eax
+	mov %$X, eax
 .loopx:
-	mov eax, _X
+	mov eax, %$X
 	mul eax, Param(0)
-	mov _BX, eax
-	invoke_cdecl _GetBitmapPixelAddress, _X, _Y, esi
+	mov %$BX, eax
+	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
-	mov [_P00XY_P10XY + Vector.x], eax
-	mov [_P00XY_P10XY + Vector.y], edx
-	mov eax, _X
+	mov [%$_P00XY_P10XY + Vector.x], eax
+	mov [%$_P00XY_P10XY + Vector.y], edx
+	mov eax, %$X
 	inc eax
-	invoke_cdecl _GetBitmapPixelAddress, eax, _Y, esi
+	invoke_cdecl _GetBitmapPixelAddress, eax, %$Y, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
-	mov [_P00XY_P10XY + Vector.z], eax
-	mov [_P00XY_P10XY + Vector.w], edx
-	mov eax, _Y
+	mov [%$_P00XY_P10XY + Vector.z], eax
+	mov [%$_P00XY_P10XY + Vector.w], edx
+	mov eax, %$Y
 	inc eax
-	invoke_cdecl _GetBitmapPixelAddress, _X, eax, esi
+	invoke_cdecl _GetBitmapPixelAddress, %$X, eax, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
-	mov [_P01XY_P11XY + Vector.x], eax
-	mov [_P01XY_P11XY + Vector.y], edx
-	mov eax, _X
-	mov ecx, _Y
+	mov [%$_P01XY_P11XY + Vector.x], eax
+	mov [%$_P01XY_P11XY + Vector.y], edx
+	mov eax, %$X
+	mov ecx, %$Y
 	inc eax
 	inc ecx
 	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, esi
 	mov edx, [eax + 4]
 	mov eax, [eax]
-	mov [_P01XY_P11XY + Vector.z], eax
-	mov [_P01XY_P11XY + Vector.w], edx
+	mov [%$_P01XY_P11XY + Vector.z], eax
+	mov [%$_P01XY_P11XY + Vector.w], edx
 	xor eax, eax
-	mov _IY, eax
+	mov %$IY, eax
 .iloopy:
 	xor eax, eax
-	mov _IX, eax
+	mov %$IX, eax
 .iloopx:
-	movq xmm0, _IX; xmm0 <= (_IX, _IY) (0, 1)
-	movlhps xmm0, xmm0; xmm0 <= (_IX, _IY, _IX, _IY) (0, 1, 2, 3)
+	movq xmm0, %$IX; xmm0 <= (%$IX, %$IY) (0, 1)
+	movlhps xmm0, xmm0; xmm0 <= (%$IX, %$IY, %$IX, %$IY) (0, 1, 2, 3)
 	cvtdq2ps xmm0, xmm0; xmm0 <= (4f)xmm0
 
 	movaps xmm1, xmm0
-	mulps xmm0, [_UV1]
-	mulps xmm1, [_UV1]
-	subps xmm0, [_UV1M]
-	subps xmm1, [_UV2M]
-	mulps xmm0, [_P00XY_P10XY]
-	mulps xmm1, [_P01XY_P11XY]
+	mulps xmm0, [%$_UV1]
+	mulps xmm1, [%$_UV1]
+	subps xmm0, [%$_UV1M]
+	subps xmm1, [%$_UV2M]
+	mulps xmm0, [%$_P00XY_P10XY]
+	mulps xmm1, [%$_P01XY_P11XY]
 	cmp dword [_HaveSSE3], 0
 	jz .no_sse3
 	haddps xmm0, xmm1
-	movaps [_DP_00_10_01_11], xmm0
+	movaps [%$_DP_00_10_01_11], xmm0
 	jmp .after_dot
 .no_sse3:
 	movaps xmm2, xmm0
@@ -205,62 +206,62 @@ DefFunc _ConvertPerlinMapToAltitude
 	shufps xmm1, xmm1, _MM_SHUFFLE(3, 1, 2, 0)
 	movhlps xmm2, xmm0
 	movlhps xmm2, xmm1
-	movaps [_DP_00_10_01_11], xmm2
+	movaps [%$_DP_00_10_01_11], xmm2
 
 .after_dot:
-	mov eax, _BX
-	mov ecx, _BY
-	add eax, _IX
-	add ecx, _IY
+	mov eax, %$BX
+	mov ecx, %$BY
+	add eax, %$IX
+	add ecx, %$IY
 	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, edi
 	mov edx, eax
 
-	mov eax, _IX
-	mov ecx, _IY
+	mov eax, %$IX
+	mov ecx, %$IY
 	lea eax, [eax * 4]
 	lea ecx, [ecx * 4]
-	add eax, _STEPS
-	add ecx, _STEPS
+	add eax, %$Steps
+	add ecx, %$Steps
 
-	movss xmm0, [_DP_00_10_01_11 + Vector.y]
-	movss xmm1, [_DP_00_10_01_11 + Vector.w]
-	subss xmm0, [_DP_00_10_01_11 + Vector.x]
-	subss xmm1, [_DP_00_10_01_11 + Vector.z]
+	movss xmm0, [%$_DP_00_10_01_11 + Vector.y]
+	movss xmm1, [%$_DP_00_10_01_11 + Vector.w]
+	subss xmm0, [%$_DP_00_10_01_11 + Vector.x]
+	subss xmm1, [%$_DP_00_10_01_11 + Vector.z]
 	mulss xmm0, [eax]
 	mulss xmm1, [eax]
-	addss xmm0, [_DP_00_10_01_11 + Vector.x]
-	addss xmm1, [_DP_00_10_01_11 + Vector.z]
+	addss xmm0, [%$_DP_00_10_01_11 + Vector.x]
+	addss xmm1, [%$_DP_00_10_01_11 + Vector.z]
 	subss xmm1, xmm0
 	mulss xmm1, [ecx]
 	addss xmm0, xmm1
 	movss [edx], xmm0
 
-	mov eax, _IX
+	mov eax, %$IX
 	inc eax
-	mov _IX, eax
+	mov %$IX, eax
 	cmp eax, Param(0)
 	jb .iloopx
 
-	mov eax, _IY
+	mov eax, %$IY
 	inc eax
-	mov _IY, eax
+	mov %$IY, eax
 	cmp eax, Param(0)
 	jb .iloopy
 
-	mov eax, _X
+	mov eax, %$X
 	inc eax
-	mov _X, eax
+	mov %$X, eax
 	cmp eax, [esi + BitMap.border_len]
 	jb .loopx
 
-	mov eax, _Y
+	mov eax, %$Y
 	inc eax
-	mov _Y, eax
+	mov %$Y, eax
 	cmp eax, [esi + BitMap.border_len]
 	jb .loopy
 
-	invoke_cdecl _free, _STEPS
-	invoke_cdecl _aligned_free, _MATRIX
+	invoke_cdecl _free, %$Steps
+	invoke_cdecl _aligned_free, %$Matrix
 
 	mov ebx, edi
 	movaps xmm5, [_FP5P5P5P5]
@@ -310,24 +311,9 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _STEPS
-	%undef _RECIPROCAL
-	%undef _MATRIX
-	%undef _X
-	%undef _Y
-	%undef _BX
-	%undef _BY
-	%undef _IX
-	%undef _IY
-	%undef _P00XY_P10XY
-	%undef _P01XY_P11XY
-	%undef _UV1
-	%undef _UV1M
-	%undef _UV2M
-	%undef _DP_00_10_01_11
 
 DefFunc _GenPerlinAltitude
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 	invoke_cdecl _CreatePerlinMap2D, Param(0)
 	mov ebx, eax
 	invoke_cdecl _ConvertPerlinMapToAltitude, Param(1), Param(2), ebx
@@ -338,7 +324,7 @@ DefFunc _GenPerlinAltitude
 	ret
 
 DefFunc _AccumulateFloatMap
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov esi, Param(1)
 	mov edi, Param(0)
@@ -392,7 +378,7 @@ struc GenPerlinLayerData
 endstruc
 
 DefFunc _GenPerlinLayerPoolProc
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	invoke_dll_cdecl srand, [ebx + GenPerlinLayerData.job_index]
@@ -405,8 +391,8 @@ DefFunc _GenPerlinLayerPoolProc
 	ret
 
 DefFunc _GenMultiLayerPerlinAltitude
-	FrameBegin 2, ebx, esi, edi
-	AssignVars _JOBS, CurLayer
+	FrameBegin ebx, esi, edi
+	DefVars %$Jobs, %$CurLayer
 
 	mov eax, Param(0)
 	bsr ecx, eax
@@ -435,19 +421,19 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov eax, GenPerlinLayerData.size
 	mul ecx
 	invoke_cdecl _malloc, &[eax + ecx * 4] ; (sizeof GenPerlinLayerData) * num_layers + (sizeof GenPerlinLayerData*) * num_layers
-	mov _JOBS, eax
+	mov %$Jobs, eax
 	mov ebx, eax ; ebx = jobs
 	mov ecx, Param(2)
 	lea esi, &[eax + ecx * 4] ; esi = ebx + (sizeof GenPerlinLayerData*) * num_layers
 
 	xor eax, eax
 	inc eax
-	mov CurLayer, eax
+	mov %$CurLayer, eax
 	mov ecx, Param(2)
 	mov edx, 2
 	mov eax, Param(0)
 .setjobs1:
-	fld dword CurLayer
+	fld dword %$CurLayer
 	fdiv dword Param(2)
 	fld dword Param(3)
 	fyl2x
@@ -469,19 +455,19 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov [ebx], esi
 	add ebx, 4
 	add esi, GenPerlinLayerData.size
-	inc dword CurLayer
+	inc dword %$CurLayer
 	dec ecx
 	jnz .setjobs1
 	mov ebx, ecx
 	inc ebx ; ebx = 1
 
 	mov eax, [_PerlinNumWorkers]
-	mov ecx, 8
+	mov ecx, 1
 	test eax, eax
 	cmovz eax, ecx
 	mov [_PerlinNumWorkers], eax
 
-	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, [_PerlinNumWorkers], Param(2), _JOBS, 0
+	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, [_PerlinNumWorkers], Param(2), %$Jobs, 0
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]
@@ -490,30 +476,28 @@ DefFunc _GenMultiLayerPerlinAltitude
 	cmp ebx, Param(2)
 	jb .accumulate
 
-	invoke_cdecl _free, _JOBS
+	invoke_cdecl _free, %$Jobs
 
-	%define _GAIN %[_JOBS]
-	%define _BIAS %[CurLayer]
-	%undef _JOBS
-	%undef CurLayer
+	%xdefine %$Gain %$Jobs
+	%xdefine %$Bias %$CurLayer
+	%undef %$Jobs
+	%undef %$CurLayer
 
 	mov ebx, [edi]
 	invoke_cdecl _free, edi
 
 	invoke_cdecl _FloatMapGetMinValue, ebx
 	fchs
-	fstp dword _BIAS
+	fstp dword %$Bias
 
-	invoke_cdecl _BatchBias, [ebx + BitMap.data], _BIAS, [ebx + BitMap.num_floats]
+	invoke_cdecl _BatchBias, [ebx + BitMap.data], %$Bias, [ebx + BitMap.num_floats]
 
 	invoke_cdecl _FloatMapGetMaxValue, ebx
 	fdivr dword Param(1)
-	fstp dword _GAIN
+	fstp dword %$Gain
 
-	invoke_cdecl _FloatMapApplyGain, ebx, _GAIN
+	invoke_cdecl _FloatMapApplyGain, ebx, %$Gain
 
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _GAIN
-	%undef _BIAS

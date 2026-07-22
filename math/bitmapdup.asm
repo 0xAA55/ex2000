@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _DuplicateBitMap
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 	mov ebx, Param(0)
 	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], [ebx + BitMap.dims], [ebx + BitMap.bytes_per_pixel]
 	mov edi, eax

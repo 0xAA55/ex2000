@@ -1,28 +1,28 @@
 %include "common.inc"
 
 DefFunc _GenDistanceMap
-	FrameBegin 3, ebx, edi
-	AssignVars _Y, _SV, _EV
+	FrameBegin ebx, edi
+	DefVars %$Y, %$SV, %$EV
 
 	invoke_cdecl _CreateBitMap, Param(0), 1, 4
 	mov ebx, eax
 
 	mov eax, Param(0)
 	shr eax, 1
-	mov _EV, eax
+	mov %$EV, eax
 	neg eax
-	mov _SV, eax
-	mov _Y, eax
+	mov %$SV, eax
+	mov %$Y, eax
 .loopy:
-	sub eax, _SV
+	sub eax, %$SV
 	mov edi, [ebx + BitMap.row_ptr + eax * 4]
 	cmp dword Param(0), 16
 	jge .vector_process
 .single_process:
-	mov eax, _SV
+	mov eax, %$SV
 .loopx_small:
 	cvtsi2ss xmm0, eax
-	cvtsi2ss xmm1, _Y
+	cvtsi2ss xmm1, %$Y
 	mulss xmm0, xmm0
 	mulss xmm1, xmm1
 	addss xmm0, xmm1
@@ -31,14 +31,14 @@ DefFunc _GenDistanceMap
 	add edi, 4
 
 	inc eax
-	cmp eax, _EV
+	cmp eax, %$EV
 	jl .loopx_small
 
 	jmp .ycontinue
 .vector_process:
-	mov eax, _SV
-	cvtsi2ss xmm7, _Y
-	cvtsi2ss xmm6, _SV
+	mov eax, %$SV
+	cvtsi2ss xmm7, %$Y
+	cvtsi2ss xmm6, %$SV
 	mulss xmm7, xmm7
 	shufps xmm6, xmm6, _MM_SHUFFLE(0, 0, 0, 0)
 	shufps xmm7, xmm7, _MM_SHUFFLE(0, 0, 0, 0)
@@ -70,20 +70,17 @@ DefFunc _GenDistanceMap
 	movaps [edi + 0x30], xmm3
 	add edi, 0x40
 	add eax, 16
-	cmp eax, _EV
+	cmp eax, %$EV
 	jl .loopx
 
 .ycontinue:
-	mov eax, _Y
+	mov eax, %$Y
 	inc eax
-	mov _Y, eax
-	cmp eax, _EV
+	mov %$Y, eax
+	cmp eax, %$EV
 	jl .loopy
 
 	mov eax, ebx
 
 	FrameEnd
 	ret
-	%undef _Y
-	%undef _SV
-	%undef _EV

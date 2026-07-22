@@ -75,14 +75,14 @@ _AssetsCabName db "assets.cab", 0
 def_dll Cabinet, "cabinet.dll"
 
 DefFunc _AssetsInitLoadDll
-	FrameBegin 0
+	FrameBegin
 	load_dll Cabinet
 	dll_func_group_load Cabinet, CabinetFunc
 	FrameEnd
 	ret
 
 DefFunc _AssetsDestroyFileStruct
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _free, [ebx + FileStruct.data]
@@ -92,7 +92,7 @@ DefFunc _AssetsDestroyFileStruct
 	ret
 
 DefFunc _AssetsFnOpen
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	invoke_dll_cdecl strcmp, Param(0), _AssetsCabName
 	test eax, eax
@@ -148,7 +148,7 @@ DefFunc _AssetsFnOpen
 	ret
 
 DefFunc _AssetsTrimFileMemory
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	mov eax, [esi + FileStruct.file_size]
@@ -184,7 +184,7 @@ DefFunc _AssetsTrimFileMemory
 	ret
 
 DefFunc _AssetsAssertFileIsOpened
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	test eax, eax
@@ -208,7 +208,7 @@ DefFunc _AssetsAssertFileIsOpened
 	ret
 
 DefFunc _AssetsFnClose
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -231,7 +231,7 @@ DefFunc _AssetsFnClose
 	ret
 
 DefFunc _AssetsFnRead
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -281,7 +281,8 @@ DefFunc _AssetsFnRead
 
 ; int AssetsFileGrowCapacity(FileStruct *f, size_t desired_minimal_capacity)
 DefFunc _AssetsFileGrowCapacity
-	FrameBegin 1, esi
+	FrameBegin esi
+	DefVars %$NewCap
 
 	mov esi, Param(0)
 	mov eax, [esi + FileStruct.file_capacity]
@@ -295,18 +296,18 @@ DefFunc _AssetsFileGrowCapacity
 	jge .enough_size
 	mov eax, Param(1)
 .enough_size:
-	mov Variable(0), eax
+	mov %$NewCap, eax
 	invoke_cdecl _realloc, [esi + FileStruct.data], eax
 	test eax, eax
 	jz .failed
 	mov [esi + FileStruct.data], eax
-	mov ecx, Variable(0)
+	mov ecx, %$NewCap
 	add eax, [esi + FileStruct.file_capacity]
 	sub ecx, [esi + FileStruct.file_capacity]
 	jz .cleared
 	invoke_dll_cdecl memset, eax, 0, ecx
 .cleared:
-	mov eax, Variable(0)
+	mov eax, %$NewCap
 	mov [esi + FileStruct.file_capacity], eax
 	jmp .end
 .failed:
@@ -321,7 +322,7 @@ DefFunc _AssetsFileGrowCapacity
 	ret
 
 DefFunc _AssetsFnWrite
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -357,7 +358,7 @@ DefFunc _AssetsFnWrite
 	ret
 
 DefFunc _AssetsFnSeek
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
@@ -423,7 +424,7 @@ DefFunc _AssetsFnSeek
 	ret
 
 DefFunc _AssetsFnOnNotify
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov eax, Param(0)
 	mov esi, Param(1)
@@ -461,7 +462,7 @@ DefFunc _AssetsFnOnNotify
 	ret
 
 ;DefFunc _AssetsShow
-;	FrameBegin 0, esi
+;	FrameBegin esi
 ;
 ;	mov esi, Param(0)
 ;	test esi, esi
@@ -476,19 +477,20 @@ DefFunc _AssetsFnOnNotify
 ;	ret
 
 DefFunc _AssetsInit
-	FrameBegin 1
+	FrameBegin
+	DefVars %$HFDI
 
 	invoke_cdecl _AssetsInitLoadDll
 
 	invoke_dll_cdecl FDICreate, _malloc, _free, _AssetsFnOpen, _AssetsFnRead, _AssetsFnWrite, _AssetsFnClose, _AssetsFnSeek, -1, _AssetsFDIERF
-	mov Variable(0), eax
+	mov %$HFDI, eax
 
-	invoke_dll_cdecl FDICopy, Variable(0), _AssetsCabName, _AssetsCabPathName, 0, _AssetsFnOnNotify, 0, 0
+	invoke_dll_cdecl FDICopy, %$HFDI, _AssetsCabName, _AssetsCabPathName, 0, _AssetsFnOnNotify, 0, 0
 	test eax, eax
 	jnz .noerror
 	debug_msg "ERF: oper: %d, type: %d, error: %d", [_AssetsFDIERF.oper], [_AssetsFDIERF.type], [_AssetsFDIERF.error]
 .noerror:
-	invoke_dll_cdecl FDIDestroy, Variable(0)
+	invoke_dll_cdecl FDIDestroy, %$HFDI
 
 	;invoke_cdecl _AssetsShow, [_AssetsTree]
 
@@ -497,7 +499,7 @@ DefFunc _AssetsInit
 	ret
 
 DefFunc _AssetsQuery
-	FrameBegin 0
+	FrameBegin
 
 	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
 	test eax, eax
@@ -517,7 +519,7 @@ DefFunc _AssetsQuery
 	ret
 
 DefFunc _AssetsDestroy
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _AVLClear, _AssetsTree
 	FrameEnd
 	ret

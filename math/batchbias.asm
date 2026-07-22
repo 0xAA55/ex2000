@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _BatchBias
-	FrameBegin 0, edi
+	FrameBegin edi
 
 	mov edi, Param(0)
 	movss xmm7, Param(1)

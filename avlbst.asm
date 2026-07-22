@@ -3,7 +3,7 @@
 
 ; void *AVLKeyCopy(void *key, KeyCompareOps compops);
 DefFunc _AVLKeyCopy
-	FrameBegin 0
+	FrameBegin
 	mov eax, Param(1)
 	invoke_cdecl [eax + KeyCompareOps.on_duplicate_key], Param(0)
 	FrameEnd
@@ -11,7 +11,7 @@ DefFunc _AVLKeyCopy
 
 ; int _AVLKeyDelete(void *key, KeyCompareOps compops);
 DefFunc _AVLKeyDelete
-	FrameBegin 0
+	FrameBegin
 	mov eax, Param(1)
 	invoke_cdecl [eax + KeyCompareOps.on_free_key], Param(0)
 	FrameEnd
@@ -19,7 +19,7 @@ DefFunc _AVLKeyDelete
 
 ; AVLBST_Node *AVLNewNode(void *key, void* userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
 DefFunc _AVLNewNode
-	FrameBegin 0, edi, ebx
+	FrameBegin edi, ebx
 
 	mov ebx, Param(3)
 
@@ -47,7 +47,7 @@ DefFunc _AVLNewNode
 
 ; void AVLDestroyNode(AVLBST_Node *node);
 DefFunc _AVLDestroyNode
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _AVLKeyDelete, [ebx + AVLBST_Node.key], [ebx + AVLBST_Node.keyops]
@@ -59,7 +59,7 @@ DefFunc _AVLDestroyNode
 
 ; int AVLHeight(AVLBST_Node *n);
 DefFunc _AVLHeight
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	test eax, eax
@@ -73,7 +73,7 @@ DefFunc _AVLHeight
 
 ; void AVLCalcHeight(AVLBST_Node *n);
 DefFunc _AVLCalcHeight
-	FrameBegin 1, ebx, esi
+	FrameBegin ebx, esi
 
 	mov ebx, Param(0)
 	invoke_cdecl _AVLHeight, [ebx + AVLBST_Node.l_child]
@@ -91,7 +91,7 @@ DefFunc _AVLCalcHeight
 
 ; AVLBST_Node *AVLRol(AVLBST_Node *x);
 DefFunc _AVLRol
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov esi, Param(0)
 	mov edi, [esi + AVLBST_Node.r_child]
@@ -109,7 +109,7 @@ DefFunc _AVLRol
 
 ; AVLBST_Node *AVLRor(AVLBST_Node *x);
 DefFunc _AVLRor
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov edi, Param(0)
 	mov esi, [edi + AVLBST_Node.l_child]
@@ -127,7 +127,7 @@ DefFunc _AVLRor
 
 ; int AVLGetBalance(AVLBST_Node *x);
 DefFunc _AVLGetBalance
-	FrameBegin 1, ebx, esi
+	FrameBegin ebx, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -147,7 +147,7 @@ DefFunc _AVLGetBalance
 
 ; AVLBST_Node *AVLRotate(AVLBST_Node *x);
 DefFunc _AVLRotate
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AVLGetBalance, esi
@@ -184,7 +184,7 @@ DefFunc _AVLRotate
 
 ; AVLBST_Node *AVLInsertRecursive(AVLBST_Node *n, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops, AVLBST_Node **pInserted);
 DefFunc _AVLInsertRecursive
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(4)
 
@@ -237,7 +237,8 @@ DefFunc _AVLInsertRecursive
 
 ; AVLBST_Node* AVLInsert(AVLBST_Node **ppn, char *key, void *userdata, void(*on_free)(void *userdata), KeyCompareOps compops);
 DefFunc _AVLInsert
-	FrameBegin 1, esi
+	FrameBegin esi
+	DefVars %$Found
 
 	mov eax, Param(0)
 	test eax, eax
@@ -251,11 +252,11 @@ DefFunc _AVLInsert
 	mov ecx, .ret_op
 	test eax, eax
 	cmovz eax, ecx
-	invoke_cdecl _AVLInsertRecursive, [esi], Param(1), Param(2), eax, Param(4), &Variable(0)
+	invoke_cdecl _AVLInsertRecursive, [esi], Param(1), Param(2), eax, Param(4), & %$Found
 	test eax, eax
 	jz .end
 	mov [esi], eax
-	mov eax, Variable(0)
+	mov eax, %$Found
 .end:
 	FrameEnd
 .ret_op:
@@ -263,7 +264,8 @@ DefFunc _AVLInsert
 
 ; AVLBST_Node* AVLRemoveRecursive(AVLBST_Node *n, char *key, int *found)
 DefFunc _AVLRemoveRecursive
-	FrameBegin 2, ebx, esi, edi
+	FrameBegin ebx, esi, edi
+	DefVars %$Key, %$Userdata
 
 	mov eax, Param(0)
 	test eax, eax
@@ -322,17 +324,17 @@ DefFunc _AVLRemoveRecursive
 .wend:
 	xor eax, eax
 	mov ecx, [edi + AVLBST_Node.userdata]
-	mov Variable(0), ecx
+	mov %$Userdata, ecx
 	mov [edi + AVLBST_Node.userdata], eax
 	invoke_cdecl _AVLKeyCopy, [edi + AVLBST_Node.key], [edi + AVLBST_Node.keyops]
-	mov Variable(1), eax
+	mov %$Key, eax
 	invoke_cdecl _AVLRemoveRecursive, [esi + AVLBST_Node.r_child], eax, Param(2)
 	mov [esi + AVLBST_Node.r_child], eax
 	invoke_cdecl [esi + AVLBST_Node.on_free], [esi + AVLBST_Node.userdata]
-	mov eax, Variable(0)
+	mov eax, %$Userdata
 	mov [esi + AVLBST_Node.userdata], eax
 	invoke_cdecl _AVLKeyDelete, [esi + AVLBST_Node.key], [esi + AVLBST_Node.keyops]
-	mov ecx, Variable(1)
+	mov ecx, %$Key
 	mov [esi + AVLBST_Node.key], ecx
 
 .after_remove:
@@ -345,10 +347,11 @@ DefFunc _AVLRemoveRecursive
 
 ; int AVLRemove(AVLBST_Node **ppn, char *key);
 DefFunc _AVLRemove
-	FrameBegin 1, esi
+	FrameBegin esi
+	DefVars %$Found
 
 	xor eax, eax
-	mov Variable(0), eax
+	mov %$Found, eax
 
 	mov eax, Param(0)
 	test eax, eax
@@ -358,16 +361,16 @@ DefFunc _AVLRemove
 	jmp .bad_param
 .next_1:
 	mov esi, eax
-	invoke_cdecl _AVLRemoveRecursive, [esi], Param(1), &Variable(0)
+	invoke_cdecl _AVLRemoveRecursive, [esi], Param(1), & %$Found
 	mov [esi], eax
-	mov eax, Variable(0)
+	mov eax, %$Found
 	FrameEnd
 .return:
 	ret
 
 ; void AVLIterate(AVLBST_Node *root, void *context, void(on_iter)(void *key, void *userdata, void *context));
 DefFunc _AVLIterate
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(0)
 	test ebx, ebx
@@ -386,7 +389,7 @@ DefFunc _AVLIterate
 
 ; AVLBST_Node* AVLSearch(AVLBST_Node *n, char *key);
 DefFunc _AVLSearch
-	FrameBegin 0, ebx, esi
+	FrameBegin ebx, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -414,7 +417,7 @@ DefFunc _AVLSearch
 
 ; void AVLClearRecursive(AVLBST_Node *n);
 DefFunc _AVLClearRecursive
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -432,7 +435,7 @@ DefFunc _AVLClearRecursive
 
 ; void AVLClear(AVLBST_Node **ppn);
 DefFunc _AVLClear
-	FrameBegin 0, esi
+	FrameBegin esi
 
 	mov esi, Param(0)
 	invoke_cdecl _AVLClearRecursive, [esi]
@@ -445,7 +448,7 @@ DefFunc _AVLClear
 
 ; AVLBST_Node *AVLBST_Min(AVLBST_Node *root);
 DefFunc _AVLBST_Min
-	FrameBegin 0
+	FrameBegin
 
 	mov eax, Param(0)
 	test eax, eax
@@ -462,7 +465,7 @@ DefFunc _AVLBST_Min
 	ret
 
 DefFunc _AVLDupStringKey
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_cdecl strlen, Param(0)
 	inc eax
 	invoke_cdecl _malloc, eax
@@ -471,26 +474,26 @@ DefFunc _AVLDupStringKey
 	ret
 
 DefFunc _AVLDupIntegerKey
-	FrameBegin 0
+	FrameBegin
 	mov eax, Param(0)
 	FrameEnd
 	ret
 
 DefFunc _AVLCmpStringKey
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_cdecl strcmp, Param(0), Param(1)
 	FrameEnd
 	ret
 
 DefFunc _AVLCmpIntegerKey
-	FrameBegin 0
+	FrameBegin
 	mov eax, Param(0)
 	sub eax, Param(1)
 	FrameEnd
 	ret
 
 DefFunc _AVLFreeStringKey
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _free, Param(0)
 	FrameEnd
 DefFunc _AVLFreeIntegerKey

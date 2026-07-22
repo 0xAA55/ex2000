@@ -1,13 +1,14 @@
 %include "common.inc"
 
 DefFunc _VectorNormal
-	FrameBegin 1
+	FrameBegin
+	DefVars %$DotResult
 
-	invoke_cdecl _VectorDot, &Variable(0), Param(1), Param(1), Param(2)
+	invoke_cdecl _VectorDot, & %$DotResult, Param(1), Param(1), Param(2)
 	mov eax, Param(1)
 	mov ecx, Param(2)
 	mov edx, Param(0)
-	movss xmm2, Variable(0)
+	movss xmm2, %$DotResult
 	shufps xmm2, xmm2, 0
 	shl ecx, 4
 	movups xmm0, [edx]

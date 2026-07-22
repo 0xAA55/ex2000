@@ -273,7 +273,7 @@ extern _VBlankFrameStartTime
 _VBlankFrameStartTime resq 1
 
 DefFunc _FreeMonitorData
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	invoke_cdecl _SafeRelease, &[ebx + MonitorData.IDXGIOutput]
@@ -284,14 +284,15 @@ DefFunc _FreeMonitorData
 	ret
 
 DefFunc _VBlankInit
-	FrameBegin 6 + SizedVar(DXGI_OUTPUT_DESC.size), ebx, esi, edi
-	AssignVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter, DXGIOutputDesc
+	FrameBegin ebx, esi, edi
+	DefVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter
+	DefSizedVar DXGIOutputDesc, DXGI_OUTPUT_DESC.size
 
 	invoke_cdecl _InitTimer, _VBlankTimer
 
 	xor eax, eax
 	lea edi, DXGIFactory
-	mov ecx, Frame_NumLocals
+	mov ecx, %$Frame_NumLocals
 	rep stosd
 	mov esi, eax
 	mov edi, eax
@@ -386,24 +387,22 @@ DefFunc _VBlankInit
 	%undef DXGIOutputDesc
 
 DefFunc _DDEnumCallbackExA@20
-	FrameBegin 1, edi
-	AssignVars DDrawObj
+	FrameBegin edi
+	DefVars %$DDrawObj
 
 	mov eax, Param(0)
 	test eax, eax
 	jz .end
 
 	xor eax, eax
-	lea edi, DDrawObj
-	mov ecx, Frame_NumVariables
-	rep stosd
+	mov %$DDrawObj, eax
 
-	invoke_dll_stdcall DirectDrawCreate, Param(0), &DDrawObj, NULL
+	invoke_dll_stdcall DirectDrawCreate, Param(0), &%$DDrawObj, NULL
 	cmp eax, 0
 	jl .fail
 
 	invoke_cdecl _calloc, 1, MonitorData.size
-	mov ecx, DDrawObj
+	mov ecx, %$DDrawObj
 	mov [eax + MonitorData.IDirectDraw], ecx
 
 	invoke_cdecl _AVLInsert, _MonitorsData, Param(4), eax, _FreeMonitorData, _AVLOps_Integer
@@ -419,14 +418,14 @@ DefFunc _DDEnumCallbackExA@20
 	ret 20
 
 DefFunc _SetupMonitorDataProc
-	FrameBegin SizedVar(MONITORINFOEXW.size) + SizedVar(DEVMODEW.size) + SizedVar(DXGI_MODE_DESC.size) + SizedVar(DXGI_MODE_DESC.size), ebx, esi, edi
-	AssignSizedVar _MonitorInfoExW, MONITORINFOEXW.size
-	AssignSizedVar _DevModeW, DEVMODEW.size
-	AssignSizedVar _DesiredMode, DXGI_MODE_DESC.size
-	AssignSizedVar _ClosestMode, DXGI_MODE_DESC.size
+	FrameBegin ebx, esi, edi
+	DefSizedVar _MonitorInfoExW, MONITORINFOEXW.size
+	DefSizedVar _DevModeW, DEVMODEW.size
+	DefSizedVar _DesiredMode, DXGI_MODE_DESC.size
+	DefSizedVar _ClosestMode, DXGI_MODE_DESC.size
 
 	xor eax, eax
-	mov ecx, Frame_NumLocals
+	mov ecx, %$Frame_NumLocals
 	lea edi, &_MonitorInfoExW
 	rep stosd
 
@@ -480,30 +479,22 @@ DefFunc _SetupMonitorDataProc
 .end:
 	FrameEnd
 	ret
-	%undef _MonitorInfoExW
-	%undef _MonitorInfoExW_Addr
-	%undef _DevModeW
-	%undef _DevModeW_Addr
-	%undef _DesiredMode
-	%undef _DesiredMode_Addr
-	%undef _ClosestMode
-	%undef _ClosestMode_Addr
 
 DefFunc _VBlankDeInit
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _AVLClear, _MonitorsData
 	FrameEnd
 	ret
 
 DefFunc _VBlankReInit
-	FrameBegin 0
+	FrameBegin
 	invoke_cdecl _VBlankInit
 	invoke_cdecl _VBlankDeInit
 	FrameEnd
 	ret
 
 DefFunc _FakeWaitForVBlank
-	FrameBegin 0
+	FrameBegin
 
 	cmp dword[.prompted], 0
 	jnz .end
@@ -521,8 +512,8 @@ segment .bss
 .prompted resd 1
 
 DefFunc _WaitForVBlank
-	FrameBegin 4, ebx
-	AssignVars _VBlankStartTimeL, _VBlankStartTimeH, _NewFrameStartTimeL, _NewFrameStartTimeH
+	FrameBegin ebx
+	DefVars %$VBlankStartTimeL, %$VBlankStartTimeH, %$NewFrameStartTimeL, %$NewFrameStartTimeH
 
 	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
 	invoke_cdecl _AVLSearch, [_MonitorsData], eax
@@ -531,7 +522,7 @@ DefFunc _WaitForVBlank
 	mov ebx, [eax + AVLBST_Node.userdata]
 
 	invoke_cdecl _UpdateTimer, _VBlankTimer
-	fst qword _VBlankStartTimeL
+	fst qword %$VBlankStartTimeL
 	fsub qword [_VBlankFrameStartTime]
 	fimul word [_WThousand]
 	fist dword [_LastFrameRenderTimeMs]
@@ -558,8 +549,8 @@ DefFunc _WaitForVBlank
 	jl .not_found
 
 	invoke_cdecl _UpdateTimer, _VBlankTimer
-	fst qword _NewFrameStartTimeL
-	fsub qword _VBlankStartTimeL
+	fst qword %$NewFrameStartTimeL
+	fsub qword %$VBlankStartTimeL
 	fimul word [_WThousand]
 	fist dword [_VBlankTimeUsedMs]
 	fimul word [_WThousand]
@@ -587,11 +578,11 @@ DefFunc _WaitForVBlank
 	fstp qword [_VBlankFrameStartTime]
 	jmp .end
 .no_delay:
-	movq xmm0, _NewFrameStartTimeL
+	movq xmm0, %$NewFrameStartTimeL
 	movq [_VBlankFrameStartTime], xmm0
 	jmp .no_delay_set_vars
 .overloaded:
-	movq xmm0, _VBlankStartTimeL
+	movq xmm0, %$VBlankStartTimeL
 	movq [_VBlankFrameStartTime], xmm0
 .no_delay_set_vars:
 	xor eax, eax
@@ -606,7 +597,3 @@ DefFunc _WaitForVBlank
 .end:
 	FrameEnd
 	ret
-	%undef _VBlankStartTimeL
-	%undef _VBlankStartTimeH
-	%undef _NewFrameStartTimeL
-	%undef _NewFrameStartTimeH

@@ -36,7 +36,7 @@ endstruc
 
 ;void OGLFC_OnLfuKeyRemove(void *key, void *context)
 DefFunc _OGLFC_OnLfuKeyRemove
-	FrameBegin 0, ebx, esi
+	FrameBegin ebx, esi
 	mov ebx, Param(1)
 	invoke_cdecl _LfuGet, [ebx + OGLFC.lfu], Param(0)
 	mov esi, eax
@@ -50,7 +50,7 @@ DefFunc _OGLFC_OnLfuKeyRemove
 
 ;void OGLFC_DescribeVAO(OGLFC *oglfc)
 DefFunc _OGLFC_DescribeVAO
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 	mov ebx, Param(0)
 	lea esi, [ebx + OGLFC.instance_buffer]
 	invoke_dll_stdcall glBindVertexArray, [ebx + OGLFC.vao]
@@ -88,9 +88,9 @@ DefFunc _OGLFC_DescribeVAO
 
 ;OGLFC *OGLFC_Create(HDC hDC, int cap_bits);
 DefFunc _OGLFC_Create
-	FrameBegin 3 + SizedVar(TEXTMETRICW.size), ebx
-	AssignVars _X, _Y, _NumCharsInARow
-	AssignSizedVar _TextMetrics, TEXTMETRICW.size
+	FrameBegin ebx
+	DefVars %$X, %$Y, %$NumCharsInARow
+	DefSizedVar %$TextMetrics, TEXTMETRICW.size
 
 	xor eax, eax
 	mov ecx, Param(1)
@@ -103,9 +103,9 @@ DefFunc _OGLFC_Create
 	cvtsi2sd xmm0, eax
 	sqrtsd xmm0, xmm0
 	cvtsd2si eax, xmm0
-	mov _NumCharsInARow, eax
+	mov %$NumCharsInARow, eax
 
-	invoke_dll_stdcall GetTextMetricsW, Param(0), &_TextMetrics
+	invoke_dll_stdcall GetTextMetricsW, Param(0), &%$TextMetrics
 
 	mov Param(1), eax
 	invoke_cdecl _calloc, 1, OGLFC.size
@@ -125,12 +125,12 @@ DefFunc _OGLFC_Create
 	invoke_dll_stdcall SetBkMode, [ebx + OGLFC.hdc_canvas], OPAQUE
 
 	mov eax, Param(0)
-	mov ecx, [_TextMetrics_Addr + TEXTMETRICW.tmAscent]
-	mov edx, [_TextMetrics_Addr + TEXTMETRICW.tmDescent]
+	mov ecx, [%$TextMetrics_Addr + TEXTMETRICW.tmAscent]
+	mov edx, [%$TextMetrics_Addr + TEXTMETRICW.tmDescent]
 	mov [ebx + OGLFC.hdc_font], eax
 	mov [ebx + OGLFC.ascent], edx
 	mov [ebx + OGLFC.descent], edx
-	mov eax, [_TextMetrics_Addr + TEXTMETRICW.tmHeight]
+	mov eax, [%$TextMetrics_Addr + TEXTMETRICW.tmHeight]
 	mov [ebx + OGLFC.font_size], eax
 	mov edx, eax
 	mov ecx, eax
@@ -139,7 +139,7 @@ DefFunc _OGLFC_Create
 	add eax, ecx
 	mov [ebx + OGLFC.grid_size], eax
 	mov [ebx + OGLFC.space_size], edx
-	mul dword _NumCharsInARow
+	mul dword %$NumCharsInARow
 	bsr ecx, eax
 	inc edx ;edx = 1
 	shl edx, ecx
@@ -151,7 +151,7 @@ DefFunc _OGLFC_Create
 	mov [ebx + OGLFC.font_map_size], edx
 	xor edx, edx
 	div dword[ebx + OGLFC.grid_size]
-	mov _NumCharsInARow, eax
+	mov %$NumCharsInARow, eax
 	mul eax
 	mov [ebx + OGLFC.capacity], eax
 
@@ -159,28 +159,28 @@ DefFunc _OGLFC_Create
 	mov [ebx + OGLFC.lfu], eax
 
 	xor eax, eax
-	mov _Y, eax
+	mov %$Y, eax
 .loop_y:
 
 	xor eax, eax
-	mov _X, eax
+	mov %$X, eax
 .loop_x:
-	mov edx, _Y
+	mov edx, %$Y
 	and eax, 0xFFFF
 	shl edx, 16
 	or eax, edx
 	invoke_cdecl _AVLInsert, &[ebx + OGLFC.vacant_coords], eax, eax, NULL, _AVLOps_Integer
 	
-	mov eax, _X
+	mov eax, %$X
 	inc eax
-	mov _X, eax
-	cmp eax, _NumCharsInARow
+	mov %$X, eax
+	cmp eax, %$NumCharsInARow
 	jb .loop_x
 
-	mov eax, _Y
+	mov eax, %$Y
 	inc eax
-	mov _Y, eax
-	cmp eax, _NumCharsInARow
+	mov %$Y, eax
+	cmp eax, %$NumCharsInARow
 	jb .loop_y
 
 	invoke_dll_stdcall glGenTextures, 1, &[ebx + OGLFC.font_map]
@@ -213,14 +213,10 @@ DefFunc _OGLFC_Create
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _X
-	%undef _Y
-	%undef _NumCharsInARow
-	%undef _TextMetrics
 
 ;void OGLFC_Destroy(OGLFC *oglfc);
 DefFunc _OGLFC_Destroy
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 
@@ -241,24 +237,24 @@ DefFunc _OGLFC_Destroy
 
 ;HBITMAP OGLFC_CreateAndSelectBitmap(HDC hDC, int w, int h, void **pptr)
 DefFunc _OGLFC_CreateAndSelectBitmap
-	FrameBegin SizedVar(BITMAPINFOHEADER.size + 1024), edi
-	AssignSizedVar _BMIF, BITMAPINFOHEADER.size
-	AssignVars _Palette
+	FrameBegin edi
+	DefSizedVar %$BMIF, BITMAPINFOHEADER.size
+	DefSizedVar %$Palette, 1024
 
 	xor eax, eax
-	lea edi, _BMIF
-	mov ecx, Frame_NumLocals
+	lea edi, %$BMIF
+	mov ecx, %$Frame_NumLocals
 	rep stosd
 	mov eax, Param(1)
 	mov ecx, Param(2)
-	mov dword[_BMIF_Addr + BITMAPINFOHEADER.biSize], 40
+	mov dword[%$BMIF_Addr + BITMAPINFOHEADER.biSize], 40
 	neg ecx
-	mov [_BMIF_Addr + BITMAPINFOHEADER.biWidth], eax
-	mov [_BMIF_Addr + BITMAPINFOHEADER.biHeight], ecx
-	mov dword[_BMIF_Addr + BITMAPINFOHEADER.biPlanes], 0x00080001
-	mov word[_BMIF_Addr + BITMAPINFOHEADER.biClrUsed], 256
+	mov [%$BMIF_Addr + BITMAPINFOHEADER.biWidth], eax
+	mov [%$BMIF_Addr + BITMAPINFOHEADER.biHeight], ecx
+	mov dword[%$BMIF_Addr + BITMAPINFOHEADER.biPlanes], 0x00080001
+	mov word[%$BMIF_Addr + BITMAPINFOHEADER.biClrUsed], 256
 
-	lea edi, _Palette
+	lea edi, %$Palette
 	xor eax, eax
 .loop_set_palette:
 	stosb
@@ -269,28 +265,25 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 	cmp ax, 256
 	jb .loop_set_palette
 
-	invoke_dll_stdcall CreateDIBSection, Param(0), &_BMIF, 0, Param(3), NULL, 0
+	invoke_dll_stdcall CreateDIBSection, Param(0), & %$BMIF, 0, Param(3), NULL, 0
 	invoke_dll_stdcall SelectObject, Param(0), eax
 
 	FrameEnd
 	ret
-	%undef _BMIF
-	%undef _BMIF_Addr
-	%undef _Palette
 
 ;void OGLFC_Compose(OGLFC *oglfc, int w, int h, const char *text);
 DefFunc _OGLFC_Compose
-	FrameBegin 17 + SizedVar(InstBufferData.size) + SizedVar(GLYPHMETRICS.size), ebx, esi, edi
-	AssignVars _PointerToChar, _X, _Y, _Buffer
-	AssignVars _BufferSize, _FontVacKey, _WCharBuf, _WCharPtr, _WCharLen
-	AssignVars _SizeW, _SizeH, _CanvasW, _CanvasH
-	AssignVars _SrcX, _SrcY, _MaxX, _MaxY
-	AssignSizedVar _InstBufferData, InstBufferData.size
-	AssignSizedVar _GlyphMetrics, GLYPHMETRICS.size
+	FrameBegin ebx, esi, edi
+	DefVars %$PointerToChar, %$X, %$Y, %$Buffer
+	DefVars %$BufferSize, %$FontVacKey, %$WCharBuf, %$WCharPtr, %$WCharLen
+	DefVars %$SizeW, %$SizeH, %$CanvasW, %$CanvasH
+	DefVars %$SrcX, %$SrcY, %$MaxX, %$MaxY
+	DefSizedVar %$MInstBufferData, InstBufferData.size
+	DefSizedVar %$GlyphMetrics, GLYPHMETRICS.size
 
 	xor eax, eax
-	lea edi, _PointerToChar
-	mov ecx, Frame_NumLocals
+	lea edi, %$PointerToChar
+	mov ecx, %$Frame_NumLocals
 	rep stosd
 
 	mov eax, [ebx + OGLFC.space_size]
@@ -299,13 +292,13 @@ DefFunc _OGLFC_Compose
 
 	mov ebx, Param(0)
 	mov eax, Param(3)
-	mov _PointerToChar, eax
+	mov %$PointerToChar, eax
 
 	invoke_cdecl _BufferClear, &[ebx + OGLFC.instance_buffer]
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
 
 .loop_compose:
-	invoke_cdecl _UtfReadCharFromPtr, &_PointerToChar
+	invoke_cdecl _UtfReadCharFromPtr, &%$PointerToChar
 	test eax, eax
 	jz .loop_end
 	cmp eax, ` `
@@ -321,26 +314,26 @@ DefFunc _OGLFC_Compose
 	jmp .draw_glyph
 .space:
 	mov eax, [ebx + OGLFC.space_size]
-	add _X, eax
+	add %$X, eax
 	jmp .after_advance
 .newline:
 	xor eax, eax
 	mov ecx, [ebx + OGLFC.font_size]
-	mov _X, eax
-	add _Y, ecx
+	mov %$X, eax
+	add %$Y, ecx
 	jmp .after_advance
 .cr:
-	mov dword _X, 0
+	mov dword %$X, 0
 	jmp .after_advance
 .tab:
 	xor edx, edx
 	mov ecx, [ebx + OGLFC.tab_width_px]
-	mov eax, _X
+	mov eax, %$X
 	dec eax
 	div ecx
 	inc eax
 	mul ecx
-	mov _X, eax
+	mov %$X, eax
 	jmp .after_advance
 
 .draw_glyph:
@@ -353,7 +346,7 @@ DefFunc _OGLFC_Compose
 	mov edi, eax
 
 	movq xmm3, [edi + LfuData.xoff]
-	movq xmm0, _X
+	movq xmm0, %$X
 	movq xmm1, [edi + LfuData.blackbox_w]
 	movq xmm2, [edi + LfuData.x]
 	cvtdq2ps xmm3, xmm3
@@ -361,37 +354,37 @@ DefFunc _OGLFC_Compose
 	cvtdq2ps xmm1, xmm1
 	cvtdq2ps xmm2, xmm2
 	subps xmm0, xmm3
-	movq [_InstBufferData_Addr + InstBufferData.x], xmm0
-	movq [_InstBufferData_Addr + InstBufferData.w], xmm1
-	movq [_InstBufferData_Addr + InstBufferData.tw], xmm1
-	movq [_InstBufferData_Addr + InstBufferData.tx], xmm2
-	invoke_cdecl _BufferPushItem, &[ebx + OGLFC.instance_buffer], &[_InstBufferData_Addr]
+	movq [%$MInstBufferData_Addr + InstBufferData.x], xmm0
+	movq [%$MInstBufferData_Addr + InstBufferData.w], xmm1
+	movq [%$MInstBufferData_Addr + InstBufferData.tw], xmm1
+	movq [%$MInstBufferData_Addr + InstBufferData.tx], xmm2
+	invoke_cdecl _BufferPushItem, &[ebx + OGLFC.instance_buffer], &[%$MInstBufferData_Addr]
 
 	movzx eax, word[edi + LfuData.xinc]
 	movzx ecx, word[edi + LfuData.yinc]
-	add _X, eax
-	add _Y, ecx
+	add %$X, eax
+	add %$Y, ecx
 .after_advance:
-	mov eax, _X
-	mov ecx, _Y
+	mov eax, %$X
+	mov ecx, %$Y
 	push ebx
-	mov edx, _MaxX
-	mov ebx, _MaxY
+	mov edx, %$MaxX
+	mov ebx, %$MaxY
 	cmp eax, edx
 	cmova edx, eax
 	cmp ecx, ebx
 	cmova ebx, ecx
-	mov _MaxX, edx
-	mov _MaxY, ebx
+	mov %$MaxX, edx
+	mov %$MaxY, ebx
 	pop ebx
 	cmp eax, Param(1)
 	jb .loop_compose
 	xor eax, eax
-	mov _X, eax
+	mov %$X, eax
 	mov eax, [ebx + OGLFC.font_size]
-	add _Y, eax
+	add %$Y, eax
 	mov eax, Param(2)
-	cmp _Y, eax
+	cmp %$Y, eax
 	jae .loop_end
 
 	jmp .loop_compose
@@ -409,24 +402,24 @@ DefFunc _OGLFC_Compose
 	mov ecx, [ebx + OGLFC.grid_size]
 	mov eax, [edi + LfuData.x]
 	mul ecx
-	mov _SrcX, eax
+	mov %$SrcX, eax
 	mov eax, [edi + LfuData.y]
 	mul ecx
-	mov _SrcY, eax
-	cmp dword _Buffer, 0
+	mov %$SrcY, eax
+	cmp dword %$Buffer, 0
 	jnz .have_buffer
 	mov eax, [ebx + OGLFC.grid_size]
 	shl eax, 1
 	mul eax
-	mov _BufferSize, eax
+	mov %$BufferSize, eax
 	invoke_cdecl _malloc, eax
-	mov _Buffer, eax
+	mov %$Buffer, eax
 .have_buffer:
-	invoke_dll_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, &_GlyphMetrics, _BufferSize, _Buffer, .mat2
+	invoke_dll_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, &%$GlyphMetrics, %$BufferSize, %$Buffer, .mat2
 	cmp eax, 0xFFFFFFFF
 	jz .non_ttf
-	mov eax, _Buffer
-	mov ecx, _BufferSize
+	mov eax, %$Buffer
+	mov ecx, %$BufferSize
 	push esi
 	push edi
 	mov esi, eax
@@ -445,7 +438,7 @@ DefFunc _OGLFC_Compose
 	jnz .convert_65_to_256
 	pop edi
 	pop esi
-	lea eax, _GlyphMetrics
+	lea eax, %$GlyphMetrics
 	mov ecx, [eax + GLYPHMETRICS.gmptGlyphOrigin_x]
 	mov edx, [eax + GLYPHMETRICS.gmptGlyphOrigin_y]
 	sub edx, [ebx + OGLFC.font_size]
@@ -457,91 +450,71 @@ DefFunc _OGLFC_Compose
 	mov [edi + LfuData.blackbox_h], edx
 	mov ecx, [eax + GLYPHMETRICS.gmCellIncX] ;gmCellIncX, gmCellIncY
 	mov [edi + LfuData.xinc], ecx ;xinc, yinc
-	invoke_dll_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, _SrcX, _SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, _Buffer
+	invoke_dll_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, %$Buffer
 .lfudata_ready:
 	invoke_cdecl _LfuPut, [ebx + OGLFC.lfu], esi, edi, _free
 	jmp .after_new_glyph_cached
 .non_ttf:
-	lea eax, _WCharBuf
-	mov _WCharPtr, eax
-	invoke_cdecl _Utf32to16, esi, &_WCharPtr
-	mov _WCharLen, eax
-	invoke_dll_stdcall GetTextExtentPoint32W, [ebx + OGLFC.hdc_font], &_WCharBuf, eax, &_SizeW
-	mov eax, _SizeW
+	lea eax, %$WCharBuf
+	mov %$WCharPtr, eax
+	invoke_cdecl _Utf32to16, esi, &%$WCharPtr
+	mov %$WCharLen, eax
+	invoke_dll_stdcall GetTextExtentPoint32W, [ebx + OGLFC.hdc_font], &%$WCharBuf, eax, &%$SizeW
+	mov eax, %$SizeW
 	mov ecx, [ebx + OGLFC.font_size]
-	mov _CanvasW, eax
-	mov _CanvasH, ecx
+	mov %$CanvasW, eax
+	mov %$CanvasH, ecx
 	cmp eax, [ebx + OGLFC.canvas_width]
 	jne .recreate_canvas
 	cmp ecx, [ebx + OGLFC.canvas_height]
 	je .have_canvas
 .recreate_canvas:
-	invoke_cdecl _OGLFC_CreateAndSelectBitmap, [ebx + OGLFC.hdc_canvas], _CanvasW, _CanvasH, &[ebx + OGLFC.canvas_pointer]
+	invoke_cdecl _OGLFC_CreateAndSelectBitmap, [ebx + OGLFC.hdc_canvas], %$CanvasW, %$CanvasH, &[ebx + OGLFC.canvas_pointer]
 	invoke_dll_stdcall DeleteObject, eax
-	mov eax, _CanvasW
-	mov ecx, _CanvasH
+	mov eax, %$CanvasW
+	mov ecx, %$CanvasH
 	mov [ebx + OGLFC.canvas_width], eax
 	mov [ebx + OGLFC.canvas_height], ecx
 .have_canvas:
-	invoke_dll_stdcall ExtTextOutW, [ebx + OGLFC.hdc_canvas], 0, 0, ETO_OPAQUE, NULL, &_WCharBuf, _WCharLen, NULL
+	invoke_dll_stdcall ExtTextOutW, [ebx + OGLFC.hdc_canvas], 0, 0, ETO_OPAQUE, NULL, &%$WCharBuf, %$WCharLen, NULL
 	mov eax, [ebx + OGLFC.canvas_width]
 	mov ecx, [ebx + OGLFC.canvas_height]
 	mov [edi + LfuData.blackbox_w], eax
 	mov [edi + LfuData.blackbox_h], ecx
 	mov [edi + LfuData.xinc], ax
-	invoke_dll_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, _SrcX, _SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, [ebx + OGLFC.canvas_pointer]
+	invoke_dll_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, [ebx + OGLFC.canvas_pointer]
 	jmp .lfudata_ready
 
 .loop_end:
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	invoke_cdecl _free, _Buffer
+	invoke_cdecl _free, %$Buffer
 
-	mov eax, _MaxX
-	mov edx, _MaxY
+	mov eax, %$MaxX
+	mov edx, %$MaxY
 	FrameEnd
 	ret
 [segment .rdata]
 .mat2:
 	dd 65536, 0
 	dd 0, 65536
-	%undef _PointerToChar
-	%undef _X
-	%undef _Y
-	%undef _Buffer
-	%undef _BufferSize
-	%undef _FontVacKey
-	%undef _WCharBuf
-	%undef _WCharPtr
-	%undef _WCharLen
-	%undef _SizeW
-	%undef _SizeH
-	%undef _CanvasW
-	%undef _CanvasH
-	%undef _SrcX
-	%undef _SrcY
-	%undef _MaxX
-	%undef _MaxY
-	%undef _InstBufferData
-	%undef _InstBufferData_Addr
-	%undef _GlyphMetrics
 
 ;void OGLFC_Present(OGLFC *oglfc, int x, int y);
 DefFunc _OGLFC_Present
-	FrameBegin 4, ebx, esi, edi
-	AssignVars _VPX, _VPY, _VPW, _VPH
+	FrameBegin ebx, esi, edi
+	DefVars %$VPX, %$VPY, %$VPW, %$VPH, %$GridSize
 
 	mov ebx, Param(0)
 	lea esi, [ebx + OGLFC.instance_buffer]
 
-	invoke_dll_stdcall glGetIntegerv, GL_VIEWPORT, &_VPX
+	invoke_dll_stdcall glGetIntegerv, GL_VIEWPORT, & %$VPX
 	movq xmm0, Param(1)
-	movq xmm1, _VPW
+	movq xmm1,  %$VPW
 	cvtsi2ss xmm2, [ebx + OGLFC.grid_size]
 	cvtdq2ps xmm0, xmm0
 	cvtdq2ps xmm1, xmm1
 	movq Param(1), xmm0
-	movq _VPW, xmm1
-	movss Variable(0), xmm2
+	movq  %$VPW, xmm1
+	movss %$GridSize, xmm2
 
 	mov edi, [esi + GlBuffer.gl_buffer]
 	invoke_cdecl _BufferFlush, esi
@@ -557,8 +530,8 @@ DefFunc _OGLFC_Present
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
 	invoke_dll_stdcall glUniform1i, [ebx + OGLFC.location_font_map], 0
-	invoke_dll_stdcall glUniform1f, [ebx + OGLFC.location_grid_size], Variable(0)
-	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_resolution], _VPW, _VPH
+	invoke_dll_stdcall glUniform1f, [ebx + OGLFC.location_grid_size], %$GridSize
+	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_resolution], %$VPW, %$VPH
 	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_offset], Param(1), Param(2)
 	invoke_dll_stdcall glDrawArraysInstanced, GL_TRIANGLE_STRIP, 0, 4, [esi + GlBuffer.num_items]
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
@@ -566,26 +539,22 @@ DefFunc _OGLFC_Present
 
 	FrameEnd
 	ret
-	%undef _VPX
-	%undef _VPY
-	%undef _VPW
-	%undef _VPH
 
 ;int GLPrintf(OGLFC *oglfc, const char *fmt, ...);
 DefFunc _GLPrintf
-	FrameBegin 2, ebx, esi, edi
-	AssignVars _ConLengthAll, _PrintfLength
+	FrameBegin ebx, esi, edi
+	DefVars %$ConLengthAll, %$PrintfLength
 
 	mov ebx, Param(0)
 	lea eax, Param(2)
 	mov edi, [_DebugConsoleBuffer]
 	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(1), eax
-	mov _PrintfLength, eax
+	mov %$PrintfLength, eax
 
 	invoke_dll_cdecl strlen, edi
-	mov _ConLengthAll, eax
+	mov %$ConLengthAll, eax
 	mov ecx, eax
-	add ecx, _PrintfLength
+	add ecx, %$PrintfLength
 	cmp ecx, _DebugConsoleBufferSize
 	jb .eat_console
 	mov byte[edi], 0
@@ -620,14 +589,11 @@ DefFunc _GLPrintf
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _ConLengthAll
-	%undef _PrintfLength
 
 
 ;int GLPrintfXY(OGLFC *oglfc, int x, int y, const char *fmt, ...);
 DefFunc _GLPrintfXY
-	FrameBegin 2, ebx, esi, edi
-	AssignVars _ConLengthAll, _PrintfLength
+	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(0)
 	lea eax, Param(4)
@@ -640,5 +606,3 @@ DefFunc _GLPrintfXY
 	mov eax, ebx
 	FrameEnd
 	ret
-	%undef _ConLengthAll
-	%undef _PrintfLength

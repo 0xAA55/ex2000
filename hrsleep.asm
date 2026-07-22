@@ -6,7 +6,7 @@ extern _hWaitableTimer
 _hWaitableTimer resd 1
 
 DefFunc _HRSleepInit
-	FrameBegin 0
+	FrameBegin
 	cmp dword[_addr_of_CreateWaitableTimerExW], 0
 	jz .end
 	cmp dword[_addr_of_SetWaitableTimer], 0
@@ -18,14 +18,14 @@ DefFunc _HRSleepInit
 	ret
 
 DefFunc _HRSleepDeInit
-	FrameBegin 0
+	FrameBegin
 	invoke_dll_stdcall CloseHandle, [_hWaitableTimer]
 	mov dword[_hWaitableTimer], 0
 	FrameEnd
 	ret
 
 DefFunc _HRSleep500us
-	FrameBegin 2
+	FrameBegin
 	cmp dword[_hWaitableTimer], 0
 	jz .fallback
 
@@ -41,4 +41,4 @@ DefFunc _HRSleep500us
 	FrameEnd
 	ret
 [segment .rdata]
-.wait_time dq -5000
+	.wait_time dq -5000

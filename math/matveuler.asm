@@ -1,7 +1,8 @@
 %include "common.inc"
 
 DefFunc _MatrixViewEuler
-	FrameBegin 0x18, ebx, esi, edi
+	FrameBegin ebx, esi, edi
+	DefSizedVar %$MatrixBuffer, 0x20 + Matrix.size
 
 	mov edi, Param(0)
 	lea esi, Variable(4)

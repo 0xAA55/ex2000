@@ -1,7 +1,7 @@
 %include "common.inc"
 
 DefFunc _FloatMapNextMip
-	FrameBegin 2, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(0)
 	cmp byte[ebx + BitMap.bytes_per_pixel], 4
@@ -39,7 +39,7 @@ DefFunc _FloatMapNextMip
 	ret
 
 DefFunc _FloatMapNextMipPoolProc
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 
 	mov ebx, Param(0)
 	mov eax, [ebx + 0] ;dst

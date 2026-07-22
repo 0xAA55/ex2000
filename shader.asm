@@ -10,61 +10,65 @@ import_dll_func strlen
 
 segment .rdata
 extern _ShaderTypes
+extern _ST_Vertex_Shader
+extern _ST_Geometry_Shader
+extern _ST_Fragment_Shader
+extern _ST_Offsets
+
 _ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
+_ST_Vertex_Shader db "Vertex", 0
+_ST_Geometry_Shader db "Geometry", 0
+_ST_Fragment_Shader db "Fragment", 0
+_ST_Offsets db 0, _ST_Geometry_Shader - _ST_Vertex_Shader, _ST_Fragment_Shader - _ST_Vertex_Shader
 
 ; int ShaderCreate(int program, int shader_type, char *shader_code, char **pp_out_infolog)
 DefFunc _ShaderCreate
-	FrameBegin 5
-	AssignVars _Shader, _SourceLen, _CompileStatus, _InfoLogLen, _InfoLogBuf
+	FrameBegin
+	DefVars %$Shader, %$SourceLen, %$CompileStatus, %$InfoLogLen, %$InfoLogBuf
 
 	invoke_dll_stdcall glCreateShader, Param(1)
-	mov _Shader, eax
+	mov %$Shader, eax
 
 	invoke_dll_cdecl strlen, Param(2)
-	mov _SourceLen, eax
+	mov %$SourceLen, eax
 
-	invoke_dll_stdcall glShaderSource, _Shader, 1, &Param(2), &_SourceLen
-	invoke_dll_stdcall glCompileShader, _Shader
-	invoke_dll_stdcall glGetShaderiv, _Shader, GL_COMPILE_STATUS, &_CompileStatus
+	invoke_dll_stdcall glShaderSource, %$Shader, 1, &Param(2), &%$SourceLen
+	invoke_dll_stdcall glCompileShader, %$Shader
+	invoke_dll_stdcall glGetShaderiv, %$Shader, GL_COMPILE_STATUS, &%$CompileStatus
 
-	mov eax, _CompileStatus
+	mov eax, %$CompileStatus
 	test eax, eax
 	jnz .success
 
-	invoke_dll_stdcall glGetShaderiv, _Shader, GL_INFO_LOG_LENGTH, &_InfoLogLen
-	mov eax, _InfoLogLen
+	invoke_dll_stdcall glGetShaderiv, %$Shader, GL_INFO_LOG_LENGTH, &%$InfoLogLen
+	mov eax, %$InfoLogLen
 	inc eax
 	invoke_cdecl _calloc, eax, 1
-	mov _InfoLogBuf, eax
+	mov %$InfoLogBuf, eax
 
-	invoke_dll_stdcall glGetShaderInfoLog, _Shader, _InfoLogLen, 0, eax
-	invoke_dll_stdcall glDeleteShader, _Shader
+	invoke_dll_stdcall glGetShaderInfoLog, %$Shader, %$InfoLogLen, 0, eax
+	invoke_dll_stdcall glDeleteShader, %$Shader
 	mov eax, Param(3)
-	mov edx, _InfoLogBuf
+	mov edx, %$InfoLogBuf
 	mov [eax], edx
 
 .failexit:
 	xor eax, eax
 	jmp .end
 .success:
-	invoke_dll_stdcall glAttachShader, Param(0), _Shader
-	invoke_dll_stdcall glDeleteShader, _Shader
+	invoke_dll_stdcall glAttachShader, Param(0), %$Shader
+	invoke_dll_stdcall glDeleteShader, %$Shader
 	xor eax, eax
 	inc eax
 
 .end:
 	FrameEnd
 	ret
-	%undef _Shader
-	%undef _SourceLen
-	%undef _CompileStatus
-	%undef _InfoLogLen
-	%undef _InfoLogBuf
 
 ; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 DefFunc _ProgramCreate
-	FrameBegin 7, esi, edi
-	AssignVars _ECX_Home, _PRG, _InfoLog, _InfoLogLen, _LinkStatus, _ShaderType, _FormatBuffer
+	FrameBegin esi, edi
+	DefVars %$ECXHome, %$Program, %$InfoLog, %$InfoLogLen, %$LinkStatus, %$ShaderType, %$FormatBuffer
 
 	mov eax, Param(0)
 	or eax, Param(1)
@@ -72,57 +76,57 @@ DefFunc _ProgramCreate
 	jz .bad_param
 
 	xor eax, eax
-	mov _InfoLog, eax
+	mov %$InfoLog, eax
 	mov edi, eax
 
 	invoke_dll_stdcall glCreateProgram
-	mov _PRG, eax
+	mov %$Program, eax
 
 	mov ecx, 3
 	mov esi, _ST_Offsets
 	dec edi
 .add_shaders:
 	inc edi
-	mov _ECX_Home, ecx
+	mov %$ECXHome, ecx
 
 	xor eax, eax
 	lodsb
 	add eax, _ST_Vertex_Shader
-	mov _ShaderType, eax
+	mov %$ShaderType, eax
 
 	mov eax, Param(edi)
 	test eax, eax
 	jz .skip_shader
 
-	invoke_cdecl _ShaderCreate, _PRG, [_ShaderTypes + edi * 4], eax, &_InfoLog
+	invoke_cdecl _ShaderCreate, %$Program, [_ShaderTypes + edi * 4], eax, &%$InfoLog
 	test eax, eax
 	jnz .skip_shader
-	debug_msg "Shader compilation error :%s Shader: %s", _ShaderType, _InfoLog
+	debug_msg "Shader compilation error :%s Shader: %s", %$ShaderType, %$InfoLog
 	jmp .bad_end
 .skip_shader:
-	mov ecx, _ECX_Home
+	mov ecx, %$ECXHome
 	dec ecx
 	jnz .add_shaders
 
-	invoke_dll_stdcall glLinkProgram, _PRG
-	invoke_dll_stdcall glGetProgramiv, _PRG, GL_LINK_STATUS, &_LinkStatus
-	mov eax, _LinkStatus
+	invoke_dll_stdcall glLinkProgram, %$Program
+	invoke_dll_stdcall glGetProgramiv, %$Program, GL_LINK_STATUS, &%$LinkStatus
+	mov eax, %$LinkStatus
 	test eax, eax
 	jnz .good_link
 
-	invoke_dll_stdcall glGetProgramiv, _PRG, GL_INFO_LOG_LENGTH, &_InfoLogLen
-	mov eax, _InfoLogLen
+	invoke_dll_stdcall glGetProgramiv, %$Program, GL_INFO_LOG_LENGTH, &%$InfoLogLen
+	mov eax, %$InfoLogLen
 	inc eax
 	invoke_cdecl _calloc, eax, 1
-	mov _InfoLog, eax
+	mov %$InfoLog, eax
 
-	invoke_dll_stdcall glGetProgramInfoLog, _PRG, _InfoLogLen, &_InfoLogLen, _InfoLog
+	invoke_dll_stdcall glGetProgramInfoLog, %$Program, %$InfoLogLen, &%$InfoLogLen, %$InfoLog
 
-	debug_msg "Shader linkage error: %s", _InfoLog
+	debug_msg "Shader linkage error: %s", %$InfoLog
 	jmp .bad_end
 
 .good_link:
-	mov eax, _PRG
+	mov eax, %$Program
 	jmp .end
 
 .bad_param:
@@ -130,44 +134,28 @@ DefFunc _ProgramCreate
 	jmp .bad_param
 
 .bad_end:
-	invoke_cdecl _free, _InfoLog
-	invoke_dll_stdcall glDeleteProgram, _PRG
+	invoke_cdecl _free, %$InfoLog
+	invoke_dll_stdcall glDeleteProgram, %$Program
 	xor eax, eax
 
 .end:
 	FrameEnd
 	ret
-	%undef _ECX_Home
-	%undef _PRG
-	%undef _InfoLog
-	%undef _InfoLogLen
-	%undef _LinkStatus
-	%undef _ShaderType
-	%undef _FormatBuffer
-
-segment .rdata
-extern _ST_Vertex_Shader
-extern _ST_Geometry_Shader
-extern _ST_Fragment_Shader
-extern _ST_Offsets
-_ST_Vertex_Shader db "Vertex", 0
-_ST_Geometry_Shader db "Geometry", 0
-_ST_Fragment_Shader db "Fragment", 0
-_ST_Offsets db 0, _ST_Geometry_Shader - _ST_Vertex_Shader, _ST_Fragment_Shader - _ST_Vertex_Shader
 
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 DefFunc _SceneLoadShaderProgram
-	FrameBegin 3, esi
+	FrameBegin esi
+	DefVars %$VSString, %$GSString, %$FSString
 
 	mov esi, Param(0)
 	invoke_cdecl _AssetsQuery, Param(1), 0
-	mov Variable(0), eax
+	mov %$VSString, eax
 	invoke_cdecl _AssetsQuery, Param(2), 0
-	mov Variable(1), eax
+	mov %$GSString, eax
 	invoke_cdecl _AssetsQuery, Param(3), 0
-	mov Variable(2), eax
+	mov %$FSString, eax
 
-	invoke_cdecl _ProgramCreate, Variable(0), Variable(1), Variable(2)
+	invoke_cdecl _ProgramCreate, %$VSString, %$GSString, %$FSString
 	mov [esi], eax
 
 	FrameEnd

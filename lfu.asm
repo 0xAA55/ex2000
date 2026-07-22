@@ -18,7 +18,7 @@ endstruc
 
 ; void FreeDataNode(DataNode *dn);
 DefFunc _FreeDataNode
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	test ebx, ebx
@@ -31,7 +31,7 @@ DefFunc _FreeDataNode
 
 ; LfuCache *LfuCreate(int capacity, KeyCompareOps *user_ops, void *context, void (*on_key_remove)(void *key, void *context));
 DefFunc _LfuCreate
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	invoke_cdecl _calloc, 1, LfuCache.size
 	mov ebx, eax
@@ -59,12 +59,12 @@ DefFunc _LfuCreate
 
 ; void LfuIncreaseFreq(LfuCache *cache, void *user_key, DataNode *dn);
 DefFunc _LfuIncreaseFreq
-	FrameBegin SizedVar(FreqKey.size), ebx, esi, edi
-	AssignVars _FreqKey
+	FrameBegin ebx, esi, edi
+	DefSizedVar %$FreqKey, FreqKey.size
 
 	mov ebx, Param(0)
 	mov esi, Param(2)
-	lea edi, _FreqKey
+	lea edi, %$FreqKey
 
 	mov eax, [esi + DataNode.freq]
 	mov ecx, Param(1)
@@ -86,11 +86,10 @@ DefFunc _LfuIncreaseFreq
 
 	FrameEnd
 	ret
-	%undef _FreqKey
 
 ; void* LfuGet(LfuCache *cache, void *key);
 DefFunc _LfuGet
-	FrameBegin 0, ebx, esi
+	FrameBegin ebx, esi
 
 	mov eax, Param(0)
 	test eax, eax
@@ -108,8 +107,8 @@ DefFunc _LfuGet
 
 ; void LfuPut(LfuCache *cache, void *key, void *value, void(*on_free)(void *userdata));
 DefFunc _LfuPut
-	FrameBegin SizedVar(FreqKey.size), ebx, esi, edi
-	AssignVars _FreqKey
+	FrameBegin ebx, esi, edi
+	DefSizedVar %$FreqKey, FreqKey.size
 
 	mov eax, Param(3)
 	mov ecx, .ret_op
@@ -150,7 +149,7 @@ DefFunc _LfuPut
 .good:
 	mov esi, [eax + AVLBST_Node.key]
 	invoke_cdecl [ebx + LfuCache.on_key_remove], [esi + FreqKey.data_key], [ebx + LfuCache.context]
-	lea edi, _FreqKey
+	lea edi, %$FreqKey
 	mov eax, [esi + FreqKey.freq]
 	mov ecx, [esi + FreqKey.data_key]
 	mov edx, [ebx + LfuCache.user_keyops]
@@ -175,7 +174,7 @@ DefFunc _LfuPut
 	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], Param(1), esi, _FreeDataNode, [ebx + LfuCache.user_keyops]
 	test eax, eax
 	jz .bad
-	lea edi, _FreqKey
+	lea edi, %$FreqKey
 	mov eax, [eax + AVLBST_Node.key]
 	mov ecx, [ebx + LfuCache.user_keyops]
 	mov dword[edi + FreqKey.freq], 1
@@ -188,11 +187,10 @@ DefFunc _LfuPut
 	FrameEnd
 .ret_op:
 	ret
-	%undef _FreqKey
 
 ; void LfuDestroy(LfuCache *cache)
 DefFunc _LfuDestroy
-	FrameBegin 0, ebx
+	FrameBegin ebx
 
 	mov ebx, Param(0)
 	test ebx, ebx
@@ -208,7 +206,7 @@ DefFunc _LfuDestroy
 
 ; int FreqKeyCompare(FreqKey *a, FreqKey *b);
 DefFunc _FreqKeyCompare
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov esi, Param(0)
 	mov edi, Param(1)
@@ -234,7 +232,7 @@ DefFunc _FreqKeyCompare
 
 ; FreqKey *FreqKeyDuplicate(FreqKey *key);
 DefFunc _FreqKeyDuplicate
-	FrameBegin 0, esi, edi
+	FrameBegin esi, edi
 
 	mov esi, Param(0)
 	invoke_cdecl _malloc, FreqKey.size

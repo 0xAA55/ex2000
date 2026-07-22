@@ -3,7 +3,7 @@
 
 ; int UtfReadCharFromPtr(char **ch);
 DefFunc _UtfReadCharFromPtr
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	xor eax, eax
 	mov ebx, eax
@@ -106,7 +106,7 @@ DefFunc _UtfReadCharFromPtr
 
 ;int Utf32to16(uint32_t utf32, wchar_t **ch);
 DefFunc _Utf32to16
-	FrameBegin 0, ebx, edi
+	FrameBegin ebx, edi
 
 	mov ebx, Param(1)
 	mov edi, [ebx]

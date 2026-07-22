@@ -12,7 +12,7 @@ extern _FloatMapCurveNumWorkers
 _FloatMapCurveNumWorkers resd 1
 
 DefFunc _FloatMapCurvePoolProc
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(0)
 	mov edi, [ebx + PoolProcParam.fmap]
@@ -29,7 +29,7 @@ DefFunc _FloatMapCurvePoolProc
 
 
 DefFunc _FloatMapCurve
-	FrameBegin 0, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(0)
 	mov eax, [ebx + BitMap.border_len]

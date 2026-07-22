@@ -45,7 +45,7 @@ segment .bss
 _LastUFunc:
 
 DefFunc _entry
-	FrameBegin 0, ebx
+	FrameBegin ebx
 	invoke_cdecl _InitLoadLibrary
 	invoke_cdecl _AssetsInit
 	invoke_cdecl _InitDelayedLoadFunc
@@ -65,7 +65,7 @@ DefFunc _entry
 	ret
 
 DefFunc _main
-	FrameBegin 0
+	FrameBegin
 
 	mov byte[_WCEx.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx.lpfnWndProc], _WndProc@16
@@ -129,7 +129,7 @@ DefFunc _main
 	ret
 
 DefFunc _DoEvents
-	FrameBegin 0
+	FrameBegin
 
 	invoke_dll_stdcall PeekMessageA, _MSG, 0, 0, 0, PM_REMOVE
 	test eax, eax
@@ -151,7 +151,7 @@ DefFunc _DoEvents
 	ret
 
 DefFunc _WndProc@16
-	FrameBegin 0
+	FrameBegin
 	mov eax, Param(1)
 	cmp eax, WM_CREATE
 	jnz .other_than_WM_CREATE
@@ -193,8 +193,7 @@ DefFunc _WndProc@16
 	xor eax, eax
 	jmp .end
 .other_than_WM_DISPLAYCHANGE:
-	FrameEnd
-	jmp [_addr_of_DefWindowProcA]
+	invoke_dll_stdcall DefWindowProcA, Param(0), Param(1), Param(2), Param(3)
 .end:
 	FrameEnd
 	ret 16
