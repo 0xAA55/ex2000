@@ -72,9 +72,11 @@ _AssetsCabSize equ $ - _AssetsCab
 extern _AssetsCabName
 _AssetsCabName db "assets.cab", 0
 
+def_dll Cabinet, "cabinet.dll"
+
 DefFunc _AssetsInitLoadDll
 	FrameBegin 0
-	def_dll_and_load Cabinet, "cabinet.dll"
+	load_dll Cabinet
 	dll_func_group_load Cabinet, CabinetFunc
 	FrameEnd
 	ret
