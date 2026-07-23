@@ -231,9 +231,7 @@ DefFunc _InitLoadLibrary
 	mov [_addr_of_GetProcAddress], edx
 
 	; Then call it to get the address of
-	push _name_of_LoadLibraryA
-	push ebx	; Base offset of kernel32
-	call edx	; GetProcAddress
+	invoke_stdcall edx, ebx, _name_of_LoadLibraryA ; GetProcAddress
 	mov [_addr_of_LoadLibraryA], eax
 %else
 	extern __imp__GetProcAddress@8

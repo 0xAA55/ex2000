@@ -50,8 +50,7 @@
 %endmacro
 
 %macro load_dll 1
-	push _name_of_ %+ %1
-	call [_addr_of_LoadLibraryA]
+	invoke_dll_stdcall LoadLibraryA, _name_of_ %+ %1
 	mov [_addr_of_ %+ %1], eax
 	%ifdef INVOKE_CHECK
 		[segment .rdata]
@@ -60,12 +59,8 @@
 		__SECT__
 		test eax, eax
 		jnz %%success
-		extern _addr_of_MessageBoxA
-		push 0
-		push 0
-		push %%dllfail
-		push 0
-		call [_addr_of_MessageBoxA]
+		import_dll_func MessageBoxA
+		invoke_dll_stdcall MessageBoxA, 0, %%dllfail, 0, 0
 		int3
 	%%success:
 	%endif
@@ -77,9 +72,7 @@
 %endmacro
 
 %macro load_dll_func 2
-	push _name_of_ %+ %2
-	push [_addr_of_ %+ %1]
-	call [_addr_of_GetProcAddress]
+	invoke_dll_stdcall GetProcAddress, [_addr_of_ %+ %1], _name_of_ %+ %2
 	mov [_addr_of_ %+ %2], eax
 	%ifdef INVOKE_CHECK
 		test eax, eax
@@ -98,12 +91,8 @@
 		%%func_name db %str(CurFuncName), ": On call `", %str(%1), "`: NULL function pointer", 0
 
 		__SECT__
-		extern _addr_of_MessageBoxA
-		push 0
-		push 0
-		push %%func_name
-		push 0
-		call [_addr_of_MessageBoxA]
+		import_dll_func MessageBoxA
+		invoke_dll_stdcall MessageBoxA, 0, %%func_name, 0, 0
 		jmp %%unsuccess
 		%%success:
 		call [_addr_of_ %+ %1]
