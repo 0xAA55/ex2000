@@ -46,10 +46,14 @@
 %define RoundUp(x, r) (GetNumRooms(x, r) * (r))
 %define SizedVar(x) GetNumRooms(x, 4)
 
-%macro DefVars 1-*
+%macro __AllocStackVars 0
 	%if %$Frame_NumVariables == 0
 		sub esp, %$Frame_NumLocals * 4
 	%endif
+%endmacro
+
+%macro DefVars 1-*
+	__AllocStackVars
 	[segment %[.stack_of_ %+ CurFuncName]]
 	[warning -zeroing]
 	%rep %0
@@ -63,9 +67,7 @@
 %endmacro
 
 %macro DefSizedVar 2
-	%if %$Frame_NumVariables == 0
-		sub esp, %$Frame_NumLocals * 4
-	%endif
+	__AllocStackVars
 	%assign %%NumRooms GetNumRooms(%2, 4)
 	%xdefine %1%[_Addr] AddrOfVariable(%[%$Frame_NumVariables])
 	%xdefine %1 Variable(%[%$Frame_NumVariables])
