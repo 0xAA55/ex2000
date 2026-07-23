@@ -26,7 +26,7 @@
 	%endif
 	%if %0 > 0
 		%xdefine %$Frame_SavedRegs %1
-		FrameSaveRegs %$Frame_SavedRegs
+		__FrameSaveRegs %$Frame_SavedRegs
 	%endif
 	%assign %$CurPrmIndex 0
 %endmacro
@@ -94,7 +94,7 @@
 		add esp, %$Frame_NumLocals * 4
 	%endif
 	%ifdef %$Frame_SavedRegs
-		FrameStoreRegs %$Frame_SavedRegs
+		__FrameStoreRegs %$Frame_SavedRegs
 	%endif
 	%ifdef Frame_UseEBP
 		pop ebp
@@ -102,7 +102,7 @@
 	%pop
 %endmacro
 
-%macro FrameSaveRegs 1-*
+%macro __FrameSaveRegs 1-*
 	%rep %0
 		push %1
 		%assign %$Frame_NumSavedRegs %$Frame_NumSavedRegs + 1
@@ -110,7 +110,7 @@
 	%endrep
 %endmacro
 
-%macro FrameStoreRegs 1-*
+%macro __FrameStoreRegs 1-*
 	%rep %0
 		%rotate -1
 		pop %1
