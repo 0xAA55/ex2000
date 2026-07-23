@@ -274,6 +274,7 @@ segment .rdata
 %endif
 
 DefFunc _LoadFuncGroup
+	FrameBegin
 	push ecx
 	invoke_dll_stdcall GetProcAddress, ebx, esi
 %ifdef INVOKE_CHECK
@@ -288,12 +289,15 @@ DefFunc _LoadFuncGroup
 	call _NextString
 	pop ecx
 	loop _LoadFuncGroup
+	FrameEnd
 	ret
 
 DefFunc _NextString
+	FrameBegin
 	lodsb
 	test al, al ; Find NUL
 	jnz _NextString
+	FrameEnd
 	ret
 
 DefFunc _NLtoNUL

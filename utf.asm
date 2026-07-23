@@ -92,6 +92,7 @@ DefFunc _UtfReadCharFromPtr
 	FrameEnd
 	ret
 .load_mb:
+	FrameBegin
 	xor eax, eax
 	lodsb
 	mov dl, al
@@ -99,6 +100,7 @@ DefFunc _UtfReadCharFromPtr
 	cmp dl, 0x80
 	jne .bad_mb
 	and al, 0x3F
+	FrameEnd
 	ret
 .bad_mb:
 	pop ecx
