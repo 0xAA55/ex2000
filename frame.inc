@@ -28,17 +28,38 @@
 		%xdefine %$Frame_SavedRegs %1
 		__FrameSaveRegs %$Frame_SavedRegs
 	%endif
+	%assign %$Frame_NumPushes 0
+	%ifdef Frame_UseEBP
+		%define AddrOfParam(x) (ebp + (x + 2) * 4)
+	%else
+		%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + %[%$Frame_NumPushes] + (x) + 1) * 4)
+	%endif
+	%define AddrOfVariable(x) (esp + %[%$Frame_NumPushes] + (x) * 4)
+	%define Param(x) [AddrOfParam(x)]
+	%define Variable(x) [AddrOfVariable(x)]
+	%macro push 1-*
+		%rep %0
+			push %1
+			%assign %$Frame_NumPushes %$Frame_NumPushes + 1
+			%ifdef __StdCallEspBias
+				%assign __StdCallEspBias __StdCallEspBias + 4
+			%endif
+			%rotate 1
+		%endrep
+	%endmacro
+
+	%macro pop 1-*
+		%rep %0
+			%rotate -1
+			pop %1
+			%assign %$Frame_NumPushes %$Frame_NumPushes - 1
+			%ifdef __StdCallEspBias
+				%assign __StdCallEspBias __StdCallEspBias - 4
+			%endif
+		%endrep
+	%endmacro
 	%assign %$CurPrmIndex 0
 %endmacro
-
-%ifdef Frame_UseEBP
-	%define AddrOfParam(x) (ebp + (x + 2) * 4)
-%else
-	%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + (x) + 1) * 4)
-%endif
-%define AddrOfVariable(x) (esp + (x) * 4)
-%define Param(x) [AddrOfParam(x)]
-%define Variable(x) [AddrOfVariable(x)]
 
 %define GetNumRooms(x, r) (((x) - 1) / (r) + 1)
 %define RoundUp(x, r) (GetNumRooms(x, r) * (r))
@@ -90,9 +111,14 @@
 	[segment %[.stack_of_ %+ CurFuncName]]
 	.stack_end:
 	__SECT__
+	%if %$Frame_NumPushes != 0
+		%error Stack not balanced: pushed %$Frame_NumPushes items before `FrameEnd`
+	%endif
 	%if %$Frame_NumLocals != 0
 		add esp, %$Frame_NumLocals * 4
 	%endif
+	%unmacro push 1-*
+	%unmacro pop 1-*
 	%ifdef %$Frame_SavedRegs
 		__FrameStoreRegs %$Frame_SavedRegs
 	%endif
@@ -116,6 +142,18 @@
 		pop %1
 		%assign %$Frame_NumSavedRegs %$Frame_NumSavedRegs - 1
 	%endrep
+%endmacro
+
+%macro __ModifyEsp 1
+	%if %1 < 0
+		sub esP, (-%1) * 4
+	%elif %1 > 0
+		add esP, (%1) * 4
+	%endif
+	%ifdef __StdCallEspBias
+		%assign __StdCallEspBias __StdCallEspBias - (%1) * 4
+	%endif
+	%assign %$Frame_NumPushes %$Frame_NumPushes - (%1)
 %endmacro
 
 %macro __StrContains 3
@@ -318,9 +356,6 @@
 		%assign __prep_index 0
 		%rep __1_prep_cnt
 			__1_prep%[__prep_index]
-			%ifidn %substr(%str(__1_prep%[__prep_index]), 1, 4), 'push'
-				%assign __StdCallEspBias __StdCallEspBias + 4
-			%endif
 			%undef __1_prep%[__prep_index]
 			%assign __prep_index __prep_index + 1
 		%endrep
@@ -329,9 +364,6 @@
 		%assign __prep_index 0
 		%rep __2_prep_cnt
 			__2_prep%[__prep_index]
-			%ifidn %substr(%str(__2_prep%[__prep_index]), 1, 4), 'push'
-				%assign __StdCallEspBias __StdCallEspBias + 4
-			%endif
 			%undef __2_prep%[__prep_index]
 			%assign __prep_index __prep_index + 1
 		%endrep
@@ -340,9 +372,6 @@
 		%assign __prep_index 0
 		%rep __3_prep_cnt
 			__3_prep%[__prep_index]
-			%ifidn %substr(%str(__3_prep%[__prep_index]), 1, 4), 'push'
-				%assign __StdCallEspBias __StdCallEspBias + 4
-			%endif
 			%undef __3_prep%[__prep_index]
 			%assign __prep_index __prep_index + 1
 		%endrep
@@ -435,28 +464,24 @@
 	%undef __IsFloatD
 	IsFloatF __IsFloatF, __Param
 	IsFloatStr __IsFloatD, __ParamStr
+	%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 	%if %substr(__ParamStr, 1, 1) == "&"
 		%define __Param %tok(%substr(__ParamStr, 2))
-		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 		__PassParam lea, __Param, %tok(__ParamStr)
-		%undef __ESP_PLACE_HOLDER__
 	%elif %substr(__ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
 		StripStringFromDot __XmmParamStr, __ParamStr
 		%xdefine __XmmParam %tok(__XmmParamStr)
 		%if %substr(__ParamStr, __ParamStrLen -1) == ".x"
-			sub esP, 4
-			%assign __StdCallEspBias __StdCallEspBias + 4
+			__ModifyEsp -1
 			movss [esP], __XmmParam
 		%elif %substr(__ParamStr, __ParamStrLen -2) == ".xy"
 			%assign __NumParamsPassed 2
-			sub esP, 8
-			%assign __StdCallEspBias __StdCallEspBias + 8
+			__ModifyEsp -2
 			movq [esP], __XmmParam
 		%elif %substr(__ParamStr, __ParamStrLen -4) == ".xyzw"
 			%assign __NumParamsPassed 4
-			sub esP, 16
-			%assign __StdCallEspBias __StdCallEspBias + 16
+			__ModifyEsp -4
 			movdqu [esP], __XmmParam
 		%else
 			%error Unknown param __ParamStr
@@ -470,14 +495,8 @@
 			__FlushPassArgs
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
 			%xdefine __Inner %tok(__InnerStr)
-			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 			push [__Inner + 4]
-			%undef __ESP_PLACE_HOLDER__
-			%assign __StdCallEspBias __StdCallEspBias + 4
-			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 			push [__Inner + 0]
-			%undef __ESP_PLACE_HOLDER__
-			%assign __StdCallEspBias __StdCallEspBias + 4
 		%elif %substr(__ParamStr, 1, 2) == "&["
 			%xdefine __InnerStr %substr(__ParamStr, 3, -2)
 			%xdefine __Inner %tok(__InnerStr)
@@ -486,9 +505,7 @@
 		%else
 			__FlushPassArgs
 			push (__Param) >> 32
-			%assign __StdCallEspBias __StdCallEspBias + 4
 			push (__Param) & 0xFFFFFFFF
-			%assign __StdCallEspBias __StdCallEspBias + 4
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "f2d "
 		%define __Param %tok(%substr(__ParamStr, 5))
@@ -498,11 +515,8 @@
 		%if %substr(__ParamStr, 1, 1) == "["
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
 			%xdefine __Inner %tok(__InnerStr)
-			sub esP, 8
-			%assign __StdCallEspBias __StdCallEspBias + 8
-			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			__ModifyEsp -2
 			fld dword [__Inner]
-			%undef __ESP_PLACE_HOLDER__
 			fstp qword [esP]
 		%else
 			%error `f2d` only supports convert float number from memory address.
@@ -515,11 +529,8 @@
 		%if %substr(__ParamStr, 1, 1) == "["
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
 			%xdefine __Inner %tok(__InnerStr)
-			sub esP, 4
-			%assign __StdCallEspBias __StdCallEspBias + 8
-			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			__ModifyEsp -1
 			fld dword [__Inner]
-			%undef __ESP_PLACE_HOLDER__
 			fistp dword [esP]
 		%else
 			%error `f2i` only supports convert float number from memory address.
@@ -532,42 +543,32 @@
 		%if %substr(__ParamStr, 1, 1) == "["
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
 			%xdefine __Inner %tok(__InnerStr)
-			sub esP, 4
-			%assign __StdCallEspBias __StdCallEspBias + 8
-			%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+			__ModifyEsp -1
 			fild dword [__Inner]
-			%undef __ESP_PLACE_HOLDER__
 			fstp dword [esP]
 		%else
 			%error `i2f` only supports convert float number from memory address.
 		%endif
 	%elifidn __ParamStr, 'st0'
-		sub esP, 4
-		%assign __StdCallEspBias __StdCallEspBias + 4
+		__ModifyEsp -1
 		fstp dword [esP]
 	%elifidn __ParamStr, 'st0d'
 		%assign __NumParamsPassed 2
-		sub esP, 8
-		%assign __StdCallEspBias __StdCallEspBias + 8
+		__ModifyEsp -2
 		fstp qword [esP]
 	%elif __IsFloatF
 		__FlushPassArgs
 		push __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
-		%assign __StdCallEspBias __StdCallEspBias + 4
 	%elif __IsFloatD
 		__FlushPassArgs
 		%assign __NumParamsPassed 2
 		push (__?float64?__(__Param) >> 32)
-		%assign __StdCallEspBias __StdCallEspBias + 4
 		push (__?float64?__(__Param) & 0xFFFFFFFF)
-		%assign __StdCallEspBias __StdCallEspBias + 4
 	%else
 		__FlushPassArgs
-		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
 		push __Param
-		%undef __ESP_PLACE_HOLDER__
-		%assign __StdCallEspBias __StdCallEspBias + 4
 	%endif
+	%undef __ESP_PLACE_HOLDER__
 	%xdefine __LastPassParam %2
 %endmacro
 
@@ -609,6 +610,7 @@
 			%undef esP
 			%error Preserved keyword `esP` was defined to something.
 		%endif
+		%assign %%CurPushRegs %$Frame_NumPushes
 		%ifndef __NoResetPassReg
 			__ResetPassReg
 		%endif
@@ -662,6 +664,8 @@
 		call %1
 		%undef __ESP_PLACE_HOLDER__
 		%undef esp
+		%assign %$Frame_NumPushes %%CurPushRegs
+		%undef __StdCallEspBias
 	%endif
 %endmacro
 
@@ -680,11 +684,13 @@
 	%else
 		invoke_stdcall %1, %2
 	%endif
+	%assign %%CurPushRegs %$Frame_NumPushes
 	%if __ParamIndex == 1
 		pop ecx
 	%elif __ParamIndex != 0
 		add esp, __ParamIndex * 4
 	%endif
+	%assign %$Frame_NumPushes %%CurPushRegs
 %endmacro
 
 %macro invoke_dll_cdecl 1-2+
