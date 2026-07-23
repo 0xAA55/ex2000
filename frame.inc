@@ -18,7 +18,7 @@
 %macro FrameBegin 0-1+
 	%push StackFrame
 	%assign %$Frame_NumVariables 0
-	%define %$Frame_NumLocals ((.stack_end - .stack_begin) / 4)
+	%define %$Frame_NumLocals 0 ;Redifines in DefVars and DefSizedVar
 	%assign %$Frame_NumSavedRegs 0
 	%ifdef Frame_UseEBP
 		push ebp
@@ -48,6 +48,7 @@
 
 %macro __AllocStackVars 0
 	%if %$Frame_NumVariables == 0
+		%define %$Frame_NumLocals ((.stack_end - .stack_begin) / 4)
 		sub esp, %$Frame_NumLocals * 4
 	%endif
 %endmacro
