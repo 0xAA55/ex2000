@@ -116,8 +116,6 @@ DefFunc _AssetsFnOpen
 	jnz .already_opened
 	inc dword [eax + FileStruct.opened]
 	mov [eax + FileStruct.file_pointer], edx
-	push eax
-	pop eax
 	jmp .end
 .already_opened:
 .opened_too_many:
