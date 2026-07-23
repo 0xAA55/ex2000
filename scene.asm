@@ -846,6 +846,8 @@ __SECT__
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRLensTexture], 0
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_RTTDepthBuffer]
 	call .check_fbo
+	test eax, eax
+	jz .quit
 
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
 	call .clear_buffers
@@ -876,6 +878,8 @@ __SECT__
 	add eax, GL_COLOR_ATTACHMENT0
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRBlurTexture], 0
 	call .check_fbo
+	test eax, eax
+	jz .quit
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthLow, %$VPHeightLow
 	call .clear_buffers
 
@@ -931,18 +935,25 @@ __SECT__
 	FrameEnd
 	ret
 .check_fbo:
+	FrameBegin
 	invoke_dll_stdcall glCheckFramebufferStatus, GL_DRAW_FRAMEBUFFER
 	cmp eax, GL_FRAMEBUFFER_COMPLETE
-	jz .fbo_good
+	jne .fbo_not_complete
+	xor eax, eax
+	inc eax
+	jmp .check_fbo_ret
+.fbo_not_complete:
 	debug_msg `glCheckFramebufferStatus() returns %d`, eax
-	pop eax
-	jmp .quit
-.fbo_good:
+	xor eax, eax
+.check_fbo_ret:
+	FrameEnd
 	ret
 .clear_buffers:
+	FrameBegin
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClearDepth, 1.0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
+	FrameEnd
 	ret
 
 DefFunc _SwapBuffersNoVSync
