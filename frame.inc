@@ -57,7 +57,7 @@
 	[warning -zeroing]
 	%rep %0
 		%[.var_ %+ %$Frame_NumVariables] resd 1
-		%xdefine %1 Variable(%[%$Frame_NumVariables])
+		%define %1 Variable(%[%$Frame_NumVariables])
 		%assign %$Frame_NumVariables %$Frame_NumVariables + 1
 		%rotate 1
 	%endrep
@@ -68,8 +68,8 @@
 %macro DefSizedVar 2
 	__AllocStackVars
 	%assign %%NumRooms GetNumRooms(%2, 4)
-	%xdefine %1%[_Addr] AddrOfVariable(%[%$Frame_NumVariables])
-	%xdefine %1 Variable(%[%$Frame_NumVariables])
+	%define %1%[_Addr] AddrOfVariable(%[%$Frame_NumVariables])
+	%define %1 Variable(%[%$Frame_NumVariables])
 	[segment %[.stack_of_ %+ CurFuncName]]
 	[warning -zeroing]
 	%[.var_ %+ %$Frame_NumVariables] resd %%NumRooms
