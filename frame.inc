@@ -37,10 +37,8 @@
 	%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + (x) + 1) * 4)
 %endif
 %define AddrOfVariable(x) (esp + (x) * 4)
-%define AddrOfCallParam(x) %error There are no addresses for call params
 %define Param(x) [AddrOfParam(x)]
 %define Variable(x) [AddrOfVariable(x)]
-%define CallParam(x) [AddrOfCallParam(x)]
 
 %define GetNumRooms(x, r) (((x) - 1) / (r) + 1)
 %define RoundUp(x, r) (GetNumRooms(x, r) * (r))
