@@ -54,6 +54,15 @@ extern _HybridWaitUs
 	invoke_cdecl _InitTimer, %1
 %endmacro
 
+%macro PerfStartNoInst 1
+	[segment .bss]
+	extern %1
+	%1 resb Timer.size
+
+	__SECT__
+	invoke_cdecl _InitTimer, %1
+%endmacro
+
 %macro PerfStop 1
 	invoke_cdecl _PauseTimer, %1
 	invoke_cdecl _UpdateTimer, %1
