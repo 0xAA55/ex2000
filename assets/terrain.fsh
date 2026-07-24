@@ -33,7 +33,6 @@ uniform float fog_distance = 3000.0;
 uniform float sea_level = 0.6 * 200.0;
 uniform float sea_wave_height = 2.0;
 uniform float sea_wave_size = 2.0;
-uniform vec3 demo_ball_pos = vec3(0.0, 200.0, 0.0);
 in vec2 texcoord;
 out vec4 color;
 
@@ -81,7 +80,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 		else
 		{
 			if (height + 0.01 >= pos.y) return vec2(dist, 1.0);
-			dist += min(pos.y - height, distance(pos, demo_ball_pos) - 10.0) * step;
+			dist += (pos.y - height) * step;
 			if (dist >= max_dist) return vec2(max_dist, 0.0);
 			if (last_dir <= 0.0)
 			{

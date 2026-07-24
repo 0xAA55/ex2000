@@ -861,31 +861,6 @@ __SECT__
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainScaling], [_TerrainMapScaling]
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.SeaLevel], [_SeaLevel]
 
-	DefVars %$Distance, %$BallX, %$BallY, %$BallZ, %$BallW
-	DefVars %$CamDirX, %$CamDirY, %$CamDirZ, %$CamDirW
-	DefVars %$VecX, %$VecY, %$VecZ, %$VecW, %$Sampled
-	movaps xmm0, [_CameraMatrix.z]
-	mulps xmm0, [_FMMMM]
-	movups %$CamDirX, xmm0
-	invoke_cdecl _RaymarchTerrainAltitude, [_TerrainBitmap], [_TerrainMapHeight], [_TerrainMapScaling], \
-		384, \
-		[_CameraPos.x], [_CameraPos.y], [_CameraPos.z], \
-		%$CamDirX, %$CamDirY, %$CamDirZ, \
-		3000.0f, &%$Distance
-	test eax, eax
-	jz .not_intersect
-	movups xmm0, [_CameraPos]
-	movss xmm1, %$Distance
-	movups xmm2, %$CamDirX
-	shufps xmm1, xmm1, 0
-	mulps xmm1, xmm2
-	addps xmm0, xmm1
-	movups %$BallX, xmm0
-
-	GetUniformLocation [_DrawSceneProgram], "demo_ball_pos"
-	invoke_dll_stdcall glUniform3f, eax, %$BallX, %$BallY, %$BallZ
-.not_intersect:
-
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
