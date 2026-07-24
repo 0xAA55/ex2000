@@ -380,4 +380,7 @@ endstruc
 ;SimpleMesh *AltitudeToTerrain(BitMap *src, float height_mod, float size_mod);
 extern _AltitudeToTerrain
 
+;void SampleFloatMap(BitMap *map, float u, float v, float *ret);
+extern _SampleFloatMap
+
 %endif

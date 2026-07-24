@@ -37,6 +37,7 @@ matveuler.asm: common.inc
 multfloatmap.asm: common.inc
 perlin.asm: common.inc
 rmap.asm: common.inc
+samplefmap.asm: common.inc
 seedvec.asm: common.inc
 sstep.asm: common.inc
 terrain.asm: common.inc
