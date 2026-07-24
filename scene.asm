@@ -917,7 +917,7 @@ __SECT__
 	fdiv qword %$DeltaTimeL
 	fstp dword %$FramesPerSec
 
-	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %d us\t渲染耗时：%d us\n`, f2d %$FramesPerSec, [_VBlankWithDelayTimeUsedUs], [_LastFrameRenderTimeUs]
+	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %d us\t渲染耗时：%d us`, f2d %$FramesPerSec, [_VBlankWithDelayTimeUsedUs], [_LastFrameRenderTimeUs]
 
 .end_of_frame:
 	invoke_cdecl _SwapBuffers
