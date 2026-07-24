@@ -55,9 +55,8 @@ bool is_underwater = false;
 vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 {
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
-	vec3 top_pos = start + dir * ((start.y - terrain_height) / dir.y);
 	float dist = 0.0;
-	if (start.y >= terrain_height) dist = distance(start, top_pos);
+	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
 	float step_modifier = 2.0;
 	float last_dir = 1.0;
 	float is_hit = 0.0;
@@ -98,9 +97,8 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 vec2 raymarch_terrain_rough(vec3 start, vec3 dir, float max_dist)
 {
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
-	vec3 top_pos = start + dir * ((start.y - terrain_height) / dir.y);
 	float dist = 0.0;
-	if (start.y >= terrain_height) dist = distance(start, top_pos);
+	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
 	float step_modifier = 2.0;
 	float last_dir = 1.0;
 	float is_hit = 0.0;
@@ -205,9 +203,8 @@ float caustic_intensity(vec2 pos, float depth)
 vec2 raymarch_water(vec3 start, vec3 dir, float max_dist)
 {
 	if (start.y > sea_level && dir.y > 0.0) return vec2(max_dist, 0.0);
-	vec3 top_pos = start + dir * ((start.y - sea_level) / dir.y);
 	float dist = 0.0;
-	if (start.y >= sea_level) dist = distance(start, top_pos);
+	if (start.y >= sea_level) dist = (start.y - sea_level) / -dir.y;
 	float is_hit = 0.0;
 	for(int i = 0; i < 64; i++)
 	{
