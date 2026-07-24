@@ -320,9 +320,6 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	invoke_cdecl _DestroyBitMap, ebx
-	xor eax, eax
-	mov [_TerrainBitmap], eax
 	FrameEnd
 	ret
 
