@@ -36,6 +36,7 @@ mattranspose.asm: common.inc
 matveuler.asm: common.inc
 multfloatmap.asm: common.inc
 perlin.asm: common.inc
+raymarch.asm: common.inc
 rmap.asm: common.inc
 samplefmap.asm: common.inc
 seedvec.asm: common.inc

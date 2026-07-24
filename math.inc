@@ -124,6 +124,7 @@ extern _Pi_P
 extern _Pi_N
 extern _2Pi
 extern _2.0f
+extern _0.01f
 extern _M1.0f
 extern _M2.0f
 extern _100.0f
@@ -382,5 +383,14 @@ extern _AltitudeToTerrain
 
 ;void SampleFloatMap(BitMap *map, float u, float v, float *ret);
 extern _SampleFloatMap
+
+;int RaymarchTerrainAltitude(BitMap *map, float height_mod, float size_mod,
+;	int num_iter,
+;	float start_x, float start_y, float start_z,
+;	float dir_x, float dir_y, float dir_z,
+;	float max_dist, float *ret_dist);
+;// Returns the distance from the start point to the terrain intersection point via `ret_dist`.
+;// If no intersection occurs, the returned value is 0, otherwise non-zero is returned.
+extern _RaymarchTerrainAltitude
 
 %endif

@@ -58,6 +58,8 @@ MakeVector _F0001
 segment .rdata
 extern _B0123
 _B0123 db 0, 1, 2, 3
+extern _0.1f
+_0.01f dd 0.01
 extern _2.0f
 _2.0f dd 2.0
 extern _100.0f
