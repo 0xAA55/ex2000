@@ -31,7 +31,7 @@ uniform float terrain_height = 200.0;
 uniform float terrain_scaling = 1000.0;
 uniform float fog_distance = 3000.0;
 uniform float sea_level = 0.6 * 200.0;
-uniform float sea_wave_height = 1.0;
+uniform float sea_wave_height = 2.0;
 uniform float sea_wave_size = 2.0;
 in vec2 texcoord;
 out vec4 color;
