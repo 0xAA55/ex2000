@@ -24,7 +24,7 @@ DefFunc _RaymarchTerrainAltitude
 	mov edi, %$RetDist
 
 	movss xmm0, %$StartY
-	comiss xmm0, %$TerrainHeight
+	ucomiss xmm0, %$TerrainHeight
 	jbe .proceed_raymarch
 
 	movss xmm0, %$TerrainHeight
@@ -33,7 +33,7 @@ DefFunc _RaymarchTerrainAltitude
 	divss xmm0, xmm1
 	movss %$Dist, xmm0
 
-	comiss xmm1, [_ZeroVector]
+	ucomiss xmm1, [_ZeroVector]
 	jb .proceed_raymarch
 .too_far:
 	mov eax, %$MaxDist
@@ -56,11 +56,11 @@ DefFunc _RaymarchTerrainAltitude
 	invoke_cdecl _SampleFloatMap, ebx, %$VecX, %$VecZ, & %$Sampled
 	movss xmm0, %$Sampled
 	mulss xmm0, %$TerrainHeight
-	comiss xmm0, %$PosY
+	ucomiss xmm0, %$PosY
 	jb .penetrated
 	movss xmm1, [_0.01f]
 	addss xmm1, xmm0
-	comiss xmm1, %$PosY
+	ucomiss xmm1, %$PosY
 	jb .not_hit
 .return_dist:
 	mov eax, %$Dist
@@ -75,7 +75,7 @@ DefFunc _RaymarchTerrainAltitude
 	divss xmm1, %$StepMod
 	addss xmm1, xmm3
 	movss %$Dist, xmm1
-	comiss xmm1, %$MaxDist
+	ucomiss xmm1, %$MaxDist
 	jae .too_far
 	xor eax, eax
 	cmp %$LastDir, eax
@@ -93,7 +93,7 @@ DefFunc _RaymarchTerrainAltitude
 	divss xmm0, %$StepMod
 	subss xmm1, xmm0
 	movss %$Dist, xmm1
-	comiss xmm1, %$Zero
+	ucomiss xmm1, %$Zero
 	ja .above_surface
 .return_zero:
 	xor eax, eax
@@ -101,7 +101,7 @@ DefFunc _RaymarchTerrainAltitude
 	jmp .end
 .above_surface:
 	movss xmm0, %$StepMod
-	comiss xmm0, [_F8888]
+	ucomiss xmm0, [_F8888]
 	jae .return_dist
 	cmp dword %$LastDir, 0
 	jnz .next_loop
@@ -112,7 +112,7 @@ DefFunc _RaymarchTerrainAltitude
 	cmp esi, %$NumIter
 	jb .proceed_raymarch
 	movss xmm0, %$Dist
-	comiss xmm0, %$MaxDist
+	ucomiss xmm0, %$MaxDist
 	jb .return_dist
 
 	mov eax, %$IsHit
