@@ -454,12 +454,15 @@ DefFunc _SetupMonitorDataProc
 	mov eax, 1000
 	xor edx, edx
 	mov ecx, [_DevModeW_Addr + DEVMODEW.dmDisplayFrequency]
+	test ecx, ecx ;In WINE, ecx = 0 is expected.
+	jz .after_read_rr
 	div ecx
 	mov [ebx + MonitorData.RefreshRate], ecx
 	mov [ebx + MonitorData.RefreshIntervalMs], eax
 	mov ecx, 1000
 	mul ecx
 	mov [ebx + MonitorData.RefreshIntervalUs], eax
+.after_read_rr:
 
 	mov esi, [ebx + MonitorData.IDXGIOutput]
 	test esi, esi
