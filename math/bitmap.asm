@@ -18,19 +18,27 @@ DefFunc _CreateBitMap
 
 	mov [ebx + BitMap.border_len], eax
 	lea edi, [ebx + BitMap.row_ptr]
-	mul eax
+	mul eax ;eax = border_len * border_len
 	mov ecx, Param(1)
 	mov [ebx + BitMap.num_pixels], eax
+	lea edx, [ecx * 4]
 	mov [ebx + BitMap.dims], ecx
+	cmp edx, Param(2)
+	jnz .not_floats
+	mov [ebx + BitMap.bytes_per_pixel], edx
 	mul ecx
 	mov [ebx + BitMap.num_floats], eax
 	shl eax, 2
 	mov [ebx + BitMap.num_bytes], eax
+	jmp .ready_to_allocate
+.not_floats:
+	mov ecx, Param(2)
+	mul ecx
+	mov [ebx + BitMap.bytes_per_pixel], ecx
+	mov [ebx + BitMap.num_bytes], eax
+.ready_to_allocate:
 	invoke_cdecl _aligned_malloc, eax, 16
 	mov [ebx + BitMap.data], eax
-
-	mov eax, Param(2)
-	mov [ebx + BitMap.bytes_per_pixel], eax
 
 	mov ecx, [ebx + BitMap.border_len]
 	lea eax, [ecx * 4]
@@ -43,7 +51,6 @@ DefFunc _CreateBitMap
 	loop .set_row_ptr
 
 	mov eax, ebx
-
 	FrameEnd
 	ret
 
