@@ -5,10 +5,6 @@ DefFunc _CreateBitMap
 	FrameBegin ebx, edi
 
 	mov eax, Param(0)
-	invoke_cdecl _malloc, &[eax * 4 + BitMap.head_size]
-	mov ebx, eax
-
-	mov eax, Param(0)
 	lea ecx, [eax - 1]
 	test eax, ecx
 	jz .good
@@ -16,6 +12,10 @@ DefFunc _CreateBitMap
 	int3
 	jmp .bad
 .good:
+	mov eax, Param(0)
+	invoke_cdecl _calloc, &[eax * 4 + BitMap.head_size], 1
+	mov ebx, eax
+
 	mov [ebx + BitMap.border_len], eax
 	lea edi, [ebx + BitMap.row_ptr]
 	mul eax
