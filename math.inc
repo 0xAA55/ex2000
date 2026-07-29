@@ -301,27 +301,6 @@ extern _GenRadiusMap
 ;BitMap *GenDistanceMap(int size);
 extern _GenDistanceMap
 
-%macro InstBMDataCmn 0
-	.dst_map resd 1
-	.src_map resd 1
-	.userdata resd 1
-	.size equ $ - .dst_map
-%endmacro
-
-struc BMDataCmn
-	InstBMDataCmn
-endstruc
-
-;BitMap *BitMapMTPool(
-;	BitMap *src,
-;	int num_workers,
-;	void *userdata,
-;	int(*work_proc)(BMDataCmn *param, size_t index),
-;	size_t stack_size);
-;// Each line of the bitmap were processed by `work_proc()`
-;// The `index` param for `work_proc()` is the row number of the bitmap
-extern _BitMapMTPool
-
 ;float FloatMapGetMaxValue(BitMap *src);
 extern _FloatMapGetMaxValue
 
