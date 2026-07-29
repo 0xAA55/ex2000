@@ -16,7 +16,7 @@ endstruc
 
 DefFunc _PoolRun
 	FrameBegin ebx, esi, edi
-	NameParams %$WorkProc, %$CommonData, %$NumWorkers, %$NumJobs, %$JobList, %$StackSize
+	NameParams %$WorkProc, %$CommonData, %$NumWorkers, %$NumJobs, %$JobList, %$StackSize, %$GrabResults
 
 	invoke_cdecl _aligned_malloc, Pool.size, 32
 	mov ebx, eax
@@ -38,8 +38,11 @@ DefFunc _PoolRun
 	mov eax, %$NumJobs
 	mov [ebx + Pool.num_jobs], eax
 
+	cmp dword %$GrabResults, 0
+	je .skip_grab_results
 	invoke_cdecl _malloc, &[eax * 4]
 	mov [ebx + Pool.results], eax
+.skip_grab_results:
 
 	mov eax, %$WorkProc
 	mov ecx, %$CommonData
@@ -52,8 +55,6 @@ DefFunc _PoolRun
 	mov edi, [ebx + Pool.worker_handles]
 .start:
 	invoke_dll_stdcall CreateThread, 0, %$StackSize, _PoolThreadProc@4, ebx, 0, 0
-	test eax, eax
-	jz .fail
 	lea edx, [edi + esi * 4]
 	mov [edx], eax
 	inc esi
@@ -61,8 +62,10 @@ DefFunc _PoolRun
 	jb .start
 .work:
 	invoke_dll_stdcall WaitForMultipleObjects, [ebx + Pool.num_workers], [ebx + Pool.worker_handles], 1, 0xFFFFFFFF
-	cmp eax, [ebx + Pool.num_workers]
-	jae .fail
+	cmp eax, 0xFFFFFFFF
+	jnz .wait_successful
+	invoke_dll_stdcall Sleep, 10
+.wait_successful:
 	xor esi, esi
 .loop_close_handles:
 	invoke_dll_stdcall CloseHandle, [edi + esi * 4]
@@ -70,10 +73,6 @@ DefFunc _PoolRun
 	cmp esi, [ebx + Pool.num_workers]
 	jb .loop_close_handles
 	jmp .end
-.wrong_call:
-.fail:
-	int3
-	jmp .wrong_call
 
 .end:
 	mov esi, [ebx + Pool.results]
@@ -84,19 +83,25 @@ DefFunc _PoolRun
 	ret
 
 DefFunc _PoolThreadProc@4
-	FrameBegin ebx, esi
+	FrameBegin ebx, esi, edi
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
 	mov ebx, Param(0)
+	mov edi, [ebx + Pool.results]
 .find_next_job:
 	invoke_dll_stdcall InterlockedIncrement, &[ebx + Pool.cur_job_index]
 	lea esi, [eax - 1]
 	cmp esi, [ebx + Pool.num_jobs]
 	jae .quit
-	lea eax, [esi * 4]
-	add eax, [ebx + Pool.jobs]
-	invoke_cdecl [ebx + Pool.work_proc], [eax], [ebx + Pool.common_data], esi
+	mov eax, [ebx + Pool.jobs]
+	test eax, eax
+	jz .no_job_param
+	mov eax, [eax + esi * 4]
+.no_job_param:
+	invoke_cdecl [ebx + Pool.work_proc], eax, [ebx + Pool.common_data], esi
+	test edi, edi
+	jz .find_next_job
 	lea edx, [esi * 4]
-	add edx, [ebx + Pool.results]
+	add edx, edi
 	mov [edx], eax ; Here stores the return value of `work_proc()`
 	jmp .find_next_job
 .quit:

@@ -466,7 +466,7 @@ DefFunc _GenMultiLayerPerlinAltitude
 	cmovz eax, ecx
 	mov [_PerlinNumWorkers], eax
 
-	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, NULL, [_PerlinNumWorkers], %$NumLayers, %$Jobs, 0
+	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, NULL, [_PerlinNumWorkers], %$NumLayers, %$Jobs, 0, 1
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]

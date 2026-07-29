@@ -52,8 +52,7 @@ DefFunc _FloatMapCurve
 	mov [edi + PoolProcParam.curve_ptr], eax
 	mov [edi + PoolProcParam.curve_points], ecx
 
-	invoke_cdecl _PoolRun, _FloatMapCurvePoolProc, ebx, [_FloatMapCurveNumWorkers], [ebx + BitMap.border_len], esi, 0
-	invoke_cdecl _free, eax
+	invoke_cdecl _PoolRun, _FloatMapCurvePoolProc, ebx, [_FloatMapCurveNumWorkers], [ebx + BitMap.border_len], esi, 0, 0
 	invoke_cdecl _free, esi
 
 	FrameEnd
