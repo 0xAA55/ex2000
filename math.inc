@@ -30,6 +30,11 @@
 	.size equ $ - .x
 %endmacro
 
+;Must be 16-byte aligned
+struc Vector
+	InstVector
+endstruc
+
 %macro InstMatrix 0
 .x:
 	.xx resd 1
@@ -54,6 +59,11 @@
 	.size equ $ - .x
 %endmacro
 
+;Must be 16-byte aligned
+struc Matrix
+	InstMatrix
+endstruc
+
 %macro InstDVector 0
 	.x resq 1
 	.y resq 1
@@ -61,6 +71,10 @@
 	.w resq 1
 	.size equ $ - .x
 %endmacro
+
+struc DVector
+	InstDVector
+endstruc
 
 %macro InstDMatrix 0
 .x:
@@ -86,6 +100,10 @@
 	.size equ $ - .x
 %endmacro
 
+struc DMatrix
+	InstDMatrix
+endstruc
+
 %macro InstBitMap 0
 	.data resd 1
 	.border_len resd 1
@@ -97,24 +115,6 @@
 	.head_size equ $ - .data
 	.row_ptr:
 %endmacro
-
-;Must be 16-byte aligned
-struc Vector
-	InstVector
-endstruc
-
-;Must be 16-byte aligned
-struc Matrix
-	InstMatrix
-endstruc
-
-struc DVector
-	InstDVector
-endstruc
-
-struc DMatrix
-	InstDMatrix
-endstruc
 
 struc BitMap
 	InstBitMap
