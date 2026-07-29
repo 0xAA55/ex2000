@@ -3,7 +3,6 @@
 struc PoolProcParam
 .curve_ptr resd 1
 .curve_points resd 1
-.fmap resd 1
 .size equ $ - PoolProcParam
 endstruc
 
@@ -15,8 +14,8 @@ DefFunc _FloatMapCurvePoolProc
 	FrameBegin ebx, esi, edi
 
 	mov ebx, Param(0)
-	mov edi, [ebx + PoolProcParam.fmap]
-	mov eax, Param(1)
+	mov edi, Param(1)
+	mov eax, Param(2)
 	mov esi, [edi + BitMap.row_ptr + eax * 4]
 
 	mov eax, [edi + BitMap.border_len]
@@ -26,7 +25,6 @@ DefFunc _FloatMapCurvePoolProc
 
 	FrameEnd
 	ret
-
 
 DefFunc _FloatMapCurve
 	FrameBegin ebx, esi, edi
@@ -53,9 +51,8 @@ DefFunc _FloatMapCurve
 	mov ecx, Param(2)
 	mov [edi + PoolProcParam.curve_ptr], eax
 	mov [edi + PoolProcParam.curve_points], ecx
-	mov [edi + PoolProcParam.fmap], ebx
 
-	invoke_cdecl _PoolRun, _FloatMapCurvePoolProc, [_FloatMapCurveNumWorkers], [ebx + BitMap.border_len], esi, 0
+	invoke_cdecl _PoolRun, _FloatMapCurvePoolProc, ebx, [_FloatMapCurveNumWorkers], [ebx + BitMap.border_len], esi, 0
 	invoke_cdecl _free, eax
 	invoke_cdecl _free, esi
 

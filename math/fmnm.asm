@@ -29,7 +29,7 @@ DefFunc _FloatMapNextMip
 	rep stosd
 	pop edi
 
-	invoke_cdecl _PoolRun, _FloatMapNextMipPoolProc, 8, [edi + BitMap.border_len], esi, 0
+	invoke_cdecl _PoolRun, _FloatMapNextMipPoolProc, NULL, 8, [edi + BitMap.border_len], esi, 0
 	invoke_cdecl _free, eax
 	invoke_cdecl _free, &[esi - 8]
 
@@ -45,7 +45,7 @@ DefFunc _FloatMapNextMipPoolProc
 	mov eax, [ebx + 0] ;dst
 	mov ebx, [ebx + 4] ;src
 
-	mov edx, Param(1)
+	mov edx, Param(2)
 	mov edi, [eax + BitMap.row_ptr + edx * 4]
 	mov ecx, [eax + BitMap.border_len]
 	lea eax, [edx * 2]

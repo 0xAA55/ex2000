@@ -7,6 +7,7 @@ struc Pool
 	.num_workers resd 1
 	.num_jobs resd 1
 	.work_proc resd 1
+	.common_data resd 1
 	.jobs resd 1
 	.results resd 1
 	.worker_handles resd 1
@@ -15,6 +16,7 @@ endstruc
 
 DefFunc _PoolRun
 	FrameBegin ebx, esi, edi
+	NameParams %$WorkProc, %$CommonData, %$NumWorkers, %$NumJobs, %$JobList, %$StackSize
 
 	invoke_cdecl _aligned_malloc, Pool.size, 32
 	mov ebx, eax
@@ -24,8 +26,8 @@ DefFunc _PoolRun
 	mov ecx, Pool.size / 4
 	rep stosd
 
-	mov eax, Param(1) ;num_workers
-	mov ecx, Param(2) ;num_jobs
+	mov eax, %$NumWorkers
+	mov ecx, %$NumJobs
 	cmp eax, ecx
 	cmova eax, ecx
 	mov [ebx + Pool.num_workers], eax
@@ -33,21 +35,23 @@ DefFunc _PoolRun
 	invoke_cdecl _malloc, &[eax * 4]
 	mov [ebx + Pool.worker_handles], eax
 
-	mov eax, Param(2) ;num_jobs
+	mov eax, %$NumJobs
 	mov [ebx + Pool.num_jobs], eax
 
 	invoke_cdecl _malloc, &[eax * 4]
 	mov [ebx + Pool.results], eax
 
-	mov eax, Param(0)
-	mov ecx, Param(3)
+	mov eax, %$WorkProc
+	mov ecx, %$CommonData
+	mov edx, %$JobList
 	mov [ebx + Pool.work_proc], eax
-	mov [ebx + Pool.jobs], ecx
+	mov [ebx + Pool.common_data], ecx
+	mov [ebx + Pool.jobs], edx
 
 	xor esi, esi
 	mov edi, [ebx + Pool.worker_handles]
 .start:
-	invoke_dll_stdcall CreateThread, 0, Param(4), _PoolThreadProc@4, ebx, 0, 0
+	invoke_dll_stdcall CreateThread, 0, %$StackSize, _PoolThreadProc@4, ebx, 0, 0
 	test eax, eax
 	jz .fail
 	lea edx, [edi + esi * 4]
@@ -90,7 +94,7 @@ DefFunc _PoolThreadProc@4
 	jae .quit
 	lea eax, [esi * 4]
 	add eax, [ebx + Pool.jobs]
-	invoke_cdecl [ebx + Pool.work_proc], [eax], esi
+	invoke_cdecl [ebx + Pool.work_proc], [eax], [ebx + Pool.common_data], esi
 	lea edx, [esi * 4]
 	add edx, [ebx + Pool.results]
 	mov [edx], eax ; Here stores the return value of `work_proc()`

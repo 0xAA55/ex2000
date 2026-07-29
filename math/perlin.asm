@@ -370,7 +370,6 @@ DefFunc _AccumulateFloatMap
 	ret
 
 struc GenPerlinLayerData
-	.job_index resd 1
 	.perlin_border_len resd 1
 	.ratio resd 1
 	.amplitude resd 1
@@ -381,7 +380,7 @@ DefFunc _GenPerlinLayerPoolProc
 	FrameBegin ebx
 
 	mov ebx, Param(0)
-	invoke_dll_cdecl srand, [ebx + GenPerlinLayerData.job_index]
+	invoke_dll_cdecl srand, Param(2)
 	invoke_cdecl _GenPerlinAltitude, \
 		[ebx + GenPerlinLayerData.perlin_border_len], \
 		[ebx + GenPerlinLayerData.ratio], \
@@ -392,9 +391,10 @@ DefFunc _GenPerlinLayerPoolProc
 
 DefFunc _GenMultiLayerPerlinAltitude
 	FrameBegin ebx, esi, edi
+	NameParams %$Size, %$Altitude, %$NumLayers, %$Curve
 	DefVars %$Jobs, %$CurLayer
 
-	mov eax, Param(0)
+	mov eax, %$Size
 	bsr ecx, eax
 	cmp eax, 8
 	jae .good_param1
@@ -411,31 +411,31 @@ DefFunc _GenMultiLayerPerlinAltitude
 	inc eax
 	shl eax, cl
 .param1_fix_done:
-	mov Param(0), eax
-	mov eax, Param(2)
+	mov %$Size, eax
+	mov eax, %$NumLayers
 	dec ecx
 	cmp ecx, eax
 	cmova ecx, eax
-	mov Param(2), ecx ; ecx = num_layers = min(bits(eax) - 1, num_layers);
+	mov %$NumLayers, ecx ; ecx = num_layers = min(bits(eax) - 1, num_layers);
 
 	mov eax, GenPerlinLayerData.size
 	mul ecx
 	invoke_cdecl _malloc, &[eax + ecx * 4] ; (sizeof GenPerlinLayerData) * num_layers + (sizeof GenPerlinLayerData*) * num_layers
 	mov %$Jobs, eax
 	mov ebx, eax ; ebx = jobs
-	mov ecx, Param(2)
+	mov ecx, %$NumLayers
 	lea esi, &[eax + ecx * 4] ; esi = ebx + (sizeof GenPerlinLayerData*) * num_layers
 
 	xor eax, eax
 	inc eax
 	mov %$CurLayer, eax
-	mov ecx, Param(2)
+	mov ecx, %$NumLayers
 	mov edx, 2
-	mov eax, Param(0)
+	mov eax, %$Size
 .setjobs1:
 	fld dword %$CurLayer
-	fdiv dword Param(2)
-	fld dword Param(3)
+	fdiv dword %$NumLayers
+	fld dword %$Curve
 	fyl2x
 	fld st0
 	frndint
@@ -448,7 +448,6 @@ DefFunc _GenMultiLayerPerlinAltitude
 	fstp st1
 	fstp [esi + GenPerlinLayerData.amplitude]
 	shr eax, 1 ; perlin_border_len /= 2
-	mov [esi + GenPerlinLayerData.job_index], ecx
 	mov [esi + GenPerlinLayerData.perlin_border_len], eax
 	mov [esi + GenPerlinLayerData.ratio], edx
 	shl edx, 1 ; ratio *= 2
@@ -467,13 +466,13 @@ DefFunc _GenMultiLayerPerlinAltitude
 	cmovz eax, ecx
 	mov [_PerlinNumWorkers], eax
 
-	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, [_PerlinNumWorkers], Param(2), %$Jobs, 0
+	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, NULL, [_PerlinNumWorkers], %$NumLayers, %$Jobs, 0
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]
 	invoke_cdecl _DestroyBitMap, [edi + ebx * 4]
 	inc ebx
-	cmp ebx, Param(2)
+	cmp ebx, %$NumLayers
 	jb .accumulate
 
 	invoke_cdecl _free, %$Jobs
@@ -493,7 +492,7 @@ DefFunc _GenMultiLayerPerlinAltitude
 	invoke_cdecl _BatchBias, [ebx + BitMap.data], %$Bias, [ebx + BitMap.num_floats]
 
 	invoke_cdecl _FloatMapGetMaxValue, ebx
-	fdivr dword Param(1)
+	fdivr dword %$Altitude
 	fstp dword %$Gain
 
 	invoke_cdecl _FloatMapApplyGain, ebx, %$Gain
