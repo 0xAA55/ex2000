@@ -40,11 +40,11 @@ DefFunc _CreateBitMap
 	invoke_cdecl _aligned_malloc, eax, 16
 	mov [ebx + BitMap.data], eax
 
-	mov ecx, [ebx + BitMap.border_len]
-	lea eax, [ecx * 4]
-	mul dword [ebx + BitMap.dims]
+	push eax
+	mov eax, [ebx + BitMap.border_len]
+	mul dword[ebx + BitMap.bytes_per_pixel]
 	mov edx, eax
-	mov eax, [ebx + BitMap.data]
+	pop eax
 .set_row_ptr:
 	stosd
 	add eax, edx
