@@ -16,6 +16,7 @@ DefFunc _CreateBitMap
 	invoke_cdecl _calloc, &[eax * 4 + BitMap.head_size], 1
 	mov ebx, eax
 
+	mov eax, Param(0)
 	mov [ebx + BitMap.border_len], eax
 	lea edi, [ebx + BitMap.row_ptr]
 	mul eax ;eax = border_len * border_len
@@ -41,8 +42,9 @@ DefFunc _CreateBitMap
 	mov [ebx + BitMap.data], eax
 
 	push eax
-	mov eax, [ebx + BitMap.border_len]
-	mul dword[ebx + BitMap.bytes_per_pixel]
+	mov ecx, [ebx + BitMap.border_len]
+	mov eax, [ebx + BitMap.bytes_per_pixel]
+	mul ecx
 	mov edx, eax
 	pop eax
 .set_row_ptr:
