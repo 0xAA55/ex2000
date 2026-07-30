@@ -380,7 +380,7 @@ extern _VisualizeFloatMap1D
 
 %macro VisualizeFloatMap1D 2+
 [segment .rdata]
-	%%save_path db %2
+	%%save_path db %2, 0
 
 __SECT__
 	invoke_cdecl _VisualizeFloatMap1D, %1, %%save_path
