@@ -1,9 +1,5 @@
 %include "common.inc"
 
-segment .rdata
-extern _FopenType
-_FopenType db "wb", 0
-
 DefFunc _VisualizeFloatMap1D
 	FrameBegin ebx, esi, edi
 	DefVars %$Buffer, %$MaxValue, %$BitmapSize
@@ -93,7 +89,7 @@ DefFunc _VisualizeFloatMap1D
 ; NOTE: Output verification requires manually inspecting the generated `.bmp` file.
 ;       No error checking is performed on file writes.
 ;       If no file is created, run under a debugger to diagnose potential failures.
-	invoke_dll_cdecl fopen, Param(1), _FopenType
+	invoke_dll_cdecl fopen, Param(1), _FopenTypeWb
 	mov ebx, eax
 
 	invoke_dll_cdecl fwrite, & %$BMFH, 14, 1, ebx

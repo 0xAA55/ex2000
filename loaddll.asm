@@ -179,6 +179,9 @@ _name_of_MSVCRT   db "msvcrt.dll", 0
 _name_of_OpenGL32 db "opengl32.dll", 0
 _name_of_WinMM    db "winmm.dll", 0
 
+extern _FopenTypeWb
+_FopenTypeWb db "wb", 0
+
 segment .bss
 extern _addr_of_User32
 extern _addr_of_GDI32

@@ -367,6 +367,8 @@ import_dll_func fwrite
 import_dll_func fclose
 import_dll_func remove
 
+extern _FopenTypeWb
+
 %define PAGE_NOACCESS           0x01
 %define PAGE_READONLY           0x02
 %define PAGE_READWRITE          0x04
