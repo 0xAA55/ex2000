@@ -312,7 +312,7 @@ DefFunc _SceneLoad01
 
 DefFunc _SceneLoad02
 	FrameBegin
-	invoke_cdecl _ConeMapGen, [_TerrainBitmap], 32
+	invoke_cdecl _ConeMapGen, [_TerrainBitmap], 64
 	mov [_TerrainConeBitmap], eax
 	FrameEnd
 	ret
