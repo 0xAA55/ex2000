@@ -109,6 +109,7 @@ def_dll_func_addr srand
 def_dll_func_addr strcat
 def_dll_func_addr strchr
 def_dll_func_addr strncpy
+def_dll_func_addr memcmp
 def_dll_func_addr memmove
 def_dll_func_addr vsnprintf
 def_dll_func_addr fopen

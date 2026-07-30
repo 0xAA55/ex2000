@@ -3,6 +3,7 @@ srand
 strcat
 strchr
 strncpy
+memcmp
 memmove
 _vsnprintf
 fopen

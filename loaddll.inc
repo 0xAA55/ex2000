@@ -355,6 +355,7 @@ import_dll_func srand
 import_dll_func strcat
 import_dll_func strchr
 import_dll_func strncpy
+import_dll_func memcmp
 import_dll_func memmove
 import_dll_func vsnprintf
 import_dll_func fopen
