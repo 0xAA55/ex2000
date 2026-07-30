@@ -50,6 +50,7 @@ vecdot.asm: common.inc
 veclength.asm: common.inc
 vecmultmat.asm: common.inc
 vecnormal.asm: common.inc
+vfmap: common.inc
 warpbitmap.asm: common.inc
 
 $(OBJ_DIR)/%.obj: %.asm

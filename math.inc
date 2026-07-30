@@ -372,4 +372,15 @@ extern _SampleFloatMap
 ;// If no intersection occurs, the returned value is 0, otherwise non-zero is returned.
 extern _RaymarchTerrainAltitude
 
+; void VisualizeFloatMap1D(BitMap *map, const char save_path);
+extern _VisualizeFloatMap1D
+
+%macro VisualizeFloatMap1D 2+
+[segment .rdata]
+	%%save_path db %2
+
+__SECT__
+	invoke_cdecl _VisualizeFloatMap1D, %1, %%save_path
+%endmacro
+
 %endif
