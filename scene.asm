@@ -38,6 +38,9 @@ _TerrainTexture resd 1
 extern _TerrainTextureMipLinear
 _TerrainTextureMipLinear resd 1
 
+extern _TerrainConeTexture
+_TerrainConeTexture resd 1
+
 extern _RTTFramebuffer
 _RTTFramebuffer resd 1
 
@@ -108,6 +111,9 @@ _NoiseBitmap resd 1
 
 extern _TerrainBitmap
 _TerrainBitmap resd 1
+
+extern _TerrainConeBitmap
+_TerrainConeBitmap resd 1
 
 extern _SceneLoadingProgress
 _SceneLoadingProgress resd 1
@@ -296,16 +302,18 @@ DefFunc _SceneLoad00
 	ret
 
 DefFunc _SceneLoad01
-	FrameBegin
+	FrameBegin ebx
 	invoke_cdecl _DuplicateBitMap, [_NoiseBitmap]
+	mov ebx, eax
 	mov [_TerrainBitmap], eax
+	invoke_cdecl _FloatMapCurve, ebx, _TerrainCurvePoints, _TerrainCurvePoints.num_points
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad02
-	FrameBegin ebx
-	mov ebx, [_TerrainBitmap]
-	invoke_cdecl _FloatMapCurve, ebx, _TerrainCurvePoints, _TerrainCurvePoints.num_points
+	FrameBegin
+	invoke_cdecl _ConeMapGen, [_TerrainBitmap], 32
+	mov [_TerrainConeBitmap], eax
 	FrameEnd
 	ret
 
@@ -320,11 +328,6 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
 	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	FrameEnd
-	ret
-
-DefFunc _SceneLoad04
-	FrameBegin ebx
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _TerrainTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
@@ -338,6 +341,20 @@ DefFunc _SceneLoad04
 	invoke_cdecl _DestroyBitMap, ebx
 	xor eax, eax
 	mov [_NoiseBitmap], eax
+	mov ebx, [_TerrainConeBitmap]
+	invoke_dll_stdcall glGenTextures, 1, _TerrainConeTexture
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
+	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad04
+	FrameBegin
 	FrameEnd
 	ret
 
@@ -511,6 +528,7 @@ DefFunc _SceneUnload
 
 	invoke_cdecl _DeInitBuffer, _BillboardVerticesBuffer
 	invoke_cdecl _DestroyBitMap, [_TerrainBitmap]
+	invoke_cdecl _DestroyBitMap, [_TerrainConeBitmap]
 
 	invoke_cdecl _OGLFC_Destroy, [_OGLFC]
 
@@ -519,6 +537,7 @@ DefFunc _SceneUnload
 
 	invoke_dll_stdcall glDeleteTextures, 1, _TerrainTexture
 	invoke_dll_stdcall glDeleteTextures, 1, _TerrainTextureMipLinear
+	invoke_dll_stdcall glDeleteTextures, 1, _TerrainConeTexture
 	invoke_dll_stdcall glDeleteTextures, 1, _HDRLensTexture
 	invoke_dll_stdcall glDeleteTextures, 1, _HDRBlurTexture
 
@@ -543,6 +562,7 @@ DefFunc _SceneUnload
 [segment .rdata]
 .set_to_NULL:
 	dd _TerrainBitmap
+	dd _TerrainConeBitmap
 	dd _OGLFC
 	dd _RTTFramebuffer
 	dd _RTTDepthBuffer
@@ -553,6 +573,7 @@ DefFunc _SceneUnload
 	dd _DrawBillboardVAO
 	dd _TerrainTexture
 	dd _TerrainTextureMipLinear
+	dd _TerrainConeTexture
 	dd _HDRLensTexture
 	dd _HDRBlurTexture
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
