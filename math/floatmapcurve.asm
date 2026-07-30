@@ -41,11 +41,13 @@ DefFunc _FloatMapCurve
 	mov eax, edi
 	mov edi, esi
 	rep stosd
-	mov eax, [_FloatMapCurveNumWorkers]
-	mov cl, 8
-	test eax, eax
-	cmovz eax, ecx
+
+	cmp dword[_FloatMapCurveNumWorkers], 0
+	jnz .proceed_to_work
+	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	shr eax, 1
 	mov [_FloatMapCurveNumWorkers], eax
+.proceed_to_work:
 
 	mov eax, Param(1)
 	mov ecx, Param(2)

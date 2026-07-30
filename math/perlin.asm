@@ -460,11 +460,12 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov ebx, ecx
 	inc ebx ; ebx = 1
 
-	mov eax, [_PerlinNumWorkers]
-	mov ecx, 1
-	test eax, eax
-	cmovz eax, ecx
+	cmp dword[_PerlinNumWorkers], 0
+	jnz .proceed_to_work
+	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	shr eax, 1
 	mov [_PerlinNumWorkers], eax
+.proceed_to_work:
 
 	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, NULL, [_PerlinNumWorkers], %$NumLayers, %$Jobs, 0, 1
 	mov edi, eax

@@ -1,5 +1,9 @@
 %include "common.inc"
 
+segment .bss
+extern _FloatMapNextMipNumWorkers
+_FloatMapNextMipNumWorkers resd 1
+
 DefFunc _FloatMapNextMip
 	FrameBegin ebx, esi, edi
 
@@ -29,7 +33,14 @@ DefFunc _FloatMapNextMip
 	rep stosd
 	pop edi
 
-	invoke_cdecl _PoolRun, _FloatMapNextMipPoolProc, NULL, 8, [edi + BitMap.border_len], esi, 0, 0
+	cmp dword[_FloatMapNextMipNumWorkers], 0
+	jnz .proceed_to_work
+	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	shr eax, 1
+	mov [_FloatMapNextMipNumWorkers], eax
+.proceed_to_work:
+
+	invoke_cdecl _PoolRun, _FloatMapNextMipPoolProc, NULL, [_FloatMapNextMipNumWorkers], [edi + BitMap.border_len], esi, 0, 0
 	invoke_cdecl _free, &[esi - 8]
 
 	mov eax, edi
