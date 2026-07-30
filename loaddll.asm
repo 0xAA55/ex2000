@@ -119,6 +119,7 @@ def_dll_func_addr fread
 def_dll_func_addr fprintf
 def_dll_func_addr fwrite
 def_dll_func_addr fclose
+def_dll_func_addr remove
 dll_func_group_end CFunc_DelayedLoad
 
 dll_func_group_start_without_name GFunc_DelayedLoad

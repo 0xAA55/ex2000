@@ -13,3 +13,4 @@ fread
 fprintf
 fwrite
 fclose
+remove

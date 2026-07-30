@@ -365,6 +365,7 @@ import_dll_func fread
 import_dll_func fprintf
 import_dll_func fwrite
 import_dll_func fclose
+import_dll_func remove
 
 %define PAGE_NOACCESS           0x01
 %define PAGE_READONLY           0x02
