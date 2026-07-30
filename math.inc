@@ -375,7 +375,7 @@ extern _RaymarchTerrainAltitude
 ; BitMap *ConeMapGen(BitMap *map, int max_iter);
 extern _ConeMapGen
 
-; void VisualizeFloatMap1D(BitMap *map, const char save_path);
+; int VisualizeFloatMap1D(BitMap *map, const char save_path);
 extern _VisualizeFloatMap1D
 
 %macro VisualizeFloatMap1D 2+
