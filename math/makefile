@@ -22,6 +22,7 @@ bitmap.asm: common.inc
 bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc
+conemap.asm: common.inc
 dmap.asm: common.inc
 floatmapclamp.asm: common.inc
 floatmapcurve.asm: common.inc

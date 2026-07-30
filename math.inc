@@ -372,6 +372,9 @@ extern _SampleFloatMap
 ;// If no intersection occurs, the returned value is 0, otherwise non-zero is returned.
 extern _RaymarchTerrainAltitude
 
+; BitMap *ConeMapGen(BitMap *map, int max_iter);
+extern _ConeMapGen
+
 ; void VisualizeFloatMap1D(BitMap *map, const char save_path);
 extern _VisualizeFloatMap1D
 
