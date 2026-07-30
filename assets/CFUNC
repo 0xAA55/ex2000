@@ -5,3 +5,10 @@ strchr
 strncpy
 memmove
 _vsnprintf
+fopen
+fseek
+fscanf
+fread
+fprintf
+fwrite
+fclose

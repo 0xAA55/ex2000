@@ -111,6 +111,13 @@ def_dll_func_addr strchr
 def_dll_func_addr strncpy
 def_dll_func_addr memmove
 def_dll_func_addr vsnprintf
+def_dll_func_addr fopen
+def_dll_func_addr fseek
+def_dll_func_addr fscanf
+def_dll_func_addr fread
+def_dll_func_addr fprintf
+def_dll_func_addr fwrite
+def_dll_func_addr fclose
 dll_func_group_end CFunc_DelayedLoad
 
 dll_func_group_start_without_name GFunc_DelayedLoad
