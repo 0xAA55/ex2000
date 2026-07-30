@@ -90,14 +90,34 @@ DefFunc _VisualizeFloatMap1D
 ;       No error checking is performed on file writes.
 ;       If no file is created, run under a debugger to diagnose potential failures.
 	invoke_dll_cdecl fopen, Param(1), _FopenTypeWb
+	test eax, eax
+	jz .fail
 	mov ebx, eax
 
 	invoke_dll_cdecl fwrite, & %$BMFH, 14, 1, ebx
+	test eax, eax
+	jz .fail
 	invoke_dll_cdecl fwrite, & %$BMIF, 52, 1, ebx
+	test eax, eax
+	jz .fail
 	invoke_dll_cdecl fwrite, %$Buffer, %$BitmapSize, 1, ebx
+	test eax, eax
+	jz .fail
 	invoke_dll_cdecl fclose, ebx
 
 	invoke_cdecl _aligned_free, %$Buffer
+	xor eax, eax
+	inc eax
+	jmp .end
+.fail:
+	invoke_cdecl _aligned_free, %$Buffer
+	test ebx, ebx
+	jz .file_closed
+	invoke_dll_cdecl fclose, ebx
+.file_closed:
+	invoke_dll_cdecl remove, Param(1)
 
+	xor eax, eax
+.end:
 	FrameEnd
 	ret
