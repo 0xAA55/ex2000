@@ -444,6 +444,10 @@ endstruc
 	.bottom resd 1
 %endmacro
 
+struc RECT
+	InstRECT
+endstruc
+
 %define WHITE_BRUSH         0
 %define LTGRAY_BRUSH        1
 %define GRAY_BRUSH          2
