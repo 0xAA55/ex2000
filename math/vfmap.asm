@@ -90,6 +90,9 @@ DefFunc _VisualizeFloatMap1D
 	cmp ecx, [ebx + BitMap.num_pixels]
 	jb .loop_pack
 
+; NOTE: Output verification requires manually inspecting the generated `.bmp` file.
+;       No error checking is performed on file writes.
+;       If no file is created, run under a debugger to diagnose potential failures.
 	invoke_dll_cdecl fopen, Param(1), _FopenType
 	mov ebx, eax
 
