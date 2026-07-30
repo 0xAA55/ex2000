@@ -333,9 +333,6 @@ DefFunc _ConeMapGen
 	mov %$NumIter, ecx
 	cmp ecx, Param(1)
 	jae .break_loop
-
-	debug_printf `num iter = %d, num updated = %d\n`, %$NumIter, %$Modified
-	xor eax, eax
 	cmp %$Modified, eax
 	jnz .proc_again
 .break_loop:
