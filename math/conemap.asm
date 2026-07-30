@@ -316,13 +316,6 @@ DefFunc _ConeMapGen
 	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], 1, 4
 	mov edi, eax
 
-	DefVars %$Comparer, %$ComparerData
-
-	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], 2, 8
-	mov %$Comparer, eax
-	mov eax, [eax + BitMap.data]
-	mov %$ComparerData, eax
-
 	DefVars %$Modified, %$SrcMap, %$UVMap, %$DstMap, %$NumIter
 
 	mov %$SrcMap, ebx
@@ -341,20 +334,6 @@ DefFunc _ConeMapGen
 	cmp ecx, Param(1)
 	jae .break_loop
 
-[segment .bss]
-	.filename_buf resb 128
-
-[segment .rdata]
-	.binf_type db 'wb', 0
-
-__SECT__
-	DefVars %$File
-	snprintf .filename_buf, 128, `uvmap_%03d.bin`, %$NumIter
-	invoke_dll_cdecl fopen, .filename_buf, .binf_type
-	mov %$File, eax
-	invoke_dll_cdecl fwrite, [esi + BitMap.data], [esi + BitMap.num_bytes], 1, eax
-	invoke_dll_cdecl fclose, %$File
-
 	debug_printf `num iter = %d, num updated = %d\n`, %$NumIter, %$Modified
 	xor eax, eax
 	cmp %$Modified, eax
@@ -363,10 +342,6 @@ __SECT__
 
 	invoke_cdecl _PoolRun, _ConeMapGenPoolProc, & %$Modified, [_ConeMapPoolSize], ebp, &[edi + BitMap.row_ptr], 0, 0
 	invoke_cdecl _DestroyBitMap, esi
-	invoke_cdecl _DestroyBitMap, %$Comparer
-
-	;Debug part. TODO: Run debug and delete the following line.
-	VisualizeFloatMap1D edi, `testcone.bmp`
 
 	mov eax, edi
 	FrameEnd
