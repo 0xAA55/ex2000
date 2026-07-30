@@ -87,12 +87,11 @@ DefFunc _VisualizeFloatMap1D
 	jb .loop_pack
 
 ; NOTE: Output verification requires manually inspecting the generated `.bmp` file.
-;       No error checking is performed on file writes.
 ;       If no file is created, run under a debugger to diagnose potential failures.
 	invoke_dll_cdecl fopen, Param(1), _FopenTypeWb
+	mov ebx, eax
 	test eax, eax
 	jz .fail
-	mov ebx, eax
 
 	invoke_dll_cdecl fwrite, & %$BMFH, 14, 1, ebx
 	test eax, eax
