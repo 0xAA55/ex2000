@@ -294,6 +294,7 @@ import_dll_func InterlockedDecrement
 import_dll_func InterlockedExchange
 import_dll_func CreateWaitableTimerExW
 import_dll_func SetWaitableTimer
+import_dll_func GetSystemInfo
 
 import_dll_func MessageBoxA
 import_dll_func MessageBoxW
@@ -447,6 +448,25 @@ endstruc
 struc RECT
 	InstRECT
 endstruc
+
+%macro InstSYSTEM_INFO 0
+	.dwOemId resd 1
+	.dwPageSize resd 1
+	.lpMinimumApplicationAddress resd 1
+	.lpMaximumApplicationAddress resd 1
+	.dwActiveProcessorMask resd 1
+	.dwNumberOfProcessors resd 1
+	.dwProcessorType resd 1
+	.dwAllocationGranularity resd 1
+	.wProcessorLevel resw 1
+	.wProcessorRevision resw 1
+%endmacro
+
+struc SYSTEM_INFO
+	InstSYSTEM_INFO
+endstruc
+
+extern _SystemInfo
 
 %define WHITE_BRUSH         0
 %define LTGRAY_BRUSH        1

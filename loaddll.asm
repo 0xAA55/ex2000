@@ -21,6 +21,9 @@ _hHeap resd 1
 _hDCDesktop resd 1
 %endif
 
+_SystemInfo:
+	InstSYSTEM_INFO
+
 segment .rdata
 _name_of_LoadLibraryA db "LoadLibraryA", 0
 
@@ -53,6 +56,7 @@ def_dll_func_addr InterlockedDecrement
 def_dll_func_addr InterlockedExchange
 def_dll_func_addr CreateWaitableTimerExW
 def_dll_func_addr SetWaitableTimer
+def_dll_func_addr GetSystemInfo
 dll_func_group_end KFunc_DelayedLoad
 
 dll_func_group_start UFunc
@@ -362,6 +366,8 @@ DefFunc _InitDelayedLoadFunc
 	mov ebx, eax
 	invoke_cdecl _NLtoNUL, ebx, %$SizeOfFuncs
 	dll_func_group_load_alter_name WinMM, WFunc_DelayedLoad, ebx
+
+	invoke_dll_stdcall GetSystemInfo, _SystemInfo
 
 	FrameEnd
 	ret

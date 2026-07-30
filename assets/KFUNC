@@ -18,3 +18,4 @@ InterlockedDecrement
 InterlockedExchange
 CreateWaitableTimerExW
 SetWaitableTimer
+GetSystemInfo
