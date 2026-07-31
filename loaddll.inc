@@ -280,6 +280,7 @@ import_dll_func HeapReAlloc
 import_dll_func HeapFree
 import_dll_func Sleep
 import_dll_func GetTickCount
+import_dll_func GetTickCount64
 import_dll_func CreateThread
 import_dll_func CloseHandle
 import_dll_func WaitForSingleObject

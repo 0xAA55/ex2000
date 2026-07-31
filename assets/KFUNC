@@ -4,6 +4,7 @@ QueryPerformanceFrequency
 QueryPerformanceCounter
 Sleep
 GetTickCount
+GetTickCount64
 CreateThread
 CloseHandle
 WaitForSingleObject

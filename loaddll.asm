@@ -42,6 +42,7 @@ def_dll_func_addr QueryPerformanceFrequency
 def_dll_func_addr QueryPerformanceCounter
 def_dll_func_addr Sleep
 def_dll_func_addr GetTickCount
+def_dll_func_addr GetTickCount64
 def_dll_func_addr CreateThread
 def_dll_func_addr CloseHandle
 def_dll_func_addr WaitForSingleObject
