@@ -244,6 +244,7 @@ DefFunc _SceneInit
 
 	invoke_cdecl _InitTimer, _Timer
 	invoke_cdecl _VBlankInit
+	invoke_cdecl _SceneLoadInitProgress
 
 	fldpi
 	fdiv dword [_2.0f]
@@ -507,7 +508,7 @@ DefFunc _SceneLoadProgressive
 	cmp ebx, _NumItemsToLoad
 	jge .end
 .load:
-	invoke_cdecl [.load_sequence + ebx * 4]
+	invoke_cdecl [_SceneLoadProgress.load_sequences + ebx * 4]
 	cmp eax, 0
 	jl .end
 	inc ebx
@@ -516,39 +517,60 @@ DefFunc _SceneLoadProgressive
 	mov eax, [_SceneLoadingProgress]
 	FrameEnd
 	ret
+
+extern _SceneLoadProgress
+_SceneLoadProgress:
+%assign num_loadseq 0
+%assign num_loadseq_mat 0
+%macro insert_loadseq 2
+	%assign num_loadseq num_loadseq + %1
+	%assign num_loadseq_mat num_loadseq_mat + 1
 segment .rdata
-.load_sequence:
-	dd _SceneLoad00
-	dd _SceneLoad01
-	dd _SceneLoad02_Start
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_Iter
-	dd _SceneLoad02_End
-	dd _SceneLoad03
-	dd _SceneLoad04
-	dd _SceneLoad05
-	dd _SceneLoad06
-	dd _SceneLoad07
-	dd _SceneLoad08
-	dd _SceneLoad09
-	dd _SceneLoad0A
-	dd _SceneLoad0B
+	db %1
+	dd %2
+segment .bss
+	resd %1
+%endmacro
+segment .bss
+.load_sequences:
+segment .rdata
+.loadseq_materials:
+
+insert_loadseq 0x01, _SceneLoad00
+insert_loadseq 0x01, _SceneLoad01
+insert_loadseq 0x01, _SceneLoad02_Start
+insert_loadseq 0x40, _SceneLoad02_Iter
+insert_loadseq 0x01, _SceneLoad02_End
+insert_loadseq 0x01, _SceneLoad03
+insert_loadseq 0x01, _SceneLoad04
+insert_loadseq 0x01, _SceneLoad05
+insert_loadseq 0x01, _SceneLoad06
+insert_loadseq 0x01, _SceneLoad07
+insert_loadseq 0x01, _SceneLoad08
+insert_loadseq 0x01, _SceneLoad09
+insert_loadseq 0x01, _SceneLoad0A
+insert_loadseq 0x01, _SceneLoad0B
 extern _NumItemsToLoad
-_NumItemsToLoad equ ($ - .load_sequence) / 4
+_NumItemsToLoad equ num_loadseq
+
+DefFunc _SceneLoadInitProgress
+	FrameBegin esi, edi
+
+	xor ecx, ecx
+	mov edx, ecx
+	mov esi, _SceneLoadProgress.loadseq_materials
+	mov edi, _SceneLoadProgress.load_sequences
+.loop_setseq:
+	mov cl, [esi]
+	mov eax, [esi + 1]
+	add esi, 5
+	rep stosd
+	inc edx
+	cmp edx, num_loadseq_mat
+	jb .loop_setseq
+
+	FrameEnd
+	ret
 
 DefFunc _SceneUnload
 	FrameBegin esi
