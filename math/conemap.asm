@@ -224,7 +224,7 @@ DefFunc _ConeMapGenIterationPoolProc
 DefFunc _ConeMapGenPoolProc
 	FrameBegin ebp, ebx, esi, edi
 	NameParams %$DstRowPtr, %$CommonData, %$Y
-	DefVars %$X, %$CurHeight, %$MaxDist, %$Zero
+	DefVars %$X, %$CurHeight, %$Normalize, %$Zero
 
 	xor eax, eax
 	lea edi, Variable(0)
@@ -241,9 +241,7 @@ DefFunc _ConeMapGenPoolProc
 	mov edi, %$DstRowPtr
 
 	cvtsi2ss xmm0, [ebx + BitMap.border_len]
-	mulss xmm0, xmm0
-	sqrtss xmm0, xmm0
-	movss %$MaxDist, xmm0
+	movss %$Normalize, xmm0
 
 	xor eax, eax
 	mov %$X, eax
@@ -281,7 +279,7 @@ DefFunc _ConeMapGenPoolProc
 	movss xmm1, [eax]
 	subss xmm1, %$CurHeight
 	divss xmm1, xmm0
-	mulss xmm1, %$MaxDist
+	mulss xmm1, %$Normalize
 	maxss xmm1, %$Zero
 	movd eax, xmm1
 
