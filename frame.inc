@@ -10,13 +10,13 @@
 	segment .stack_of_ %+ CurFuncName info
 	segment .text
 	%1:
-	[segment %[.stack_of_ %+ CurFuncName]]
-	.stack_begin:
-	__SECT__
 %endmacro
 
 %macro FrameBegin 0-1+
 	%push StackFrame
+	[segment %[.stack_of_ %+ CurFuncName]]
+	.stack_begin:
+	__SECT__
 	%assign %$Frame_NumVariables 0
 	%define %$Frame_NumLocals 0 ;Redifines in DefVars and DefSizedVar
 	%assign %$Frame_NumSavedRegs 0
