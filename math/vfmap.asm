@@ -1,18 +1,12 @@
 %include "common.inc"
 
-DefFunc _VisualizeFloatMap1D
+DefFunc _VisualizeFloatMap
 	FrameBegin ebx, esi, edi
 	DefVars %$Buffer, %$MaxValue, %$BitmapSize
 	DefSizedVar %$BMFH, 14
 	DefSizedVar %$BMIF, 52
 
 	mov ebx, Param(0)
-	cmp dword[ebx + BitMap.dims], 1
-	jz .good
-.bad:
-	int3
-	jmp .bad
-.good:
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
 	lea edi, Variable(0)
@@ -50,29 +44,80 @@ DefFunc _VisualizeFloatMap1D
 	invoke_cdecl _BatchMax, esi, [ebx + BitMap.num_pixels]
 	fstp dword %$MaxValue
 
-	mov edx, 255
 	xor ecx, ecx
+	mov edx, 255
+	movaps xmm4, [_UFFF0]
+	rcpss xmm5, %$MaxValue
 	cvtsi2ss xmm7, edx
-	shl edx, 24
-	movd xmm6, edx
-	divss xmm7, %$MaxValue
-	pshufd xmm6, xmm6, 0
+	shufps xmm5, xmm5, 0
+	movaps xmm6, [_F0001]
+	shufps xmm7, xmm7, 0
+	mulps xmm6, xmm7
+	mulps xmm7, xmm5
 	cmp dword[ebx + BitMap.num_pixels], 4
 	jb .proc_very_little_data
 	mov edx, 16
 .loop_pack:
-	movss xmm0, [esi + 0x0]
-	movss xmm1, [esi + 0x4]
-	movss xmm2, [esi + 0x8]
-	movss xmm3, [esi + 0xC]
-	mulss xmm0, xmm7
-	mulss xmm1, xmm7
-	mulss xmm2, xmm7
-	mulss xmm3, xmm7
-	shufps xmm0, xmm0, 0
-	shufps xmm1, xmm1, 0
-	shufps xmm2, xmm2, 0
-	shufps xmm3, xmm3, 0
+	cmp dword[ebx + BitMap.dims], 1
+	jz .multi_1d
+	cmp dword[ebx + BitMap.dims], 2
+	jz .multi_1d
+	cmp dword[ebx + BitMap.dims], 3
+	jz .multi_3d
+	cmp dword[ebx + BitMap.dims], 4
+	jz .multi_4d
+.bad:
+	int3
+	jmp .bad
+.multi_1d:
+	movd xmm0, [esi + 0x0]
+	movd xmm1, [esi + 0x4]
+	movd xmm2, [esi + 0x8]
+	movd xmm3, [esi + 0xC]
+	shufps xmm0, xmm0, _MM_SHUFFLE(1, 0, 0, 0)
+	shufps xmm1, xmm1, _MM_SHUFFLE(1, 0, 0, 0)
+	shufps xmm2, xmm2, _MM_SHUFFLE(1, 0, 0, 0)
+	shufps xmm3, xmm3, _MM_SHUFFLE(1, 0, 0, 0)
+	add esi, edx
+	jmp .multi_rgb_set
+.multi_2d:
+	movq xmm0, [esi + 0x00]
+	movq xmm1, [esi + 0x08]
+	movq xmm2, [esi + 0x10]
+	movq xmm3, [esi + 0x18]
+	add esi, 0x20
+	jmp .multi_rgb_set
+.multi_3d:
+	movaps xmm0, [esi + 0x00]
+	movups xmm1, [esi + 0x0C]
+	movaps xmm2, [esi + 0x18]
+	movups xmm3, [esi + 0x24]
+	andps xmm0, xmm4
+	andps xmm1, xmm4
+	andps xmm2, xmm4
+	andps xmm3, xmm4
+	add esi, 0x30
+.multi_rgb_set:
+	mulps xmm0, xmm7
+	mulps xmm1, xmm7
+	mulps xmm2, xmm7
+	mulps xmm3, xmm7
+	orps xmm0, xmm6
+	orps xmm1, xmm6
+	orps xmm2, xmm6
+	orps xmm3, xmm6
+	jmp .multi_normalized
+.multi_4d:
+	movaps xmm0, [esi + 0x00]
+	movaps xmm1, [esi + 0x10]
+	movaps xmm2, [esi + 0x20]
+	movaps xmm3, [esi + 0x30]
+	mulps xmm0, xmm7
+	mulps xmm1, xmm7
+	mulps xmm2, xmm7
+	mulps xmm3, xmm7
+	add esi, 0x40
+.multi_normalized:
 	cvtps2dq xmm0, xmm0
 	cvtps2dq xmm1, xmm1
 	cvtps2dq xmm2, xmm2
@@ -80,23 +125,47 @@ DefFunc _VisualizeFloatMap1D
 	packssdw xmm0, xmm1
 	packssdw xmm2, xmm3
 	packuswb xmm0, xmm2
-	por xmm0, xmm6
 	movaps [edi], xmm0
-	add esi, edx
 	add edi, edx
 	add ecx, 4
 	cmp ecx, [ebx + BitMap.num_pixels]
 	jb .loop_pack
-	jmp .save_file
+	jmp .after_proc
 .proc_very_little_data:
+	cmp dword[ebx + BitMap.dims], 1
+	jz .single_1d
+	cmp dword[ebx + BitMap.dims], 2
+	jz .single_1d
+	cmp dword[ebx + BitMap.dims], 3
+	jz .single_3d
+	cmp dword[ebx + BitMap.dims], 4
+	jz .single_4d
+	jmp .bad
+.single_1d:
 	lodsd
 	movd xmm0, eax
-	mulss xmm0, xmm7
-	shufps xmm0, xmm0, 0
+	shufps xmm0, xmm0, _MM_SHUFFLE(1, 0, 0, 0)
+	jmp .single_rgb_set
+.single_2d:
+	movq xmm0, [esi]
+	add esi, 8
+	jmp .single_rgb_set
+.single_3d:
+	movups xmm0, [esi]
+	andps xmm0, xmm4
+	add esi, 12
+.single_rgb_set:
+	mulps xmm0, xmm7
+	orps xmm0, xmm6
+	jmp .single_normalized
+.single_4d:
+	movaps xmm0, [esi]
+	mulps xmm0, xmm7
+	add esi, edx
+.single_normalized:
 	cvtps2dq xmm0, xmm0
 	packssdw xmm0, xmm0
 	packuswb xmm0, xmm0
-	por xmm0, xmm6
 	movd eax, xmm0
 	stosd
 	inc ecx

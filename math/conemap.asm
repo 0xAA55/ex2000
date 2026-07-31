@@ -340,7 +340,7 @@ DefFunc _ConeMapGen
 	invoke_cdecl _PoolRun, _ConeMapGenPoolProc, & %$Modified, [_ConeMapPoolSize], ebp, &[edi + BitMap.row_ptr], 0, 0
 	invoke_cdecl _DestroyBitMap, esi
 
-	;VisualizeFloatMap1D edi, 'testcone.bmp'
+	VisualizeFloatMap edi, 'testcone.bmp'
 
 	mov eax, edi
 	FrameEnd

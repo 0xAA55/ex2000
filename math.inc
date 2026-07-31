@@ -375,15 +375,15 @@ extern _RaymarchTerrainAltitude
 ; BitMap *ConeMapGen(BitMap *map, int max_iter);
 extern _ConeMapGen
 
-; int VisualizeFloatMap1D(BitMap *map, const char save_path);
-extern _VisualizeFloatMap1D
+; int VisualizeFloatMap(BitMap *map, const char save_path);
+extern _VisualizeFloatMap
 
-%macro VisualizeFloatMap1D 2+
+%macro VisualizeFloatMap 2+
 [segment .rdata]
 	%%save_path db %2, 0
 
 __SECT__
-	invoke_cdecl _VisualizeFloatMap1D, %1, %%save_path
+	invoke_cdecl _VisualizeFloatMap, %1, %%save_path
 %endmacro
 
 %endif
