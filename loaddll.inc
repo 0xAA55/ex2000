@@ -480,6 +480,14 @@ endstruc
 
 extern _SystemInfo
 
+%define STATUS_WAIT_0           0
+%define STATUS_ABANDONED_WAIT_0 0x80
+%define WAIT_FAILED             0xFFFFFFFF
+%define WAIT_OBJECT_0           ((STATUS_WAIT_0 ) + 0 )
+%define WAIT_ABANDONED          ((STATUS_ABANDONED_WAIT_0 ) + 0 )
+%define WAIT_ABANDONED_0        ((STATUS_ABANDONED_WAIT_0 ) + 0 )
+%define WAIT_TIMEOUT            0x00000102
+
 %define WHITE_BRUSH         0
 %define LTGRAY_BRUSH        1
 %define GRAY_BRUSH          2
