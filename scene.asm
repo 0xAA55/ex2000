@@ -664,51 +664,6 @@ __SECT__
 	invoke_dll_stdcall ClientToScreen, [_hWnd], _WindowRect.right
 	invoke_dll_stdcall GetCursorPos, _CursorPos
 
-	invoke_dll_stdcall GetForegroundWindow
-	cmp eax, [_hWnd]
-	jnz .after_check_input
-	mov esi, .keys_to_detect
-	lea edi, %$KeyW
-.loop_check_keys:
-	xor eax, eax
-	lodsb
-	test eax, eax
-	jz .after_check_keys
-	invoke_dll_stdcall GetAsyncKeyState, eax
-	stosd
-	jmp .loop_check_keys
-.after_check_keys:
-	cmp dword %$KeyEscape, 0
-	jnz .quit
-
-	movq xmm1, [_WindowRect.right]
-	movq xmm0, [_CursorPos]
-	paddd xmm1, [_WindowRect.left]
-	movq xmm2, [_CameraYaw]
-	psrad xmm1, 1
-	movq xmm3, [_point_001_vector]
-	movq [_WindowCenter.x], xmm1
-	cvtdq2ps xmm0, xmm0
-	cvtdq2ps xmm1, xmm1
-	subps xmm0, xmm1
-	mulps xmm0, xmm3
-	subps xmm2, xmm0
-	ucomiss xmm2, [_Pi_P]
-	jbe .pi_p
-	subss xmm2, [_2Pi]
-.pi_p:
-	ucomiss xmm2, [_Pi_N]
-	jae .pi_n
-	addss xmm2, [_2Pi]
-.pi_n:
-	movq [_CameraYaw], xmm2
-	movss xmm0, [_CameraPitch]
-	maxss xmm0, [_MinPitch]
-	minss xmm0, [_MaxPitch]
-	movss [_CameraPitch], xmm0
-
-	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
-.after_check_input:
 	mov eax, [_ClientRect.bottom]
 	cmp eax, [_ClientRect.top]
 	jbe .end_after_swap_buffers
@@ -837,6 +792,53 @@ __SECT__
 	invoke_cdecl _SwapBuffersNoVSync
 	jmp .end_after_swap_buffers
 .loaded:
+
+	invoke_dll_stdcall GetForegroundWindow
+	cmp eax, [_hWnd]
+	jnz .after_check_input
+	mov esi, .keys_to_detect
+	lea edi, %$KeyW
+.loop_check_keys:
+	xor eax, eax
+	lodsb
+	test eax, eax
+	jz .after_check_keys
+	invoke_dll_stdcall GetAsyncKeyState, eax
+	stosd
+	jmp .loop_check_keys
+.after_check_keys:
+	cmp dword %$KeyEscape, 0
+	jnz .quit
+
+	movq xmm1, [_WindowRect.right]
+	movq xmm0, [_CursorPos]
+	paddd xmm1, [_WindowRect.left]
+	movq xmm2, [_CameraYaw]
+	psrad xmm1, 1
+	movq xmm3, [_point_001_vector]
+	movq [_WindowCenter.x], xmm1
+	cvtdq2ps xmm0, xmm0
+	cvtdq2ps xmm1, xmm1
+	subps xmm0, xmm1
+	mulps xmm0, xmm3
+	subps xmm2, xmm0
+	ucomiss xmm2, [_Pi_P]
+	jbe .pi_p
+	subss xmm2, [_2Pi]
+.pi_p:
+	ucomiss xmm2, [_Pi_N]
+	jae .pi_n
+	addss xmm2, [_2Pi]
+.pi_n:
+	movq [_CameraYaw], xmm2
+	movss xmm0, [_CameraPitch]
+	maxss xmm0, [_MinPitch]
+	minss xmm0, [_MaxPitch]
+	movss [_CameraPitch], xmm0
+
+	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
+.after_check_input:
+
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 2000.0f
