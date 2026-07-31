@@ -1,6 +1,6 @@
 %include "common.inc"
 
-%define SEARCH_RADIUS 1
+%define SEARCH_RADIUS 2
 
 segment .bss
 extern _ConeMapPoolSize
