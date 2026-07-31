@@ -2,7 +2,7 @@
 
 DefFunc _VisualizeFloatMap
 	FrameBegin ebx, esi, edi
-	DefVars %$Buffer, %$MaxValue, %$BitmapSize
+	DefVars %$Buffer, %$MaxValue, %$MinValue, %$BitmapSize
 	DefSizedVar %$BMFH, 14
 	DefSizedVar %$BMIF, 52
 
@@ -41,10 +41,14 @@ DefFunc _VisualizeFloatMap
 	mov byte[%$BMIF_Addr + 45], 0xFF
 	mov byte[%$BMIF_Addr + 50], 0xFF
 
+	invoke_cdecl _BatchMin, esi, [ebx + BitMap.num_pixels]
+	fstp dword %$MinValue
 	invoke_cdecl _BatchMax, esi, [ebx + BitMap.num_pixels]
 	fstp dword %$MaxValue
 
-	mov eax, %$MaxValue
+	movss xmm0, %$MaxValue
+	subss xmm0, %$MinValue
+	movd eax, xmm0
 	mov edx, 0x3F800000
 	test eax, eax
 	cmovz eax, edx
@@ -60,6 +64,8 @@ DefFunc _VisualizeFloatMap
 	shufps xmm7, xmm7, 0
 	mulps xmm6, xmm7
 	mulps xmm7, xmm5
+	movd xmm5, %$MinValue
+	shufps xmm5, xmm5, _MM_SHUFFLE(1, 0, 0, 0)
 	cmp dword[ebx + BitMap.num_pixels], 4;If the square POT bitmap is big enough, no trailing data should be processed
 	jb .proc_very_little_data
 	mov edx, 16
@@ -104,6 +110,10 @@ DefFunc _VisualizeFloatMap
 	andps xmm3, xmm4
 	add esi, 0x30
 .multi_rgb_set:
+	subps xmm0, xmm5
+	subps xmm1, xmm5
+	subps xmm2, xmm5
+	subps xmm3, xmm5
 	mulps xmm0, xmm7
 	mulps xmm1, xmm7
 	mulps xmm2, xmm7
@@ -118,6 +128,10 @@ DefFunc _VisualizeFloatMap
 	movaps xmm1, [esi + 0x10]
 	movaps xmm2, [esi + 0x20]
 	movaps xmm3, [esi + 0x30]
+	subps xmm0, xmm5
+	subps xmm1, xmm5
+	subps xmm2, xmm5
+	subps xmm3, xmm5
 	mulps xmm0, xmm7
 	mulps xmm1, xmm7
 	mulps xmm2, xmm7
@@ -161,11 +175,13 @@ DefFunc _VisualizeFloatMap
 	andps xmm0, xmm4
 	add esi, 12
 .single_rgb_set:
+	subps xmm0, xmm5
 	mulps xmm0, xmm7
 	orps xmm0, xmm6
 	jmp .single_normalized
 .single_4d:
 	movaps xmm0, [esi]
+	subps xmm0, xmm5
 	mulps xmm0, xmm7
 	add esi, edx
 .single_normalized:
