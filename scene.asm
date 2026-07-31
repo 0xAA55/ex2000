@@ -320,7 +320,7 @@ DefFunc _SceneLoad02_Start
 
 DefFunc _SceneLoad02_Iter
 	FrameBegin
-	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 4, 2
+	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 1, 2
 	FrameEnd
 	ret
 
