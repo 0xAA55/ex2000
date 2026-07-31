@@ -1,20 +1,5 @@
 %include "common.inc"
 
-%define SEARCH_RADIUS 2
-
-segment .bss
-extern _ConeMapPoolSize
-_ConeMapPoolSize resd 1
-
-%macro mov_eax_minus_SR 0
-	%if SEARCH_RADIUS == 1
-		xor eax, eax
-		dec eax
-	%else
-		mov eax, -SEARCH_RADIUS
-	%endif
-%endmacro
-
 DefFunc _ConeMapGenInitUVMapPoolProc
 	FrameBegin ebp, ebx, esi, edi
 	NameParams %$UVRowPtr, %$CommonData, %$Y
@@ -27,9 +12,9 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	rep stosd
 
 	mov ebp, %$CommonData
-	%define %$Modified [ebp + 0]
-	%define %$SrcMap [ebp + 4]
-	%define %$UVMap [ebp + 8]
+	%define %$Modified [ebp + CMG.modified]
+	%define %$SrcMap [ebp + CMG.src_map]
+	%define %$UVMap [ebp + CMG.uv_map]
 
 	mov ebx, %$SrcMap
 
@@ -48,10 +33,12 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov [edi + 0], ecx
 	mov [edi + 4], edx
 
-	mov_eax_minus_SR
+	mov eax, [ebp + CMG.search_radius]
+	neg eax
 	mov %$SurrY, eax
 .loopy:
-	mov_eax_minus_SR
+	mov eax, [ebp + CMG.search_radius]
+	neg eax
 	mov %$SurrX, eax
 .loopx:
 	or eax, %$SurrY
@@ -89,13 +76,13 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov eax, %$SurrX
 	inc eax
 	mov %$SurrX, eax
-	cmp eax, SEARCH_RADIUS
+	cmp eax, [ebp + CMG.search_radius]
 	jle .loopx
 	
 	mov eax, %$SurrY
 	inc eax
 	mov %$SurrY, eax
-	cmp eax, SEARCH_RADIUS
+	cmp eax, [ebp + CMG.search_radius]
 	jle .loopy
 
 	add edi, 8
@@ -103,7 +90,7 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, [ebx + BitMap.border_len]
+	cmp eax, [ebp + CMG.border_len]
 	jb .proc_pixel
 
 	FrameEnd
@@ -121,9 +108,9 @@ DefFunc _ConeMapGenIterationPoolProc
 	rep stosd
 
 	mov ebp, %$CommonData
-	%define %$Modified [ebp + 0]
-	%define %$SrcMap [ebp + 4]
-	%define %$UVMap [ebp + 8]
+	%define %$Modified [ebp + CMG.modified]
+	%define %$SrcMap [ebp + CMG.src_map]
+	%define %$UVMap [ebp + CMG.uv_map]
 
 	mov ebx, %$SrcMap
 
@@ -139,10 +126,12 @@ DefFunc _ConeMapGenIterationPoolProc
 	mov %$K, eax
 	mov %$Updated, eax
 
-	mov_eax_minus_SR
+	mov eax, [ebp + CMG.search_radius]
+	neg eax
 	mov %$SurrY, eax
 .loopy:
-	mov_eax_minus_SR
+	mov eax, [ebp + CMG.search_radius]
+	neg eax
 	mov %$SurrX, eax
 .loopx:
 	mov ecx, %$SurrY
@@ -197,13 +186,13 @@ DefFunc _ConeMapGenIterationPoolProc
 	mov eax, %$SurrX
 	inc eax
 	mov %$SurrX, eax
-	cmp eax, SEARCH_RADIUS
+	cmp eax, [ebp + CMG.search_radius]
 	jle .loopx
 	
 	mov eax, %$SurrY
 	inc eax
 	mov %$SurrY, eax
-	cmp eax, SEARCH_RADIUS
+	cmp eax, [ebp + CMG.search_radius]
 	jle .loopy
 
 	cmp dword %$Updated, 0
@@ -215,7 +204,7 @@ DefFunc _ConeMapGenIterationPoolProc
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, [ebx + BitMap.border_len]
+	cmp eax, [ebp + CMG.border_len]
 	jb .proc_pixel
 
 	FrameEnd
@@ -232,15 +221,15 @@ DefFunc _ConeMapGenPoolProc
 	rep stosd
 
 	mov ebp, %$CommonData
-	%define %$Modified [ebp + 0]
-	%define %$SrcMap [ebp + 4]
-	%define %$UVMap [ebp + 8]
-	%define %$DstMap [ebp + 12]
+	%define %$Modified [ebp + CMG.modified]
+	%define %$SrcMap [ebp + CMG.src_map]
+	%define %$UVMap [ebp + CMG.uv_map]
+	%define %$DstMap [ebp + CMG.dst_map]
 
 	mov ebx, %$UVMap
 	mov edi, %$DstRowPtr
 
-	cvtsi2ss xmm0, [ebx + BitMap.border_len]
+	cvtsi2ss xmm0, [ebp + CMG.border_len]
 	movss %$Normalize, xmm0
 
 	xor eax, eax
@@ -289,54 +278,89 @@ DefFunc _ConeMapGenPoolProc
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, [ebx + BitMap.border_len]
+	cmp eax, [ebp + CMG.border_len]
 	jb .proc_pixel
 
 	FrameEnd
 	ret
 
 
-; BitMap *ConeMapGen(BitMap *map);
-DefFunc _ConeMapGen
-	FrameBegin ebp, ebx, esi, edi
+; CMG *ConeMapGenStart(BitMap *map);
+DefFunc _ConeMapGenStart
+	FrameBegin ebx, esi, edi
+	NameParams %$SrcMap, %$ThreadPoolSize
 
-	mov ebx, Param(0)
+	invoke_cdecl _calloc, CMG.size, 1
+	mov ebx, eax
 
-	cmp dword[_ConeMapPoolSize], 0
-	jnz .proceed_to_work
-	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
-	shr eax, 1
-	mov [_ConeMapPoolSize], eax
-.proceed_to_work:
-	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], 2, 8
+	mov esi, %$SrcMap
+	mov eax, %$ThreadPoolSize
+	mov ecx, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	mov edi, [esi + BitMap.border_len]
+	test eax, eax
+	cmovz eax, ecx
+
+	mov [ebx + CMG.src_map], esi
+	mov [ebx + CMG.thread_pool_size], eax
+	mov [ebx + CMG.border_len], edi
+
+	invoke_cdecl _CreateBitMap, edi, 2, 8
 	mov esi, eax
+	mov [ebx + CMG.uv_map], eax
 
-	invoke_cdecl _CreateBitMap, [ebx + BitMap.border_len], 1, 4
+	invoke_cdecl _CreateBitMap, edi, 1, 4
+	mov [ebx + CMG.dst_map], eax
+
+	invoke_cdecl _PoolRun, _ConeMapGenInitUVMapPoolProc, ebx, [ebx + CMG.thread_pool_size], edi, &[esi + BitMap.row_ptr], 0, 0
+	mov eax, ebx
+	FrameEnd
+	ret
+
+; int ConeMapGenIter(CMG *inst, int steps, int search_radius);
+DefFunc _ConeMapGenIter
+	FrameBegin ebx, esi, edi
+	NameParams %$Inst, %$Steps, %$SearchRadius
+	DefVars %$NumIter
+
+	mov ebx, %$Inst
+	xor eax, eax
+	mov esi, [ebx + CMG.uv_map]
+	inc eax
+	mov ecx, %$SearchRadius
+	mov edi, [ebx + CMG.border_len]
+	cmp ecx, eax
+	cmovb ecx, eax
+	mov [ebx + CMG.search_radius], ecx
+
+	dec eax
 	mov edi, eax
-
-	DefVars %$Modified, %$SrcMap, %$UVMap, %$DstMap, %$NumIter
-
-	mov %$SrcMap, ebx
-	mov %$UVMap, esi
-	mov %$DstMap, edi
-	mov ebp, [ebx + BitMap.border_len]
-
-	invoke_cdecl _PoolRun, _ConeMapGenInitUVMapPoolProc, & %$Modified, [_ConeMapPoolSize], ebp, &[esi + BitMap.row_ptr], 0, 0
-	mov %$NumIter, eax
 .proc_again:
-	mov %$Modified, eax
-	invoke_cdecl _PoolRun, _ConeMapGenIterationPoolProc, & %$Modified, [_ConeMapPoolSize], ebp, &[esi + BitMap.row_ptr], 0, 0
-	mov ecx, %$NumIter
-	inc ecx
-	mov %$NumIter, ecx
-	cmp ecx, Param(1)
-	jae .break_loop
-	cmp %$Modified, eax
+	mov [ebx + CMG.modified], eax
+	invoke_cdecl _PoolRun, _ConeMapGenIterationPoolProc, ebx, [ebx + CMG.thread_pool_size], [ebx + CMG.border_len], &[esi + BitMap.row_ptr], 0, 0
+	inc edi
+	cmp edi, %$Steps
+	jae .end
+	cmp [ebx + CMG.modified], eax
 	jnz .proc_again
-.break_loop:
+	inc eax
 
-	invoke_cdecl _PoolRun, _ConeMapGenPoolProc, & %$Modified, [_ConeMapPoolSize], ebp, &[edi + BitMap.row_ptr], 0, 0
+.end:
+	add [ebx + CMG.num_iter], edi
+	FrameEnd
+	ret
+
+; int _ConeMapGenEnd(CMG *inst);
+DefFunc _ConeMapGenEnd
+	FrameBegin ebx, esi, edi
+	NameParams %$Inst
+
+	mov ebx, %$Inst
+	mov esi, [ebx + CMG.uv_map]
+	mov edi, [ebx + CMG.dst_map]
+
+	invoke_cdecl _PoolRun, _ConeMapGenPoolProc, ebx, [ebx + CMG.thread_pool_size], [ebx + CMG.border_len], &[edi + BitMap.row_ptr], 0, 0
 	invoke_cdecl _DestroyBitMap, esi
+	invoke_cdecl _free, ebx
 
 	VisualizeFloatMap edi, 'testcone.bmp'
 

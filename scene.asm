@@ -310,9 +310,22 @@ DefFunc _SceneLoad01
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad02
+DefFunc _SceneLoad02_Start
 	FrameBegin
-	invoke_cdecl _ConeMapGen, [_TerrainBitmap], 64
+	invoke_cdecl _ConeMapGenStart, [_TerrainBitmap], 0
+	mov [_TerrainConeBitmap], eax
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad02_Iter
+	FrameBegin
+	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 4, 2
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad02_End
+	FrameBegin
+	invoke_cdecl _ConeMapGenEnd, [_TerrainConeBitmap]
 	mov [_TerrainConeBitmap], eax
 	FrameEnd
 	ret
@@ -507,7 +520,24 @@ segment .rdata
 .load_sequence:
 	dd _SceneLoad00
 	dd _SceneLoad01
-	dd _SceneLoad02
+	dd _SceneLoad02_Start
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_Iter
+	dd _SceneLoad02_End
 	dd _SceneLoad03
 	dd _SceneLoad04
 	dd _SceneLoad05
@@ -772,7 +802,7 @@ __SECT__
 	jl .quit
 
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
-	call .clear_buffers
+	invoke_cdecl Scene_clear_buffers
 
 	invoke_dll_stdcall glUseProgram, [_DrawProgressProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
@@ -863,12 +893,12 @@ __SECT__
 	add eax, GL_COLOR_ATTACHMENT0
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRLensTexture], 0
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_RTTDepthBuffer]
-	call .check_fbo
+	invoke_cdecl Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
-	call .clear_buffers
+	invoke_cdecl Scene_clear_buffers
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	invoke_dll_stdcall glDepthFunc, GL_LEQUAL
@@ -896,11 +926,11 @@ __SECT__
 	mov eax, [_DrawBlurProgramLocations.OutColor]
 	add eax, GL_COLOR_ATTACHMENT0
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRBlurTexture], 0
-	call .check_fbo
+	invoke_cdecl Scene_check_fbo
 	test eax, eax
 	jz .quit
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthLow, %$VPHeightLow
-	call .clear_buffers
+	invoke_cdecl Scene_clear_buffers
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
@@ -917,7 +947,7 @@ __SECT__
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
-	call .clear_buffers
+	invoke_cdecl Scene_clear_buffers
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRBlurTexture]
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
@@ -953,7 +983,7 @@ __SECT__
 .end:
 	FrameEnd
 	ret
-.check_fbo:
+DefFunc Scene_check_fbo
 	FrameBegin
 	invoke_dll_stdcall glCheckFramebufferStatus, GL_DRAW_FRAMEBUFFER
 	cmp eax, GL_FRAMEBUFFER_COMPLETE
@@ -967,7 +997,7 @@ __SECT__
 .check_fbo_ret:
 	FrameEnd
 	ret
-.clear_buffers:
+DefFunc Scene_clear_buffers
 	FrameBegin
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClearDepth, 1.0

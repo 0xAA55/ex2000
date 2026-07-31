@@ -372,8 +372,44 @@ extern _SampleFloatMap
 ;// If no intersection occurs, the returned value is 0, otherwise non-zero is returned.
 extern _RaymarchTerrainAltitude
 
-; BitMap *ConeMapGen(BitMap *map, int max_iter);
-extern _ConeMapGen
+struc CMG
+	.modified resd 1
+	.src_map resd 1
+	.uv_map resd 1
+	.dst_map resd 1
+	.border_len resd 1
+	.search_radius resd 1
+	.thread_pool_size resd 1
+	.num_iter resd 1
+	.size equ $ - CMG
+endstruc
+
+; CMG *ConeMapGenStart(BitMap *map, int thread_pool_size);
+; // `thread_pool_size`: The number of worker threads to spawn.
+; //   If set to 0, the generator will query the system and use a default
+; //   count based on the available CPU cores.
+extern _ConeMapGenStart
+
+; int ConeMapGenIter(CMG *inst, int steps, int search_radius);
+; // `steps`: The number of iteration steps to process in this batch.
+; // `search_radius`: The radius of neighboring pixels sampled during each
+; //   iteration. Must be greater than 1. Values above 4 are discouraged,
+; //   as computational complexity increases exponentially.
+; //   Smaller radii propagate gradients faster but over shorter distances.
+; //   Larger radii propagate slower but cover longer distances per step.
+; // Returns 1 if further iterations are required to complete the generation.
+; // Returns 0 if the generation process has finished (no more iterations needed).
+extern _ConeMapGenIter
+
+; BitMap *ConeMapGenEnd(CMG *inst);
+; // Finalizes the generator and returns the resulting cone map bitmap.
+; // A valid bitmap is produced regardless of whether the iteration process
+; // has fully converged. More iterations yield higher visual fidelity but
+; // require more computation time. Conversely, fewer iterations reduce
+; // preprocessing cost; any remaining error can be resolved later during
+; // real-time rendering via additional raymarching steps, keeping the
+; // overall runtime within acceptable limits.
+extern _ConeMapGenEnd
 
 ; int VisualizeFloatMap(BitMap *map, const char save_path);
 extern _VisualizeFloatMap
