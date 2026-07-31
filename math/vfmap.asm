@@ -57,6 +57,8 @@ DefFunc _VisualizeFloatMap1D
 	movd xmm6, edx
 	divss xmm7, %$MaxValue
 	pshufd xmm6, xmm6, 0
+	cmp dword[ebx + BitMap.num_pixels], 4
+	jb .proc_very_little_data
 	mov edx, 16
 .loop_pack:
 	movss xmm0, [esi + 0x0]
@@ -85,6 +87,31 @@ DefFunc _VisualizeFloatMap1D
 	add ecx, 4
 	cmp ecx, [ebx + BitMap.num_pixels]
 	jb .loop_pack
+	jmp .save_file
+.proc_very_little_data:
+	lodsd
+	movd xmm0, eax
+	mulss xmm0, xmm7
+	shufps xmm0, xmm0, 0
+	cvtps2dq xmm0, xmm0
+	packssdw xmm0, xmm0
+	packuswb xmm0, xmm0
+	por xmm0, xmm6
+	movd eax, xmm0
+	stosd
+	inc ecx
+	cmp ecx, [ebx + BitMap.num_pixels]
+	jb .proc_very_little_data
+.after_proc:
+	xor eax, eax
+	mov edx, %$Buffer
+	add edx, %$BitmapSize
+.fill_tail:
+	cmp edi, edx
+	jae .fill_end
+	stosb
+	jmp .fill_tail
+.fill_end:
 
 ; NOTE: Output verification requires manually inspecting the generated `.bmp` file.
 ;       If no file is created, run under a debugger to diagnose potential failures.
