@@ -320,7 +320,7 @@ DefFunc _SceneLoad02_Start
 
 DefFunc _SceneLoad02_Iter
 	FrameBegin
-	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 1, 2
+	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 2
 	FrameEnd
 	ret
 
@@ -539,7 +539,7 @@ segment .rdata
 insert_loadseq 0x01, _SceneLoad00
 insert_loadseq 0x01, _SceneLoad01
 insert_loadseq 0x01, _SceneLoad02_Start
-insert_loadseq 0x40, _SceneLoad02_Iter
+insert_loadseq 0x08, _SceneLoad02_Iter
 insert_loadseq 0x01, _SceneLoad02_End
 insert_loadseq 0x01, _SceneLoad03
 insert_loadseq 0x01, _SceneLoad04
