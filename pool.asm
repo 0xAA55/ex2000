@@ -14,6 +14,40 @@ struc Pool
 	.size equ $ - Pool
 endstruc
 
+DefFunc _WaitForAllMultipleObjects
+	FrameBegin ebx, esi, edi
+	NameParams %$NumObjects, %$Handles, %$Timeout
+	DefVars %$TimeLow, %$TimeHigh
+
+	mov ebx, %$NumObjects
+	mov esi, %$Handles
+	mov edi, %$Timeout
+.loop_wait:
+	invoke_dll_stdcall GetTickCount64
+	mov %$TimeLow, eax
+	mov %$TimeHigh, edx
+	mov eax, 64
+	cmp ebx, eax
+	cmovb eax, ebx
+	sub ebx, eax
+	invoke_dll_stdcall WaitForMultipleObjects, eax, esi, 1, edi
+	cmp eax, WAIT_TIMEOUT
+	jnz .end
+	invoke_dll_stdcall GetTickCount64
+	sub eax, %$TimeLow
+	sbb edx, %$TimeHigh
+	cmp eax, edi
+	jae .timeout_end
+	sub edi, eax
+	add esi, 64 * 4
+	test ebx, ebx
+	jnz .loop_wait
+.timeout_end:
+	mov eax, WAIT_TIMEOUT
+.end:
+	FrameEnd
+	ret
+
 DefFunc _PoolRun
 	FrameBegin ebx, esi, edi
 	NameParams %$WorkProc, %$CommonData, %$NumWorkers, %$NumJobs, %$JobList, %$StackSize, %$GrabResults
@@ -61,11 +95,8 @@ DefFunc _PoolRun
 	cmp esi, [ebx + Pool.num_workers]
 	jb .start
 .work:
-	invoke_dll_stdcall WaitForMultipleObjects, [ebx + Pool.num_workers], [ebx + Pool.worker_handles], 1, 0xFFFFFFFF
-	cmp eax, 0xFFFFFFFF
-	jnz .wait_successful
-	invoke_dll_stdcall Sleep, 10
-.wait_successful:
+	invoke_cdecl _WaitForAllMultipleObjects, [ebx + Pool.num_workers], [ebx + Pool.worker_handles], 0xFFFFFFFF
+	cmp eax, WAIT_FAILED
 	xor esi, esi
 .loop_close_handles:
 	invoke_dll_stdcall CloseHandle, [edi + esi * 4]

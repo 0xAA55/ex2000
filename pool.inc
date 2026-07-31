@@ -37,12 +37,6 @@
 ; *                     `work_proc` for each job (size == num_jobs).
 ; *                     If `grab_results` is zero, returns NULL.
 ; *
-; * @note Thread Limit & Synchronization:
-; *       If the actual number of worker threads exceeds 64 (the limit for
-; *       `WaitForMultipleObjects`), the internal waiting logic degrades from
-; *       efficient object waiting to polling via `Sleep(10)`. This may impact
-; *       performance and responsiveness.
-; *
 ; * @warning If `grab_results` is non-zero, the returned array must be freed with
 ; *          `free()`. Note that if the array elements point to dynamically
 ; *          allocated resources, those must be cleaned up by the caller prior
