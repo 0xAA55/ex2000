@@ -14,7 +14,7 @@ DefFunc _VisualizeFloatMap
 
 	mov eax, [ebx + BitMap.num_pixels]
 	shl eax, 2
-	add eax, 2
+	add eax, 2;Paddings to the bitmap data to make sure the whole file is 4-bytes padded
 	mov %$BitmapSize, eax
 	invoke_cdecl _aligned_malloc, eax, 16
 	mov %$Buffer, eax
@@ -44,6 +44,12 @@ DefFunc _VisualizeFloatMap
 	invoke_cdecl _BatchMax, esi, [ebx + BitMap.num_pixels]
 	fstp dword %$MaxValue
 
+	mov eax, %$MaxValue
+	mov edx, 0x3F800000
+	test eax, eax
+	cmovz eax, edx
+	mov %$MaxValue, eax
+
 	xor ecx, ecx
 	mov edx, 255
 	movaps xmm4, [_UFFF0]
@@ -54,14 +60,14 @@ DefFunc _VisualizeFloatMap
 	shufps xmm7, xmm7, 0
 	mulps xmm6, xmm7
 	mulps xmm7, xmm5
-	cmp dword[ebx + BitMap.num_pixels], 4
+	cmp dword[ebx + BitMap.num_pixels], 4;If the square POT bitmap is big enough, no trailing data should be processed
 	jb .proc_very_little_data
 	mov edx, 16
 .loop_pack:
 	cmp dword[ebx + BitMap.dims], 1
 	jz .multi_1d
 	cmp dword[ebx + BitMap.dims], 2
-	jz .multi_1d
+	jz .multi_2d
 	cmp dword[ebx + BitMap.dims], 3
 	jz .multi_3d
 	cmp dword[ebx + BitMap.dims], 4
@@ -135,7 +141,7 @@ DefFunc _VisualizeFloatMap
 	cmp dword[ebx + BitMap.dims], 1
 	jz .single_1d
 	cmp dword[ebx + BitMap.dims], 2
-	jz .single_1d
+	jz .single_2d
 	cmp dword[ebx + BitMap.dims], 3
 	jz .single_3d
 	cmp dword[ebx + BitMap.dims], 4
