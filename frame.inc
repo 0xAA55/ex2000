@@ -29,36 +29,32 @@
 		__FrameSaveRegs %$Frame_SavedRegs
 	%endif
 	%assign %$Frame_NumPushes 0
+	%assign %$CurPrmIndex 0
 	%ifdef Frame_UseEBP
 		%define AddrOfParam(x) (ebp + (x + 2) * 4)
 	%else
-		%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + %[%$Frame_NumPushes] + (x) + 1) * 4)
+		%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + %$Frame_NumPushes + (x) + 1) * 4)
 	%endif
-	%define AddrOfVariable(x) (esp + %[%$Frame_NumPushes] + (x) * 4)
+	%define AddrOfVariable(x) (esp + (%$Frame_NumPushes + (x)) * 4)
 	%define Param(x) [AddrOfParam(x)]
 	%define Variable(x) [AddrOfVariable(x)]
-	%macro push 1-*
-		%rep %0
-			push %1
-			%assign %$Frame_NumPushes %$Frame_NumPushes + 1
-			%ifdef __StdCallEspBias
-				%assign __StdCallEspBias __StdCallEspBias + 4
-			%endif
-			%rotate 1
-		%endrep
+	%macro push 1
+		push %1
+		%assign %$Frame_NumPushes %$Frame_NumPushes + 1
+		%ifdef __StdCallEspBias
+			%assign __StdCallEspBias __StdCallEspBias + 4
+		%endif
 	%endmacro
 
-	%macro pop 1-*
-		%rep %0
-			%rotate -1
-			pop %1
-			%assign %$Frame_NumPushes %$Frame_NumPushes - 1
-			%ifdef __StdCallEspBias
-				%assign __StdCallEspBias __StdCallEspBias - 4
-			%endif
-		%endrep
+	%macro pop 1
+		%define esp (esP - 4)
+		%assign %$Frame_NumPushes %$Frame_NumPushes - 1
+		%ifdef __StdCallEspBias
+			%assign __StdCallEspBias __StdCallEspBias - 4
+		%endif
+		pop %1
+		%undef esp
 	%endmacro
-	%assign %$CurPrmIndex 0
 %endmacro
 
 %define GetNumRooms(x, r) (((x) - 1) / (r) + 1)
@@ -117,8 +113,8 @@
 	%if %$Frame_NumLocals != 0
 		add esp, %$Frame_NumLocals * 4
 	%endif
-	%unmacro push 1-*
-	%unmacro pop 1-*
+	%unmacro push 1
+	%unmacro pop 1
 	%ifdef %$Frame_SavedRegs
 		__FrameStoreRegs %$Frame_SavedRegs
 	%endif
@@ -150,10 +146,7 @@
 	%elif %1 > 0
 		add esP, (%1) * 4
 	%endif
-	%ifdef __StdCallEspBias
-		%assign __StdCallEspBias __StdCallEspBias - (%1) * 4
-	%endif
-	%assign %$Frame_NumPushes %$Frame_NumPushes - (%1)
+	%assign __StdCallEspBias __StdCallEspBias - (%1) * 4
 %endmacro
 
 %macro __StrContains 3
