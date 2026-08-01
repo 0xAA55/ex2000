@@ -14,6 +14,7 @@ uniform vec3 campos;
 uniform float time;
 uniform sampler2D cloud;
 uniform sampler2D terrain;
+uniform sampler2D terrain_conemap;
 uniform float sun_size_shrink = 10000.0;
 uniform float sun_brightness = 5.0;
 uniform float sky_brightness = 20.0;
@@ -57,37 +58,19 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
 	float dist = 0.0;
 	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
-	float step_modifier = 2.0;
-	float last_dir = 1.0;
 	float is_hit = 0.0;
-	for(int i = 0; i < 384; i++)
+	float dir_horz = length(dir.xz);
+	for(int i = 0; i < 64; i++)
 	{
-		float step = 1.0 / step_modifier;
 		vec3 pos = start + dir * dist;
-		float height = texture2D(terrain, pos.xz / terrain_scaling).r * terrain_height;
-		if (pos.y < height)
-		{
-			is_hit = 1.0;
-			dist -= (height - pos.y) * step;
-			if (dist <= 0.0) return vec2(0.0, 1.0);
-			if (step_modifier >= 8.0) return vec2(dist, 1.0);
-			if (last_dir >= 0.0)
-			{
-				last_dir = -1.0;
-				step_modifier += 1.0;
-			}
-		}
-		else
-		{
-			if (height + 0.01 >= pos.y) return vec2(dist, 1.0);
-			dist += (pos.y - height) * step;
-			if (dist >= max_dist) return vec2(max_dist, 0.0);
-			if (last_dir <= 0.0)
-			{
-				last_dir = 1.0;
-				step_modifier += 1.0;
-			}
-		}
+		vec2 pos_uv = pos.xz / terrain_scaling;
+		float height = texture2D(terrain, pos_uv).r * terrain_height;
+		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
+		float cone = texture2D(terrain_conemap, pos_uv).r * terrain_height / terrain_scaling;
+		float step = (pos.y - height) / (cone * dir_horz - dir.y);
+		if (step < 0.0) return vec2(max_dist, 0.0);
+		dist += step;
+		if (dist >= max_dist) return vec2(max_dist, 0.0);
 	}
 	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
 	if (is_hit < 0.5) dist = max_dist;
@@ -99,37 +82,19 @@ vec2 raymarch_terrain_rough(vec3 start, vec3 dir, float max_dist)
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
 	float dist = 0.0;
 	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
-	float step_modifier = 2.0;
-	float last_dir = 1.0;
 	float is_hit = 0.0;
-	for(int i = 0; i < 64; i++)
+	float dir_horz = length(dir.xz);
+	for(int i = 0; i < 32; i++)
 	{
-		float step = 1.0 / step_modifier;
 		vec3 pos = start + dir * dist;
-		float height = texture2D(terrain, pos.xz / terrain_scaling).r * terrain_height;
-		if (pos.y < height)
-		{
-			is_hit = 1.0;
-			dist -= (height - pos.y) * step;
-			if (dist <= 0.0) return vec2(0.0, 1.0);
-			if (step_modifier >= 8.0) return vec2(dist, 1.0);
-			if (last_dir >= 0.0)
-			{
-				last_dir = -1.0;
-				step_modifier += 1.0;
-			}
-		}
-		else
-		{
-			if (height + 0.01 >= pos.y) return vec2(dist, 1.0);
-			dist += (pos.y - height) * step;
-			if (dist >= max_dist) return vec2(max_dist, 0.0);
-			if (last_dir <= 0.0)
-			{
-				last_dir = 1.0;
-				step_modifier += 1.0;
-			}
-		}
+		vec2 pos_uv = pos.xz / terrain_scaling;
+		float height = texture2D(terrain, pos_uv).r * terrain_height;
+		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
+		float cone = texture2D(terrain_conemap, pos_uv).r * terrain_height / terrain_scaling;
+		float step = (pos.y - height) / (cone * dir_horz - dir.y);
+		if (step < 0.0) return vec2(max_dist, 0.0);
+		dist += step;
+		if (dist >= max_dist) return vec2(max_dist, 0.0);
 	}
 	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
 	if (is_hit < 0.5) dist = max_dist;
