@@ -102,6 +102,7 @@ DefFunc _ConeMapGenIterationProc
 	NameParams %$UVRowPtr, %$CommonData, %$Y
 	DefVars %$X, %$CurHeight, %$K, %$Zero
 	DefVars %$SurrX, %$SurrY
+	DefVars %$DX, %$DY, %$BM, %$HalfBorder
 
 	xor eax, eax
 	lea edi, Variable(0)
@@ -111,6 +112,12 @@ DefFunc _ConeMapGenIterationProc
 	mov ebp, %$CommonData
 	%define %$SrcMap [ebp + CMG.src_map]
 	%define %$UVMap [ebp + CMG.uv_map]
+
+	mov eax, [ebp + CMG.border_len]
+	lea ecx, [eax - 1]
+	shr eax, 1
+	mov %$BM, ecx
+	mov %$HalfBorder, eax
 
 	mov ebx, %$SrcMap
 	mov edi, %$UVRowPtr
@@ -133,6 +140,7 @@ DefFunc _ConeMapGenIterationProc
 	neg eax
 	mov %$SurrX, eax
 .loopx:
+	;mov eax, %$SurrX
 	mov ecx, %$SurrY
 	add eax, %$X
 	add ecx, %$Y
@@ -144,10 +152,23 @@ DefFunc _ConeMapGenIterationProc
 	mov edx, [esi + 4]
 	sub ecx, %$X
 	sub edx, %$Y
+	and ecx, %$BM
+	and edx, %$BM
+	cmp ecx, %$HalfBorder
+	jbe .dx_ok
+	sub ecx, [ebp + CMG.border_len]
+.dx_ok:
+	cmp edx, %$HalfBorder
+	jbe .dy_ok
+	sub edx, [ebp + CMG.border_len]
+.dy_ok:
 	push ecx
 	or ecx, edx
 	pop ecx
 	jz .continue
+
+	mov %$DX, ecx
+	mov %$DY, edx
 
 	cvtsi2ss xmm0, ecx
 	cvtsi2ss xmm1, edx
@@ -164,8 +185,10 @@ DefFunc _ConeMapGenIterationProc
 	jbe .continue
 
 	movss %$K, xmm1
-	mov eax, [esi + 0]
-	mov ecx, [esi + 4]
+	mov eax, %$X
+	mov ecx, %$Y
+	add eax, %$DX
+	add ecx, %$DY
 	mov [edi + 0], eax
 	mov [edi + 4], ecx
 
