@@ -320,8 +320,13 @@ DefFunc _SceneLoad02_Start
 	ret
 
 DefFunc _SceneLoad02_Iter
+	;FrameBegin ebx
+	;mov ebx, [_TerrainConeBitmap]
+	;invoke_cdecl _ConeMapGenIter, ebx, 1
+	;debug_msg `num iter: %d, mod: %d`, [ebx + CMG.num_iter], [ebx + CMG.modified]
+	;FrameEnd
 	FrameBegin
-	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 2
+	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 1
 	FrameEnd
 	ret
 
