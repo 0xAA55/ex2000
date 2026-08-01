@@ -2,11 +2,12 @@
 
 DefFunc _VisualizeFloatMap
 	FrameBegin ebx, esi, edi
+	NameParams %$FloatMap, %$SavePath
 	DefVars %$Buffer, %$MaxValue, %$MinValue, %$BitmapSize
 	DefSizedVar %$BMFH, 14
 	DefSizedVar %$BMIF, 52
 
-	mov ebx, Param(0)
+	mov ebx, %$FloatMap
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
 	lea edi, Variable(0)
@@ -206,7 +207,7 @@ DefFunc _VisualizeFloatMap
 
 ; NOTE: Output verification requires manually inspecting the generated `.bmp` file.
 ;       If no file is created, run under a debugger to diagnose potential failures.
-	invoke_dll_cdecl fopen, Param(1), _FopenTypeWb
+	invoke_dll_cdecl fopen, %$SavePath, _FopenTypeWb
 	mov ebx, eax
 	test eax, eax
 	jz .fail
@@ -232,7 +233,7 @@ DefFunc _VisualizeFloatMap
 	jz .file_closed
 	invoke_dll_cdecl fclose, ebx
 .file_closed:
-	invoke_dll_cdecl remove, Param(1)
+	invoke_dll_cdecl remove, %$SavePath
 
 	xor eax, eax
 .end:
