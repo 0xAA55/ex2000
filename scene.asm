@@ -84,6 +84,7 @@ _DrawSceneProgramLocations:
 	.Time resd 1
 	.Cloud resd 1
 	.Terrain resd 1
+	.TerrainConeMap resd 1
 	.TerrainHeight resd 1
 	.TerrainScaling resd 1
 	.SeaLevel resd 1
@@ -399,6 +400,8 @@ DefFunc _SceneLoad05
 	mov [_DrawSceneProgramLocations.Cloud], eax
 	GetUniformLocation [ebx], "terrain"
 	mov [_DrawSceneProgramLocations.Terrain], eax
+	GetUniformLocation [ebx], "terrain_conemap"
+	mov [_DrawSceneProgramLocations.TerrainConeMap], eax
 	GetUniformLocation [ebx], "terrain_height"
 	mov [_DrawSceneProgramLocations.TerrainHeight], eax
 	GetUniformLocation [ebx], "terrain_scaling"
@@ -940,8 +943,11 @@ __SECT__
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
 	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.Cloud], 0
 	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.Terrain], 1
+	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.TerrainConeMap], 2
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
 
