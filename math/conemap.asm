@@ -308,7 +308,6 @@ DefFunc _ConeMapGenStart
 DefFunc _ConeMapGenIter
 	FrameBegin ebx, esi, edi
 	NameParams %$Inst, %$SearchRadius
-	DefVars %$NumIter
 
 	mov ebx, %$Inst
 	cmp dword[ebx + CMG.modified], 0
@@ -339,10 +338,20 @@ DefFunc _ConeMapGenIter
 
 	invoke_dll_cdecl memcmp, [ebx + CMG.uv_map_data_backup], [esi + BitMap.data], [esi + BitMap.num_bytes]
 	mov [ebx + CMG.modified], eax
+	test eax, eax
+	jz .end
 	invoke_dll_cdecl memcpy, [ebx + CMG.uv_map_data_backup], [esi + BitMap.data], [esi + BitMap.num_bytes]
 
 %ifdef DEBUG_CONEMAP
 	invoke_cdecl _ConeMapGenXtrResult, ebx
+
+[segment .bss]
+	.printf_buffer resb 256
+
+__SECT__
+	snprintf .printf_buffer, 256, `testiter_%02d.bmp`, [ebx + CMG.num_iter]
+	invoke_cdecl _VisualizeFloatMap, [ebx + CMG.dst_map], .printf_buffer
+
 %endif
 .end:
 	mov eax, [ebx + CMG.modified]
@@ -358,15 +367,6 @@ DefFunc _ConeMapGenXtrResult
 	mov edi, [ebx + CMG.dst_map]
 
 	invoke_cdecl _PoolRun, _ConeMapGenPoolProc, ebx, [ebx + CMG.thread_pool_size], [ebx + CMG.border_len], &[edi + BitMap.row_ptr], 0, 0
-
-%ifdef DEBUG_CONEMAP
-[segment .bss]
-	.printf_buffer resb 256
-
-__SECT__
-	snprintf .printf_buffer, 256, `testiter_%02d.bmp`, [ebx + CMG.num_iter]
-	invoke_cdecl _VisualizeFloatMap, edi, .printf_buffer
-%endif
 
 	mov eax, edi
 	FrameEnd
