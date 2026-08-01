@@ -14,11 +14,11 @@ DefFunc _VisualizeFloatMap
 	rep stosd
 
 	mov eax, [ebx + BitMap.num_pixels]
-	shl eax, 2
-	add eax, 2;Paddings to the bitmap data to make sure the whole file is 4-bytes padded
-	mov %$BitmapSize, eax
+	lea eax, [eax * 4 + 2];Paddings to the bitmap data to make sure the whole file is 4-bytes padded
+	push eax
 	invoke_cdecl _aligned_malloc, eax, 16
 	mov %$Buffer, eax
+	pop dword %$BitmapSize
 	mov esi, [ebx + BitMap.data]
 	mov edi, eax
 
@@ -211,12 +211,9 @@ DefFunc _VisualizeFloatMap
 	xor eax, eax
 	mov edx, %$Buffer
 	add edx, %$BitmapSize
-.fill_tail:
-	cmp edi, edx
-	jae .fill_end
-	stosb
-	jmp .fill_tail
-.fill_end:
+    mov ecx, edx
+    sub ecx, edi
+    rep stosb
 
 ; NOTE: Output verification requires manually inspecting the generated `.bmp` file.
 ;       If no file is created, run under a debugger to diagnose potential failures.
