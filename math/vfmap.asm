@@ -34,6 +34,7 @@ DefFunc _VisualizeFloatMap
 	mov [%$BMIF_Addr + BITMAPINFOHEADER.biWidth], ecx
 	mov [%$BMIF_Addr + BITMAPINFOHEADER.biHeight], edx
 	mov eax, %$BitmapSize
+	sub eax, 2
 	mov byte[%$BMIF_Addr + BITMAPINFOHEADER.biPlanes], 1
 	mov byte[%$BMIF_Addr + BITMAPINFOHEADER.biBitCount], 32
 	mov byte[%$BMIF_Addr + BITMAPINFOHEADER.biCompression], BI_BITFIELDS
