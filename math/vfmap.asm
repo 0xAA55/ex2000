@@ -67,22 +67,37 @@ DefFunc _VisualizeFloatMap
 	mulps xmm6, xmm7
 	mulps xmm7, xmm5
 	movd xmm5, %$MinValue
+	cmp dword[ebx + BitMap.dims], 1
+	jz .init_1d
+	cmp dword[ebx + BitMap.dims], 2
+	jz .init_2d
+	cmp dword[ebx + BitMap.dims], 3
+	jz .init_3d
+	cmp dword[ebx + BitMap.dims], 4
+	jz .init_4d
+.bad:
+	int3
+	jmp .bad
+.init_1d:
+.init_3d:
 	shufps xmm5, xmm5, _MM_SHUFFLE(1, 0, 0, 0)
+	jmp .init_ready
+.init_2d:
+	shufps xmm5, xmm5, _MM_SHUFFLE(1, 1, 0, 0)
+	jmp .init_ready
+.init_4d:
+	shufps xmm5, xmm5, _MM_SHUFFLE(0, 0, 0, 0)
+.init_ready:
 	cmp dword[ebx + BitMap.num_pixels], 4;If the square POT bitmap is big enough, no trailing data should be processed
 	jb .proc_very_little_data
 	mov edx, 16
 .loop_pack:
-	cmp dword[ebx + BitMap.dims], 1
-	jz .multi_1d
 	cmp dword[ebx + BitMap.dims], 2
 	jz .multi_2d
 	cmp dword[ebx + BitMap.dims], 3
 	jz .multi_3d
 	cmp dword[ebx + BitMap.dims], 4
 	jz .multi_4d
-.bad:
-	int3
-	jmp .bad
 .multi_1d:
 	movd xmm0, [esi + 0x0]
 	movd xmm1, [esi + 0x4]
@@ -154,15 +169,12 @@ DefFunc _VisualizeFloatMap
 	jb .loop_pack
 	jmp .after_proc
 .proc_very_little_data:
-	cmp dword[ebx + BitMap.dims], 1
-	jz .single_1d
 	cmp dword[ebx + BitMap.dims], 2
 	jz .single_2d
 	cmp dword[ebx + BitMap.dims], 3
 	jz .single_3d
 	cmp dword[ebx + BitMap.dims], 4
 	jz .single_4d
-	jmp .bad
 .single_1d:
 	lodsd
 	movd xmm0, eax
