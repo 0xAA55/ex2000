@@ -523,6 +523,11 @@ DefFunc _SceneLoadProgressive
 
 extern _SceneLoadProgress
 _SceneLoadProgress:
+segment .bss
+.load_sequences:
+segment .rdata
+.loadseq_materials:
+
 %assign num_loadseq 0
 %assign num_loadseq_mat 0
 %macro insert_loadseq 2
@@ -534,15 +539,11 @@ segment .rdata
 segment .bss
 	resd %1
 %endmacro
-segment .bss
-.load_sequences:
-segment .rdata
-.loadseq_materials:
 
 insert_loadseq 0x01, _SceneLoad00
 insert_loadseq 0x01, _SceneLoad01
 insert_loadseq 0x01, _SceneLoad02_Start
-insert_loadseq 0x08, _SceneLoad02_Iter
+insert_loadseq 0x10, _SceneLoad02_Iter
 insert_loadseq 0x01, _SceneLoad02_End
 insert_loadseq 0x01, _SceneLoad03
 insert_loadseq 0x01, _SceneLoad04
