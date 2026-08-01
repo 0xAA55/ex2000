@@ -43,9 +43,9 @@ DefFunc _VisualizeFloatMap
 	mov byte[%$BMIF_Addr + 45], 0xFF
 	mov byte[%$BMIF_Addr + 50], 0xFF
 
-	invoke_cdecl _BatchMin, esi, [ebx + BitMap.num_pixels]
+	invoke_cdecl _BatchMin, esi, [ebx + BitMap.num_floats]
 	fstp dword %$MinValue
-	invoke_cdecl _BatchMax, esi, [ebx + BitMap.num_pixels]
+	invoke_cdecl _BatchMax, esi, [ebx + BitMap.num_floats]
 	fstp dword %$MaxValue
 
 	movss xmm0, %$MaxValue
