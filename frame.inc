@@ -41,16 +41,16 @@
 	%macro push 1
 		push %1
 		%assign %$Frame_NumPushes %$Frame_NumPushes + 1
-		%ifdef __StdCallEspBias
-			%assign __StdCallEspBias __StdCallEspBias + 4
+		%ifdef __EspBias
+			%assign __EspBias __EspBias + 4
 		%endif
 	%endmacro
 
 	%macro pop 1
 		%define esp (esP - 4)
 		%assign %$Frame_NumPushes %$Frame_NumPushes - 1
-		%ifdef __StdCallEspBias
-			%assign __StdCallEspBias __StdCallEspBias - 4
+		%ifdef __EspBias
+			%assign __EspBias __EspBias - 4
 		%endif
 		pop %1
 		%undef esp
@@ -146,7 +146,7 @@
 	%elif %1 > 0
 		add esP, (%1) * 4
 	%endif
-	%assign __StdCallEspBias __StdCallEspBias - (%1) * 4
+	%assign __EspBias __EspBias - (%1) * 4
 %endmacro
 
 %macro __StrContains 3
@@ -329,7 +329,7 @@
 	%undef __LastPassParam
 	%define __PassReg
 	%define __LastPassParam
-	%assign __StdCallEspBias 0
+	%assign __EspBias 0
 	%assign __1_prep_cnt 0
 	%assign __2_prep_cnt 0
 	%assign __3_prep_cnt 0
@@ -457,87 +457,76 @@
 	%undef __IsFloatD
 	IsFloatF __IsFloatF, __Param
 	IsFloatStr __IsFloatD, __ParamStr
-	%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+	%define __ESP_PLACE_HOLDER__ (esP + __EspBias)
 	%if %substr(__ParamStr, 1, 1) == "&"
 		%define __Param %tok(%substr(__ParamStr, 2))
 		__PassParam lea, __Param, %tok(__ParamStr)
 	%elif %substr(__ParamStr, 1, 3) == "xmm"
 		%undef __XmmParamStr
 		StripStringFromDot __XmmParamStr, __ParamStr
-		%xdefine __XmmParam %tok(__XmmParamStr)
 		%if %substr(__ParamStr, __ParamStrLen -1) == ".x"
 			__ModifyEsp -1
-			movss [esP], __XmmParam
+			movss [esP], %tok(__XmmParamStr)
 		%elif %substr(__ParamStr, __ParamStrLen -2) == ".xy"
 			%assign __NumParamsPassed 2
 			__ModifyEsp -2
-			movq [esP], __XmmParam
+			movq [esP], %tok(__XmmParamStr)
 		%elif %substr(__ParamStr, __ParamStrLen -4) == ".xyzw"
 			%assign __NumParamsPassed 4
 			__ModifyEsp -4
-			movdqu [esP], __XmmParam
+			movdqu [esP], %tok(__XmmParamStr)
 		%else
 			%error Unknown param __ParamStr
 		%endif
 	%elif %substr(__ParamStr, 1, 3) == "qw "
-		%define __Param %tok(%substr(__ParamStr, 4))
-		%defstr __ParamStr __Param
-		%strlen __ParamStrLen __ParamStr
+		%xdefine __ParamStr %substr(__ParamStr, 4)
+		%define __Param %tok(__ParamStr)
 		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
 			__FlushPassArgs
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
-			%xdefine __Inner %tok(__InnerStr)
-			push [__Inner + 4]
-			push [__Inner + 0]
+			push [%tok(__InnerStr) + 4]
+			push [%tok(__InnerStr) + 0]
 		%elif %substr(__ParamStr, 1, 2) == "&["
 			%xdefine __InnerStr %substr(__ParamStr, 3, -2)
-			%xdefine __Inner %tok(__InnerStr)
-			__PassParam lea, [__Inner + 4], [__Inner + 4]
-			__PassParam lea, [__Inner + 0], [__Inner + 0]
+			__PassParam lea, [tok(__InnerStr) + 4], [tok(__InnerStr) + 4]
+			__PassParam lea, [tok(__InnerStr) + 0], [tok(__InnerStr) + 0]
 		%else
 			__FlushPassArgs
 			push (__Param) >> 32
 			push (__Param) & 0xFFFFFFFF
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "f2d "
-		%define __Param %tok(%substr(__ParamStr, 5))
-		%defstr __ParamStr __Param
-		%strlen __ParamStrLen __ParamStr
+		%xdefine __ParamStr %substr(__ParamStr, 5)
 		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
-			%xdefine __Inner %tok(__InnerStr)
 			__ModifyEsp -2
-			fld dword [__Inner]
+			fld dword [%tok(__InnerStr)]
 			fstp qword [esP]
 		%else
 			%error `f2d` only supports convert float number from memory address.
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "f2i "
-		%define __Param %tok(%substr(__ParamStr, 5))
-		%defstr __ParamStr __Param
-		%strlen __ParamStrLen __ParamStr
+		%xdefine __ParamStr %substr(__ParamStr, 5)
+		%define __Param %tok(__ParamStr)
 		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
-			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
-			%xdefine __Inner %tok(__InnerStr)
 			__ModifyEsp -1
-			fld dword [__Inner]
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			fld dword [%tok(__InnerStr)]
 			fistp dword [esP]
 		%else
 			%error `f2i` only supports convert float number from memory address.
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "i2f "
-		%define __Param %tok(%substr(__ParamStr, 5))
-		%defstr __ParamStr __Param
-		%strlen __ParamStrLen __ParamStr
+		%xdefine __ParamStr %substr(__ParamStr, 5)
+		%define __Param %tok(__ParamStr)
 		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
-			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
-			%xdefine __Inner %tok(__InnerStr)
 			__ModifyEsp -1
-			fild dword [__Inner]
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			fild dword [%tok(__InnerStr)]
 			fstp dword [esP]
 		%else
 			%error `i2f` only supports convert float number from memory address.
@@ -653,12 +642,12 @@
 		%endrep
 		%rotate -1
 		__FlushPassArgs
-		%define __ESP_PLACE_HOLDER__ (esP + __StdCallEspBias)
+		%define __ESP_PLACE_HOLDER__ (esP + __EspBias)
 		call %1
 		%undef __ESP_PLACE_HOLDER__
 		%undef esp
 		%assign %$Frame_NumPushes %%CurPushRegs
-		%undef __StdCallEspBias
+		%undef __EspBias
 	%endif
 %endmacro
 
