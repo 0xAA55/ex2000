@@ -158,7 +158,7 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	float weight = 1.0;
 	float sum_of_values = 0.0;
 	float sum_of_weights = 0.0;
-	float drag_mult = 0.1;
+	float drag_mult = 0.2;
 	for(int i = 0; i < num_waves; i++)
 	{
 		vec2 p = vec2(sin(iter), cos(iter));
