@@ -534,6 +534,73 @@
 		%else
 			%error `i2f` only supports convert float number from memory address.
 		%endif
+	%elif %substr(__ParamStr, 1, 5) == "fchs "
+		__FlushPassArgs
+		%xdefine __ParamStr %substr(__ParamStr, 6)
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			__ModifyEsp -1
+			fld dword [%tok(__InnerStr)]
+			fchs
+			fstp dword [esP]
+		%elif __IsGenReg(__ParamStr)
+			push %tok(__ParamStr)
+			xor dword [esP], 0x80000000
+		%else
+			%error `fchs` only supports convert float number from memory address or generic registers.
+		%endif
+	%elif %substr(__ParamStr, 1, 5) == "ichs "
+		%xdefine __ParamStr %substr(__ParamStr, 6)
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			__ModifyEsp -1
+			push [%tok(__InnerStr)]
+			neg dword [esP]
+		%elif __IsGenReg(__ParamStr)
+			push %tok(__ParamStr)
+			neg dword [esP]
+		%else
+			%error `ichs` only supports convert float number from memory address or generic registers.
+		%endif
+	%elif %substr(__ParamStr, 1, 7) == "f2dchs "
+		__FlushPassArgs
+		%xdefine __ParamStr %substr(__ParamStr, 8)
+		%assign __NumParamsPassed 2
+		%if %substr(__ParamStr, 1, 1) == "["
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			__ModifyEsp -2
+			fld dword [%tok(__InnerStr)]
+			fchs
+			fstp qword [esP]
+		%else
+			%error `f2d` only supports convert float number from memory address.
+		%endif
+	%elif %substr(__ParamStr, 1, 7) == "f2ichs "
+		%xdefine __ParamStr %substr(__ParamStr, 8)
+		%define __Param %tok(__ParamStr)
+		%assign __NumParamsPassed 2
+		%if %substr(__ParamStr, 1, 1) == "["
+			__ModifyEsp -1
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			fld dword [%tok(__InnerStr)]
+			fchs
+			fistp dword [esP]
+		%else
+			%error `f2i` only supports convert float number from memory address.
+		%endif
+	%elif %substr(__ParamStr, 1, 7) == "i2fchs "
+		%xdefine __ParamStr %substr(__ParamStr, 8)
+		%define __Param %tok(__ParamStr)
+		%assign __NumParamsPassed 2
+		%if %substr(__ParamStr, 1, 1) == "["
+			__ModifyEsp -1
+			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
+			fild dword [%tok(__InnerStr)]
+			fchs
+			fstp dword [esP]
+		%else
+			%error `i2f` only supports convert float number from memory address.
+		%endif
 	%elifidn __ParamStr, 'st0'
 		__ModifyEsp -1
 		fstp dword [esP]
