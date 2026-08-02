@@ -742,6 +742,9 @@
 	%assign %%CurPushRegs %$Frame_NumPushes
 	%if __ParamIndex == 1
 		pop ecx
+	%elif __ParamIndex == 2
+		pop ecx
+		pop ecx
 	%elif __ParamIndex != 0
 		add esp, __ParamIndex * 4
 	%endif
