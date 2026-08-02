@@ -3,7 +3,7 @@
 ; %define DEBUG_CONEMAP 1
 
 DefFunc _ConeMapGenInitUVMapPoolProc
-	FrameBegin ebp, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 	NameParams %$UVRowPtr, %$CommonData, %$Y
 	DefVars %$X, %$CurHeight, %$K, %$Zero
 	DefVars %$SurrX, %$SurrY, %$SurrAbsX, %$SurrAbsY
@@ -13,17 +13,13 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 
-	mov ebp, %$CommonData
-	%define %$SrcMap [ebp + CMG.src_map]
-	%define %$UVMap [ebp + CMG.uv_map]
-
-	mov ebx, %$SrcMap
+	mov ebx, %$CommonData
 
 	xor eax, eax
 	mov %$X, eax
 	mov edi, %$UVRowPtr
 .proc_pixel:
-	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, ebx
+	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, [ebx + CMG.src_map]
 	mov eax, [eax]
 	mov %$CurHeight, eax
 
@@ -34,11 +30,11 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov [edi + 0], ecx
 	mov [edi + 4], edx
 
-	mov eax, [ebp + CMG.search_radius]
+	mov eax, [ebx + CMG.search_radius]
 	neg eax
 	mov %$SurrY, eax
 .loopy:
-	mov eax, [ebp + CMG.search_radius]
+	mov eax, [ebx + CMG.search_radius]
 	neg eax
 	mov %$SurrX, eax
 .loopx:
@@ -51,7 +47,7 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	add ecx, %$SurrY
 	mov %$SurrAbsX, eax
 	mov %$SurrAbsY, ecx
-	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, ebx
+	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, [ebx + CMG.src_map]
 
 	cvtsi2ss xmm0, %$SurrX
 	cvtsi2ss xmm1, %$SurrY
@@ -77,13 +73,13 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov eax, %$SurrX
 	inc eax
 	mov %$SurrX, eax
-	cmp eax, [ebp + CMG.search_radius]
+	cmp eax, [ebx + CMG.search_radius]
 	jle .loopx
 	
 	mov eax, %$SurrY
 	inc eax
 	mov %$SurrY, eax
-	cmp eax, [ebp + CMG.search_radius]
+	cmp eax, [ebx + CMG.search_radius]
 	jle .loopy
 
 	add edi, 8
@@ -91,14 +87,14 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, [ebp + CMG.border_len]
+	cmp eax, [ebx + CMG.border_len]
 	jb .proc_pixel
 
 	FrameEnd
 	ret
 
 DefFunc _ConeMapGenIterationProc
-	FrameBegin ebp, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 	NameParams %$UVRowPtr, %$CommonData, %$Y
 	DefVars %$X, %$CurHeight, %$K, %$Zero
 	DefVars %$SurrX, %$SurrY
@@ -109,34 +105,31 @@ DefFunc _ConeMapGenIterationProc
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 
-	mov ebp, %$CommonData
-	%define %$SrcMap [ebp + CMG.src_map]
-	%define %$UVMap [ebp + CMG.uv_map]
+	mov ebx, %$CommonData
 
-	mov eax, [ebp + CMG.border_len]
+	mov eax, [ebx + CMG.border_len]
 	lea ecx, [eax - 1]
 	shr eax, 1
 	mov %$BM, ecx
 	mov %$HalfBorder, eax
 
-	mov ebx, %$SrcMap
 	mov edi, %$UVRowPtr
 
 	xor eax, eax
 	mov %$X, eax
 .proc_pixel:
-	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, ebx
+	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, [ebx + CMG.src_map]
 	mov eax, [eax]
 	mov %$CurHeight, eax
 
 	xor eax, eax
 	mov %$K, eax
 
-	mov eax, [ebp + CMG.search_radius]
+	mov eax, [ebx + CMG.search_radius]
 	neg eax
 	mov %$SurrY, eax
 .loopy:
-	mov eax, [ebp + CMG.search_radius]
+	mov eax, [ebx + CMG.search_radius]
 	neg eax
 	mov %$SurrX, eax
 .loopx:
@@ -144,9 +137,9 @@ DefFunc _ConeMapGenIterationProc
 	mov ecx, %$SurrY
 	add eax, %$X
 	add ecx, %$Y
-	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, %$UVMap
+	invoke_cdecl _GetBitmapPixelAddress, eax, ecx, [ebx + CMG.uv_map]
 	mov esi, eax
-	invoke_cdecl _GetBitmapPixelAddress, [esi + 0], [esi + 4], ebx
+	invoke_cdecl _GetBitmapPixelAddress, [esi + 0], [esi + 4], [ebx + CMG.src_map]
 
 	mov ecx, [esi + 0]
 	mov edx, [esi + 4]
@@ -156,11 +149,11 @@ DefFunc _ConeMapGenIterationProc
 	and edx, %$BM
 	cmp ecx, %$HalfBorder
 	jbe .dx_ok
-	sub ecx, [ebp + CMG.border_len]
+	sub ecx, [ebx + CMG.border_len]
 .dx_ok:
 	cmp edx, %$HalfBorder
 	jbe .dy_ok
-	sub edx, [ebp + CMG.border_len]
+	sub edx, [ebx + CMG.border_len]
 .dy_ok:
 	push ecx
 	or ecx, edx
@@ -196,13 +189,13 @@ DefFunc _ConeMapGenIterationProc
 	mov eax, %$SurrX
 	inc eax
 	mov %$SurrX, eax
-	cmp eax, [ebp + CMG.search_radius]
+	cmp eax, [ebx + CMG.search_radius]
 	jle .loopx
 	
 	mov eax, %$SurrY
 	inc eax
 	mov %$SurrY, eax
-	cmp eax, [ebp + CMG.search_radius]
+	cmp eax, [ebx + CMG.search_radius]
 	jle .loopy
 
 	add edi, 8
@@ -210,14 +203,14 @@ DefFunc _ConeMapGenIterationProc
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, [ebp + CMG.border_len]
+	cmp eax, [ebx + CMG.border_len]
 	jb .proc_pixel
 
 	FrameEnd
 	ret
 
 DefFunc _ConeMapGenPoolProc
-	FrameBegin ebp, ebx, esi, edi
+	FrameBegin ebx, esi, edi
 	NameParams %$DstRowPtr, %$CommonData, %$Y
 	DefVars %$X, %$CurHeight, %$Normalize, %$Zero
 
@@ -226,28 +219,23 @@ DefFunc _ConeMapGenPoolProc
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 
-	mov ebp, %$CommonData
-	%define %$SrcMap [ebp + CMG.src_map]
-	%define %$UVMap [ebp + CMG.uv_map]
-	%define %$DstMap [ebp + CMG.dst_map]
-
-	mov ebx, %$UVMap
+	mov ebx, %$CommonData
 	mov edi, %$DstRowPtr
 
-	cvtsi2ss xmm0, [ebp + CMG.border_len]
+	cvtsi2ss xmm0, [ebx + CMG.border_len]
 	movss %$Normalize, xmm0
 
 	xor eax, eax
 	mov %$X, eax
 .proc_pixel:
-	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, %$SrcMap
+	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, [ebx + CMG.src_map]
 	mov eax, [eax]
 	mov %$CurHeight, eax
 
-	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, ebx
+	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, [ebx + CMG.uv_map]
 	mov esi, eax
 
-	invoke_cdecl _GetBitmapPixelAddress, [esi + 0], [esi + 4], %$SrcMap
+	invoke_cdecl _GetBitmapPixelAddress, [esi + 0], [esi + 4], [ebx + CMG.src_map]
 
 	mov ecx, [esi + 0]
 	mov edx, [esi + 4]
@@ -283,7 +271,7 @@ DefFunc _ConeMapGenPoolProc
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, [ebp + CMG.border_len]
+	cmp eax, [ebx + CMG.border_len]
 	jb .proc_pixel
 
 	FrameEnd
