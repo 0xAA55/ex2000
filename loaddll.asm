@@ -292,6 +292,7 @@ segment .rdata
 
 DefFunc _LoadFuncGroup
 	FrameBegin
+.next_func:
 	push ecx
 	invoke_dll_stdcall GetProcAddress, ebx, esi
 %ifdef INVOKE_CHECK
@@ -305,15 +306,16 @@ DefFunc _LoadFuncGroup
 	stosd
 	call _NextString
 	pop ecx
-	loop _LoadFuncGroup
+	loop .next_func
 	FrameEnd
 	ret
 
 DefFunc _NextString
 	FrameBegin
+.next_char:
 	lodsb
 	test al, al ; Find NUL
-	jnz _NextString
+	jnz .next_char
 	FrameEnd
 	ret
 
