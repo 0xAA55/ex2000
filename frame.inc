@@ -3,6 +3,19 @@
 
 ; %define Frame_UseEBP
 
+;*** NOTE ***
+; Opcodes and register names MUST be written in lowercase.
+; Dynamic ESP tracing relies on the macros `push`, `pop`, and `esp`.
+; To prevent NASM from double-expanding macros, the internal variant `esP`
+; (note the capital P) is used, as `esp` itself is redefined.
+
+;*** NOTE ***
+; When using `DefVars`, `DefSizedVar`, or `NameParams`, use context-local
+; symbols prefixed with `%$`. If you do so, these variables and parameters
+; are automatically `%undef`'d after `FrameEnd`.
+; Otherwise, the symbols persist from the previous function. Unless manually
+; `%undef`'d, they cannot be safely reused.
+
 %macro DefFunc 1
 	extern %1
 	%xdefine CurFuncName %1
