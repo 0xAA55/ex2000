@@ -285,18 +285,18 @@ DefFunc _FreeMonitorData
 
 DefFunc _VBlankInit
 	FrameBegin ebx, esi, edi
-	DefVars DXGIFactory, D3D11Device, DXGIDevice, DXGIOutput, DXGIAdapter
-	DefSizedVar DXGIOutputDesc, DXGI_OUTPUT_DESC.size
+	DefVars %$DXGIFactory, %$D3D11Device, %$DXGIDevice, %$DXGIOutput, %$DXGIAdapter
+	DefSizedVar %$DXGIOutputDesc, DXGI_OUTPUT_DESC.size
 
 	invoke_cdecl _InitTimer, _VBlankTimer
 
 	xor eax, eax
-	lea edi, DXGIFactory
+	lea edi, %$DXGIFactory
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 	mov esi, eax
 	mov edi, eax
-	lea ebx, DXGIOutputDesc
+	lea ebx, %$DXGIOutputDesc
 
 	load_dll DXGI
 	test eax, eax
@@ -313,25 +313,25 @@ DefFunc _VBlankInit
 	invoke_dll_stdcall DXGIDisableVBlankVirtualization
 
 .after_disable_virtvblank:
-	invoke_dll_stdcall CreateDXGIFactory, _IID_IDXGIFactory, &DXGIFactory
+	invoke_dll_stdcall CreateDXGIFactory, _IID_IDXGIFactory, &%$DXGIFactory
 	cmp eax, 0
 	jl .no_dxgi
 
 .loop_enum_monitors_by_dxgi:
-	invoke_com DXGIFactory, IDXGIFactoryVtbl.EnumAdapters, esi, &DXGIAdapter
+	invoke_com %$DXGIFactory, IDXGIFactoryVtbl.EnumAdapters, esi, &%$DXGIAdapter
 	cmp eax, 0
 	jl .end_enum_adapeters_dxgi
 
 	xor edi, edi
 .loop_enum_outputs_dxgi:
-	invoke_com DXGIAdapter, IDXGIAdapterVtbl.EnumOutputs, edi, &DXGIOutput
+	invoke_com %$DXGIAdapter, IDXGIAdapterVtbl.EnumOutputs, edi, &%$DXGIOutput
 	cmp eax, 0
 	jl .end_enum_outputs_dxgi
 
-	invoke_com DXGIOutput, IDXGIOutputVtbl.GetDesc, ebx
+	invoke_com %$DXGIOutput, IDXGIOutputVtbl.GetDesc, ebx
 
 	invoke_cdecl _calloc, 1, MonitorData.size
-	mov ecx, DXGIOutput
+	mov ecx, %$DXGIOutput
 	mov [eax + MonitorData.IDXGIOutput], ecx
 
 	invoke_cdecl _AVLInsert, _MonitorsData, [ebx + DXGI_OUTPUT_DESC.HMonitor], eax, _FreeMonitorData, _AVLOps_Integer
@@ -339,12 +339,12 @@ DefFunc _VBlankInit
 	jmp .loop_enum_outputs_dxgi
 
 .end_enum_outputs_dxgi:
-	invoke_cdecl _SafeRelease, &DXGIAdapter
+	invoke_cdecl _SafeRelease, &%$DXGIAdapter
 	inc esi
 	jmp .loop_enum_monitors_by_dxgi
 
 .end_enum_adapeters_dxgi:
-	invoke_cdecl _SafeRelease, &DXGIFactory
+	invoke_cdecl _SafeRelease, &%$DXGIFactory
 	xor eax, eax
 	inc eax
 	jmp .finish
@@ -377,14 +377,6 @@ DefFunc _VBlankInit
 .end:
 	FrameEnd
 	ret
-	%undef DXGIFactory
-	%undef D3D11Device
-	%undef DXGIDevice
-	%undef DXGIOutput
-	%undef DXGIAdapter
-	%undef HMonitor
-	%undef Dummy
-	%undef DXGIOutputDesc
 
 DefFunc _DDEnumCallbackExA@20
 	FrameBegin edi
@@ -419,41 +411,41 @@ DefFunc _DDEnumCallbackExA@20
 
 DefFunc _SetupMonitorDataProc
 	FrameBegin ebx, esi, edi
-	DefSizedVar _MonitorInfoExW, MONITORINFOEXW.size
-	DefSizedVar _DevModeW, DEVMODEW.size
-	DefSizedVar _DesiredMode, DXGI_MODE_DESC.size
-	DefSizedVar _ClosestMode, DXGI_MODE_DESC.size
+	DefSizedVar %$MonitorInfoExW, MONITORINFOEXW.size
+	DefSizedVar %$DevModeW, DEVMODEW.size
+	DefSizedVar %$DesiredMode, DXGI_MODE_DESC.size
+	DefSizedVar %$ClosestMode, DXGI_MODE_DESC.size
 
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
-	lea edi, &_MonitorInfoExW
+	lea edi, Variable(0)
 	rep stosd
 
 	mov ebx, Param(1)
-	mov byte[_MonitorInfoExW_Addr + MONITORINFOEXW.cbSize], MONITORINFOEXW.size
-	mov byte[_DevModeW_Addr + DEVMODEW.dmSize], DEVMODEW.size
+	mov byte[%$MonitorInfoExW_Addr + MONITORINFOEXW.cbSize], MONITORINFOEXW.size
+	mov byte[%$DevModeW_Addr + DEVMODEW.dmSize], DEVMODEW.size
 	mov byte[ebx + MonitorData.RefreshRate], 60
 	mov byte[ebx + MonitorData.RefreshIntervalMs], 16
 	mov word[ebx + MonitorData.RefreshIntervalUs], 16666
 
-	invoke_dll_stdcall GetMonitorInfoW, Param(0), &_MonitorInfoExW
+	invoke_dll_stdcall GetMonitorInfoW, Param(0), &%$MonitorInfoExW
 	test eax, eax
 	jz .end
-	invoke_dll_stdcall EnumDisplaySettingsW, &[_MonitorInfoExW_Addr + MONITORINFOEXW.szDevice], ENUM_CURRENT_SETTINGS, &_DevModeW
+	invoke_dll_stdcall EnumDisplaySettingsW, &[%$MonitorInfoExW_Addr + MONITORINFOEXW.szDevice], ENUM_CURRENT_SETTINGS, &%$DevModeW
 	test eax, eax
 	jz .end
 
-	mov eax, [_MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_r]
-	mov ecx, [_MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_b]
-	sub eax, [_MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_x]
-	sub ecx, [_MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_y]
-	mov [_DesiredMode_Addr + DXGI_MODE_DESC.Width], eax
-	mov [_DesiredMode_Addr + DXGI_MODE_DESC.Height], ecx
-	mov byte[_DesiredMode_Addr + DXGI_MODE_DESC.Format], DXGI_FORMAT_R8G8B8A8_UNORM
+	mov eax, [%$MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_r]
+	mov ecx, [%$MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_b]
+	sub eax, [%$MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_x]
+	sub ecx, [%$MonitorInfoExW_Addr + MONITORINFOEXW.rcMonitor_y]
+	mov [%$DesiredMode_Addr + DXGI_MODE_DESC.Width], eax
+	mov [%$DesiredMode_Addr + DXGI_MODE_DESC.Height], ecx
+	mov byte[%$DesiredMode_Addr + DXGI_MODE_DESC.Format], DXGI_FORMAT_R8G8B8A8_UNORM
 
 	mov eax, 1000
 	xor edx, edx
-	mov ecx, [_DevModeW_Addr + DEVMODEW.dmDisplayFrequency]
+	mov ecx, [%$DevModeW_Addr + DEVMODEW.dmDisplayFrequency]
 	test ecx, ecx ;In WINE, ecx = 0 is expected.
 	jz .after_read_rr
 	div ecx
@@ -468,12 +460,12 @@ DefFunc _SetupMonitorDataProc
 	test esi, esi
 	jz .end
 
-	invoke_com esi, IDXGIOutputVtbl.FindClosestMatchingMode, &_DesiredMode, &_ClosestMode, NULL
+	invoke_com esi, IDXGIOutputVtbl.FindClosestMatchingMode, &%$DesiredMode, &%$ClosestMode, NULL
 	cmp eax, 0
 	jl .end
 
-	mov eax, [_ClosestMode_Addr + DXGI_MODE_DESC.RefreshRate_Denominator]
-	mov ecx, [_ClosestMode_Addr + DXGI_MODE_DESC.RefreshRate_Numerator]
+	mov eax, [%$ClosestMode_Addr + DXGI_MODE_DESC.RefreshRate_Denominator]
+	mov ecx, [%$ClosestMode_Addr + DXGI_MODE_DESC.RefreshRate_Numerator]
 	mov edx, 1000000
 	mul edx
 	div ecx
