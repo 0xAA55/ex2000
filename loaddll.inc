@@ -1,6 +1,8 @@
 %ifndef _LOADDLL_INC_
 %define _LOADDLL_INC_ 1
 
+; %define INVOKE_CHECK
+
 %include "frame.inc"
 
 %define NULL 0

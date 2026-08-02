@@ -2,7 +2,6 @@
 %define _FRAME_INC_ 1
 
 ; %define Frame_UseEBP
-; %define INVOKE_CHECK
 
 %macro DefFunc 1
 	extern %1
