@@ -497,6 +497,7 @@
 			push (__Param) & 0xFFFFFFFF
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "f2d "
+		__FlushPassArgs
 		%xdefine __ParamStr %substr(__ParamStr, 5)
 		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
