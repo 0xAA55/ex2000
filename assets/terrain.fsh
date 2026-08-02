@@ -58,23 +58,23 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
 	float dist = 0.0;
 	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
-	float is_hit = 0.0;
-	float dir_horz = length(dir.xz);
+	float cone_mult = length(dir.xz) * terrain_height / terrain_scaling;
 	for(int i = 0; i < 64; i++)
 	{
 		vec3 pos = start + dir * dist;
 		vec2 pos_uv = pos.xz / terrain_scaling;
 		float height = texture2D(terrain, pos_uv).r * terrain_height;
 		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
-		float cone = texture2D(terrain_conemap, pos_uv).r * terrain_height / terrain_scaling;
-		float step = (pos.y - height) / (cone * dir_horz - dir.y);
+		float cone = texture2D(terrain_conemap, pos_uv).r * cone_mult;
+		float step = (pos.y - height) / (cone - dir.y);
 		if (step < 0.0) return vec2(max_dist, 0.0);
 		dist += step;
 		if (dist >= max_dist) return vec2(max_dist, 0.0);
 	}
-	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
-	if (is_hit < 0.5) dist = max_dist;
-	return vec2(dist, is_hit);
+	bool is_hit = false;
+	if (dir.y <= 0.0 || dist < max_dist) is_hit = true;
+	if (!is_hit) dist = max_dist;
+	return vec2(dist, is_hit ? 1.0: 0.0);
 }
 
 vec2 raymarch_terrain_rough(vec3 start, vec3 dir, float max_dist)
@@ -82,23 +82,23 @@ vec2 raymarch_terrain_rough(vec3 start, vec3 dir, float max_dist)
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
 	float dist = 0.0;
 	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
-	float is_hit = 0.0;
-	float dir_horz = length(dir.xz);
+	float cone_mult = length(dir.xz) * terrain_height / terrain_scaling;
 	for(int i = 0; i < 32; i++)
 	{
 		vec3 pos = start + dir * dist;
 		vec2 pos_uv = pos.xz / terrain_scaling;
 		float height = texture2D(terrain, pos_uv).r * terrain_height;
 		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
-		float cone = texture2D(terrain_conemap, pos_uv).r * terrain_height / terrain_scaling;
-		float step = (pos.y - height) / (cone * dir_horz - dir.y);
+		float cone = texture2D(terrain_conemap, pos_uv).r * cone_mult;
+		float step = (pos.y - height) / (cone - dir.y);
 		if (step < 0.0) return vec2(max_dist, 0.0);
 		dist += step;
 		if (dist >= max_dist) return vec2(max_dist, 0.0);
 	}
-	if (dir.y <= 0.0 || dist < max_dist) is_hit = 1.0;
-	if (is_hit < 0.5) dist = max_dist;
-	return vec2(dist, is_hit);
+	bool is_hit = false;
+	if (dir.y <= 0.0 || dist < max_dist) is_hit = true;
+	if (!is_hit) dist = max_dist;
+	return vec2(dist, is_hit ? 1.0: 0.0);
 }
 
 vec3 terrain_normal(vec3 pos, float e)
