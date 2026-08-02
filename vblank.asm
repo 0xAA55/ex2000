@@ -291,7 +291,7 @@ DefFunc _VBlankInit
 	invoke_cdecl _InitTimer, _VBlankTimer
 
 	xor eax, eax
-	lea edi, %$DXGIFactory
+	lea edi, Variable(0)
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 	mov esi, eax

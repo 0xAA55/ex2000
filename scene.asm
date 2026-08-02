@@ -653,7 +653,7 @@ __SECT__
 
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
-	lea edi, %$TimerValue32
+	lea edi, Variable(0)
 	rep stosd
 
 	fld qword [_Timer.TimerVal]

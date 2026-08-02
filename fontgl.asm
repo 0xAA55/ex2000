@@ -242,7 +242,7 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 	DefSizedVar %$Palette, 1024
 
 	xor eax, eax
-	lea edi, %$BMIF
+	lea edi, Variable(0)
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 	mov eax, Param(1)
@@ -282,7 +282,7 @@ DefFunc _OGLFC_Compose
 	DefSizedVar %$GlyphMetrics, GLYPHMETRICS.size
 
 	xor eax, eax
-	lea edi, %$PointerToChar
+	lea edi, Variable(0)
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 

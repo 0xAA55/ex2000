@@ -13,7 +13,7 @@ DefFunc _RaymarchTerrainAltitude
 
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
-	lea edi, %$Sampled
+	lea edi, Variable(0)
 	rep stosd
 
 	mov eax, [_2.0f]
