@@ -7,7 +7,7 @@
 %macro DefFunc 1
 	extern %1
 	%xdefine CurFuncName %1
-	segment .stack_of_ %+ CurFuncName info
+	segment .stack_of_ %+ CurFuncName info ;Contents will never get into the final binary
 	segment .text
 	%1:
 %endmacro
@@ -72,14 +72,12 @@
 %macro DefVars 1-*
 	__AllocStackVars
 	[segment %[.stack_of_ %+ CurFuncName]]
-	[warning -zeroing]
 	%rep %0
-		%[.var_ %+ %$Frame_NumVariables] resd 1
+		%[.var_ %+ %$Frame_NumVariables] dd 0
 		%define %1 Variable(%[%$Frame_NumVariables])
 		%assign %$Frame_NumVariables %$Frame_NumVariables + 1
 		%rotate 1
 	%endrep
-	[warning +zeroing]
 	__SECT__
 %endmacro
 
@@ -89,10 +87,8 @@
 	%define %1%[_Addr] AddrOfVariable(%[%$Frame_NumVariables])
 	%define %1 Variable(%[%$Frame_NumVariables])
 	[segment %[.stack_of_ %+ CurFuncName]]
-	[warning -zeroing]
-	%[.var_ %+ %$Frame_NumVariables] resd %%NumRooms
+	%[.var_ %+ %$Frame_NumVariables] times %%NumRooms dd 0
 	%assign %$Frame_NumVariables %$Frame_NumVariables + %%NumRooms
-	[warning +zeroing]
 	__SECT__
 %endmacro
 
