@@ -20,22 +20,23 @@
 	%assign %$Frame_NumVariables 0
 	%define %$Frame_NumLocals 0 ;Redifines in DefVars and DefSizedVar
 	%assign %$Frame_NumSavedRegs 0
-	%ifdef Frame_UseEBP
-		push ebp
-		mov ebp, esp
-	%endif
 	%if %0 > 0
 		%xdefine %$Frame_SavedRegs %1
 		__FrameSaveRegs %$Frame_SavedRegs
 	%endif
+	%ifdef Frame_UseEBP
+		push ebp
+		mov ebp, esp
+	%endif
 	%assign %$Frame_NumPushes 0
 	%assign %$CurPrmIndex 0
 	%ifdef Frame_UseEBP
-		%define AddrOfParam(x) (ebp + (x + 2) * 4)
+		%define AddrOfParam(x) (ebp + ((x) + 2 + %$Frame_NumSavedRegs) * 4)
+		%define AddrOfVariable(x) (ebp + ((x) - %$Frame_NumLocals) * 4)
 	%else
 		%define AddrOfParam(x) (esp + (%$Frame_NumSavedRegs + %$Frame_NumLocals + %$Frame_NumPushes + (x) + 1) * 4)
+		%define AddrOfVariable(x) (esp + (%$Frame_NumPushes + (x)) * 4)
 	%endif
-	%define AddrOfVariable(x) (esp + (%$Frame_NumPushes + (x)) * 4)
 	%define Param(x) [AddrOfParam(x)]
 	%define Variable(x) [AddrOfVariable(x)]
 	%macro push 1
@@ -110,16 +111,23 @@
 	%if %$Frame_NumPushes != 0
 		%error Stack not balanced: pushed %$Frame_NumPushes items before `FrameEnd`
 	%endif
-	%if %$Frame_NumLocals != 0
-		add esp, %$Frame_NumLocals * 4
-	%endif
 	%unmacro push 1
 	%unmacro pop 1
+	%ifndef Frame_UseEBP
+		%if %$Frame_NumLocals > 2
+			add esp, %$Frame_NumLocals * 4
+		%elif %$Frame_NumLocals == 2
+			pop ecx
+			pop ecx
+		%elif %$Frame_NumLocals == 1
+			pop ecx
+		%endif
+	%else
+		mov esp, ebp
+		pop ebp
+	%endif
 	%ifdef %$Frame_SavedRegs
 		__FrameStoreRegs %$Frame_SavedRegs
-	%endif
-	%ifdef Frame_UseEBP
-		pop ebp
 	%endif
 	%pop
 %endmacro
