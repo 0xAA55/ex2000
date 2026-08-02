@@ -363,7 +363,7 @@ extern _AltitudeToTerrain
 ;void SampleFloatMap(BitMap *map, float u, float v, float *ret);
 extern _SampleFloatMap
 
-;int RaymarchTerrainAltitude(BitMap *map, float height_mod, float size_mod,
+;int RaymarchTerrainAltitude(BitMap *height_map, BitMap *cone_map, float height_mod, float size_mod,
 ;	int num_iter,
 ;	float start_x, float start_y, float start_z,
 ;	float dir_x, float dir_y, float dir_z,

@@ -1,27 +1,36 @@
 %include "common.inc"
 
 DefFunc _RaymarchTerrainAltitude
-	FrameBegin ebx, esi, edi
-	NameParams %$Map, %$TerrainHeight, %$TerrainSize
+	FrameBegin esi, edi
+	NameParams %$HeightMap, %$ConeMap, %$TerrainHeight, %$TerrainSize
 	NameParams %$NumIter
 	NameParams %$StartX, %$StartY, %$StartZ
 	NameParams %$DirX, %$DirY, %$DirZ
 	NameParams %$MaxDist, %$RetDist
-	DefVars %$Sampled, %$Dist, %$LastDir, %$IsHit, %$StepMod, %$Zero
 	DefVars %$PosX, %$PosY, %$PosZ, %$PosW
 	DefVars %$VecX, %$VecY, %$VecZ, %$VecW
+	DefVars %$Sampled, %$Dist, %$Zero
+	DefVars %$CurAltHeight, %$TerrainSizeRCP, %$ConeMultVal
 
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
 	lea edi, Variable(0)
 	rep stosd
 
-	mov eax, [_2.0f]
-	mov %$StepMod, eax
-
-	mov ebx, %$Map
 	xor esi, esi
 	mov edi, %$RetDist
+
+	rcpss xmm0, %$TerrainSize
+	movss xmm1, %$DirX
+	movss xmm2, %$DirZ
+	movss %$TerrainSizeRCP, xmm0
+	mulss xmm1, xmm1
+	mulss xmm2, xmm2
+	mulss xmm0, %$TerrainHeight
+	addss xmm1, xmm2
+	sqrtss xmm1, xmm1
+	mulss xmm0, xmm1
+	movss %$ConeMultVal, xmm0
 
 	movss xmm0, %$StartY
 	ucomiss xmm0, %$TerrainHeight
@@ -33,7 +42,7 @@ DefFunc _RaymarchTerrainAltitude
 	divss xmm0, xmm1
 	movss %$Dist, xmm0
 
-	ucomiss xmm1, [_ZeroVector]
+	ucomiss xmm1, %$Zero
 	jb .proceed_raymarch
 .too_far:
 	mov eax, %$MaxDist
@@ -41,7 +50,7 @@ DefFunc _RaymarchTerrainAltitude
 	xor eax, eax
 	jmp .end
 .proceed_raymarch:
-	rcpss xmm6, %$TerrainSize
+	movss xmm6, %$TerrainSizeRCP
 	movups xmm0, %$StartX
 	movss xmm2, %$Dist
 	movups xmm1, %$DirX
@@ -53,12 +62,11 @@ DefFunc _RaymarchTerrainAltitude
 	mulps xmm2, xmm6
 	movups %$VecX, xmm2
 
-	invoke_cdecl _SampleFloatMap, ebx, %$VecX, %$VecZ, & %$Sampled
+	invoke_cdecl _SampleFloatMap, %$HeightMap, %$VecX, %$VecZ, & %$Sampled
 	movss xmm0, %$Sampled
-	mulss xmm0, %$TerrainHeight
-	ucomiss xmm0, %$PosY
-	jb .penetrated
 	movss xmm1, [_0.01f]
+	mulss xmm0, %$TerrainHeight
+	movss %$CurAltHeight, xmm0
 	addss xmm1, xmm0
 	ucomiss xmm1, %$PosY
 	jb .not_hit
@@ -69,56 +77,28 @@ DefFunc _RaymarchTerrainAltitude
 	inc eax
 	jmp .end
 .not_hit:
-	movss xmm1, %$PosY
-	movss xmm3, %$Dist
-	subss xmm1, xmm0
-	divss xmm1, %$StepMod
-	addss xmm1, xmm3
-	movss %$Dist, xmm1
-	ucomiss xmm1, %$MaxDist
-	jae .too_far
-	xor eax, eax
-	cmp %$LastDir, eax
-	jz .next_loop
-	mov %$LastDir, eax
-.inc_step_mod:
-	movss xmm0, %$StepMod
-	addss xmm0, [_F1111]
-	movss %$StepMod, xmm0
-	jmp .next_loop
-.penetrated:
-	mov byte %$IsHit, 1
-	movss xmm1, %$Dist
-	subss xmm0, %$PosY
-	divss xmm0, %$StepMod
-	subss xmm1, xmm0
-	movss %$Dist, xmm1
-	ucomiss xmm1, %$Zero
-	ja .above_surface
-.return_zero:
-	xor eax, eax
-	stosd
-	jmp .end
-.above_surface:
-	movss xmm0, %$StepMod
-	ucomiss xmm0, [_F8888]
-	jae .return_dist
-	cmp dword %$LastDir, 0
-	jnz .next_loop
-	inc dword %$LastDir
-	jmp .inc_step_mod
-.next_loop:
+	invoke_cdecl _SampleFloatMap, %$ConeMap, %$VecX, %$VecZ, & %$Sampled
+	movss xmm0, %$PosY
+	movss xmm1, %$Sampled
+	subss xmm0, %$CurAltHeight
+	mulss xmm1, %$ConeMultVal
+	subss xmm1, %$DirY
+	divss xmm0, xmm1
+	ucomiss xmm0, %$Zero
+	jb .too_far
+	addss xmm0, %$Dist
+	ucomiss xmm0, %$MaxDist
+	ja .too_far
+	movss %$Dist, xmm0
+
 	inc esi
 	cmp esi, %$NumIter
 	jb .proceed_raymarch
+
 	movss xmm0, %$Dist
 	ucomiss xmm0, %$MaxDist
 	jb .return_dist
-
-	mov eax, %$IsHit
-	test eax, eax
-	jz .too_far
-	jmp .return_dist
+	jmp .too_far
 
 .end:
 	FrameEnd
