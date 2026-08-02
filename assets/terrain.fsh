@@ -36,8 +36,6 @@ uniform float sea_wave_height = 2.0;
 uniform float sea_wave_size = 2.0;
 in vec2 texcoord;
 out vec4 color;
-uniform vec3 demo_sphere;
-float demo_sphere_size = 5.0;
 
 vec3 suncolor_hdr = suncolor * sun_brightness;
 vec3 skycolor_hdr = skycolor * sky_brightness;
@@ -70,9 +68,7 @@ vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
 		float cone = texture2D(terrain_conemap, pos_uv).r * cone_mult;
 		float step = (pos.y - height) / (cone - dir.y);
 		if (step < 0.0) return vec2(max_dist, 0.0);
-		step = min(step, distance(pos, demo_sphere) - demo_sphere_size);
 		dist += step;
-		if (step < 0.0) return vec2(dist, 1.0);
 		if (dist >= max_dist) return vec2(max_dist, 0.0);
 	}
 	bool is_hit = false;
@@ -257,7 +253,6 @@ vec3 sky_color(vec3 pos, vec3 ray)
 vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float dist)
 {
 	vec3 diffuse = light_mask; // TODO
-	diffuse = mix(diffuse, vec3(1.0, 0.0, 0.0), demo_sphere_size * 2.0 - min(demo_sphere_size * 2.0, distance(pos, demo_sphere)));
 	vec3 ambient = diffuse * ambcolor.xyz * amb_mask;
 	vec4 specular = vec4(0.0, 0.0, 0.0, 1.0); // TODO
 	float cloud_shade = mix(0.5, 1.0, get_cloud_shade(pos));

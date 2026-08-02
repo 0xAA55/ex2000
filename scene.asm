@@ -945,26 +945,6 @@ __SECT__
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainScaling], [_TerrainMapScaling]
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.SeaLevel], [_SeaLevel]
 
-	DefVars %$CastDist, %$CastX, %$CastY, %$CastZ, %$CastW
-	invoke_cdecl _RaymarchTerrainAltitude, [_TerrainBitmap], [_TerrainConeBitmap], \
-		[_TerrainMapHeight], [_TerrainMapScaling], \
-		64, \
-		[_CameraPos.x], [_CameraPos.y], [_CameraPos.z], \
-		fchs [_CameraMatrix.zx], fchs [_CameraMatrix.zy], fchs [_CameraMatrix.zz], \
-		3000.0f, & %$CastDist
-	test eax, eax
-	jz .no_cast
-	movups xmm0, [_CameraPos]
-	movups xmm1, [_CameraMatrix.z]
-	movss xmm2, %$CastDist
-	shufps xmm2, xmm2, 0
-	mulps xmm1, xmm2
-	subps xmm0, xmm1
-	movups %$CastX, xmm0
-	GetUniformLocation [_DrawSceneProgram], "demo_sphere"
-	invoke_dll_stdcall glUniform3fv, eax, 1, & %$CastX
-.no_cast:
-
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
