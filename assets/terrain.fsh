@@ -250,7 +250,7 @@ vec3 sky_color(vec3 pos, vec3 ray)
 	return ret;
 }
 
-vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float distance)
+vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float dist)
 {
 	vec3 diffuse = light_mask; // TODO
 	vec3 ambient = diffuse * ambcolor.xyz * amb_mask;
@@ -263,15 +263,15 @@ vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3
 	float dspecular_lit = pow(max(0.0, dot(half_way, normal)), specular.w);
 	vec3 objcolor = mix(ambient, diffuse, diffuse_lit);
 	vec3 specolor = specular.xyz * cloud_shade * dspecular_lit;
-	return mix(objcolor + specolor, fogcolor_hdr, min(distance / fog_distance, 1.0));
+	return mix(objcolor + specolor, fogcolor_hdr, min(dist / fog_distance, 1.0));
 }
 
-vec3 get_terrain_color_dry(vec3 pos, vec3 dir, float distance)
+vec3 get_terrain_color_dry(vec3 pos, vec3 dir, float dist)
 {
-	return get_terrain_color_base(suncolor_hdr, suncolor_hdr, vec3(1.0), sunpos, pos, dir, distance);
+	return get_terrain_color_base(suncolor_hdr, suncolor_hdr, vec3(1.0), sunpos, pos, dir, dist);
 }
 
-vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float distance)
+vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float dist)
 {
 	float water_surface = get_water_height(pos.xz, num_waves_surface, 0.0);
 	float floor_depth = water_surface - pos.y;
@@ -280,7 +280,7 @@ vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float distance)
 	vec3 absorbed_light = exp(-water_attenuation * floor_depth);
 	vec3 water_lighting = suncolor_hdr * caustic * absorbed_light;
 
-	vec3 scattered_light = exp(-water_attenuation * distance);
+	vec3 scattered_light = exp(-water_attenuation * dist);
 	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), vec3(0.0), vec3(0.0, 1.0, 0.0), pos, dir, 0.0);
 	return floor_color * scattered_light;
 }
