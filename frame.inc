@@ -271,6 +271,8 @@
 %endmacro
 
 %define __IsPassReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx))
+%define __IsGenReg(reg) (%isidn(reg, eax) || %isidn(reg, ecx) || %isidn(reg, edx) || %isidn(reg, ebx) \
+                         %isidn(reg, esp) || %isidn(reg, ebp) || %isidn(reg, esi) || %isidn(reg, edi))
 
 %define __NUM_REG_USED_FOR_PASS (\
 	__EAX_USED_FOR_PASS + \
