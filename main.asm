@@ -37,13 +37,6 @@ extern _MSG
 _MSG:
 	InstMSG
 
-extern _TempRect
-_TempRect:
-	InstRECT
-
-segment .bss
-_LastUFunc:
-
 DefFunc _entry
 	FrameBegin ebx
 	invoke_cdecl _InitLoadLibrary
@@ -66,6 +59,18 @@ DefFunc _entry
 
 DefFunc _main
 	FrameBegin
+
+	DefVars %$TR_L, %$TR_T, %$TR_R, %$TR_B
+	DefVars %$WinW, %$WinH
+	DefSizedVar %$MonitorInfoW, MONITORINFOW.size
+
+	xor eax, eax
+	mov ecx, %$Frame_NumLocals
+	lea edi, Variable(0)
+	rep stosd
+
+	mov word %$WinW, DESIRED_WIDTH
+	mov word %$WinH, DESIRED_HEIGHT
 
 	mov byte[_WCEx.cbSize], WNDCLASSEX.size
 	mov dword[_WCEx.lpfnWndProc], _WndProc@16
@@ -92,19 +97,26 @@ DefFunc _main
 		0, 0, [_hInstance], 0
 	mov [_hWnd], eax
 
-	invoke_dll_stdcall GetWindowRect, [_hWnd], _TempRect
-	mov eax, [_TempRect.left]
-	mov ecx, [_TempRect.top]
-	add eax, DESIRED_WIDTH
-	add ecx, DESIRED_HEIGHT
-	mov [_TempRect.right], eax
-	mov [_TempRect.bottom], ecx
-	invoke_dll_stdcall AdjustWindowRect, _TempRect, WS_OVERLAPPEDWINDOW, 0
-	mov eax, [_TempRect.right]
-	mov ecx, [_TempRect.bottom]
-	sub eax, [_TempRect.left]
-	sub ecx, [_TempRect.top]
-	invoke_dll_stdcall MoveWindow, [_hWnd], [_TempRect.left], [_TempRect.top], eax, ecx, 0
+	mov byte[%$MonitorInfoW_Addr + MONITORINFOW.cbSize], MONITORINFOW.size
+	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
+	invoke_dll_stdcall GetMonitorInfoW, eax, &%$MonitorInfoW
+	movq xmm0, [%$MonitorInfoW_Addr + MONITORINFOW.rcMonitor_x]
+	movq xmm1, [%$MonitorInfoW_Addr + MONITORINFOW.rcMonitor_r]
+	movq xmm2, xmm1
+	movq xmm3, %$WinW
+	paddd xmm1, xmm0
+	psubd xmm2, xmm0
+	psrad xmm1, 1
+	pminsw xmm2, xmm3
+	movq %$WinW, xmm2
+	movq xmm3, xmm2
+	psrad xmm2, 1
+	psubd xmm1, xmm2
+	movq %$TR_L, xmm1
+	paddd xmm1, xmm3
+	movq %$TR_R, xmm1
+	invoke_dll_stdcall AdjustWindowRect, & %$TR_L, WS_OVERLAPPEDWINDOW, 0
+	invoke_dll_stdcall MoveWindow, [_hWnd], %$TR_L, %$TR_T, %$WinW, %$WinH, 0
 
 	invoke_dll_stdcall ShowWindow, [_hWnd], 1
 	invoke_dll_stdcall UpdateWindow, [_hWnd]
