@@ -658,6 +658,20 @@ endstruc
 %define GGO_GRAY8_BITMAP   6
 %define GGO_GLYPH_INDEX    0x0080
 
+struc MONITORINFOW
+	.cbSize resd 1
+	.rcMonitor_x resd 1
+	.rcMonitor_y resd 1
+	.rcMonitor_r resd 1
+	.rcMonitor_b resd 1
+	.rcWork_x resd 1
+	.rcWork_y resd 1
+	.rcWork_r resd 1
+	.rcWork_b resd 1
+	.dwFlags resd 1
+	.size equ $ - MONITORINFOW
+endstruc
+
 struc MONITORINFOEXW
 	.cbSize resd 1
 	.rcMonitor_x resd 1
