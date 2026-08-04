@@ -53,52 +53,35 @@ vec4 camdir_z = inverse(proj) * ndc;
 vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
 bool is_underwater = false;
 
-vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
+vec2 raymarch_terrain_base(vec3 start, vec3 dir, int num_iter, float max_dist)
 {
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
 	float dist = 0.0;
 	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
 	float cone_mult = length(dir.xz) * terrain_height / terrain_scaling;
-	for(int i = 0; i < 64; i++)
+	for(int i = 0; i < num_iter; i++)
 	{
 		vec3 pos = start + dir * dist;
 		vec2 pos_uv = pos.xz / terrain_scaling;
 		float height = texture2D(terrain, pos_uv).r * terrain_height;
 		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
 		float cone = texture2D(terrain_conemap, pos_uv).r * cone_mult;
+		if (cone <= dir.y) return vec2(max_dist, 0.0);
 		float step = (pos.y - height) / (cone - dir.y);
-		if (step < 0.0) return vec2(max_dist, 0.0);
 		dist += step;
 		if (dist >= max_dist) return vec2(max_dist, 0.0);
 	}
-	bool is_hit = false;
-	if (dir.y <= 0.0 || dist < max_dist) is_hit = true;
-	if (!is_hit) dist = max_dist;
-	return vec2(dist, is_hit ? 1.0: 0.0);
+	return vec2(dist, 1.0);
+}
+
+vec2 raymarch_terrain(vec3 start, vec3 dir, float max_dist)
+{
+	return raymarch_terrain_base(start, dir, 64, max_dist);
 }
 
 vec2 raymarch_terrain_rough(vec3 start, vec3 dir, float max_dist)
 {
-	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
-	float dist = 0.0;
-	if (start.y > terrain_height) dist = (start.y - terrain_height) / -dir.y;
-	float cone_mult = length(dir.xz) * terrain_height / terrain_scaling;
-	for(int i = 0; i < 32; i++)
-	{
-		vec3 pos = start + dir * dist;
-		vec2 pos_uv = pos.xz / terrain_scaling;
-		float height = texture2D(terrain, pos_uv).r * terrain_height;
-		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
-		float cone = texture2D(terrain_conemap, pos_uv).r * cone_mult;
-		float step = (pos.y - height) / (cone - dir.y);
-		if (step < 0.0) return vec2(max_dist, 0.0);
-		dist += step;
-		if (dist >= max_dist) return vec2(max_dist, 0.0);
-	}
-	bool is_hit = false;
-	if (dir.y <= 0.0 || dist < max_dist) is_hit = true;
-	if (!is_hit) dist = max_dist;
-	return vec2(dist, is_hit ? 1.0: 0.0);
+	return raymarch_terrain_base(start, dir, 16, max_dist);
 }
 
 vec3 terrain_normal(vec3 pos, float e)
