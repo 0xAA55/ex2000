@@ -5,7 +5,7 @@
 DefFunc _ConeMapGenInitUVMapPoolProc
 	FrameBegin ebx, esi, edi
 	NameParams %$UVRowPtr, %$CommonData, %$Y
-	DefVars %$X, %$CurHeight, %$K, %$Zero
+	DefVars %$X, %$CurHeight, %$K, %$Zero, %$NegSearchRadius
 	DefVars %$SurrX, %$SurrY, %$SurrAbsX, %$SurrAbsY
 
 	xor eax, eax
@@ -14,6 +14,10 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	rep stosd
 
 	mov ebx, %$CommonData
+
+	mov eax, [ebx + CMG.search_radius]
+	neg eax
+	mov %$NegSearchRadius, eax
 
 	xor eax, eax
 	mov %$X, eax
@@ -30,12 +34,10 @@ DefFunc _ConeMapGenInitUVMapPoolProc
 	mov [edi + 0], ecx
 	mov [edi + 4], edx
 
-	mov eax, [ebx + CMG.search_radius]
-	neg eax
+	mov eax, %$NegSearchRadius
 	mov %$SurrY, eax
 .loopy:
-	mov eax, [ebx + CMG.search_radius]
-	neg eax
+	mov eax, %$NegSearchRadius
 	mov %$SurrX, eax
 .loopx:
 	or eax, %$SurrY
@@ -97,7 +99,7 @@ DefFunc _ConeMapGenIterationProc
 	FrameBegin ebx, esi, edi
 	NameParams %$UVRowPtr, %$CommonData, %$Y
 	DefVars %$X, %$CurHeight, %$K, %$Zero
-	DefVars %$SurrX, %$SurrY
+	DefVars %$SurrX, %$SurrY, %$NegSearchRadius
 	DefVars %$DX, %$DY, %$BM, %$HalfBorder
 
 	xor eax, eax
@@ -106,6 +108,10 @@ DefFunc _ConeMapGenIterationProc
 	rep stosd
 
 	mov ebx, %$CommonData
+
+	mov eax, [ebx + CMG.search_radius]
+	neg eax
+	mov %$NegSearchRadius, eax
 
 	mov eax, [ebx + CMG.border_len]
 	lea ecx, [eax - 1]
@@ -125,12 +131,10 @@ DefFunc _ConeMapGenIterationProc
 	xor eax, eax
 	mov %$K, eax
 
-	mov eax, [ebx + CMG.search_radius]
-	neg eax
+	mov eax, %$NegSearchRadius
 	mov %$SurrY, eax
 .loopy:
-	mov eax, [ebx + CMG.search_radius]
-	neg eax
+	mov eax, %$NegSearchRadius
 	mov %$SurrX, eax
 .loopx:
 	;mov eax, %$SurrX
