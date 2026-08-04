@@ -248,26 +248,23 @@ DefFunc _ConeMapGenPoolProc
 	push ecx
 	or ecx, edx
 	pop ecx
-	jz .store_zero
+	jz .max_slope_on_self
 
 	cvtsi2ss xmm0, ecx
 	cvtsi2ss xmm1, edx
 	mulss xmm0, xmm0
 	mulss xmm1, xmm1
 	addss xmm0, xmm1
-	sqrtss xmm0, xmm0
-	ucomiss xmm0, [_0.01f]
-	jae .good_dist_value
-.store_zero:
-	xor eax, eax
-	jmp .store_eax
-.good_dist_value:
+	rsqrtss xmm0, xmm0
 	movss xmm1, [eax]
 	subss xmm1, %$CurHeight
-	divss xmm1, xmm0
+	mulss xmm1, xmm0
 	mulss xmm1, %$Normalize
 	maxss xmm1, %$Zero
 	movd eax, xmm1
+	jmp .store_eax
+.max_slope_on_self:
+	mov eax, 0x3F800000
 
 .store_eax:
 	stosd
