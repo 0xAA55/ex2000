@@ -129,7 +129,7 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 
 float laplacian_depth(vec2 pos, float depth, float eps)
 {
-	float depth_phase = depth;
+	float depth_phase = depth * PI * 10.0;
 
 	float h0 = get_water_height(pos, num_waves_caustic, depth_phase);
 
