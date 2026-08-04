@@ -2,7 +2,7 @@
 
 const float PI = 3.14159265358979;
 const int num_waves_surface = 12;
-const int num_waves_normal = num_waves_surface + 4;
+const int num_waves_normal = num_waves_surface * 2 + 2;
 const int num_waves_simple = num_waves_surface / 2;
 const int num_waves_caustic = num_waves_normal;
 const float water_refraction = 1.4;
@@ -32,8 +32,8 @@ uniform float terrain_height = 200.0;
 uniform float terrain_scaling = 1000.0;
 uniform float fog_distance = 3000.0;
 uniform float sea_level = 0.6 * 200.0;
-uniform float sea_wave_height = 2.0;
-uniform float sea_wave_size = 2.0;
+uniform float sea_wave_height = 1.0;
+uniform float sea_wave_size = 1.0;
 in vec2 texcoord;
 out vec4 color;
 
@@ -117,9 +117,10 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 		sum_of_weights += weight;
 
 		pos += p * wave_dx * weight * drag_mult;
+		drag_mult *= 1.05;
 
 		weight *= 0.8;
-		frequency *= 1.28;
+		frequency *= 1.12;
 		time_mod *= 1.08;
 		iter += 1.399;
 	}
