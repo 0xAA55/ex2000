@@ -117,10 +117,9 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 		sum_of_weights += weight;
 
 		pos += p * wave_dx * weight * drag_mult;
-		drag_mult *= 1.05;
 
 		weight *= 0.8;
-		frequency *= 1.12;
+		frequency *= 1.18;
 		time_mod *= 1.08;
 		iter += 1.399;
 	}
