@@ -142,6 +142,10 @@
 
 %macro __FrameSaveRegs 1-*
 	%rep %0
+		%if %isdef(Frame_UseEBP) && %isidn(%1, ebp)
+			%warning When `Frame_UseEBP` is defined and you save EBP for your own purposes, do not use stack-based parameters or variables.
+			%warning Because with `Frame_UseEBP` defined, the stack frame uses EBP to access parameters and local variables.
+		%endif
 		push %1
 		%assign %$Frame_NumSavedRegs %$Frame_NumSavedRegs + 1
 		%rotate 1
