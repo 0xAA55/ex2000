@@ -407,6 +407,7 @@ extern _ConeMapGenIter
 ; // intermediate result. The bitmap remains valid even if convergence is
 ; // incomplete—remaining artifacts can be resolved later during real-time
 ; // rendering via supplementary raymarching passes.
+; // Xtr stands for "extract"
 extern _ConeMapGenXtrResult
 
 ; BitMap *ConeMapGenEnd(CMG *inst);
