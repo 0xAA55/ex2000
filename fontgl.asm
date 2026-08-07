@@ -72,12 +72,12 @@ DefFunc _OGLFC_DescribeVAO
 	GetAttribLocation [ebx + OGLFC.shader_program], "txy"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, InstBufferData.size, 0x10
+	invoke_dll_stdcall glVertexAttribIPointer, edi, 2, GL_INT, InstBufferData.size, 0x10
 	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
 	GetAttribLocation [ebx + OGLFC.shader_program], "twh"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, InstBufferData.size, 0x18
+	invoke_dll_stdcall glVertexAttribIPointer, edi, 2, GL_INT, InstBufferData.size, 0x18
 	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
@@ -88,11 +88,12 @@ DefFunc _OGLFC_DescribeVAO
 ;OGLFC *OGLFC_Create(HDC hDC, int cap_bits);
 DefFunc _OGLFC_Create
 	FrameBegin ebx
+	NameParams %$hDC, %$CapacitorBits
 	DefVars %$X, %$Y, %$NumCharsInARow
 	DefSizedVar %$TextMetrics, TEXTMETRICW.size
 
 	xor eax, eax
-	mov ecx, Param(1)
+	mov ecx, %$CapacitorBits
 	mov edx, eax
 	inc eax
 	mov dl, 16
@@ -104,18 +105,23 @@ DefFunc _OGLFC_Create
 	cvtsd2si eax, xmm0
 	mov %$NumCharsInARow, eax
 
-	invoke_dll_stdcall GetTextMetricsW, Param(0), &%$TextMetrics
+	invoke_dll_stdcall GetTextMetricsW, %$hDC, &%$TextMetrics
 
-	mov Param(1), eax
+	mov %$CapacitorBits, eax
 	invoke_cdecl _calloc, 1, OGLFC.size
 	mov ebx, eax
 
 	mov byte[ebx + OGLFC.tab_width], 8
+	xor eax, eax
+	dec eax
+	mov [ebx + OGLFC.fore_color], eax
+	shl eax, 31
+	mov [ebx + OGLFC.back_color], eax
 
 	invoke_dll_stdcall CreateCompatibleDC, 0
 	mov [ebx + OGLFC.hdc_canvas], eax
 
-	invoke_dll_stdcall GetCurrentObject, Param(0), OBJ_FONT
+	invoke_dll_stdcall GetCurrentObject, %$hDC, OBJ_FONT
 	invoke_dll_stdcall SelectObject, [ebx + OGLFC.hdc_canvas], eax
 	invoke_dll_stdcall DeleteObject, eax
 
@@ -123,7 +129,7 @@ DefFunc _OGLFC_Create
 	invoke_dll_stdcall SetTextColor, [ebx + OGLFC.hdc_canvas], 0xFFFFFF
 	invoke_dll_stdcall SetBkMode, [ebx + OGLFC.hdc_canvas], OPAQUE
 
-	mov eax, Param(0)
+	mov eax, %$hDC
 	mov ecx, [%$TextMetrics_Addr + TEXTMETRICW.tmAscent]
 	mov edx, [%$TextMetrics_Addr + TEXTMETRICW.tmDescent]
 	mov [ebx + OGLFC.hdc_font], eax
@@ -200,6 +206,8 @@ DefFunc _OGLFC_Create
 	mov [ebx + OGLFC.location_grid_size], eax
 	GetUniformLocation [ebx + OGLFC.shader_program], "font_color"
 	mov [ebx + OGLFC.location_font_color], eax
+	GetUniformLocation [ebx + OGLFC.shader_program], "bkgr_color"
+	mov [ebx + OGLFC.location_bkgr_color], eax
 	GetUniformLocation [ebx + OGLFC.shader_program], "resolution"
 	mov [ebx + OGLFC.location_resolution], eax
 	GetUniformLocation [ebx + OGLFC.shader_program], "offset"
@@ -270,9 +278,10 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 	FrameEnd
 	ret
 
-;void OGLFC_Compose(OGLFC *oglfc, int w, int h, const char *text);
+;uint64_t OGLFC_Compose(OGLFC *oglfc, int w, int h, const char *text);
 DefFunc _OGLFC_Compose
 	FrameBegin ebx, esi, edi
+	NameParams %$Inst, %$Width, %$Height, %$Text
 	DefVars %$PointerToChar, %$X, %$Y, %$Buffer
 	DefVars %$BufferSize, %$FontVacKey, %$WCharBuf, %$WCharPtr, %$WCharLen
 	DefVars %$SizeW, %$SizeH, %$CanvasW, %$CanvasH
@@ -289,11 +298,13 @@ DefFunc _OGLFC_Compose
 	mul dword[ebx + OGLFC.tab_width]
 	mov [ebx + OGLFC.tab_width_px], eax
 
-	mov ebx, Param(0)
-	mov eax, Param(3)
+	mov ebx, %$Inst
+	mov eax, %$Text
 	mov %$PointerToChar, eax
 
 	invoke_cdecl _BufferClear, &[ebx + OGLFC.instance_buffer]
+	;Push a placeholder for the background
+	invoke_cdecl _BufferPushItem, &[ebx + OGLFC.instance_buffer], &[%$MInstBufferData_Addr]
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
 
 .loop_compose:
@@ -348,14 +359,14 @@ DefFunc _OGLFC_Compose
 	movq xmm0, %$X
 	movq xmm1, [edi + LfuData.blackbox_w]
 	movq xmm2, [edi + LfuData.x]
+	movq xmm4, xmm1
 	cvtdq2ps xmm3, xmm3
 	cvtdq2ps xmm0, xmm0
 	cvtdq2ps xmm1, xmm1
-	cvtdq2ps xmm2, xmm2
 	subps xmm0, xmm3
 	movq [%$MInstBufferData_Addr + InstBufferData.x], xmm0
 	movq [%$MInstBufferData_Addr + InstBufferData.w], xmm1
-	movq [%$MInstBufferData_Addr + InstBufferData.tw], xmm1
+	movq [%$MInstBufferData_Addr + InstBufferData.tw], xmm4
 	movq [%$MInstBufferData_Addr + InstBufferData.tx], xmm2
 	invoke_cdecl _BufferPushItem, &[ebx + OGLFC.instance_buffer], &[%$MInstBufferData_Addr]
 
@@ -366,6 +377,8 @@ DefFunc _OGLFC_Compose
 .after_advance:
 	mov eax, %$X
 	mov ecx, %$Y
+	sub ecx, [edi + LfuData.yoff]
+	add ecx, [edi + LfuData.blackbox_h]
 	push ebx
 	mov edx, %$MaxX
 	mov ebx, %$MaxY
@@ -376,13 +389,13 @@ DefFunc _OGLFC_Compose
 	mov %$MaxX, edx
 	mov %$MaxY, ebx
 	pop ebx
-	cmp eax, Param(1)
+	cmp eax, %$Width
 	jb .loop_compose
 	xor eax, eax
 	mov %$X, eax
 	mov eax, [ebx + OGLFC.font_size]
 	add %$Y, eax
-	mov eax, Param(2)
+	mov eax, %$Height
 	cmp %$Y, eax
 	jae .loop_end
 
@@ -488,8 +501,15 @@ DefFunc _OGLFC_Compose
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _free, %$Buffer
 
+	mov edi, [ebx + OGLFC.instbuf_pointer]
+
 	mov eax, %$MaxX
 	mov edx, %$MaxY
+	mov [ebx + OGLFC.composed_max_x], eax
+	mov [ebx + OGLFC.composed_max_y], edx
+	movq xmm0, [ebx + OGLFC.composed_max_x]
+	cvtdq2ps xmm0, xmm0
+	movq [edi + InstBufferData.w], xmm0
 	FrameEnd
 	ret
 [segment .rdata]
@@ -500,20 +520,21 @@ DefFunc _OGLFC_Compose
 ;void OGLFC_Present(OGLFC *oglfc, int x, int y);
 DefFunc _OGLFC_Present
 	FrameBegin ebx, esi, edi
-	DefVars %$VPX, %$VPY, %$VPW, %$VPH, %$GridSize
+	NameParams %$Inst, %$X, %$Y
+	DefVars %$VPX, %$VPY, %$VPW, %$VPH
+	DefVars %$FCR, %$FCG, %$FCB, %$FCA
+	DefVars %$BCR, %$BCG, %$BCB, %$BCA
 
-	mov ebx, Param(0)
+	mov ebx, %$Inst
 	lea esi, [ebx + OGLFC.instance_buffer]
 
 	invoke_dll_stdcall glGetIntegerv, GL_VIEWPORT, & %$VPX
-	movq xmm0, Param(1)
-	movq xmm1,  %$VPW
-	cvtsi2ss xmm2, [ebx + OGLFC.grid_size]
+	movq xmm0, %$X
+	movq xmm1, %$VPW
 	cvtdq2ps xmm0, xmm0
 	cvtdq2ps xmm1, xmm1
-	movq Param(1), xmm0
-	movq  %$VPW, xmm1
-	movss %$GridSize, xmm2
+	movq %$X, xmm0
+	movq %$VPW, xmm1
 
 	mov edi, [esi + GlBuffer.gl_buffer]
 	invoke_cdecl _BufferFlush, esi
@@ -529,9 +550,29 @@ DefFunc _OGLFC_Present
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
 	invoke_dll_stdcall glUniform1i, [ebx + OGLFC.location_font_map], 0
-	invoke_dll_stdcall glUniform1f, [ebx + OGLFC.location_grid_size], %$GridSize
+	invoke_dll_stdcall glUniform1i, [ebx + OGLFC.location_grid_size], [ebx + OGLFC.grid_size]
 	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_resolution], %$VPW, %$VPH
-	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_offset], Param(1), Param(2)
+	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_offset], %$X, %$Y
+	xor eax, eax
+	dec al
+	movd xmm0, [ebx + OGLFC.fore_color]
+	movd xmm1, [ebx + OGLFC.back_color]
+	cvtsi2ss xmm2, eax
+	pxor xmm7, xmm7
+	rcpss xmm2, xmm2
+	punpcklbw xmm0, xmm7
+	punpcklbw xmm1, xmm7
+	punpcklwd xmm0, xmm7
+	punpcklwd xmm1, xmm7
+	pshufd xmm2, xmm2, 0
+	cvtdq2ps xmm0, xmm0
+	cvtdq2ps xmm1, xmm1
+	mulps xmm0, xmm2
+	mulps xmm1, xmm2
+	movups %$FCR, xmm0
+	movups %$BCR, xmm1
+	invoke_dll_stdcall glUniform4f, [ebx + OGLFC.location_font_color], %$FCR, %$FCG, %$FCB, %$FCA
+	invoke_dll_stdcall glUniform4f, [ebx + OGLFC.location_bkgr_color], %$BCR, %$BCG, %$BCB, %$BCA
 	invoke_dll_stdcall glDrawArraysInstanced, GL_TRIANGLE_STRIP, 0, 4, [esi + GlBuffer.num_items]
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_dll_stdcall glBindVertexArray, 0
@@ -588,7 +629,6 @@ DefFunc _GLPrintf
 	mov eax, ebx
 	FrameEnd
 	ret
-
 
 ;int GLPrintfXY(OGLFC *oglfc, int x, int y, const char *fmt, ...);
 DefFunc _GLPrintfXY

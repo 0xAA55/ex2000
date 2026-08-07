@@ -7,6 +7,8 @@ struc OGLFC ;OpenGL Font Cache
 .public_rw:
 	.space_size resd 1
 	.tab_width resd 1
+	.fore_color resd 1
+	.back_color resd 1
 	.ascent resd 1 ;E.g. The upper part of Q is O, the height of O is ascent
 	.descent resd 1 ;`font_size` - `ascent` = `descent`
 
@@ -15,6 +17,8 @@ struc OGLFC ;OpenGL Font Cache
 	.font_size resd 1 ;Height
 	.grid_size resd 1
 	.tab_width_px resd 1
+	.composed_max_x resd 1
+	.composed_max_y resd 1
 
 .protected:
 	.hdc_font resd 1
@@ -30,6 +34,7 @@ struc OGLFC ;OpenGL Font Cache
 	.location_font_map resd 1
 	.location_grid_size resd 1
 	.location_font_color resd 1
+	.location_bkgr_color resd 1
 	.location_resolution resd 1
 	.location_offset resd 1
 	.instance_buffer:
