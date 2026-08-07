@@ -53,6 +53,62 @@ vec4 camdir_z = inverse(proj) * ndc;
 vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
 bool is_underwater = false;
 
+vec4 cubic_weights(float t) {
+	float t2 = t * t;
+	float t3 = t2 * t;
+	vec4 w;
+	w.x = -0.5 * t3 +       t2 - 0.5 * t; // p0
+	w.y =  1.5 * t3 - 2.5 * t2 + 1.0;     // p1
+	w.z = -1.5 * t3 + 2.0 * t2 + 0.5 * t; // p2
+	w.w =  0.5 * t3 - 0.5 * t2;           // p3
+	return w;
+}
+
+vec4 smooth_sample(sampler2D s, vec2 uv) {
+	ivec2 tsize = textureSize(s, 0);
+	ivec2 bm = tsize - ivec2(1);
+
+	vec2 texel_uv = uv * vec2(tsize);
+	ivec2 base = ivec2(floor(texel_uv));
+
+	vec2 t = texel_uv - vec2(base);
+
+	vec4 wx = cubic_weights(t.x);
+	vec4 wy = cubic_weights(t.y);
+
+	ivec2 p0 = (base - ivec2(1)) & bm;
+	ivec2 p1 = base & bm;
+	ivec2 p2 = (base + ivec2(1)) & bm;
+	ivec2 p3 = (base + ivec2(2)) & bm;
+
+	vec4 s00 = texelFetch(s, ivec2(p0.x, p0.y), 0);
+	vec4 s10 = texelFetch(s, ivec2(p1.x, p0.y), 0);
+	vec4 s20 = texelFetch(s, ivec2(p2.x, p0.y), 0);
+	vec4 s30 = texelFetch(s, ivec2(p3.x, p0.y), 0);
+
+	vec4 s01 = texelFetch(s, ivec2(p0.x, p1.y), 0);
+	vec4 s11 = texelFetch(s, ivec2(p1.x, p1.y), 0);
+	vec4 s21 = texelFetch(s, ivec2(p2.x, p1.y), 0);
+	vec4 s31 = texelFetch(s, ivec2(p3.x, p1.y), 0);
+
+	vec4 s02 = texelFetch(s, ivec2(p0.x, p2.y), 0);
+	vec4 s12 = texelFetch(s, ivec2(p1.x, p2.y), 0);
+	vec4 s22 = texelFetch(s, ivec2(p2.x, p2.y), 0);
+	vec4 s32 = texelFetch(s, ivec2(p3.x, p2.y), 0);
+
+	vec4 s03 = texelFetch(s, ivec2(p0.x, p3.y), 0);
+	vec4 s13 = texelFetch(s, ivec2(p1.x, p3.y), 0);
+	vec4 s23 = texelFetch(s, ivec2(p2.x, p3.y), 0);
+	vec4 s33 = texelFetch(s, ivec2(p3.x, p3.y), 0);
+
+	vec4 row0 = wx.x * s00 + wx.y * s10 + wx.z * s20 + wx.w * s30;
+	vec4 row1 = wx.x * s01 + wx.y * s11 + wx.z * s21 + wx.w * s31;
+	vec4 row2 = wx.x * s02 + wx.y * s12 + wx.z * s22 + wx.w * s32;
+	vec4 row3 = wx.x * s03 + wx.y * s13 + wx.z * s23 + wx.w * s33;
+
+	return wy.x * row0 + wy.y * row1 + wy.z * row2 + wy.w * row3;
+}
+
 vec2 raymarch_terrain_base(vec3 start, vec3 dir, int num_iter, float max_dist)
 {
 	if (start.y > terrain_height && dir.y > 0.0) return vec2(max_dist, 0.0);
@@ -63,9 +119,9 @@ vec2 raymarch_terrain_base(vec3 start, vec3 dir, int num_iter, float max_dist)
 	{
 		vec3 pos = start + dir * dist;
 		vec2 pos_uv = pos.xz / terrain_scaling;
-		float height = texture2D(terrain, pos_uv).r * terrain_height;
+		float height = smooth_sample(terrain, pos_uv).r * terrain_height;
 		if (pos.y - 0.01 <= height) return vec2(dist, 1.0);
-		float cone = texture2D(terrain_conemap, pos_uv).r * cone_mult;
+		float cone = smooth_sample(terrain_conemap, pos_uv).r * cone_mult;
 		if (cone <= dir.y) return vec2(max_dist, 0.0);
 		float step = (pos.y - height) / (cone - dir.y);
 		dist += step;
@@ -90,9 +146,9 @@ vec3 terrain_normal(vec3 pos, float e)
 	vec2 tpos = pos.xz / terrain_scaling;
 	return normalize(
 		vec3(
-			texture2D(terrain, tpos + ex.xy).r - texture2D(terrain, tpos - ex.xy).r,
+			smooth_sample(terrain, tpos + ex.xy).r - smooth_sample(terrain, tpos - ex.xy).r,
 			ex.x * terrain_scaling / terrain_height,
-			texture2D(terrain, tpos + ex.yx).r - texture2D(terrain, tpos - ex.yx).r
+			smooth_sample(terrain, tpos + ex.yx).r - smooth_sample(terrain, tpos - ex.yx).r
 		)
 	);
 }
@@ -108,7 +164,7 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	float sum_of_weights = 0.0;
 	float drag_mult = 0.2;
 	float depth_effect_shore = 10.0;
-	float cur_terrain_height = texture2D(terrain, pos / terrain_scaling).r * terrain_height;
+	float cur_terrain_height = smooth_sample(terrain, pos / terrain_scaling).r * terrain_height;
 	float shore_wave_x = max(0.0, sea_level - cur_terrain_height);
 	float shore_wave_weight = pow(2.0, -shore_wave_x / depth_effect_shore);
 	float wave_weight = 1.0 - shore_wave_weight;
