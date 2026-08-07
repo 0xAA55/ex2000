@@ -1,18 +1,23 @@
 %ifndef _BUFFER_INC_
 %define _BUFFER_INC_ 1
 
-%macro InstGlBuffer 0
-	.address:
-	.pointer resd 1
-	.num_items resd 1
-	.capacity resd 1
-	.size_of_item resd 1
-	.gl_buffer resd 1
-	.gl_buffer_type resd 1
-	.gl_buffer_usage resd 1
-	.gl_buffer_cap resd 1
-	.flushed resd 1 ; Non-zero or zero
-	.size equ $ - .address
+%macro InstGlBuffer 0-1
+	%if %0 == 0
+		%define %%pre .
+	%else
+		%define %%pre . %+ %1
+	%endif
+	%%pre %+ address:
+	%%pre %+ pointer resd 1
+	%%pre %+ num_items resd 1
+	%%pre %+ capacity resd 1
+	%%pre %+ size_of_item resd 1
+	%%pre %+ gl_buffer resd 1
+	%%pre %+ gl_buffer_type resd 1
+	%%pre %+ gl_buffer_usage resd 1
+	%%pre %+ gl_buffer_cap resd 1
+	%%pre %+ flushed resd 1 ; Non-zero or zero
+	%%pre %+ size equ $ - %%pre %+ address
 %endmacro
 
 struc GlBuffer
