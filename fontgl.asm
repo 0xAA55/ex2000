@@ -50,16 +50,15 @@ DefFunc _OGLFC_OnLfuKeyRemove
 
 ;void OGLFC_DescribeVAO(OGLFC *oglfc)
 DefFunc _OGLFC_DescribeVAO
-	FrameBegin ebx, esi, edi
+	FrameBegin ebx, edi
 	mov ebx, Param(0)
-	lea esi, [ebx + OGLFC.instance_buffer]
 	invoke_dll_stdcall glBindVertexArray, [ebx + OGLFC.vao]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
 	GetAttribLocation [ebx + OGLFC.shader_program], "position"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
 	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [esi + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.instbuf_gl_buffer]
 	GetAttribLocation [ebx + OGLFC.shader_program], "xy"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi

@@ -32,7 +32,8 @@ struc OGLFC ;OpenGL Font Cache
 	.location_font_color resd 1
 	.location_resolution resd 1
 	.location_offset resd 1
-	.instance_buffer resb GlBuffer.size
+	.instance_buffer:
+		InstGlBuffer instbuf_
 	.vao resd 1
 	.size equ $ - OGLFC
 endstruc
