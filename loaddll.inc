@@ -406,10 +406,12 @@ extern _FopenTypeWb
 %define ETO_PDY                      0x2000
 %define ETO_REVERSE_INDEX_MAP        0x10000
 
-%define WM_CREATE 0x0001
-%define WM_DESTROY 0x0002
-%define WM_QUIT 0x0012
-%define WM_DISPLAYCHANGE 0x007E
+%define WM_CREATE                       0x0001
+%define WM_DESTROY                      0x0002
+%define WM_QUIT                         0x0012
+%define WM_DISPLAYCHANGE                0x007E
+%define WM_KEYDOWN                      0x0100
+%define WM_KEYUP                        0x0101
 
 %define WS_OVERLAPPEDWINDOW (0x00000000 | 0x00C00000 | 0x00080000 | 0x00040000 | 0x00020000 | 0x00010000)
 
@@ -851,5 +853,8 @@ endstruc
 %define VK_LAUNCH_MEDIA_SELECT 0xB5
 %define VK_LAUNCH_APP1         0xB6
 %define VK_LAUNCH_APP2         0xB7
+
+%define VK_PAGEUP         VK_PRIOR
+%define VK_PAGEDN         VK_NEXT
 
 %endif
