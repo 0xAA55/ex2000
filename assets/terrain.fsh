@@ -107,23 +107,29 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	float sum_of_values = 0.0;
 	float sum_of_weights = 0.0;
 	float drag_mult = 0.2;
+	float depth_effect_shore = 10.0;
+	float cur_terrain_height = texture2D(terrain, pos / terrain_scaling).r * terrain_height;
+	float shore_wave_x = max(0.0, sea_level - cur_terrain_height);
+	float shore_wave_weight = pow(2.0, -shore_wave_x / depth_effect_shore);
+	float wave_weight = 1.0 - shore_wave_weight;
+	float shore_x = phase_shift * frequency + time * time_mod + shore_wave_x;
+	float shore_level = -(1.0 - exp(sin(shore_x) - 1.0));
 	for(int i = 0; i < num_waves; i++)
 	{
 		vec2 p = vec2(sin(iter), cos(iter));
-		float wave_x = dot(p, pos) * frequency + time * time_mod + phase_shift_on_pos + phase_shift * frequency;
+		float wave_x = (dot(p, pos) + phase_shift) * frequency + time * time_mod + phase_shift_on_pos;
 		float wave = 1.0 - exp(sin(wave_x) - 1.0);
 		float wave_dx = -wave * cos(wave_x);
 		sum_of_values += wave * weight;
 		sum_of_weights += weight;
-
 		pos += p * wave_dx * weight * drag_mult;
-
 		weight *= 0.8;
 		frequency *= 1.17;
 		time_mod *= 1.08;
 		iter += 1.399;
 	}
-	return sea_level - abs(sum_of_values * sea_wave_height / sum_of_weights);
+	float wave_level = -abs(sum_of_values * sea_wave_height / sum_of_weights);
+	return sea_level + wave_level * wave_weight + shore_level * shore_wave_weight;
 }
 
 float laplacian_depth(vec2 pos, float depth, float eps)
