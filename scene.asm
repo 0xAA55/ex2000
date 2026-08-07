@@ -13,6 +13,9 @@ extern _hWnd
 extern _hDC
 
 segment .bss
+extern _CurTextureQuality
+_CurTextureQuality resd 1
+
 extern _BillboardVerticesBuffer
 _BillboardVerticesBuffer:
 	InstGlBuffer
@@ -88,6 +91,7 @@ _DrawSceneProgramLocations:
 	.TerrainHeight resd 1
 	.TerrainScaling resd 1
 	.SeaLevel resd 1
+	.TextureQuality resd 1
 	.OutColor resd 1
 
 extern _DrawBlurProgramLocations
@@ -239,6 +243,22 @@ _BillBoardVertices:
 	db 1, 1
 .num equ $ - _BillBoardVertices
 
+segment .rdata
+extern _StrBestQuality
+extern _StrMidQuality
+extern _StrLowQuality
+extern _StrWorstQuality
+_StrBestQuality db '高', 0
+_StrMidQuality db '中', 0
+_StrLowQuality db '低', 0
+_StrWorstQuality db '最低', 0
+extern _PtrStrQualities
+_PtrStrQualities:
+	dd _StrWorstQuality
+	dd _StrLowQuality
+	dd _StrMidQuality
+	dd _StrBestQuality
+
 ;int SceneInit();
 DefFunc _SceneInit
 	FrameBegin ebx, esi
@@ -246,6 +266,8 @@ DefFunc _SceneInit
 	invoke_cdecl _InitTimer, _Timer
 	invoke_cdecl _VBlankInit
 	invoke_cdecl _SceneLoadInitProgress
+
+	mov byte[_CurTextureQuality], 3
 
 	fldpi
 	fdiv dword [_2.0f]
@@ -413,6 +435,8 @@ DefFunc _SceneLoad05
 	mov [_DrawSceneProgramLocations.TerrainScaling], eax
 	GetUniformLocation [ebx], "sea_level"
 	mov [_DrawSceneProgramLocations.SeaLevel], eax
+	GetUniformLocation [ebx], "texture_quality"
+	mov [_DrawSceneProgramLocations.TextureQuality], eax
 
 	GetFragDataLocation [ebx], "color"
 	mov [_DrawSceneProgramLocations.OutColor], eax
@@ -639,17 +663,51 @@ DefFunc _SceneUnload
 	dd _HDRBlurTexture
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
 
+
+DefFunc _Scene_OnKeyDown
+	FrameBegin
+	NameParams %$KeyCode
+
+	mov eax, %$KeyCode
+	cmp eax, VK_PAGEUP
+	jz .pageup
+	cmp eax, VK_PAGEDN
+	jz .pagedn
+	jmp .end
+.pageup:
+	mov eax, [_CurTextureQuality]
+	inc eax
+	and eax, 3
+	mov [_CurTextureQuality], eax
+	jmp .end
+.pagedn:
+	mov eax, [_CurTextureQuality]
+	dec eax
+	and eax, 3
+	mov [_CurTextureQuality], eax
+	jmp .end
+.end:
+	FrameEnd
+	ret
+
+DefFunc _Scene_OnKeyUp
+	FrameBegin
+	NameParams %$KeyCode
+
+	FrameEnd
+	ret
+
 DefFunc _Scene
+	FrameBegin ebx, esi, edi
+	DefVars %$TimerValue32, %$DeltaTimeL, %$DeltaTimeH, %$DeltaTime32
+	DefVars %$VPWidth, %$VPHeight, %$VPSize, %$VPWidthLow, %$VPHeightLow, %$VPSizeLow
+	DefVars %$CurMovementSpeed, %$FramesPerSec
+
 [segment .rdata]
 .keys_to_detect db 'WSAD', VK_SPACE, VK_CONTROL, VK_ESCAPE, 0
 .num_keys_to_detect equ $ - .keys_to_detect
 __SECT__
-
-	FrameBegin ebx, esi, edi
-	DefVars %$TimerValue32, %$DeltaTimeL, %$DeltaTimeH, %$DeltaTime32 ;4
-	DefVars %$KeyW, %$KeyS, %$KeyA, %$KeyD, %$KeySpace, %$KeyCtrl, %$KeyEscape ;7
-	DefVars %$VPWidth, %$VPHeight, %$VPSize, %$VPWidthLow, %$VPHeightLow, %$VPSizeLow ;6
-	DefVars %$CurMovementSpeed, %$FramesPerSec ;2
+	DefVars %$KeyW, %$KeyS, %$KeyA, %$KeyD, %$KeySpace, %$KeyCtrl, %$KeyEscape
 
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
@@ -944,6 +1002,7 @@ __SECT__
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainHeight], [_TerrainMapHeight]
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainScaling], [_TerrainMapScaling]
 	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.SeaLevel], [_SeaLevel]
+	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.TextureQuality], [_CurTextureQuality]
 
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
@@ -1006,6 +1065,9 @@ __SECT__
 	fstp dword %$FramesPerSec
 
 	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %d us\t渲染耗时：%d us`, f2d %$FramesPerSec, [_VBlankWithDelayTimeUsedUs], [_LastFrameRenderTimeUs]
+	mov eax, [_CurTextureQuality]
+	GLPrintfXY [_OGLFC], 0, 20, `质量：%s。按 Page Up 切换质量。`, [_PtrStrQualities + eax * 4]
+
 
 .end_of_frame:
 	invoke_cdecl _SwapBuffers
