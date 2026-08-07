@@ -11,6 +11,8 @@ extern _DeInitGL33
 extern _Scene
 extern _SceneInit
 extern _SceneUnload
+extern _Scene_OnKeyDown
+extern _Scene_OnKeyUp
 
 %define DESIRED_WIDTH 1920
 %define DESIRED_HEIGHT 1080
@@ -164,11 +166,23 @@ DefFunc _DoEvents
 
 DefFunc _WndProc@16
 	FrameBegin
-	mov eax, Param(1)
-	cmp eax, WM_CREATE
-	jnz .other_than_WM_CREATE
+	NameParams %$hWnd, %$Msg, %$wParam, %$lParam
 
-	invoke_dll_stdcall GetDC, Param(0)
+	mov eax, %$Msg
+	cmp eax, WM_CREATE
+	jz .on_WM_CREATE
+	cmp eax, WM_DESTROY
+	jz .on_WM_DESTROY
+	cmp eax, WM_DISPLAYCHANGE
+	jz .on_WM_DISPLAYCHANGE
+	cmp eax, WM_KEYDOWN
+	jz .on_WM_KEYDOWN
+	cmp eax, WM_KEYUP
+	jz .on_WM_KEYUP
+	invoke_dll_stdcall DefWindowProcA, %$hWnd, %$Msg, %$wParam, %$lParam
+	jmp .end
+.on_WM_CREATE:
+	invoke_dll_stdcall GetDC, %$hWnd
 	mov [_hDC], eax
 
 	invoke_dll_stdcall GetStockObject, SYSTEM_FIXED_FONT
@@ -177,35 +191,30 @@ DefFunc _WndProc@16
 
 	invoke_cdecl _InitGL33
 	test eax, eax
-	jz .fail
-
-	xor eax, eax
-	jmp .end
-.fail:
-	dec eax
-	jmp .end
-.other_than_WM_CREATE:
-	cmp eax, WM_DESTROY
-	jnz .other_than_WM_DESTROY
-
+	jz .failed_end
+	jmp .normal_end
+.on_WM_DESTROY:
 	invoke_cdecl _SceneUnload
 	invoke_cdecl _DeInitGL33
 
 	invoke_dll_stdcall ReleaseDC, [_hWnd], [_hDC]
 	invoke_dll_stdcall PostQuitMessage, 0
-
-	xor eax, eax
-	jmp .end
-.other_than_WM_DESTROY:
-	cmp eax, WM_DISPLAYCHANGE
-	jnz .other_than_WM_DISPLAYCHANGE
-
+	jmp .normal_end
+.on_WM_DISPLAYCHANGE
 	invoke_cdecl _VBlankReInit
-
+	jmp .normal_end
+.on_WM_KEYDOWN:
+	invoke_cdecl _Scene_OnKeyDown, %$wParam
+	jmp .normal_end
+.on_WM_KEYUP:
+	invoke_cdecl _Scene_OnKeyUp, %$wParam
+	jmp .normal_end
+.failed_end:
 	xor eax, eax
+	dec eax
 	jmp .end
-.other_than_WM_DISPLAYCHANGE:
-	invoke_dll_stdcall DefWindowProcA, Param(0), Param(1), Param(2), Param(3)
+.normal_end:
+	xor eax, eax
 .end:
 	FrameEnd
 	ret 16
