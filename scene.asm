@@ -1064,7 +1064,10 @@ __SECT__
 	fdiv qword %$DeltaTimeL
 	fstp dword %$FramesPerSec
 
-	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %d us\t渲染耗时：%d us`, f2d %$FramesPerSec, [_VBlankWithDelayTimeUsedUs], [_LastFrameRenderTimeUs]
+	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %lld us\t渲染耗时：%lld us`, \
+		f2d %$FramesPerSec, \
+		qw [_VBlankWithDelayTimeUsedUs], \
+		qw [_LastFrameRenderTimeUs]
 	mov eax, [_CurTextureQuality]
 	GLPrintfXY [_OGLFC], 0, 20, `质量：%s。按 Page Up 切换质量。`, [_PtrStrQualities + eax * 4]
 
