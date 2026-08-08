@@ -115,7 +115,15 @@ DefFunc _UnpauseTimer
 ; void HybridWaitUs(uint32_t us_l, uint32_t us_h);
 DefFunc _HybridWaitUs
 	FrameBegin
-	DefVars %$TimeValL, %$TimeValH, %$WaitedUsL, %$WaitedUsH
+	NameParams %$US_L, %$US_H
+	DefVars %$TimeValL, %$TimeValH, %$WaitedL, %$WaitedH, %$ToWaitL, %$ToWaitH, %$ThousandL, %$ThousandH
+
+	fild qword %$US_L
+	fidiv dword [_Million]
+	fstp qword %$ToWaitL
+
+	fild word [_WThousand]
+	fstp qword %$ThousandL
 
 	invoke_cdecl _GetSysTimerVal
 	fstp qword %$TimeValL
@@ -123,17 +131,15 @@ DefFunc _HybridWaitUs
 .again:
 	invoke_cdecl _GetSysTimerVal
 	fsub qword %$TimeValL
-	fimul dword [_Million]
-	fistp qword %$WaitedUsL
-	mov eax, Param(0)
-	mov edx, Param(1)
-	sub eax, %$WaitedUsL
-	sbb edx, %$WaitedUsH
+	fstp qword %$WaitedL
+
+	movq xmm0, %$ToWaitL
+	movq xmm1, %$WaitedL
+	movq xmm2, %$ThousandL
+	ucomisd xmm0, xmm1
 	jb .end
-	test edx, edx
-	jnz .sleep
-	cmp eax, 1000
-	jbe .again
+	ucomisd xmm0, xmm2
+	jb .again
 .sleep:
 	invoke_cdecl _HRSleep500us
 	jmp .again
