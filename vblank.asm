@@ -466,6 +466,8 @@ DefFunc _SetupMonitorDataProc
 
 	mov eax, [%$ClosestMode_Addr + DXGI_MODE_DESC.RefreshRate_Denominator]
 	mov ecx, [%$ClosestMode_Addr + DXGI_MODE_DESC.RefreshRate_Numerator]
+	test ecx, ecx
+	jz .end
 	mov edx, 1000000
 	mul edx
 	div ecx
