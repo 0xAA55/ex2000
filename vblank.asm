@@ -252,22 +252,22 @@ _VBlankTimer:
 extern _VBlankTimeUsedMs
 extern _VBlankTimeUsedUs
 _VBlankTimeUsedMs resd 1
-_VBlankTimeUsedUs resd 1
+_VBlankTimeUsedUs resq 1
 
 extern _LastFrameRenderTimeMs
 extern _LastFrameRenderTimeUs
 _LastFrameRenderTimeMs resd 1
-_LastFrameRenderTimeUs resd 1
+_LastFrameRenderTimeUs resq 1
 
 extern _FrameRenderDelayMs
 extern _FrameRenderDelayUs
 _FrameRenderDelayMs resd 1
-_FrameRenderDelayUs resd 1
+_FrameRenderDelayUs resq 1
 
 extern _VBlankWithDelayTimeUsedMs
 extern _VBlankWithDelayTimeUsedUs
 _VBlankWithDelayTimeUsedMs resd 1
-_VBlankWithDelayTimeUsedUs resd 1
+_VBlankWithDelayTimeUsedUs resq 1
 
 extern _VBlankFrameStartTime
 _VBlankFrameStartTime resq 1
@@ -524,10 +524,13 @@ DefFunc _WaitForVBlank
 	fimul word [_WThousand]
 	fist dword [_LastFrameRenderTimeMs]
 	fimul word [_WThousand]
-	fistp dword [_LastFrameRenderTimeUs]
+	fistp qword [_LastFrameRenderTimeUs]
 
-	mov eax, [ebx + MonitorData.RefreshIntervalUs]
-	cmp [_LastFrameRenderTimeUs], eax
+	mov eax, [_LastFrameRenderTimeUs + 0]
+	mov edx, [_LastFrameRenderTimeUs + 4]
+	test edx, edx
+	jnz .overloaded
+	cmp eax, [ebx + MonitorData.RefreshIntervalUs]
 	jae .overloaded
 
 .w_dxgi:
@@ -551,25 +554,31 @@ DefFunc _WaitForVBlank
 	fimul word [_WThousand]
 	fist dword [_VBlankTimeUsedMs]
 	fimul word [_WThousand]
-	fistp dword [_VBlankTimeUsedUs]
+	fistp qword [_VBlankTimeUsedUs]
 
 	mov eax, [ebx + MonitorData.RefreshIntervalUs]
-	sub eax, [_LastFrameRenderTimeUs]
-	jbe .no_delay
+	xor ecx, ecx
+	sub eax, [_LastFrameRenderTimeUs + 0]
+	sbb ecx, [_LastFrameRenderTimeUs + 4]
 	sub eax, 1000
-	jbe .no_delay
-	mov [_FrameRenderDelayUs], eax
-	invoke_cdecl _HybridWaitUs, eax, 0
-	fild dword[_FrameRenderDelayUs]
+	sbb ecx, 0
+	js .no_delay
+	mov [_FrameRenderDelayUs + 0], eax
+	mov [_FrameRenderDelayUs + 4], ecx
+	invoke_cdecl _HybridWaitUs, eax, ecx
+	fild qword[_FrameRenderDelayUs]
 	fidiv word[_WThousand]
 	fist dword[_FrameRenderDelayMs]
 
 	mov eax, [_FrameRenderDelayMs]
-	mov ecx, [_FrameRenderDelayUs]
+	mov ecx, [_FrameRenderDelayUs + 0]
+	mov edx, [_FrameRenderDelayUs + 4]
 	add eax, [_VBlankTimeUsedMs]
-	add ecx, [_VBlankTimeUsedUs]
+	add ecx, [_VBlankTimeUsedUs + 0]
+	adc edx, [_VBlankTimeUsedUs + 4]
 	mov [_VBlankWithDelayTimeUsedMs], eax
-	mov [_VBlankWithDelayTimeUsedUs], ecx
+	mov [_VBlankWithDelayTimeUsedUs + 0], ecx
+	mov [_VBlankWithDelayTimeUsedUs + 4], edx
 
 	invoke_cdecl _UpdateTimer, _VBlankTimer
 	fstp qword [_VBlankFrameStartTime]
@@ -584,11 +593,14 @@ DefFunc _WaitForVBlank
 .no_delay_set_vars:
 	xor eax, eax
 	mov [_VBlankTimeUsedMs], eax
-	mov [_VBlankTimeUsedUs], eax
+	mov [_VBlankTimeUsedUs + 0], eax
+	mov [_VBlankTimeUsedUs + 4], eax
 	mov [_FrameRenderDelayMs], eax
-	mov [_FrameRenderDelayUs], eax
+	mov [_FrameRenderDelayUs + 0], eax
+	mov [_FrameRenderDelayUs + 4], eax
 	mov [_VBlankWithDelayTimeUsedMs], eax
-	mov [_VBlankWithDelayTimeUsedUs], eax
+	mov [_VBlankWithDelayTimeUsedUs + 0], eax
+	mov [_VBlankWithDelayTimeUsedUs + 4], eax
 
 .not_found:
 .end:
