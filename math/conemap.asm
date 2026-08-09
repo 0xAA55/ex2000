@@ -236,8 +236,6 @@ DefFunc _ConeMapGen
 	cmovz eax, ecx
 	invoke_cdecl _PoolRun, _ConeMapGenMapPoolProc, ebx, eax, [ebx + CMGData.border_len], &[edi + BitMap.row_ptr], 0, 0
 
-	VisualizeFloatMap edi, `testcone.bmp`
-
 .end:
 	lea esi, [ebx + CMGData.src_map_levels + 4]
 .loop_free:
