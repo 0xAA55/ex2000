@@ -200,7 +200,7 @@ DefFunc _WndProc@16
 	invoke_dll_stdcall ReleaseDC, [_hWnd], [_hDC]
 	invoke_dll_stdcall PostQuitMessage, 0
 	jmp .normal_end
-.on_WM_DISPLAYCHANGE
+.on_WM_DISPLAYCHANGE:
 	invoke_cdecl _VBlankReInit
 	jmp .normal_end
 .on_WM_KEYDOWN:
