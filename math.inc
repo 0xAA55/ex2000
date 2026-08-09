@@ -329,7 +329,10 @@ extern _BitMapBlt
 ;void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
 extern _FloatMapCurve
 
-;BitMap *FloatMapNextMip(BitMap *map);
+%define FMNM_AVR 0
+%define FMNM_MAX 1
+
+;BitMap *FloatMapNextMip(BitMap *map, int method, int thread_pool_size);
 extern _FloatMapNextMip
 
 %macro InstSimpleVertex 0

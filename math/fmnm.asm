@@ -1,13 +1,18 @@
 %include "common.inc"
 
-segment .bss
-extern _FloatMapNextMipNumWorkers
-_FloatMapNextMipNumWorkers resd 1
+segment .rdata
+extern _FMNMProcs
+_FMNMProcs:
+	dd _FloatMapNextAvrMipPoolProc
+	dd _FloatMapNextMaxMipPoolProc
+.num_methods equ ($ - _FMNMProcs) / 4
 
 DefFunc _FloatMapNextMip
 	FrameBegin ebx, esi, edi
+	NameParams %$SrcMap, %$Method, %$ThreadPoolSize
+	DefVars %$DstMap, %$SrcMap_
 
-	mov ebx, Param(0)
+	mov ebx, %$SrcMap
 	cmp byte[ebx + BitMap.bytes_per_pixel], 4
 	jz .good
 .bad:
@@ -21,42 +26,110 @@ DefFunc _FloatMapNextMip
 	invoke_cdecl _CreateBitMap, eax, 1, 4
 	mov edi, eax
 
-	mov eax, [edi + BitMap.border_len]
-	invoke_cdecl _malloc, &[eax * 4 + 8]
-	lea esi, [eax + 8]
-	mov [eax + 0], edi
-	mov [eax + 4], ebx
+	mov %$SrcMap_, ebx
+	mov %$DstMap, eax
 
-	mov ecx, [edi + BitMap.border_len]
-	push edi
-	mov edi, esi
-	rep stosd
-	pop edi
-
-	cmp dword[_FloatMapNextMipNumWorkers], 0
-	jnz .proceed_to_work
-	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
-	shr eax, 1
-	mov [_FloatMapNextMipNumWorkers], eax
-.proceed_to_work:
-
-	invoke_cdecl _PoolRun, _FloatMapNextMipPoolProc, NULL, [_FloatMapNextMipNumWorkers], [edi + BitMap.border_len], esi, 0, 0
-	invoke_cdecl _free, &[esi - 8]
-
+	mov eax, %$ThreadPoolSize
+	mov ecx, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	test eax, eax
+	cmovz eax, ecx
+	mov ecx, %$Method
+	cmp ecx, _FMNMProcs.num_methods
+	jae .bad
+	invoke_cdecl _PoolRun, [_FMNMProcs + ecx * 4], & %$DstMap, eax, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
 	mov eax, edi
 .end:
 	FrameEnd
 	ret
 
-DefFunc _FloatMapNextMipPoolProc
+DefFunc _FloatMapNextMaxMipPoolProc
 	FrameBegin ebx, edi
+	NameParams %$RowPtr, %$CommonData, %$Y
 
-	mov ebx, Param(0)
+	mov ebx, %$CommonData
 	mov eax, [ebx + 0] ;dst
 	mov ebx, [ebx + 4] ;src
 
-	mov edx, Param(2)
-	mov edi, [eax + BitMap.row_ptr + edx * 4]
+	mov edx, %$Y
+	mov edi, %$RowPtr
+	mov ecx, [eax + BitMap.border_len]
+	lea eax, [edx * 2]
+	mov edx, [ebx + BitMap.row_ptr + eax * 4 + 4]
+	mov eax, [ebx + BitMap.row_ptr + eax * 4 + 0]
+
+	test dword[ebx + BitMap.border_len], 0x0F
+	jz .proc_many
+
+.loop_proc:
+	movss xmm0, [eax + 0]
+	maxss xmm0, [edx + 0]
+	maxss xmm0, [eax + 4]
+	maxss xmm0, [edx + 4]
+	movss [edi], xmm0
+	add eax, 8
+	add edx, 8
+	add edi, 4
+
+	dec ecx
+	jnz .loop_proc
+	jmp .end
+
+.proc_many:
+	shr ecx, 3
+.loop_many:
+	movaps xmm0, [eax + 0x00]
+	movaps xmm1, [eax + 0x10]
+	movaps xmm2, [eax + 0x20]
+	movaps xmm3, [eax + 0x30]
+	movaps xmm4, [edx + 0x00]
+	movaps xmm5, [edx + 0x10]
+	movaps xmm6, [edx + 0x20]
+	movaps xmm7, [edx + 0x30]
+	maxps xmm0, xmm4
+	maxps xmm1, xmm5
+	maxps xmm2, xmm6
+	maxps xmm3, xmm7
+	movaps xmm4, xmm0
+	movaps xmm5, xmm1
+	movaps xmm6, xmm2
+	movaps xmm7, xmm3
+	shufps xmm0, xmm0, _MM_SHUFFLE(2, 3, 0, 1)
+	shufps xmm1, xmm1, _MM_SHUFFLE(2, 3, 0, 1)
+	shufps xmm2, xmm2, _MM_SHUFFLE(2, 3, 0, 1)
+	shufps xmm3, xmm3, _MM_SHUFFLE(2, 3, 0, 1)
+	maxps xmm0, xmm4
+	maxps xmm1, xmm5
+	maxps xmm2, xmm6
+	maxps xmm3, xmm7
+	shufps xmm0, xmm0, _MM_SHUFFLE(2, 0, 2, 0)
+	shufps xmm1, xmm1, _MM_SHUFFLE(2, 0, 2, 0)
+	shufps xmm2, xmm2, _MM_SHUFFLE(2, 0, 2, 0)
+	shufps xmm3, xmm3, _MM_SHUFFLE(2, 0, 2, 0)
+	movq [edi + 0x00], xmm0
+	movq [edi + 0x08], xmm1
+	movq [edi + 0x10], xmm2
+	movq [edi + 0x18], xmm3
+	add eax, 0x40
+	add edx, 0x40
+	add edi, 0x20
+
+	dec ecx
+	jnz .loop_many
+
+.end:
+	FrameEnd
+	ret
+
+DefFunc _FloatMapNextAvrMipPoolProc
+	FrameBegin ebx, edi
+	NameParams %$RowPtr, %$CommonData, %$Y
+
+	mov ebx, %$CommonData
+	mov eax, [ebx + 0] ;dst
+	mov ebx, [ebx + 4] ;src
+
+	mov edx, %$Y
+	mov edi, %$RowPtr
 	mov ecx, [eax + BitMap.border_len]
 	lea eax, [edx * 2]
 	mov edx, [ebx + BitMap.row_ptr + eax * 4 + 4]
