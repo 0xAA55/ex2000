@@ -334,27 +334,9 @@ DefFunc _SceneLoad01
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad02_Start
+DefFunc _SceneLoad02
 	FrameBegin
-	invoke_cdecl _ConeMapGenStart, [_TerrainBitmap], 0
-	mov [_TerrainConeBitmap], eax
-	FrameEnd
-	ret
-
-DefFunc _SceneLoad02_Iter
-	;FrameBegin ebx
-	;mov ebx, [_TerrainConeBitmap]
-	;invoke_cdecl _ConeMapGenIter, ebx, 1
-	;debug_msg `num iter: %d, mod: %d`, [ebx + CMG.num_iter], [ebx + CMG.modified]
-	;FrameEnd
-	FrameBegin
-	invoke_cdecl _ConeMapGenIter, [_TerrainConeBitmap], 1
-	FrameEnd
-	ret
-
-DefFunc _SceneLoad02_End
-	FrameBegin
-	invoke_cdecl _ConeMapGenEnd, [_TerrainConeBitmap]
+	invoke_cdecl _ConeMapGen, [_TerrainBitmap], 0
 	mov [_TerrainConeBitmap], eax
 	FrameEnd
 	ret
@@ -571,9 +553,7 @@ segment .bss
 
 insert_loadseq 0x01, _SceneLoad00
 insert_loadseq 0x01, _SceneLoad01
-insert_loadseq 0x01, _SceneLoad02_Start
-insert_loadseq 0x10, _SceneLoad02_Iter
-insert_loadseq 0x01, _SceneLoad02_End
+insert_loadseq 0x01, _SceneLoad02
 insert_loadseq 0x01, _SceneLoad03
 insert_loadseq 0x01, _SceneLoad04
 insert_loadseq 0x01, _SceneLoad05

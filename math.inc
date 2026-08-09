@@ -375,53 +375,11 @@ extern _SampleFloatMap
 ;// If no intersection occurs, the returned value is 0, otherwise non-zero is returned.
 extern _RaymarchTerrainAltitude
 
-struc CMG
-	.modified resd 1
-	.src_map resd 1
-	.uv_map resd 1
-	.dst_map resd 1
-	.uv_map_data_backup resd 1
-	.border_len resd 1
-	.search_radius resd 1
-	.thread_pool_size resd 1
-	.num_iter resd 1
-	.size equ $ - CMG
-endstruc
-
-; CMG *ConeMapGenStart(BitMap *map, int thread_pool_size);
+; BitMap *ConeMapGen(BitMap *map, int thread_pool_size);
 ; // `thread_pool_size`: The number of worker threads to spawn.
 ; //   If set to 0, the generator will query the system and use a default
 ; //   count based on the available CPU cores.
-extern _ConeMapGenStart
-
-; int ConeMapGenIter(CMG *inst, int search_radius);
-; // `search_radius`: The radius of neighboring pixels sampled during each
-; //   iteration. Must be greater than 1. Values above 4 are discouraged,
-; //   as computational complexity increases exponentially.
-; //   Smaller radii propagate gradients faster but over shorter distances.
-; //   Larger radii propagate slower but cover longer distances per step.
-; // Returns 1 if further iterations are required to complete the generation.
-; // Returns 0 if the generation process has finished (no more iterations needed).
-extern _ConeMapGenIter
-
-; BitMap *ConeMapGenXtrResult(CMG *inst);
-; // Extracts the current cone map bitmap without finalizing the generator.
-; // This function can be called at any iteration stage to retrieve an
-; // intermediate result. The bitmap remains valid even if convergence is
-; // incomplete—remaining artifacts can be resolved later during real-time
-; // rendering via supplementary raymarching passes.
-; // Xtr stands for "extract"
-extern _ConeMapGenXtrResult
-
-; BitMap *ConeMapGenEnd(CMG *inst);
-; // Finalizes the generator and returns the resulting cone map bitmap.
-; // Internally delegates to ConeMapGenXtrResult() to extract the final bitmap,
-; // then releases all internal generator resources. After calling this function,
-; // the CMG instance becomes invalid and must not be reused.
-; // Note: Early termination is permitted—the extracted bitmap maintains validity
-; // regardless of convergence state. Trading preprocessing iterations for runtime
-; // raymarching steps keeps total frame time within acceptable bounds.
-extern _ConeMapGenEnd
+extern _ConeMapGen
 
 ; int VisualizeFloatMap(BitMap *map, const char save_path);
 extern _VisualizeFloatMap
