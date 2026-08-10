@@ -347,8 +347,8 @@ vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3
 	vec3 ambient = base_color * amb_mask;
 	float cloud_shade = mix(0.5, 1.0, get_cloud_shade(pos));
 	vec3 normal = terrain_normal(pos, 1.0);
-	vec3 reflection = reflect(dir, normal);
-	vec3 half_way = normalize(r_light_dir + reflection);
+	vec3 reflection = reflect(-r_light_dir, normal);
+	vec3 half_way = normalize(reflection - dir);
 	float diffuse_lit = max(0.0, dot(r_light_dir, normal));
 	float dspecular_lit = pow(max(0.0, dot(half_way, normal)), specular.w);
 	vec3 objcolor = mix(ambient, diffuse, diffuse_lit);
