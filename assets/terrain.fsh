@@ -41,6 +41,7 @@ out vec4 color;
 uniform int texture_quality = 3;
 
 const float lowq_preci = 0.5;
+const float water_surface_absorption = 0.5;
 
 vec3 suncolor_hdr = suncolor * sun_brightness;
 vec3 skycolor_hdr = skycolor * sky_brightness;
@@ -368,7 +369,7 @@ vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float dist)
 
 	float caustic = caustic_intensity(pos.xz, floor_depth);
 	vec3 absorbed_light = exp(-water_attenuation * floor_depth);
-	vec3 water_lighting = suncolor_hdr * caustic * absorbed_light;
+	vec3 water_lighting = suncolor_hdr * caustic * absorbed_light * water_surface_absorption;
 
 	vec3 scattered_light = exp(-water_attenuation * dist);
 	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), vec3(0.0), sunpos, pos, dir, 0.0);
