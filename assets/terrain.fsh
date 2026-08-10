@@ -39,7 +39,7 @@ out vec4 color;
 
 uniform int texture_quality = 3;
 
-float lowq_preci = 0.5;
+const float lowq_preci = 0.5;
 
 vec3 suncolor_hdr = suncolor * sun_brightness;
 vec3 skycolor_hdr = skycolor * sky_brightness;
