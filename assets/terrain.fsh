@@ -297,7 +297,7 @@ vec2 raymarch_water_underwater(vec3 start, vec3 dir, float max_dist)
 	return vec2(dist, is_hit);
 }
 
-vec3 water_normal(vec3 pos, float e, int num_waves, float phase_shift)
+vec3 get_water_normal(vec3 pos, float e, int num_waves, float phase_shift)
 {
 	vec2 ex = vec2(e, 0);
 	float H = get_water_height(pos.xz, num_waves, phase_shift);
@@ -393,7 +393,7 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	vec3 dir = (water_pos - eyepos) / water_dist;
 	float cloud_shade = get_cloud_shade(water_pos);
 	float water_depth = max(water_pos.y - smooth_sample(terrain, water_pos.xz / terrain_scaling).r * terrain_height, 0.0);
-	vec3 wnormal = water_normal(water_pos, 0.1, num_waves_normal, 0.0);
+	vec3 wnormal = get_water_normal(water_pos, 0.1, num_waves_normal, 0.0);
 	vec3 refraction_fragdir = refract(dir, wnormal, water_ETA);
 	vec3 refraction_lightdir = -refract(-sunpos, wnormal, water_ETA);
 	vec2 rayterrain = raymarch_terrain_rough(water_pos, refraction_fragdir, fog_distance);
@@ -474,7 +474,7 @@ bool draw_underwater(vec3 pos, vec3 dir, bool z_check)
 	}
 	else
 	{
-		vec3 wnormal = -water_normal(hitpos, 0.1, num_waves_normal, 0.0);
+		vec3 wnormal = -get_water_normal(hitpos, 0.1, num_waves_normal, 0.0);
 		vec3 refraction = refract(dir, wnormal, water_refraction);
 		if (length(refraction) > 0.001)
 		{
