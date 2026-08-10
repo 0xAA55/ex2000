@@ -17,7 +17,8 @@ uniform sampler2D terrain;
 uniform sampler2D terrain_conemap;
 uniform float sun_size_shrink = 10000.0;
 uniform float sun_brightness = 5.0;
-uniform float sky_brightness = 20.0;
+uniform float sky_brightness = 3.0;
+uniform float amb_brightness = 0.5;
 uniform float sun_staring_brightness = 1000.0;
 uniform vec3 fogcolor = vec3(0.8, 0.9, 1.0);
 uniform vec3 skycolor = vec3(0.1, 0.2, 0.9);
@@ -44,10 +45,10 @@ const float lowq_preci = 0.5;
 vec3 suncolor_hdr = suncolor * sun_brightness;
 vec3 skycolor_hdr = skycolor * sky_brightness;
 vec3 fogcolor_hdr = fogcolor * sky_brightness;
+vec3 ambcolor_hdr = fogcolor * amb_brightness;
 float cloud_brightness = sky_brightness;
 vec3 water_attenuation = water_attenuation_baseval * water_attenuation_density;
 float zdepth_out = 1.0;
-vec4 ambcolor = vec4(fogcolor * sun_brightness, 1.0);
 float cloud_size = cloud_size_mod * cloud_height;
 float cloud_fadeout_dist = cloud_size * 5.0;
 vec2 cloud_movement = vec2(time * 0.005);
@@ -339,9 +340,11 @@ vec3 sky_color(vec3 pos, vec3 ray)
 
 vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3 r_light_dir, vec3 pos, vec3 dir, float dist)
 {
-	vec3 diffuse = light_mask; // TODO
-	vec3 ambient = diffuse * ambcolor.xyz * amb_mask;
-	vec4 specular = vec4(0.0, 0.0, 0.0, 1.0); // TODO
+	vec3 base_color = vec3(1.0); //TODO
+	vec4 spec_color = vec4(vec3(1.0), 100.0); //TODO
+	vec4 specular = vec4(spec_color.xyz * light_mask, spec_color.w);
+	vec3 diffuse = base_color * light_mask;
+	vec3 ambient = base_color * amb_mask;
 	float cloud_shade = mix(0.5, 1.0, get_cloud_shade(pos));
 	vec3 normal = terrain_normal(pos, 1.0);
 	vec3 reflection = reflect(dir, normal);
@@ -355,7 +358,7 @@ vec3 get_terrain_color_base(vec3 light_mask, vec3 spec_mask, vec3 amb_mask, vec3
 
 vec3 get_terrain_color_dry(vec3 pos, vec3 dir, float dist)
 {
-	return get_terrain_color_base(suncolor_hdr, suncolor_hdr, vec3(1.0), sunpos, pos, dir, dist);
+	return get_terrain_color_base(suncolor_hdr, suncolor_hdr, ambcolor_hdr, sunpos, pos, dir, dist);
 }
 
 vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float dist)
