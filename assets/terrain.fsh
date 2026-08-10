@@ -172,9 +172,9 @@ vec3 terrain_normal(vec3 pos, float e)
 	vec2 tpos = pos.xz / terrain_scaling;
 	return normalize(
 		vec3(
-			smooth_sample(terrain, tpos + ex.xy).r - smooth_sample(terrain, tpos - ex.xy).r,
-			ex.x * terrain_scaling / terrain_height,
-			smooth_sample(terrain, tpos + ex.yx).r - smooth_sample(terrain, tpos - ex.yx).r
+			smooth_sample(terrain, tpos - ex.xy).r - smooth_sample(terrain, tpos + ex.xy).r,
+			e / terrain_height,
+			smooth_sample(terrain, tpos - ex.yx).r - smooth_sample(terrain, tpos + ex.yx).r
 		)
 	);
 }
