@@ -57,6 +57,9 @@ vec4 camdir_z = inverse(proj) * ndc;
 vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
 bool is_underwater = false;
 
+float foam_depth = 0.5;
+vec3 foam_color = suncolor_hdr * 0.8;
+
 vec4 cubic_weights(float t) {
 	float t2 = t * t;
 	float t3 = t2 * t;
@@ -386,6 +389,7 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	float water_dist = distance(eyepos, water_pos);
 	vec3 dir = (water_pos - eyepos) / water_dist;
 	float cloud_shade = get_cloud_shade(water_pos);
+	float water_depth = max(water_pos.y - smooth_sample(terrain, water_pos.xz / terrain_scaling).r * terrain_height, 0.0);
 	vec3 wnormal = water_normal(water_pos, 0.1, num_waves_normal, 0.0);
 	vec3 refraction_fragdir = refract(dir, wnormal, water_ETA);
 	vec3 refraction_lightdir = -refract(-sunpos, wnormal, water_ETA);
@@ -394,19 +398,20 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	float fresnel = min(1.0, (0.04 + (1.0 - 0.04) * pow(1.0 - max(0.0, dot(-wnormal, dir)), 5.0)));
 	vec3 refl_color = sky_terrain_rough_color(water_pos, reflection);
 	vec3 specolor = refl_color;
+	vec3 water_color;
 	if (rayterrain.y > 0.5)
 	{
 		vec3 seabed_rel_surface = refraction_fragdir * rayterrain.x;
 		vec3 terrain_hit_pos = water_pos + seabed_rel_surface;
 		vec3 underwater_color = get_terrain_color_underwater(terrain_hit_pos, refraction_fragdir, rayterrain.x);
-		vec3 objcolor = mix(underwater_color, specolor, fresnel);
-		return mix(objcolor, fogcolor_hdr, min(water_dist / fog_distance, 1.0));
+		water_color = mix(underwater_color, specolor, fresnel);
 	}
 	else
 	{
-		vec3 objcolor = specolor;
-		return mix(objcolor, fogcolor_hdr, min(water_dist / fog_distance, 1.0));
+		water_color = specolor;
 	}
+	water_color = mix(water_color, foam_color, max(0.0, 1.0 - water_depth / foam_depth));
+	return mix(water_color, fogcolor_hdr, min(water_dist / fog_distance, 1.0));
 }
 
 float get_z(vec3 ray, float dist)
