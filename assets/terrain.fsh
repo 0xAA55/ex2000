@@ -395,7 +395,6 @@ vec3 get_water_color_abovewater(vec3 eyepos, vec3 water_pos)
 	float water_depth = max(water_pos.y - smooth_sample(terrain, water_pos.xz / terrain_scaling).r * terrain_height, 0.0);
 	vec3 wnormal = get_water_normal(water_pos, 0.1, num_waves_normal, 0.0);
 	vec3 refraction_fragdir = refract(dir, wnormal, water_ETA);
-	vec3 refraction_lightdir = -refract(-sunpos, wnormal, water_ETA);
 	vec2 rayterrain = raymarch_terrain_rough(water_pos, refraction_fragdir, fog_distance);
 	vec3 reflection = reflect(dir, wnormal);
 	float fresnel = min(1.0, (0.04 + (1.0 - 0.04) * pow(1.0 - max(0.0, dot(-wnormal, dir)), 5.0)));
