@@ -18,14 +18,15 @@ uniform sampler2D terrain_conemap;
 uniform float sun_size_shrink = 10000.0;
 uniform float sun_brightness = 5.0;
 uniform float sky_brightness = 3.0;
-uniform float amb_brightness = 0.5;
+uniform float amb_brightness = 0.3;
+uniform float uwa_brightness = 0.5;
 uniform float sun_staring_brightness = 1000.0;
 uniform vec3 fogcolor = vec3(0.8, 0.9, 1.0);
 uniform vec3 skycolor = vec3(0.1, 0.2, 0.9);
 uniform vec3 suncolor = vec3(1.0, 0.9, 0.8);
 uniform vec4 water_specular = vec4(1.0, 1.0, 1.0, 10000.0);
-uniform float water_attenuation_density = 0.05;
-uniform vec3 water_attenuation_baseval = vec3(0.133991590885, 0.119268072602, 0.118039853847);
+uniform float water_attenuation_density = 0.01;
+uniform vec3 water_attenuation_baseval = vec3(1.0, 0.890116, 0.880949);//vec3(0.133991590885, 0.119268072602, 0.118039853847);
 uniform vec3 sunpos = normalize(vec3(1.0, 1.0, 1.0));
 uniform float cloud_size_mod = 5.0;
 uniform float cloud_height = 1000.0;
@@ -43,10 +44,12 @@ uniform int texture_quality = 3;
 const float lowq_preci = 0.5;
 const float water_surface_absorption = 0.5;
 
+vec3 uwfcolor = vec3(1.0) - water_attenuation_baseval;
 vec3 suncolor_hdr = suncolor * sun_brightness;
 vec3 skycolor_hdr = skycolor * sky_brightness;
 vec3 fogcolor_hdr = fogcolor * sky_brightness;
 vec3 ambcolor_hdr = fogcolor * amb_brightness;
+vec3 uwacolor_hdr = uwfcolor * uwa_brightness;
 float cloud_brightness = sky_brightness;
 vec3 water_attenuation = water_attenuation_baseval * water_attenuation_density;
 float zdepth_out = 1.0;
@@ -370,9 +373,10 @@ vec3 get_terrain_color_underwater(vec3 pos, vec3 dir, float dist)
 	float caustic = caustic_intensity(pos.xz, floor_depth);
 	vec3 absorbed_light = exp(-water_attenuation * floor_depth);
 	vec3 water_lighting = suncolor_hdr * caustic * absorbed_light * water_surface_absorption;
+	vec3 water_shading = uwacolor_hdr * caustic;
 
 	vec3 scattered_light = exp(-water_attenuation * dist);
-	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), vec3(0.0), sunpos, pos, dir, 0.0);
+	vec3 floor_color = get_terrain_color_base(water_lighting, vec3(0.0), water_shading, vec3(0.0, 1.0, 0.0), pos, dir, 0.0);
 	return floor_color * scattered_light;
 }
 
