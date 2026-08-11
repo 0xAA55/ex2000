@@ -348,9 +348,14 @@ import_dll_func remove
 
 extern _FopenTypeWb
 
-%define PAGE_NOACCESS           0x01
-%define PAGE_READONLY           0x02
-%define PAGE_READWRITE          0x04
+%define PAGE_NOACCESS			0x01
+%define PAGE_READONLY			0x02
+%define PAGE_READWRITE			0x04
+%define PAGE_WRITECOPY			0x08
+%define PAGE_EXECUTE_NOACCESS	0x10
+%define PAGE_EXECUTE_READONLY	0x20
+%define PAGE_EXECUTE_READWRITE	0x40
+%define PAGE_EXECUTE_WRITECOPY	0x80
 
 %define TRANSPARENT         1
 %define OPAQUE              2
