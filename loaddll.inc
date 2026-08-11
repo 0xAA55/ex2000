@@ -188,22 +188,6 @@
 	%endif
 %endmacro
 
-%macro debug_show 3-4+
-	%ifndef _DEBUG
-		%error `_DEBUG` not defined.
-		%exitmacro
-	%endif
-	[segment .rdata]
-	%%format db %3, 0
-
-	__SECT__
-	%if %0 >= 4
-		invoke_cdecl _DebugShow, %1, %2, %%format, %4
-	%else
-		invoke_cdecl _DebugShow, %1, %2, %%format
-	%endif
-%endmacro
-
 %macro snprintf 3-4+
 	[segment .rdata]
 	%%format db %3, 0
@@ -222,10 +206,6 @@ import_dll_func LoadLibraryA
 
 extern _hInstance
 
-%ifdef _DEBUG
-	extern _hDCDesktop
-%endif
-
 extern _LoadFuncGroup
 
 ;void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
@@ -239,10 +219,6 @@ extern _LoadFuncsFromAssets
 %endmacro
 
 extern _DebugMsg ;void DebugMsg(const char *format, ...);
-%ifdef _DEBUG
-	extern _DebugShow ;void DebugShow(int x, int y, const char *format, ...);
-	extern _DebugShowV ;void DebugShowV(int x, int y, const char *format, void *ap);
-%endif
 extern _snprintf
 extern _malloc
 extern _calloc

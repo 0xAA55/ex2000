@@ -17,9 +17,6 @@ _addr_of_Kernel32 resd 1
 _addr_of_GetProcAddress resd 1
 _hInstance resd 1
 _hHeap resd 1
-%ifdef _DEBUG
-_hDCDesktop resd 1
-%endif
 
 _SystemInfo:
 	InstSYSTEM_INFO
@@ -415,13 +412,6 @@ DefFunc _InitDbg
 	mov [_DebugConsoleBuffer], eax
 .dbgconbuf_ok:
 
-%ifdef _DEBUG
-	cmp dword[_hDCDesktop], 0
-	jnz .hdcdesktop_ok
-	invoke_dll_stdcall GetDC, 0
-	mov [_hDCDesktop], eax
-.hdcdesktop_ok:
-%endif
 .end:
 	FrameEnd
 	ret
@@ -429,23 +419,12 @@ DefFunc _InitDbg
 DefFunc _DeInitDbg
 	FrameBegin
 
-%ifdef _DEBUG
-	mov eax, [_hDCDesktop]
-	test eax, eax
-	jz .hdcdesktop_ok
-	invoke_dll_stdcall ReleaseDC, eax, 0
-.hdcdesktop_ok:
-%endif
-
 	invoke_cdecl _free, [_DebugConsoleBuffer]
 	invoke_cdecl _free, [_DebugMsgBuffer]
 
 	xor eax, eax
 	mov [_DebugMsgBuffer], eax
 	mov [_DebugConsoleBuffer], eax
-%ifdef _DEBUG
-	mov [_hDCDesktop], eax
-%endif
 
 	FrameEnd
 	ret
@@ -461,46 +440,6 @@ DefFunc _DebugMsg
 	xor eax, eax
 	FrameEnd
 	ret
-
-%ifdef _DEBUG
-DefFunc _DebugShow
-	FrameBegin
-
-	movq xmm0, Param(0)
-	movq [_DebugShowRect], xmm0
-	mov eax, 1024
-	movd xmm1, eax
-	pshufd xmm1, xmm1, 0
-	paddd xmm0, xmm1
-	movq [_DebugShowRect + 8], xmm0
-
-	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), &Param(3)
-	invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
-
-.end:
-	xor eax, eax
-	FrameEnd
-	ret
-
-DefFunc _DebugShowV
-	FrameBegin
-
-	movq xmm0, Param(0)
-	movq [_DebugShowRect], xmm0
-	mov eax, 1024
-	movd xmm1, eax
-	pshufd xmm1, xmm1, 0
-	paddd xmm0, xmm1
-	movq [_DebugShowRect + 8], xmm0
-
-	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(2), Param(3)
-	invoke_dll_stdcall DrawTextA, [_hDCDesktop], [_DebugMsgBuffer], eax, _DebugShowRect, DT_EXPANDTABS | DT_NOPREFIX | DT_LEFT | DT_NOCLIP | DT_TOP
-
-.end:
-	xor eax, eax
-	FrameEnd
-	ret
-%endif
 
 DefFunc _snprintf
 	FrameBegin
