@@ -3,7 +3,7 @@
 
 DefFunc _AltitudeToTerrain
 	FrameBegin ebx, esi, edi
-	DefVars %$X, %$Y, %$NumVertices, %$NumIndices, %$CbVertices, %$BitMask, %$YI, _YI2
+	DefVars %$X, %$Y, %$NumVertices, %$NumIndices, %$CbVertices, %$BitMask, %$YI, %$YI2
 
 	mov esi, Param(0)
 	cmp dword[esi + BitMap.dims], 1
@@ -40,8 +40,8 @@ DefFunc _AltitudeToTerrain
 	mov [ebx + SimpleMesh.num_indices], edx
 
 .gen_indices:
-	%define _T1 %[%$NumVertices]
-	%define _T2 %[%$NumIndices]
+	%define %$T1 %[%$NumVertices]
+	%define %$T2 %[%$NumIndices]
 	%undef %$NumVertices
 	%undef %$NumIndices
 
@@ -55,7 +55,7 @@ DefFunc _AltitudeToTerrain
 .loopy_i:
 	mov %$YI, eax
 	inc eax
-	mov _YI2, eax
+	mov %$YI2, eax
 	movq xmm4, %$YI
 	unpcklps xmm4, xmm4 ;yi, yi, yi1, yi1
 	pmuludq xmm4, xmm5 ;yi * w, yi1 * w
@@ -64,10 +64,10 @@ DefFunc _AltitudeToTerrain
 	xor eax, eax
 	mov %$X, eax
 .loopx_i:
-	mov _T1, eax
+	mov %$T1, eax
 	inc eax
-	mov _T2, eax
-	movq xmm0, _T1
+	mov %$T2, eax
+	movq xmm0, %$T1
 	pshufd xmm0, xmm0, _MM_SHUFFLE(1, 0, 1, 0) ;xi, xi1, xi, xi1
 	paddd xmm0, xmm4 ;xi + yi * w, xi1 + yi * w, xi + yi1 * w, xi1 + yi1 * w
 	pshufd xmm1, xmm0, _MM_SHUFFLE(2, 3, 1, 2)
@@ -88,16 +88,16 @@ DefFunc _AltitudeToTerrain
 	jb .loopy_i
 
 .gen_vertices:
-	%define _CURR_ROW %[_T1]
-	%define _PREV_ROW %[_T2]
-	%define _NEXT_ROW %[%$CbVertices]
-	%define _NXZ_MOD %[%$YI]
-	%define _CUR_HEIGHT %[_YI2]
-	%undef _T1
-	%undef _T2
+	%define %$CurrRow %[%$T1]
+	%define %$PrevRow %[%$T2]
+	%define %$NextRow %[%$CbVertices]
+	%define %$NormalXZMod %[%$YI]
+	%define %$Currheight %[%$YI]
+	%undef %$T1
+	%undef %$T2
 	%undef %$CbVertices
 	%undef %$YI
-	%undef _YI2
+	%undef %$YI2
 
 	mov edi, [ebx + SimpleMesh.vertices]
 
@@ -112,8 +112,7 @@ DefFunc _AltitudeToTerrain
 	movss xmm2, xmm4
 	addss xmm2, xmm4
 	divss xmm7, xmm2 ; height_mod / (2.0 * size_mod / border_len)
-	shufps xmm7, xmm7, 0
-	movss _NXZ_MOD, xmm7
+	movss %$NormalXZMod, xmm7
 
 	xor eax, eax
 	mov %$Y, eax
@@ -126,15 +125,15 @@ DefFunc _AltitudeToTerrain
 	mov eax, [esi + BitMap.row_ptr + eax * 4]
 	mov ecx, [esi + BitMap.row_ptr + ecx * 4]
 	mov edx, [esi + BitMap.row_ptr + edx * 4]
-	mov _CURR_ROW, eax ; y
-	mov _PREV_ROW, ecx ; y - 1
-	mov _NEXT_ROW, edx ; y + 1
+	mov %$CurrRow, eax ; y
+	mov %$PrevRow, ecx ; y - 1
+	mov %$NextRow, edx ; y + 1
 	xor eax, eax
 	mov %$X, eax
 .loopx_v:
 	and eax, %$BitMask
-	mov ecx, _PREV_ROW
-	mov edx, _NEXT_ROW
+	mov ecx, %$PrevRow
+	mov edx, %$NextRow
 	lea ecx, [ecx + eax * 4]
 	lea edx, [edx + eax * 4]
 	movd xmm2, [ecx] ;(x, y-1)
@@ -142,17 +141,19 @@ DefFunc _AltitudeToTerrain
 	lea ecx, [eax - 1]
 	lea edx, [eax + 1]
 	lea eax, [eax * 4]
-	add eax, _CURR_ROW
+	add eax, %$CurrRow
 	movss xmm0, [eax]
 	mulss xmm0, Param(1)
-	movss _CUR_HEIGHT, xmm0
-	mov eax, _CURR_ROW
+	movss %$Currheight, xmm0
+	mov eax, %$CurrRow
 	and ecx, %$BitMask
 	and edx, %$BitMask
 	lea ecx, [eax + ecx * 4]
 	lea edx, [eax + edx * 4]
+	movss xmm7, %$NormalXZMod
 	movd xmm0, [ecx] ;(x-1, y)
 	movd xmm1, [edx] ;(x+1, y)
+	shufps xmm7, xmm7, 0
 	movlhps xmm0, xmm2
 	movlhps xmm1, xmm3
 	subps xmm0, xmm1
@@ -163,7 +164,7 @@ DefFunc _AltitudeToTerrain
 	invoke_cdecl _VectorNormal, &[edi + SimpleVertex.nx], &[edi + SimpleVertex.nx], 3
 
 	movq xmm0, %$X
-	movd xmm1, _CUR_HEIGHT
+	movd xmm1, %$Currheight
 	cvtdq2ps xmm0, xmm0
 	movaps xmm3, xmm0
 	mulps xmm0, xmm4 ; xz * size_mod / border_len
