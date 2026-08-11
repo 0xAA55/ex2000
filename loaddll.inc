@@ -149,19 +149,19 @@
 %endmacro
 
 %macro dll_func_group_load 2
-	mov esi, _First %+ %2 %+ Name
-	mov edi, _First %+ %2 %+ Addr
-	mov ecx, (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
-	mov ebx, [_addr_of_ %+ %1]
-	call _LoadFuncGroup
+	%define %%DllBase [_addr_of_ %+ %1]
+	%define %%Count (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
+	%define %%Names _First %+ %2 %+ Name
+	%define %%Pointers _First %+ %2 %+ Addr
+	invoke_cdecl _LoadFuncGroup, %%DllBase, %%Count, %%Names, %%Pointers
 %endmacro
 
 %macro dll_func_group_load_alter_name 3
-	mov esi, %3
-	mov edi, _First %+ %2 %+ Addr
-	mov ecx, (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
-	mov ebx, [_addr_of_ %+ %1]
-	call _LoadFuncGroup
+	%define %%DllBase [_addr_of_ %+ %1]
+	%define %%Count (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
+	%define %%Names %3
+	%define %%Pointers _First %+ %2 %+ Addr
+	invoke_cdecl _LoadFuncGroup, %%DllBase, %%Count, %%Names, %%Pointers
 %endmacro
 
 %macro debug_msg 1-2+

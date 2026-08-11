@@ -291,7 +291,12 @@ segment .rdata
 %endif
 
 DefFunc _LoadFuncGroup
-	FrameBegin
+	FrameBegin ebx, esi, edi
+	NameParams %$DllBase, %$Count, %$Names, %$Pointers
+	mov ebx, %$DllBase
+	mov ecx, %$Count
+	mov esi, %$Names
+	mov edi, %$Pointers
 .next_func:
 	push ecx
 	invoke_dll_stdcall GetProcAddress, ebx, esi
@@ -338,17 +343,14 @@ DefFunc _NLtoNUL
 
 ; void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
 DefFunc _LoadFuncsFromAssets
-	FrameBegin ebx, esi, edi
+	FrameBegin esi
+	NameParams %$Pointers, %$DllBase, %$AssetPath, %$Count
 	DefVars %$SizeOfNames
 
-	mov edi, Param(0)
-	mov ebx, Param(1)
-	invoke_cdecl _AssetsQuery, Param(2), & %$SizeOfNames
+	invoke_cdecl _AssetsQuery, %$AssetPath, & %$SizeOfNames
 	mov esi, eax
 	invoke_cdecl _NLtoNUL, esi, %$SizeOfNames
-
-	mov ecx, Param(3)
-	call _LoadFuncGroup
+	invoke_cdecl _LoadFuncGroup, %$DllBase, %$Count, esi, %$Pointers
 
 	FrameEnd
 	ret
