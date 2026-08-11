@@ -2,8 +2,7 @@
 
 const float PI = 3.14159265358979;
 const int num_waves_surface = 12;
-const int num_waves_normal = num_waves_surface * 2 + 2;
-const int num_waves_simple = num_waves_surface / 2;
+const int num_waves_normal = num_waves_surface * 2;
 const int num_waves_caustic = num_waves_normal;
 const float water_refraction = 1.4;
 const float water_ETA = 1.0 / water_refraction;
@@ -189,7 +188,6 @@ vec3 terrain_normal(vec3 pos, float e)
 
 float get_water_height(vec2 pos, int num_waves, float phase_shift)
 {
-	float phase_shift_on_pos = length(pos) * PI * 0.1;
 	float iter = 0.0;
 	float frequency = 1.0 / sea_wave_size;
 	float time_mod = 2.0;
@@ -215,7 +213,7 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	for(int i = 0; i < num_waves; i++)
 	{
 		vec2 p = vec2(sin(iter), cos(iter));
-		float wave_x = (dot(p, pos) + phase_shift) * frequency + time * time_mod + phase_shift_on_pos;
+		float wave_x = (dot(p, pos) + phase_shift) * frequency + time * time_mod;
 		float wave = 1.0 - exp(sin(wave_x) - 1.0);
 		float wave_dx = -wave * cos(wave_x);
 		if (texture_quality <= 0)
