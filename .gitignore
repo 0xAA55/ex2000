@@ -7,3 +7,4 @@ ex2000d.exe
 *.gdb
 *.o
 test*.bmp
+*.tmp
