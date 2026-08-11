@@ -326,7 +326,7 @@ extern _FloatMapClamp
 ;);
 extern _BitMapBlt
 
-;void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points);
+;void FloatMapCurve(BitMap *map, CurvePoints_p curve, size_t num_curve_points, int thread_pool_size);
 extern _FloatMapCurve
 
 %define FMNM_AVR 0
