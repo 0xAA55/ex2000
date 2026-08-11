@@ -45,6 +45,7 @@ def_dll_func_addr CloseHandle
 def_dll_func_addr WaitForSingleObject
 def_dll_func_addr WaitForMultipleObjects
 def_dll_func_addr VirtualProtect
+def_dll_func_addr FlushInstructionCache
 def_dll_func_addr TlsAlloc
 def_dll_func_addr TlsGetValue
 def_dll_func_addr TlsSetValue

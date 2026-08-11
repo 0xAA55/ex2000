@@ -264,6 +264,7 @@ import_dll_func CloseHandle
 import_dll_func WaitForSingleObject
 import_dll_func WaitForMultipleObjects
 import_dll_func VirtualProtect
+import_dll_func FlushInstructionCache
 import_dll_func TlsAlloc
 import_dll_func TlsGetValue
 import_dll_func TlsSetValue
