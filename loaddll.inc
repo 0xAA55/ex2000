@@ -172,7 +172,7 @@
 	%if %0 >= 2
 		invoke_cdecl _DebugMsg, %%format, %2
 	%else
-		invoke_cdecl _DebugMsg, %%format
+		invoke_dll_stdcall MessageBoxA, 0, %%format, 0, 0
 	%endif
 %endmacro
 
