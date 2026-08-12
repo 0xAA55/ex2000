@@ -379,6 +379,7 @@ endstruc
 
 struc SYSTEM_INFO
 	InstSYSTEM_INFO
+	.size equ $ - SYSTEM_INFO
 endstruc
 
 extern _SystemInfo
