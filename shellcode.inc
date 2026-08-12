@@ -23,6 +23,7 @@ struc SCHead
 	._GetBitmapPixelAddress resd 1
 	._SampleFloatMap resd 1
 	._BatchAdd resd 1
+	._BatchBias resd 1
 .last_ptr:
 	.size equ $ - SCHead
 endstruc

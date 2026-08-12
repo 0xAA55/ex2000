@@ -22,6 +22,7 @@ _SCEAT:
 	._GetBitmapPixelAddress resd 1
 	._SampleFloatMap resd 1
 	._BatchAdd resd 1
+	._BatchBias resd 1
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata

@@ -27,6 +27,7 @@ DefExp _DestroyBitMap
 DefExp _GetBitmapPixelAddress
 DefExp _SampleFloatMap
 DefExp _BatchAdd
+DefExp _BatchBias
 
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
@@ -44,5 +45,6 @@ DefExp _BatchAdd
 %include "bitmap.inc"
 %include "samplefmap.inc"
 %include "batchadd.inc"
+%include "batchbias.inc"
 
 times 16 - ($ - $$) % 16 int3

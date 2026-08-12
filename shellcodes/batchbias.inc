@@ -1,11 +1,11 @@
-%include "common.inc"
 
 DefFunc _BatchBias
 	FrameBegin edi
+	NameParams %$Dst, %$Bias, %$Count
 
-	mov edi, Param(0)
-	movss xmm7, Param(1)
-	mov eax, Param(2)
+	mov edi, %$Dst
+	movss xmm7, %$Bias
+	mov eax, %$Count
 	mov edx, 16
 	shufps xmm7, xmm7, 0
 
