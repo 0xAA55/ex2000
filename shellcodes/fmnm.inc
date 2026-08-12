@@ -33,6 +33,7 @@ DefFunc _FloatMapNextMip
 	mov eax, %$ThreadPoolSize
 	test eax, eax
 	cmovz eax, ecx
+	mov %$ThreadPoolSize, eax
 	mov ecx, %$Method
 	cmp ecx, 0
 	jz .method_0
@@ -45,7 +46,7 @@ DefFunc _FloatMapNextMip
 .method_1:
 	GetAbsAddr ecx, _FloatMapNextMaxMipPoolProc
 .ready_to_run:
-	invoke_cdecl _PoolRun, ecx, & %$DstMap, eax, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
+	invoke_cdecl _PoolRun, ecx, & %$DstMap, %$ThreadPoolSize, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
 	mov eax, edi
 .end:
 	FrameEnd

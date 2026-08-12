@@ -21,6 +21,9 @@ DefImp _aligned_free
 DefImp _AssetsQuery
 DefImp _PoolRun
 DefImp _GetNumProcessors
+DefImp _CheckSSE3
+DefImp _CheckSSE41
+DefImp _SmootherStep
 
 %include "scfuncs.tmp"
 
@@ -42,6 +45,15 @@ DefExp _MatrixProjection
 DefExp _MatrixRotationEuler
 DefExp _MatrixTranspose
 DefExp _FloatMapApplyGain
+DefExp _CreateSeedVector
+DefExp _CreatePerlinMap2D
+DefExp _ConvertPerlinMapToAltitude
+DefExp _GenPerlinAltitude
+DefExp _AccumulateFloatMap
+DefExp _GenMultiLayerPerlinAltitude
+DefExp _FloatMapCurve
+DefExp _FloatMapGetMinValue
+DefExp _FloatMapGetMaxValue
 
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
@@ -81,5 +93,10 @@ DefExp _FloatMapApplyGain
 %include "mateuler.inc"
 %include "mattranspose.inc"
 %include "floatmapgain.inc"
+%include "floatmapmax.inc"
+%include "floatmapmin.inc"
+%include "floatmapcurve.inc"
+%include "seedvec.inc"
+%include "perlin.inc"
 
 times 16 - ($ - $$) % 16 int3

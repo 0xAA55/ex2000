@@ -1,25 +1,25 @@
-segment .bss
-extern _PerlinNumWorkers
-_PerlinNumWorkers resd 1
 
 DefFunc _CreatePerlinMap2D
 	FrameBegin ebx, esi
+	DefVars %$AndVal
 	DefSizedVar %$VectorBuffer, 0x20
 
 	invoke_cdecl _CreateBitMap, Param(0), 2, 8
 	mov ebx, eax
+
+	mov dword %$AndVal, 0xFFFF
 
 	mov eax, Param(0)
 	cmp eax, 1
 	jae .blae1
 
 	mov esi, [ebx + BitMap.data]
-	invoke_dll_cdecl rand
+	invoke_cdecl rand
 	shl eax, 1
 	sub eax, 0x7FFF
 	mov [esi], eax
 	fild dword [esi]
-	fidiv dword [_Rand4AndVal]
+	fidiv dword %$AndVal
 	fldpi
 	fmul
 	fsincos
@@ -32,15 +32,24 @@ DefFunc _CreatePerlinMap2D
 	and esi, 0xFFFFFFF0
 	invoke_cdecl _CreateSeedVector, esi
 
+	mov eax, __?float32?__(1.0)
+	mov ecx, 0x343fD
+	mov edx, 0x269EC3
+	movd xmm2, eax
+	movd xmm4, ecx
+	movd xmm6, edx
+	mov eax, 0xFFFFFFFF
+	shufps xmm2, xmm2, 0
+	shufps xmm4, xmm4, 0
+	shufps xmm6, xmm6, 0
+	movd xmm5, eax
+	movaps xmm3, [esi]
 	mov eax, [ebx + BitMap.data]
 	mov ecx, [ebx + BitMap.num_pixels]
+	movss xmm7, %$AndVal
 	shr ecx, 1
-	movaps xmm2, [_F1111]
-	movaps xmm3, [esi]
-	movaps xmm4, [_Rand4MulVal]
-	movaps xmm5, [_UF0F0]
-	movaps xmm6, [_Rand4AddVal]
-	movaps xmm7, [_Rand4AndVal]
+	shufps xmm5, xmm5, _MM_SHUFFLE(1, 0, 1, 0)
+	shufps xmm7, xmm7, 0
 .generate:
 	movaps xmm0, xmm3
 	pmuludq xmm0, xmm4
@@ -107,14 +116,16 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov ebx, %$Matrix
 	mov eax, %$Reciprocal
 	pxor xmm0, xmm0
-	movaps xmm1, [_F1111]
+	mov edx, __?float32?__(1.0)
+	movd xmm1, edx
+	shufps xmm1, xmm1, 0
 	mov ecx, 4
 	movaps [%$_UV1M], xmm0
 	movaps [%$_UV2M], xmm1
 .init_uv:
 	mov [%$_UV1 + (ecx - 1) * 4], eax
 	loop .init_uv
-	mov dword[%$_UV1M + Vector.z], 0x3F800000
+	mov dword[%$_UV1M + Vector.z], __?float32?__(1.0)
 	mov [%$_UV2M + Vector.x], ecx
 
 	mov ebx, %$Steps
@@ -188,7 +199,8 @@ DefFunc _ConvertPerlinMapToAltitude
 	subps xmm1, [%$_UV2M]
 	mulps xmm0, [%$_P00XY_P10XY]
 	mulps xmm1, [%$_P01XY_P11XY]
-	cmp dword [_HaveSSE3], 0
+	invoke_cdecl _CheckSSE3
+	test eax, eax
 	jz .no_sse3
 	haddps xmm0, xmm1
 	movaps [%$_DP_00_10_01_11], xmm0
@@ -262,7 +274,9 @@ DefFunc _ConvertPerlinMapToAltitude
 	invoke_cdecl _aligned_free, %$Matrix
 
 	mov ebx, edi
-	movaps xmm5, [_FP5P5P5P5]
+	mov eax, __?float32?__(0.5)
+	movd xmm5, eax
+	shufps xmm5, xmm5, 0
 	movss xmm7, Param(1)
 	mov esi, [ebx + BitMap.data]
 	mov eax, [ebx + BitMap.num_floats]
@@ -378,7 +392,7 @@ DefFunc _GenPerlinLayerPoolProc
 	FrameBegin ebx
 
 	mov ebx, Param(0)
-	invoke_dll_cdecl srand, Param(2)
+	invoke_cdecl srand, Param(2)
 	invoke_cdecl _GenPerlinAltitude, \
 		[ebx + GenPerlinLayerData.perlin_border_len], \
 		[ebx + GenPerlinLayerData.ratio], \
@@ -389,7 +403,7 @@ DefFunc _GenPerlinLayerPoolProc
 
 DefFunc _GenMultiLayerPerlinAltitude
 	FrameBegin ebx, esi, edi
-	NameParams %$Size, %$Altitude, %$NumLayers, %$Curve
+	NameParams %$Size, %$Altitude, %$NumLayers, %$Curve, %$ThreadPoolSize
 	DefVars %$Jobs, %$CurLayer
 
 	mov eax, %$Size
@@ -458,14 +472,14 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov ebx, ecx
 	inc ebx ; ebx = 1
 
-	cmp dword[_PerlinNumWorkers], 0
-	jnz .proceed_to_work
-	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
-	shr eax, 1
-	mov [_PerlinNumWorkers], eax
-.proceed_to_work:
-
-	invoke_cdecl _PoolRun, _GenPerlinLayerPoolProc, NULL, [_PerlinNumWorkers], %$NumLayers, %$Jobs, 0, 1
+	invoke_cdecl _GetNumProcessors
+	mov ecx, eax
+	mov eax, %$ThreadPoolSize
+	test eax, eax
+	cmovz eax, ecx
+	mov %$ThreadPoolSize, eax
+	GetAbsAddr ecx, _GenPerlinLayerPoolProc
+	invoke_cdecl _PoolRun, ecx, NULL, %$ThreadPoolSize, %$NumLayers, %$Jobs, 0, 1
 	mov edi, eax
 .accumulate:
 	invoke_cdecl _AccumulateFloatMap, [edi], [edi + ebx * 4]
@@ -499,4 +513,3 @@ DefFunc _GenMultiLayerPerlinAltitude
 	mov eax, ebx
 	FrameEnd
 	ret
-

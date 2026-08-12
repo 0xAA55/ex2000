@@ -1,4 +1,3 @@
-%include "common.inc"
 
 struc PoolProcParam
 .bitmap resd 1
@@ -29,13 +28,14 @@ DefFunc _FloatMapCurve
 
 	mov ebx, %$Map
 
+	invoke_cdecl _GetNumProcessors
+	mov ecx, eax
 	mov eax, %$ThreadPoolSize
-	mov ecx, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
 	test eax, eax
 	cmovz eax, ecx
 	mov %$ThreadPoolSize, eax
-
-	invoke_cdecl _PoolRun, _FloatMapCurvePoolProc, & %$Map, %$ThreadPoolSize, [ebx + BitMap.border_len], &[ebx + BitMap.row_ptr], 0, 0
+	GetAbsAddr ecx, _FloatMapCurvePoolProc
+	invoke_cdecl _PoolRun, ecx, & %$Map, %$ThreadPoolSize, [ebx + BitMap.border_len], &[ebx + BitMap.row_ptr], 0, 0
 
 	FrameEnd
 	ret

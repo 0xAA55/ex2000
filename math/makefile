@@ -16,15 +16,10 @@ common.inc: ../math.inc ../pool.inc ../loaddll.inc
 bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc
-floatmapcurve.asm: common.inc
-floatmapmax.asm: common.inc
-floatmapmin.asm: common.inc
 math.asm: common.inc
 matteuler.asm: common.inc
 matveuler.asm: common.inc
-perlin.asm: common.inc
 raymarch.asm: common.inc
-seedvec.asm: common.inc
 sstep.asm: common.inc
 terrain.asm: common.inc
 veccross.asm: common.inc

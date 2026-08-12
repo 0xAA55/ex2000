@@ -274,7 +274,7 @@ extern _AccumulateFloatMap
 ;void FloatMapApplyGain(BitMap *map, float gain);
 extern _FloatMapApplyGain
 
-;BitMap *GenMultiLayerPerlinAltitude(int size, float altitude, int num_layers, float curve);
+;BitMap *GenMultiLayerPerlinAltitude(int size, float altitude, int num_layers, float curve, int thread_pool_size);
 extern _GenMultiLayerPerlinAltitude
 
 ;float FloatMapGetMaxValue(BitMap *src);

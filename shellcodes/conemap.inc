@@ -233,8 +233,9 @@ DefFunc _ConeMapGen
 	mov eax, %$ThreadPoolSize
 	test eax, eax
 	cmovz eax, ecx
+	mov %$ThreadPoolSize, eax
 	GetAbsAddr ecx, _ConeMapGenMapPoolProc
-	invoke_cdecl _PoolRun, ecx, ebx, eax, [ebx + CMGData.border_len], &[edi + BitMap.row_ptr], 0, 0
+	invoke_cdecl _PoolRun, ecx, ebx, %$ThreadPoolSize, [ebx + CMGData.border_len], &[edi + BitMap.row_ptr], 0, 0
 
 .end:
 	lea esi, [ebx + CMGData.src_map_levels + 4]

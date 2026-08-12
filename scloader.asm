@@ -2,6 +2,7 @@
 %include "shellcode.inc"
 %include "assets.inc"
 %include "pool.inc"
+%include "math.inc"
 
 segment .bss
 extern _ShellOldProtect
@@ -44,6 +45,15 @@ _SCEAT:
 	DefImpSC _MatrixRotationEuler
 	DefImpSC _MatrixTranspose
 	DefImpSC _FloatMapApplyGain
+	DefImpSC _CreateSeedVector
+	DefImpSC _CreatePerlinMap2D
+	DefImpSC _ConvertPerlinMapToAltitude
+	DefImpSC _GenPerlinAltitude
+	DefImpSC _AccumulateFloatMap
+	DefImpSC _GenMultiLayerPerlinAltitude
+	DefImpSC _FloatMapCurve
+	DefImpSC _FloatMapGetMinValue
+	DefImpSC _FloatMapGetMaxValue
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
@@ -57,11 +67,26 @@ _RelocSCIAT:
 	DefExpSC _AssetsQuery
 	DefExpSC _PoolRun
 	DefExpSC _GetNumProcessors
+	DefExpSC _CheckSSE3
+	DefExpSC _CheckSSE41
+	DefExpSC _SmootherStep
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _GetNumProcessors
 	FrameBegin
 	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	FrameEnd
+	ret
+
+DefFunc _CheckSSE3
+	FrameBegin
+	mov eax, [_HaveSSE3]
+	FrameEnd
+	ret
+
+DefFunc _CheckSSE41
+	FrameBegin
+	mov eax, [_HaveSSE41]
 	FrameEnd
 	ret
 
@@ -152,3 +177,12 @@ RedirCall _MatrixProjection
 RedirCall _MatrixRotationEuler
 RedirCall _MatrixTranspose
 RedirCall _FloatMapApplyGain
+RedirCall _CreateSeedVector
+RedirCall _CreatePerlinMap2D
+RedirCall _ConvertPerlinMapToAltitude
+RedirCall _GenPerlinAltitude
+RedirCall _AccumulateFloatMap
+RedirCall _GenMultiLayerPerlinAltitude
+RedirCall _FloatMapCurve
+RedirCall _FloatMapGetMinValue
+RedirCall _FloatMapGetMaxValue

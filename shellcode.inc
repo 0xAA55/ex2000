@@ -20,6 +20,9 @@ struc SCHead
 	DefImp _AssetsQuery
 	DefImp _PoolRun
 	DefImp _GetNumProcessors
+	DefImp _CheckSSE3
+	DefImp _CheckSSE41
+	DefImp _SmootherStep
 
 	%include 'scfuncs.tmp'
 
@@ -43,6 +46,15 @@ struc SCHead
 	DefExp _MatrixRotationEuler
 	DefExp _MatrixTranspose
 	DefExp _FloatMapApplyGain
+	DefExp _CreateSeedVector
+	DefExp _CreatePerlinMap2D
+	DefExp _ConvertPerlinMapToAltitude
+	DefExp _GenPerlinAltitude
+	DefExp _AccumulateFloatMap
+	DefExp _GenMultiLayerPerlinAltitude
+	DefExp _FloatMapCurve
+	DefExp _FloatMapGetMinValue
+	DefExp _FloatMapGetMaxValue
 
 .last_ptr:
 	.size equ $ - SCHead

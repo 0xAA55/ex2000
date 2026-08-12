@@ -1,15 +1,17 @@
-%include "common.inc"
 
 DefFunc _CreateSeedVector
 	FrameBegin ebx
+	DefVars %$AndVal
 
 	mov ebx, Param(0)
 
-	invoke_dll_cdecl rand
+	mov dword %$AndVal, 0x7FFF
+
+	invoke_cdecl rand
 	mov [ebx], eax
 
 	fild dword [ebx]
-	fidiv dword [_Rand4AndVal]
+	fidiv dword %$AndVal
 	fldpi
 	fldpi
 	fadd

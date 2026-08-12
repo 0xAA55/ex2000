@@ -1,6 +1,5 @@
-%include "common.inc"
 
-DefFunc _FloatMapGetMinValue
+DefFunc _FloatMapGetMaxValue
 	FrameBegin ebx
 
 	mov ebx, Param(0)
@@ -11,7 +10,7 @@ DefFunc _FloatMapGetMinValue
 	int3
 	jmp .bad
 .good:
-	invoke_cdecl _BatchMin, [ebx + BitMap.data], eax
+	invoke_cdecl _BatchMax, [ebx + BitMap.data], eax
 
 	FrameEnd
 	ret
