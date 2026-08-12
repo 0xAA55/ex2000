@@ -5,7 +5,6 @@ strchr
 strncpy
 memcmp
 memmove
-_vsnprintf
 fopen
 fseek
 fscanf

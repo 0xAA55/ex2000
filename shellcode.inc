@@ -1,19 +1,27 @@
 %ifndef _SHELLCODE_INC_
 %define _SHELLCODE_INC_ 1
 
+%macro DefImp 1
+.%1 resb 5
+%endmacro
+
 struc SCHead
 .imports:
-	.malloc resb 5
-	.calloc resb 5
-	.realloc resb 5
-	.free resb 5
-	.aligned_malloc resb 5
-	.aligned_free resb 5
+	DefImp _malloc
+	DefImp _calloc
+	DefImp _realloc
+	DefImp _free
+	DefImp _aligned_malloc
+	DefImp _aligned_free
+	DefImp _AssetsQuery
+
+	%include 'scfuncs.tmp'
+
 .exports:
-	.CreateBitMap resd 1
-	.DestroyBitMap resd 1
-	.GetBitmapPixelAddress resd 1
-	.SampleFloatMap resd 1
+	._CreateBitMap resd 1
+	._DestroyBitMap resd 1
+	._GetBitmapPixelAddress resd 1
+	._SampleFloatMap resd 1
 .last_ptr:
 	.size equ $ - SCHead
 endstruc

@@ -12,6 +12,9 @@ _ShellcodeBase resd 1
 extern _ShellcodeSize
 _ShellcodeSize resd 1
 
+extern _FirstDelayLoadFunc
+extern _NumDelayLoadFunc
+
 extern _SCEAT
 _SCEAT:
 	.CreateBitMap resd 1
@@ -28,6 +31,7 @@ _RelocSCIAT:
 	.free dd _free
 	.aligned_malloc dd _aligned_malloc
 	.aligned_free dd _aligned_free
+	.AssetsQuery dd _AssetsQuery
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _LoadShellcode
@@ -49,6 +53,17 @@ DefFunc _LoadShellcode
 	add edx, 5
 	dec ecx
 	jnz .setup_iat
+
+	mov esi, _FirstDelayLoadFunc
+	mov ecx, _NumDelayLoadFunc
+.setup_iat_delay_load_api:
+	lodsd
+	sub eax, edx
+	stosd
+	inc edi
+	add edx, 5
+	dec ecx
+	jnz .setup_iat_delay_load_api
 
 	lea esi, [ebx + SCHead.exports]
 	mov edi, _SCEAT

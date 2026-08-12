@@ -18,6 +18,9 @@ DefImp _realloc
 DefImp _free
 DefImp _aligned_malloc
 DefImp _aligned_free
+DefImp _AssetsQuery
+
+%include "scfuncs.tmp"
 
 DefExp _CreateBitMap
 DefExp _DestroyBitMap

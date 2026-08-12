@@ -32,66 +32,9 @@ def_dll_func HeapReAlloc
 def_dll_func HeapFree
 dll_func_group_end KFunc
 
-dll_func_group_start_without_name KFunc_DelayedLoad
-def_dll_func_addr GetCurrentProcess
-def_dll_func_addr SetProcessInformation
-def_dll_func_addr QueryPerformanceFrequency
-def_dll_func_addr QueryPerformanceCounter
-def_dll_func_addr Sleep
-def_dll_func_addr GetTickCount
-def_dll_func_addr GetTickCount64
-def_dll_func_addr CreateThread
-def_dll_func_addr CloseHandle
-def_dll_func_addr WaitForSingleObject
-def_dll_func_addr WaitForMultipleObjects
-def_dll_func_addr VirtualProtect
-def_dll_func_addr FlushInstructionCache
-def_dll_func_addr TlsAlloc
-def_dll_func_addr TlsGetValue
-def_dll_func_addr TlsSetValue
-def_dll_func_addr TlsFree
-def_dll_func_addr InterlockedIncrement
-def_dll_func_addr InterlockedDecrement
-def_dll_func_addr InterlockedExchange
-def_dll_func_addr CreateWaitableTimerExW
-def_dll_func_addr SetWaitableTimer
-def_dll_func_addr GetSystemInfo
-dll_func_group_end KFunc_DelayedLoad
-
 dll_func_group_start UFunc
 def_dll_func MessageBoxA
 dll_func_group_end UFunc
-
-dll_func_group_start_without_name UFunc_DelayedLoad
-def_dll_func_addr MessageBoxW
-def_dll_func_addr AdjustWindowRect
-def_dll_func_addr MoveWindow
-def_dll_func_addr DrawTextA
-def_dll_func_addr LoadIconA
-def_dll_func_addr LoadCursorA
-def_dll_func_addr RegisterClassExA
-def_dll_func_addr CreateWindowExA
-def_dll_func_addr ShowWindow
-def_dll_func_addr UpdateWindow
-def_dll_func_addr PeekMessageA
-def_dll_func_addr TranslateMessage
-def_dll_func_addr DispatchMessageA
-def_dll_func_addr PostQuitMessage
-def_dll_func_addr DefWindowProcA
-def_dll_func_addr GetDC
-def_dll_func_addr ReleaseDC
-def_dll_func_addr GetWindowRect
-def_dll_func_addr GetClientRect
-def_dll_func_addr ClientToScreen
-def_dll_func_addr GetCursorPos
-def_dll_func_addr SetCursorPos
-def_dll_func_addr ShowCursor
-def_dll_func_addr GetAsyncKeyState
-def_dll_func_addr GetForegroundWindow
-def_dll_func_addr MonitorFromWindow
-def_dll_func_addr GetMonitorInfoW
-def_dll_func_addr EnumDisplaySettingsW
-dll_func_group_end UFunc_DelayedLoad
 
 dll_func_group_start CFunc
 def_dll_func strcpy
@@ -100,70 +43,36 @@ def_dll_func strcmp
 def_dll_func printf
 def_dll_func memset
 def_dll_func memcpy
+def_dll_func_alias vsnprintf, '_vsnprintf'
 dll_func_group_end CFunc
 
+segment .bss
+extern _FirstDelayLoadFunc
+_FirstDelayLoadFunc:
+
+dll_func_group_start_without_name KFunc_DelayedLoad
+%include "kfuncs.tmp"
+dll_func_group_end KFunc_DelayedLoad
+
+dll_func_group_start_without_name UFunc_DelayedLoad
+%include "ufuncs.tmp"
+dll_func_group_end UFunc_DelayedLoad
+
 dll_func_group_start_without_name CFunc_DelayedLoad
-def_dll_func_addr rand
-def_dll_func_addr srand
-def_dll_func_addr strcat
-def_dll_func_addr strchr
-def_dll_func_addr strncpy
-def_dll_func_addr memcmp
-def_dll_func_addr memmove
-def_dll_func_addr vsnprintf
-def_dll_func_addr fopen
-def_dll_func_addr fseek
-def_dll_func_addr fscanf
-def_dll_func_addr fread
-def_dll_func_addr fprintf
-def_dll_func_addr fwrite
-def_dll_func_addr fclose
-def_dll_func_addr remove
+%include "cfuncs.tmp"
 dll_func_group_end CFunc_DelayedLoad
 
 dll_func_group_start_without_name GFunc_DelayedLoad
-def_dll_func_addr SelectObject
-def_dll_func_addr DeleteObject
-def_dll_func_addr GetStockObject
-def_dll_func_addr GetCurrentObject
-def_dll_func_addr ChoosePixelFormat
-def_dll_func_addr SetPixelFormat
-def_dll_func_addr GetTextMetricsW
-def_dll_func_addr GetGlyphOutlineW
-def_dll_func_addr GetTextExtentPoint32W
-def_dll_func_addr CreateCompatibleDC
-def_dll_func_addr CreateDIBSection
-def_dll_func_addr DeleteDC
-def_dll_func_addr SetBkColor
-def_dll_func_addr SetTextColor
-def_dll_func_addr SetBkMode
-def_dll_func_addr ExtTextOutW
+%include "gfuncs.tmp"
 dll_func_group_end GFunc_DelayedLoad
 
 dll_func_group_start_without_name WFunc_DelayedLoad
-def_dll_func_addr waveOutBreakLoop
-def_dll_func_addr waveOutClose
-def_dll_func_addr waveOutGetDevCaps
-def_dll_func_addr waveOutGetErrorText
-def_dll_func_addr waveOutGetID
-def_dll_func_addr waveOutGetNumDevs
-def_dll_func_addr waveOutGetPitch
-def_dll_func_addr waveOutGetPlaybackRate
-def_dll_func_addr waveOutGetPosition
-def_dll_func_addr waveOutGetVolume
-def_dll_func_addr waveOutMessage
-def_dll_func_addr waveOutOpen
-def_dll_func_addr waveOutPause
-def_dll_func_addr waveOutPrepareHeader
-def_dll_func_addr waveOutProc
-def_dll_func_addr waveOutReset
-def_dll_func_addr waveOutRestart
-def_dll_func_addr waveOutSetPitch
-def_dll_func_addr waveOutSetPlaybackRate
-def_dll_func_addr waveOutSetVolume
-def_dll_func_addr waveOutUnprepareHeader
-def_dll_func_addr waveOutWrite
+%include "wfuncs.tmp"
 dll_func_group_end WFunc_DelayedLoad
+
+segment .bss
+extern _NumDelayLoadFunc
+_NumDelayLoadFunc equ ($ - _FirstDelayLoadFunc) / 4
 
 segment .rdata
 extern _name_of_User32

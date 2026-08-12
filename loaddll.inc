@@ -252,76 +252,7 @@ import_dll_func HeapAlloc
 import_dll_func HeapReAlloc
 import_dll_func HeapFree
 
-import_dll_func GetCurrentProcess
-import_dll_func SetProcessInformation
-import_dll_func QueryPerformanceFrequency
-import_dll_func QueryPerformanceCounter
-import_dll_func Sleep
-import_dll_func GetTickCount
-import_dll_func GetTickCount64
-import_dll_func CreateThread
-import_dll_func CloseHandle
-import_dll_func WaitForSingleObject
-import_dll_func WaitForMultipleObjects
-import_dll_func VirtualProtect
-import_dll_func FlushInstructionCache
-import_dll_func TlsAlloc
-import_dll_func TlsGetValue
-import_dll_func TlsSetValue
-import_dll_func TlsFree
-import_dll_func InterlockedIncrement
-import_dll_func InterlockedDecrement
-import_dll_func InterlockedExchange
-import_dll_func CreateWaitableTimerExW
-import_dll_func SetWaitableTimer
-import_dll_func GetSystemInfo
-
 import_dll_func MessageBoxA
-import_dll_func MessageBoxW
-import_dll_func AdjustWindowRect
-import_dll_func MoveWindow
-import_dll_func DrawTextA
-import_dll_func LoadIconA
-import_dll_func LoadCursorA
-import_dll_func RegisterClassExA
-import_dll_func CreateWindowExA
-import_dll_func ShowWindow
-import_dll_func UpdateWindow
-import_dll_func PeekMessageA
-import_dll_func TranslateMessage
-import_dll_func DispatchMessageA
-import_dll_func PostQuitMessage
-import_dll_func DefWindowProcA
-import_dll_func GetDC
-import_dll_func ReleaseDC
-import_dll_func GetWindowRect
-import_dll_func GetClientRect
-import_dll_func ClientToScreen
-import_dll_func GetCursorPos
-import_dll_func SetCursorPos
-import_dll_func ShowCursor
-import_dll_func GetAsyncKeyState
-import_dll_func GetForegroundWindow
-import_dll_func MonitorFromWindow
-import_dll_func GetMonitorInfoW
-import_dll_func EnumDisplaySettingsW
-
-import_dll_func SelectObject
-import_dll_func DeleteObject
-import_dll_func GetStockObject
-import_dll_func GetCurrentObject
-import_dll_func ChoosePixelFormat
-import_dll_func SetPixelFormat
-import_dll_func GetTextMetricsW
-import_dll_func GetGlyphOutlineW
-import_dll_func GetTextExtentPoint32W
-import_dll_func CreateCompatibleDC
-import_dll_func CreateDIBSection
-import_dll_func DeleteDC
-import_dll_func SetBkColor
-import_dll_func SetTextColor
-import_dll_func SetBkMode
-import_dll_func ExtTextOutW
 
 import_dll_func strcpy
 import_dll_func strlen
@@ -329,23 +260,9 @@ import_dll_func strcmp
 import_dll_func printf
 import_dll_func memset
 import_dll_func memcpy
-
-import_dll_func rand
-import_dll_func srand
-import_dll_func strcat
-import_dll_func strchr
-import_dll_func strncpy
-import_dll_func memcmp
-import_dll_func memmove
 import_dll_func vsnprintf
-import_dll_func fopen
-import_dll_func fseek
-import_dll_func fscanf
-import_dll_func fread
-import_dll_func fprintf
-import_dll_func fwrite
-import_dll_func fclose
-import_dll_func remove
+
+%include "expfuncs.tmp"
 
 extern _FopenTypeWb
 
