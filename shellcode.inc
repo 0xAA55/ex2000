@@ -18,6 +18,7 @@ struc SCHead
 	DefImp _aligned_malloc
 	DefImp _aligned_free
 	DefImp _AssetsQuery
+	DefImp _PoolRun
 
 	%include 'scfuncs.tmp'
 

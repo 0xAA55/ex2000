@@ -1,6 +1,7 @@
 %include "loaddll.inc"
 %include "shellcode.inc"
 %include "assets.inc"
+%include "pool.inc"
 
 segment .bss
 extern _ShellOldProtect
@@ -37,6 +38,7 @@ _RelocSCIAT:
 	._aligned_malloc dd _aligned_malloc
 	._aligned_free dd _aligned_free
 	._AssetsQuery dd _AssetsQuery
+	._PoolRun dd _PoolRun
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _LoadShellcode
