@@ -24,6 +24,8 @@ _SCEAT:
 	._BatchAdd resd 1
 	._BatchBias resd 1
 	._BatchCurve resd 1
+	._BatchMax resd 1
+	._BatchMin resd 1
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
@@ -121,4 +123,10 @@ DefFunc _BatchBias
 
 DefFunc _BatchCurve
 	jmp [_SCEAT._BatchCurve]
+
+DefFunc _BatchMax
+	jmp [_SCEAT._BatchMax]
+
+DefFunc _BatchMin
+	jmp [_SCEAT._BatchMin]
 

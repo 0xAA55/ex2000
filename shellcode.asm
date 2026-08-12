@@ -29,6 +29,8 @@ DefExp _SampleFloatMap
 DefExp _BatchAdd
 DefExp _BatchBias
 DefExp _BatchCurve
+DefExp _BatchMax
+DefExp _BatchMin
 
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
@@ -48,5 +50,7 @@ DefExp _BatchCurve
 %include "batchadd.inc"
 %include "batchbias.inc"
 %include "batchcurve.inc"
+%include "batchmax.inc"
+%include "batchmin.inc"
 
 times 16 - ($ - $$) % 16 int3

@@ -1,15 +1,14 @@
-%include "common.inc"
-%include "avlbst.inc"
 
 DefFunc _BatchMin
 	FrameBegin ebx, esi, edi
+	NameParams %$Data, %$Count
 	DefSizedVar %$VectorBuffer, 32
 
 	lea edi, Variable(4)
 	and edi, 0xFFFFFFF0
 
-	mov ebx, Param(0)
-	mov eax, Param(1)
+	mov ebx, %$Data
+	mov eax, %$Count
 
 	test eax, eax ; param sanity check
 	jnz .good
@@ -18,7 +17,7 @@ DefFunc _BatchMin
 .good:
 	movaps xmm0, [ebx]
 	movaps [edi], xmm0
-	mov eax, Param(1)
+	mov eax, %$Count
 .on_choose_methods: ; to trim data or to batch process data
 	mov esi, ebx
 	test al, 0x3F

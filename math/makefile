@@ -13,8 +13,6 @@ ASMFLAGS=
 all: ../out/math.lib
 ../loaddll.inc: ../frame.inc
 common.inc: ../math.inc ../pool.inc ../loaddll.inc
-batchmax.asm: common.inc
-batchmin.asm: common.inc
 bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc

@@ -25,6 +25,8 @@ struc SCHead
 	._BatchAdd resd 1
 	._BatchBias resd 1
 	._BatchCurve resd 1
+	._BatchMax resd 1
+	._BatchMin resd 1
 .last_ptr:
 	.size equ $ - SCHead
 endstruc
