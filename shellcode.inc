@@ -5,6 +5,10 @@
 .%1 resb 5
 %endmacro
 
+%macro DefExp 1
+.%1 resd 1
+%endmacro
+
 struc SCHead
 .imports:
 	DefImp _malloc
@@ -18,15 +22,16 @@ struc SCHead
 	%include 'scfuncs.tmp'
 
 .exports:
-	._CreateBitMap resd 1
-	._DestroyBitMap resd 1
-	._GetBitmapPixelAddress resd 1
-	._SampleFloatMap resd 1
-	._BatchAdd resd 1
-	._BatchBias resd 1
-	._BatchCurve resd 1
-	._BatchMax resd 1
-	._BatchMin resd 1
+	DefExp _ShellcodeInit
+	DefExp _CreateBitMap
+	DefExp _DestroyBitMap
+	DefExp _GetBitmapPixelAddress
+	DefExp _SampleFloatMap
+	DefExp _BatchAdd
+	DefExp _BatchBias
+	DefExp _BatchCurve
+	DefExp _BatchMax
+	DefExp _BatchMin
 .last_ptr:
 	.size equ $ - SCHead
 endstruc

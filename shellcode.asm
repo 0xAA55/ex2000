@@ -41,6 +41,7 @@ DefExp _BatchMin
 [warning +pp-macro-redef-multi]
 
 %unmacro DefImp 1
+%unmacro DefExp 1
 
 %include "shellcode.inc"
 %include "math/common.inc"
