@@ -36,6 +36,13 @@ struc SCHead
 	DefExp _BatchMin
 	DefExp _FloatMapNextMip
 	DefExp _ConeMapGen
+	DefExp _VectorMultMatrix
+	DefExp _MatrixMultiply
+	DefExp _MatrixMultiplyTo
+	DefExp _MatrixProjection
+	DefExp _MatrixRotationEuler
+	DefExp _MatrixTranspose
+	DefExp _FloatMapApplyGain
 
 .last_ptr:
 	.size equ $ - SCHead

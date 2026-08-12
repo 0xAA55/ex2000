@@ -1,11 +1,11 @@
-%include "common.inc"
 
 DefFunc _VectorMultMatrix
 	FrameBegin
+	NameParams %$Out, %$Vec, %$Mat
 
-	mov eax, Param(2)
-	mov ecx, Param(1)
-	mov edx, Param(0)
+	mov eax, %$Mat
+	mov ecx, %$Vec
+	mov edx, %$Out
 
 	movaps xmm2, [ecx]
 	movaps xmm3, xmm2

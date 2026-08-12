@@ -11,21 +11,16 @@ ASMFLAGS=
 	copy $@+
 
 all: ../out/math.lib
-../loaddll.inc: ../frame.inc
+../loaddll.inc: ../frame.inc ../expfuncs.tmp
 common.inc: ../math.inc ../pool.inc ../loaddll.inc
 bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc
 floatmapcurve.asm: common.inc
-floatmapgain.asm: common.inc
 floatmapmax.asm: common.inc
 floatmapmin.asm: common.inc
-mateuler.asm: common.inc
 math.asm: common.inc
-matmult.asm: common.inc
-matproj.asm: common.inc
 matteuler.asm: common.inc
-mattranspose.asm: common.inc
 matveuler.asm: common.inc
 perlin.asm: common.inc
 raymarch.asm: common.inc
@@ -35,7 +30,6 @@ terrain.asm: common.inc
 veccross.asm: common.inc
 vecdot.asm: common.inc
 veclength.asm: common.inc
-vecmultmat.asm: common.inc
 vecnormal.asm: common.inc
 vfmap: common.inc
 

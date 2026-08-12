@@ -16,32 +16,47 @@ _ShellcodeSize resd 1
 extern _FirstDelayLoadFunc
 extern _NumDelayLoadFunc
 
+%macro DefImpSC 1
+	.%1 resd 1
+%endmacro
+
+%macro DefExpSC 1
+	.%1 dd %1
+%endmacro
+
 extern _SCEAT
 _SCEAT:
-	._CreateBitMap resd 1
-	._DestroyBitMap resd 1
-	._GetBitmapPixelAddress resd 1
-	._SampleFloatMap resd 1
-	._BatchAdd resd 1
-	._BatchBias resd 1
-	._BatchCurve resd 1
-	._BatchMax resd 1
-	._BatchMin resd 1
-	._FloatMapNextMip resd 1
-	._ConeMapGen resd 1
+	DefImpSC _CreateBitMap
+	DefImpSC _DestroyBitMap
+	DefImpSC _GetBitmapPixelAddress
+	DefImpSC _SampleFloatMap
+	DefImpSC _BatchAdd
+	DefImpSC _BatchBias
+	DefImpSC _BatchCurve
+	DefImpSC _BatchMax
+	DefImpSC _BatchMin
+	DefImpSC _FloatMapNextMip
+	DefImpSC _ConeMapGen
+	DefImpSC _VectorMultMatrix
+	DefImpSC _MatrixMultiply
+	DefImpSC _MatrixMultiplyTo
+	DefImpSC _MatrixProjection
+	DefImpSC _MatrixRotationEuler
+	DefImpSC _MatrixTranspose
+	DefImpSC _FloatMapApplyGain
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
 _RelocSCIAT:
-	._malloc dd _malloc
-	._calloc dd _calloc
-	._realloc dd _realloc
-	._free dd _free
-	._aligned_malloc dd _aligned_malloc
-	._aligned_free dd _aligned_free
-	._AssetsQuery dd _AssetsQuery
-	._PoolRun dd _PoolRun
-	._GetNumProcessors dd _GetNumProcessors
+	DefExpSC _malloc
+	DefExpSC _calloc
+	DefExpSC _realloc
+	DefExpSC _free
+	DefExpSC _aligned_malloc
+	DefExpSC _aligned_free
+	DefExpSC _AssetsQuery
+	DefExpSC _PoolRun
+	DefExpSC _GetNumProcessors
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _GetNumProcessors
@@ -114,36 +129,26 @@ DefFunc _UnloadShellcode
 	FrameEnd
 	ret
 
-DefFunc _CreateBitMap
-	jmp [_SCEAT._CreateBitMap]
+%macro RedirCall 1
+	DefFunc %1
+	jmp [_SCEAT.%1]
+%endmacro
 
-DefFunc _DestroyBitMap
-	jmp [_SCEAT._DestroyBitMap]
-
-DefFunc _GetBitmapPixelAddress
-	jmp [_SCEAT._GetBitmapPixelAddress]
-
-DefFunc _SampleFloatMap
-	jmp [_SCEAT._SampleFloatMap]
-
-DefFunc _BatchAdd
-	jmp [_SCEAT._BatchAdd]
-
-DefFunc _BatchBias
-	jmp [_SCEAT._BatchBias]
-
-DefFunc _BatchCurve
-	jmp [_SCEAT._BatchCurve]
-
-DefFunc _BatchMax
-	jmp [_SCEAT._BatchMax]
-
-DefFunc _BatchMin
-	jmp [_SCEAT._BatchMin]
-
-DefFunc _FloatMapNextMip
-	jmp [_SCEAT._FloatMapNextMip]
-
-DefFunc _ConeMapGen
-	jmp [_SCEAT._ConeMapGen]
-
+RedirCall _CreateBitMap
+RedirCall _DestroyBitMap
+RedirCall _GetBitmapPixelAddress
+RedirCall _SampleFloatMap
+RedirCall _BatchAdd
+RedirCall _BatchBias
+RedirCall _BatchCurve
+RedirCall _BatchMax
+RedirCall _BatchMin
+RedirCall _FloatMapNextMip
+RedirCall _ConeMapGen
+RedirCall _VectorMultMatrix
+RedirCall _MatrixMultiply
+RedirCall _MatrixMultiplyTo
+RedirCall _MatrixProjection
+RedirCall _MatrixRotationEuler
+RedirCall _MatrixTranspose
+RedirCall _FloatMapApplyGain

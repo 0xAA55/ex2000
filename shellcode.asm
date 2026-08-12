@@ -35,6 +35,13 @@ DefExp _BatchMax
 DefExp _BatchMin
 DefExp _FloatMapNextMip
 DefExp _ConeMapGen
+DefExp _VectorMultMatrix
+DefExp _MatrixMultiply
+DefExp _MatrixMultiplyTo
+DefExp _MatrixProjection
+DefExp _MatrixRotationEuler
+DefExp _MatrixTranspose
+DefExp _FloatMapApplyGain
 
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
@@ -54,6 +61,8 @@ DefExp _ConeMapGen
 	add %1, %2 - %%label
 %endmacro
 
+%define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
+
 %include "shellcode.inc"
 %include "math/common.inc"
 
@@ -66,5 +75,11 @@ DefExp _ConeMapGen
 %include "batchmin.inc"
 %include "fmnm.inc"
 %include "conemap.inc"
+%include "vecmultmat.inc"
+%include "matmult.inc"
+%include "matproj.inc"
+%include "mateuler.inc"
+%include "mattranspose.inc"
+%include "floatmapgain.inc"
 
 times 16 - ($ - $$) % 16 int3

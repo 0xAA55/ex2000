@@ -1,10 +1,10 @@
-%include "common.inc"
 
 ; %define _EULER_DEBUG 1
 
 %ifndef _EULER_DEBUG
 DefFunc _MatrixRotationEuler
 	FrameBegin
+	NameParams %$Out, %$Yaw, %$Pitch, %$Roll
 	DefVars %$CosY, %$SinY, %$CosP, %$SinP, %$CosR, %$SinR
 
 	xor eax, eax
@@ -19,7 +19,7 @@ DefFunc _MatrixRotationEuler
 	add al, 2
 	loop .sincos
 
-	mov eax, Param(0)
+	mov eax, %$Out
 	xorps xmm0, xmm0
 	movaps [eax + Matrix.x], xmm0
 	movaps [eax + Matrix.y], xmm0
@@ -85,23 +85,28 @@ DefFunc _MatrixRotationEuler
 	ret
 %else
 DefFunc _MakeIdentity
+	FrameBegin
+	NameParams %$Out
+	mov eax, %$Out
 	movaps xmm0, [_IdentityMatrix + Matrix.x]
 	movaps xmm1, [_IdentityMatrix + Matrix.y]
 	movaps xmm2, [_IdentityMatrix + Matrix.z]
 	movaps xmm3, [_IdentityMatrix + Matrix.w]
-	movaps [ebx + Matrix.x], xmm0
-	movaps [ebx + Matrix.y], xmm1
-	movaps [ebx + Matrix.z], xmm2
-	movaps [ebx + Matrix.w], xmm3
+	movaps [eax + Matrix.x], xmm0
+	movaps [eax + Matrix.y], xmm1
+	movaps [eax + Matrix.z], xmm2
+	movaps [eax + Matrix.w], xmm3
+	FrameEnd
 	ret
 
 DefFunc _MatrixRotationX
 	FrameBegin ebx
+	NameParams %$Out, %$Angle
 
-	mov ebx, Param(0)
-	call _MakeIdentity
+	mov ebx, %$Out
+	invoke_cdecl _MakeIdentity, ebx
 
-	fld dword Param(1)
+	fld dword %$Angle
 	fsincos
 	fst dword [ebx + Matrix.yy]
 	fstp dword [ebx + Matrix.zz]
@@ -114,11 +119,12 @@ DefFunc _MatrixRotationX
 
 DefFunc _MatrixRotationY
 	FrameBegin ebx
+	NameParams %$Out, %$Angle
 
-	mov ebx, Param(0)
-	call _MakeIdentity
+	mov ebx, %$Out
+	invoke_cdecl _MakeIdentity, ebx
 
-	fld dword Param(1)
+	fld dword %$Angle
 	fsincos
 	fst dword [ebx + Matrix.xx]
 	fstp dword [ebx + Matrix.zz]
@@ -131,11 +137,12 @@ DefFunc _MatrixRotationY
 
 DefFunc _MatrixRotationZ
 	FrameBegin ebx
+	NameParams %$Out, %$Angle
 
-	mov ebx, Param(0)
-	call _MakeIdentity
+	mov ebx, %$Out
+	invoke_cdecl _MakeIdentity, ebx
 
-	fld dword Param(1)
+	fld dword %$Angle
 	fsincos
 	fst dword [ebx + Matrix.xx]
 	fstp dword [ebx + Matrix.yy]
@@ -148,6 +155,7 @@ DefFunc _MatrixRotationZ
 
 DefFunc _MatrixRotationEuler
 	FrameBegin ebx
+	NameParams %$Out, %$Yaw, %$Pitch, %$Roll
 	DefSizedVar %$MatrixBuffer, 0x10 + Matrix.size * 4
 
 	lea ebx, Variable(4)
@@ -156,11 +164,11 @@ DefFunc _MatrixRotationEuler
 	%define PM   &[ebx + Matrix.size * 1]
 	%define RM   &[ebx + Matrix.size * 2]
 	%define RPM  &[ebx + Matrix.size * 3]
-	invoke_cdecl _MatrixRotationZ, RM, Param(3)
-	invoke_cdecl _MatrixRotationX, PM, Param(2)
-	invoke_cdecl _MatrixRotationY, YM, Param(1)
+	invoke_cdecl _MatrixRotationZ, RM, %$Roll
+	invoke_cdecl _MatrixRotationX, PM, %$Pitch
+	invoke_cdecl _MatrixRotationY, YM, %$Yaw
 	invoke_cdecl _MatrixMultiply, RPM, RM, PM
-	invoke_cdecl _MatrixMultiply, Param(0), RPM, YM
+	invoke_cdecl _MatrixMultiply, %$Out, RPM, YM
 
 	FrameEnd
 	ret

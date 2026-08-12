@@ -1,25 +1,28 @@
-%include "common.inc"
 
 DefFunc _MatrixProjection
 	FrameBegin
+	NameParams %$Out, %$FovY, %$Aspect, %$ZN, %$ZF
 
-	mov eax, Param(0)
+	mov eax, %$Out
 	xorps xmm0, xmm0
 	movaps [eax + Matrix.x], xmm0
 	movaps [eax + Matrix.y], xmm0
 	movaps [eax + Matrix.z], xmm0
 	movaps [eax + Matrix.w], xmm0
 
-	movss xmm6, Param(3)
-	movss xmm7, Param(4)
-	movss xmm1, [_M1.0f]
-	movss xmm2, [_2.0f]
+	mov ecx, __?float32?__(-1.0)
+	mov edx, __?float32?__(2.0)
 
-	fld dword Param(1)
+	movss xmm6, %$ZN
+	movss xmm7, %$ZF
+	movd xmm1, ecx
+	movd xmm2, edx
+
+	fld dword %$FovY
 	fsincos
 	fdivp
 	fst dword [eax + Matrix.xx]
-	fmul dword Param(2)
+	fmul dword %$Aspect
 	fstp dword [eax + Matrix.yy]
 
 	;W = tan(fovy)

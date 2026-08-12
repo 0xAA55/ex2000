@@ -1,9 +1,9 @@
-%include "common.inc"
 
 DefFunc _MatrixTranspose
 	FrameBegin
+	NameParams %$Out, %$Mat
 
-	mov eax, Param(1)
+	mov eax, %$Mat
 	movaps xmm3, [eax + Matrix.y]
 	movaps xmm1, [eax + Matrix.x]
 	shufps xmm1, xmm3, 0x44
@@ -19,7 +19,7 @@ DefFunc _MatrixTranspose
 	shufps xmm1, xmm3, 0xEE
 	movaps xmm7, xmm1
 
-	mov eax, Param(0)
+	mov eax, %$Out
 	movaps xmm1, xmm4
 	movaps xmm3, xmm5
 	shufps xmm1, xmm3, 0x88

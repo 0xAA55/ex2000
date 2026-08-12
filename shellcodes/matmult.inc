@@ -1,4 +1,3 @@
-%include "common.inc"
 
 DefFunc _MatrixMultiply
 	FrameBegin esi, edi

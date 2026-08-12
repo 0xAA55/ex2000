@@ -1,13 +1,13 @@
-%include "common.inc"
 
 DefFunc _FloatMapApplyGain
 	FrameBegin ebx, esi
+	NameParams %$Map, %$Gain
 
-	mov ebx, Param(0)
+	mov ebx, %$Map
 
 	mov eax, [ebx + BitMap.num_floats]
 	mov esi, [ebx + BitMap.data]
-	movss xmm7, Param(1)
+	movss xmm7, %$Gain
 	test al, 0xF
 	mov ecx, eax
 	jz .batch_proc
