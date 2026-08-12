@@ -65,7 +65,7 @@ shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
 utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 scloader.asm: loaddll.inc shellcode.inc assets.inc
-shellcode.asm: shellcode.inc scfuncs.tmp
+shellcode.asm: shellcode.inc scfuncs.tmp $(wildcard shellcodes/*)
 
 shellcode.bin: shellcode.asm
 	nasm $^ $(DEFS) $(ASMFLAGS) -o $@
