@@ -4,7 +4,7 @@ OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
 OBJS_D=$(patsubst %.asm, $(OBJ_DIR)/%_d.obj, $(SRCS))
 LIBS=out/math.lib lib/kernel32.lib
 DEFS:=
-ASMFLAGS=-i. -ishellcodes
+ASMFLAGS=
 
 all: ex2000.exe
 .PHONY: clean again
@@ -68,7 +68,7 @@ scloader.asm: loaddll.inc shellcode.inc assets.inc
 shellcode.asm: shellcode.inc scfuncs.tmp $(wildcard shellcodes/*)
 
 shellcode.bin: shellcode.asm
-	nasm $^ $(DEFS) $(ASMFLAGS) -o $@
+	nasm $^ $(DEFS) -ishellcodes $(ASMFLAGS) -o $@
 out/stub.bin: stub.asm
 	nasm $^ -o $@
 out/%_d.obj: %.asm
