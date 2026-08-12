@@ -18,7 +18,6 @@ batchbias.asm: common.inc
 batchcurve.asm: common.inc
 batchmax.asm: common.inc
 batchmin.asm: common.inc
-bitmap.asm: common.inc
 bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc
@@ -42,7 +41,6 @@ multfloatmap.asm: common.inc
 perlin.asm: common.inc
 raymarch.asm: common.inc
 rmap.asm: common.inc
-samplefmap.asm: common.inc
 seedvec.asm: common.inc
 sstep.asm: common.inc
 terrain.asm: common.inc
