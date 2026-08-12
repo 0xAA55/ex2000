@@ -11,7 +11,6 @@ DefFunc _MatrixMultiply
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.z], &[esi + Matrix.z], Param(2)
 	invoke_cdecl _VectorMultMatrix, &[edi + Matrix.w], &[esi + Matrix.w], Param(2)
 
-
 	FrameEnd
 	ret
 

@@ -253,9 +253,6 @@ extern _DuplicateBitMap
 ;void DestroyBitMap(BitMap *map);
 extern _DestroyBitMap
 
-;void WarpBitMap(BitMap *dst, BitMap *src, int x, int y);
-extern _WarpBitMap
-
 ;float SmootherStep(float x);
 extern _SmootherStep
 
@@ -274,41 +271,17 @@ extern _GenPerlinAltitude
 ;void AccumulateFloatMap(BitMap *accum_to, BitMap *src);
 extern _AccumulateFloatMap
 
-;void MultiplyFloatMap(BitMap *mult_to, BitMap *src);
-extern _MultiplyFloatMap
-
-;void FloatMapDivide(BitMap *dst, BitMap *src);
-extern _FloatMapDivide
-
 ;void FloatMapApplyGain(BitMap *map, float gain);
 extern _FloatMapApplyGain
 
 ;BitMap *GenMultiLayerPerlinAltitude(int size, float altitude, int num_layers, float curve);
 extern _GenMultiLayerPerlinAltitude
 
-;typedef struct radmap_s
-;{
-;	size_t items;
-;	struct item
-;	{
-; 		int16_t x, y;
-; 	}[0];
-;} radmap_t, *radmap_p;
-;radmap_p GenRadiusMap(int16_t radius);
-;// The returned pointer should be `free()`d.
-extern _GenRadiusMap
-
-;BitMap *GenDistanceMap(int size);
-extern _GenDistanceMap
-
 ;float FloatMapGetMaxValue(BitMap *src);
 extern _FloatMapGetMaxValue
 
 ;float FloatMapGetMinValue(BitMap *src);
 extern _FloatMapGetMinValue
-
-;void FloatMapClamp(BitMap *map, float max, float min);
-extern _FloatMapClamp
 
 ;void BitMapBlt(
 ;	BitMap *dst,
