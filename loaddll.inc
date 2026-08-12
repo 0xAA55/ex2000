@@ -247,15 +247,15 @@ import_dll OpenGL32
 import_dll WinMM
 
 import_dll_func ExitProcess
+import_dll_func GetProcessHeap
+import_dll_func HeapAlloc
+import_dll_func HeapReAlloc
+import_dll_func HeapFree
 
 import_dll_func GetCurrentProcess
 import_dll_func SetProcessInformation
 import_dll_func QueryPerformanceFrequency
 import_dll_func QueryPerformanceCounter
-import_dll_func GetProcessHeap
-import_dll_func HeapAlloc
-import_dll_func HeapReAlloc
-import_dll_func HeapFree
 import_dll_func Sleep
 import_dll_func GetTickCount
 import_dll_func GetTickCount64
