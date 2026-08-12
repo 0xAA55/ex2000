@@ -39,7 +39,14 @@ _RelocSCIAT:
 	._aligned_free dd _aligned_free
 	._AssetsQuery dd _AssetsQuery
 	._PoolRun dd _PoolRun
+	._GetNumProcessors dd _GetNumProcessors
 	.num_fps equ ($ - _RelocSCIAT) / 4
+
+DefFunc _GetNumProcessors
+	FrameBegin
+	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
+	FrameEnd
+	ret
 
 DefFunc _LoadShellcode
 	FrameBegin ebx, esi, edi

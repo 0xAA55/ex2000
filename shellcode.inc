@@ -19,6 +19,7 @@ struc SCHead
 	DefImp _aligned_free
 	DefImp _AssetsQuery
 	DefImp _PoolRun
+	DefImp _GetNumProcessors
 
 	%include 'scfuncs.tmp'
 
