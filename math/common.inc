@@ -5,8 +5,4 @@
 %include "math.inc"
 %include "pool.inc"
 
-extern _Rand4MulVal
-extern _Rand4AddVal
-extern _Rand4AndVal
-
 %endif
