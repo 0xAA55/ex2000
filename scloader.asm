@@ -17,21 +17,22 @@ extern _NumDelayLoadFunc
 
 extern _SCEAT
 _SCEAT:
-	.CreateBitMap resd 1
-	.DestroyBitMap resd 1
-	.GetBitmapPixelAddress resd 1
-	.SampleFloatMap resd 1
+	._CreateBitMap resd 1
+	._DestroyBitMap resd 1
+	._GetBitmapPixelAddress resd 1
+	._SampleFloatMap resd 1
+	._BatchAdd resd 1
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
 _RelocSCIAT:
-	.malloc dd _malloc
-	.calloc dd _calloc
-	.realloc dd _realloc
-	.free dd _free
-	.aligned_malloc dd _aligned_malloc
-	.aligned_free dd _aligned_free
-	.AssetsQuery dd _AssetsQuery
+	._malloc dd _malloc
+	._calloc dd _calloc
+	._realloc dd _realloc
+	._free dd _free
+	._aligned_malloc dd _aligned_malloc
+	._aligned_free dd _aligned_free
+	._AssetsQuery dd _AssetsQuery
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _LoadShellcode
@@ -99,14 +100,14 @@ DefFunc _UnloadShellcode
 	ret
 
 DefFunc _CreateBitMap
-	jmp [_SCEAT.CreateBitMap]
+	jmp [_SCEAT._CreateBitMap]
 
 DefFunc _DestroyBitMap
-	jmp [_SCEAT.DestroyBitMap]
+	jmp [_SCEAT._DestroyBitMap]
 
 DefFunc _GetBitmapPixelAddress
-	jmp [_SCEAT.GetBitmapPixelAddress]
+	jmp [_SCEAT._GetBitmapPixelAddress]
 
 DefFunc _SampleFloatMap
-	jmp [_SCEAT.SampleFloatMap]
+	jmp [_SCEAT._SampleFloatMap]
 
