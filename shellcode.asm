@@ -45,6 +45,13 @@ DefExp _BatchMin
 %unmacro DefImp 1
 %unmacro DefExp 1
 
+%macro GetAbsAddr 2
+	call %%label
+	%%label:
+	pOp %1
+	add %1, %2 - %%label
+%endmacro
+
 %include "shellcode.inc"
 %include "math/common.inc"
 
