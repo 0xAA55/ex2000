@@ -1,5 +1,12 @@
-%include "common.inc"
-%include "avlbst.inc"
+
+%define _MM_CMP_EQ_    0x00
+%define _MM_CMP_LT_    0x01
+%define _MM_CMP_LE_    0x02
+%define _MM_CMP_UNORD_ 0x03
+%define _MM_CMP_NEQ_   0x04
+%define _MM_CMP_GE_    0x05
+%define _MM_CMP_GT_    0x06
+%define _MM_CMP_ORD_   0x07
 
 ; typedef struct CurvePoints_s
 ; {
@@ -42,14 +49,15 @@
 
 DefFunc _BatchCurve
 	FrameBegin ebx, esi, edi
-	DefVars %$DataToProc
+	NameParams %$Data, %$Count, %$Curve, %$Points
+	DefVars %$DataToProc,
 
-	mov edi, Param(0)
-	mov eax, Param(1)
-	mov esi, Param(2)
+	mov edi, %$Data
+	mov eax, %$Count
+	mov esi, %$Curve
 	xorps xmm5, xmm5
 	xor edx, edx
-	mov ecx, Param(3)
+	mov ecx, %$Points
 .sum_weights:
 	addss xmm5, [esi + edx + CurvePoint.weight]
 	add edx, 8
@@ -70,7 +78,7 @@ DefFunc _BatchCurve
 	xorps xmm0, xmm0
 	movss xmm1, [edi]
 	xor edx, edx
-	mov ecx, Param(3)
+	mov ecx, %$Points
 .loop_curve:
 	movss xmm6, [esi + edx + CurvePoint.volume] ;volume
 	movss xmm7, [esi + edx + CurvePoint.weight] ;weight
@@ -102,7 +110,7 @@ DefFunc _BatchCurve
 	xorps xmm0, xmm0 ;ret
 	movups xmm1, [edi + 0x00] ;value
 	xor edx, edx
-	mov ecx, Param(3)
+	mov ecx, %$Points
 .loop_curve_2:
 	movss xmm6, [esi + edx + CurvePoint.volume] ;volume
 	movss xmm7, [esi + edx + CurvePoint.weight] ;weight

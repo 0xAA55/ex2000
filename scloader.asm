@@ -23,6 +23,7 @@ _SCEAT:
 	._SampleFloatMap resd 1
 	._BatchAdd resd 1
 	._BatchBias resd 1
+	._BatchCurve resd 1
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
@@ -114,4 +115,10 @@ DefFunc _SampleFloatMap
 
 DefFunc _BatchAdd
 	jmp [_SCEAT._BatchAdd]
+
+DefFunc _BatchBias
+	jmp [_SCEAT._BatchBias]
+
+DefFunc _BatchCurve
+	jmp [_SCEAT._BatchCurve]
 
