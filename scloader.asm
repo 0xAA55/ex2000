@@ -58,7 +58,13 @@ DefFunc _LoadShellcode
 	mov ecx, _NumDelayLoadFunc
 .setup_iat_delay_load_api:
 	lodsd
+	test eax, eax
+	jz .nullptr
 	sub eax, edx
+	jmp .after_get_offset
+.nullptr:
+	dec eax
+.after_get_offset:
 	stosd
 	inc edi
 	add edx, 5
