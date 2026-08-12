@@ -1,10 +1,10 @@
 OBJ_DIR:=out
-SRCS=$(filter-out stub.asm, $(wildcard *.asm))
+SRCS=$(filter-out stub.asm shellcode.asm, $(wildcard *.asm))
 OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
 OBJS_D=$(patsubst %.asm, $(OBJ_DIR)/%_d.obj, $(SRCS))
 LIBS=out/math.lib lib/kernel32.lib
 DEFS:=
-ASMFLAGS=
+ASMFLAGS=-i. -ishellcodes
 
 all: ex2000.exe
 .PHONY: clean again
@@ -35,6 +35,8 @@ shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
 utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 
+shellcode.bin: shellcode.asm
+	nasm $^ $(DEFS) $(ASMFLAGS) -o $@
 out/stub.bin: stub.asm
 	nasm $^ -o $@
 out/%_d.obj: %.asm
@@ -43,9 +45,9 @@ out/%_d.obj: %.asm
 out/%.obj: %.asm
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
 	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
-out/assets.cab: $(wildcard assets/*)
+out/assets.cab: $(wildcard assets/*) shellcode.bin
 	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-	cabarc -r -p -m LZX:21 N $@ assets\\*
+	cabarc -r -p -m LZX:21 N $@ assets\\* shellcode.bin
 out/math.lib: $(wildcard math/*) loaddll.inc pool.inc math.inc
 	make -C math
 
@@ -56,7 +58,7 @@ ex2000d.exe: $(OBJS_D) $(LIBS) out/stub.bin
 	link /NOLOGO /NODEFAULTLIB /NOENTRY /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:CONSOLE $(OBJS_D) $(LIBS)
 
 clean:
-	del /f /s /q out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb ex2000.exe
+	del /f /s /q out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb shellcode.bin ex2000.exe ex2000d.exe
 
 again:
 	make clean

@@ -1,4 +1,3 @@
-%include "common.inc"
 
 ;void SampleFloatMap(BitMap *map, float u, float v, float *ret);
 DefFunc _SampleFloatMap
@@ -17,14 +16,19 @@ DefFunc _SampleFloatMap
 	shufps xmm6, xmm6, 0 ;border_len
 	pshufd xmm7, xmm7, 0 ;mask x 4
 
+	xor eax, eax
+	inc eax
+
 	movq xmm0, %$SU ;x, y
 	mulps xmm0, xmm6
 
+	movd xmm3, eax
 	cvttps2dq xmm1, xmm0 ;xmm1 = {ix, iy}
 	cvtdq2ps xmm2, xmm1
+	pshufd xmm3, xmm3, 0
 	subps xmm0, xmm2 ;xmm0 = {u, v}
 	movq xmm2, xmm1 ;xmm2 = {ix, iy}
-	paddd xmm1, [_I1111] ;xmm1 = {ix+1, iy+1}
+	paddd xmm1, xmm3 ;xmm1 = {ix+1, iy+1}
 
 	movq %$X0, xmm2
 	movq %$X1, xmm1

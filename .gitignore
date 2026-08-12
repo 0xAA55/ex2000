@@ -8,3 +8,4 @@ ex2000d.exe
 *.o
 test*.bmp
 *.tmp
+*.bin
