@@ -4,7 +4,7 @@ bits 32
 
 %macro DefImp 1
 	segment .text
-	%1: db 0xE9, 0, 0, 0, 0
+	%1: db 0xE9, 0xE9, 0xE9, 0xE9, 0xE9
 %endmacro
 
 %macro DefExp 1
