@@ -50,7 +50,7 @@
 DefFunc _BatchCurve
 	FrameBegin ebx, esi, edi
 	NameParams %$Data, %$Count, %$Curve, %$Points
-	DefVars %$DataToProc,
+	DefVars %$DataToProc
 
 	mov edi, %$Data
 	mov eax, %$Count
