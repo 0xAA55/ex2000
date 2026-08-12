@@ -2,10 +2,11 @@
 
 DefFunc _BatchAdd
 	FrameBegin esi, edi
+	NameParams %$Dst, %$Src, %$Count
 
-	mov edi, Param(0)
-	mov esi, Param(1)
-	mov eax, Param(2)
+	mov edi, %$Dst
+	mov esi, %$Src
+	mov eax, %$Count
 	mov edx, 16
 
 .proc16:
