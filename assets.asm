@@ -498,13 +498,14 @@ DefFunc _AssetsInit
 
 DefFunc _AssetsQuery
 	FrameBegin
+	NameParams %$Path, %$PtrSize
 
-	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
+	invoke_cdecl _AVLSearch, [_AssetsTree], %$Path
 	test eax, eax
 	jz .end
 	mov eax, [eax + AVLBST_Node.userdata]
 
-	mov edx, Param(1)
+	mov edx, %$PtrSize
 	test edx, edx
 	jz .return_ptr
 	mov ecx, [eax + FileStruct.file_size]
