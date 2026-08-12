@@ -13,7 +13,6 @@ ASMFLAGS=
 all: ../out/math.lib
 ../loaddll.inc: ../frame.inc
 common.inc: ../math.inc ../pool.inc ../loaddll.inc
-batchbias.asm: common.inc
 batchcurve.asm: common.inc
 batchmax.asm: common.inc
 batchmin.asm: common.inc
