@@ -1,4 +1,3 @@
-%include "common.inc"
 
 DefFunc _BatchAdd
 	FrameBegin esi, edi

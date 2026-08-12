@@ -111,3 +111,6 @@ DefFunc _GetBitmapPixelAddress
 DefFunc _SampleFloatMap
 	jmp [_SCEAT._SampleFloatMap]
 
+DefFunc _BatchAdd
+	jmp [_SCEAT._BatchAdd]
+
