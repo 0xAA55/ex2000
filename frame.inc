@@ -20,6 +20,16 @@
 %define StackSegmentAttrib info
 %endif
 
+%ifdef StackSegmentIsBss
+	%macro StackSegmentReserve 1
+		resd %1
+	%endmacro
+%else
+	%macro StackSegmentReserve 1
+		times %1 dd 0
+	%endmacro
+%endif
+
 %macro DefFunc 1
 	extern %1
 	%xdefine CurFuncName %1
@@ -89,7 +99,8 @@
 	__AllocStackVars
 	[segment %[.stack_of_ %+ CurFuncName]]
 	%rep %0
-		%[.var_ %+ %$Frame_NumVariables] dd 0
+		%[.var_ %+ %$Frame_NumVariables]:
+		StackSegmentReserve 1
 		%define %1 Variable(%[%$Frame_NumVariables])
 		%assign %$Frame_NumVariables %$Frame_NumVariables + 1
 		%rotate 1
@@ -103,7 +114,8 @@
 	%define %1%[_Addr] AddrOfVariable(%[%$Frame_NumVariables])
 	%define %1 Variable(%[%$Frame_NumVariables])
 	[segment %[.stack_of_ %+ CurFuncName]]
-	%[.var_ %+ %$Frame_NumVariables] times %%NumRooms dd 0
+	%[.var_ %+ %$Frame_NumVariables]:
+	StackSegmentReserve %%NumRooms
 	%assign %$Frame_NumVariables %$Frame_NumVariables + %%NumRooms
 	__SECT__
 %endmacro
