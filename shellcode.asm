@@ -35,6 +35,8 @@ DefExp _SampleFloatMap
 %endmacro
 [warning +pp-macro-redef-multi]
 
+%unmacro DefImp 1
+
 %include "shellcode.inc"
 %include "math/common.inc"
 
