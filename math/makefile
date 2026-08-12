@@ -16,7 +16,6 @@ common.inc: ../math.inc ../pool.inc ../loaddll.inc
 bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc
-conemap.asm: common.inc
 dmap.asm: common.inc
 floatmapclamp.asm: common.inc
 floatmapcurve.asm: common.inc
@@ -24,7 +23,6 @@ floatmapdiv.asm: common.inc
 floatmapgain.asm: common.inc
 floatmapmax.asm: common.inc
 floatmapmin.asm: common.inc
-fmnm.asm: common.inc
 mateuler.asm: common.inc
 math.asm: common.inc
 matmult.asm: common.inc

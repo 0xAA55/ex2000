@@ -1,6 +1,5 @@
-%include "common.inc"
 
-segment .rdata
+segment .text
 extern _FMNMProcs
 _FMNMProcs:
 	dd _FloatMapNextAvrMipPoolProc
@@ -29,14 +28,24 @@ DefFunc _FloatMapNextMip
 	mov %$SrcMap_, ebx
 	mov %$DstMap, eax
 
+	invoke_cdecl _GetNumProcessors
+	mov ecx, eax
 	mov eax, %$ThreadPoolSize
-	mov ecx, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
 	test eax, eax
 	cmovz eax, ecx
 	mov ecx, %$Method
-	cmp ecx, _FMNMProcs.num_methods
-	jae .bad
-	invoke_cdecl _PoolRun, [_FMNMProcs + ecx * 4], & %$DstMap, eax, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
+	cmp ecx, 0
+	jz .method_0
+	cmp ecx, 1
+	jz .method_1
+	jmp .bad
+.method_0:
+	GetAbsAddr ecx, _FloatMapNextAvrMipPoolProc
+	jmp .ready_to_run
+.method_1:
+	GetAbsAddr ecx, _FloatMapNextMaxMipPoolProc
+.ready_to_run:
+	invoke_cdecl _PoolRun, ecx, & %$DstMap, eax, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
 	mov eax, edi
 .end:
 	FrameEnd
@@ -121,12 +130,21 @@ DefFunc _FloatMapNextMaxMipPoolProc
 	ret
 
 DefFunc _FloatMapNextAvrMipPoolProc
-	FrameBegin ebx, edi
+	FrameBegin ebx, esi, edi
 	NameParams %$RowPtr, %$CommonData, %$Y
+	DefSizedVar %$VectorBuffer, 32
 
 	mov ebx, %$CommonData
 	mov eax, [ebx + 0] ;dst
 	mov ebx, [ebx + 4] ;src
+
+	lea esi, Variable(4)
+	and esi, 0xFFFFFFF0
+
+	mov eax, 4
+	cvtsi2ss xmm0, eax
+	shufps xmm0, xmm0, 0
+	movaps [esi], xmm0
 
 	mov edx, %$Y
 	mov edi, %$RowPtr
@@ -143,7 +161,7 @@ DefFunc _FloatMapNextAvrMipPoolProc
 	addss xmm0, [edx + 0]
 	addss xmm0, [eax + 4]
 	addss xmm0, [edx + 4]
-	divss xmm0, [_F4444]
+	divss xmm0, [esi]
 	movss [edi], xmm0
 	add eax, 8
 	add edx, 8
@@ -180,10 +198,10 @@ DefFunc _FloatMapNextAvrMipPoolProc
 	addps xmm1, xmm5
 	addps xmm2, xmm6
 	addps xmm3, xmm7
-	divps xmm0, [_F4444]
-	divps xmm1, [_F4444]
-	divps xmm2, [_F4444]
-	divps xmm3, [_F4444]
+	divps xmm0, [esi]
+	divps xmm1, [esi]
+	divps xmm2, [esi]
+	divps xmm3, [esi]
 	movq [edi + 0x00], xmm0
 	movq [edi + 0x08], xmm1
 	movq [edi + 0x10], xmm2

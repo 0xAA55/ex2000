@@ -1,6 +1,3 @@
-%include "common.inc"
-
-; %define DEBUG_CONEMAP 1
 
 struc CMGData
 	.border_len resd 1
@@ -76,10 +73,11 @@ DefFunc _ConeMapDistToBlockWrap
 DefFunc _ConeMapSearchBlock
 	FrameBegin ebx, esi, edi
 	NameParams %$CommonData, %$Best, %$H, %$OX, %$OY, %$X0, %$Y0, %$X1, %$Y1
-	DefVars %$BW, %$BH, %$MaxH, %$Dist, %$MidX, %$MidY, %$MidX1, %$MidY1, %$MipX, %$MipY
+	DefVars %$BW, %$BH, %$MaxH, %$Dist, %$MidX, %$MidY, %$MidX1, %$MidY1, %$MipX, %$MipY, %$Epsilon
 
 	mov ebx, %$CommonData
 	mov edi, %$Best
+	mov dword %$Epsilon, __?float32?__(0.01)
 
 	mov eax, %$X1
 	mov ecx, %$Y1
@@ -107,7 +105,7 @@ DefFunc _ConeMapSearchBlock
 	mov %$MaxH, eax
 
 	invoke_cdecl _ConeMapDistToBlockWrap, & %$Dist, %$OX, %$OY, %$X0, %$Y0, %$X1, %$Y1, [ebx + CMGData.border_len]
-	ucomiss xmm0, [_0.01f]
+	ucomiss xmm0, %$Epsilon
 	jb .block_include_origin
 	movss xmm1, %$MaxH
 	movss xmm2, %$H
@@ -229,12 +227,14 @@ DefFunc _ConeMapGen
 	test eax, eax
 	jnz .gen_next_mipmap
 
+	invoke_cdecl _GetNumProcessors
+	mov ecx, eax
 	mov edi, [ebx + CMGData.dst_map]
 	mov eax, %$ThreadPoolSize
-	mov ecx, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]
 	test eax, eax
 	cmovz eax, ecx
-	invoke_cdecl _PoolRun, _ConeMapGenMapPoolProc, ebx, eax, [ebx + CMGData.border_len], &[edi + BitMap.row_ptr], 0, 0
+	GetAbsAddr ecx, _ConeMapGenMapPoolProc
+	invoke_cdecl _PoolRun, ecx, ebx, eax, [ebx + CMGData.border_len], &[edi + BitMap.row_ptr], 0, 0
 
 .end:
 	lea esi, [ebx + CMGData.src_map_levels + 4]

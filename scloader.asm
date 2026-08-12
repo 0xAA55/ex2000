@@ -27,6 +27,8 @@ _SCEAT:
 	._BatchCurve resd 1
 	._BatchMax resd 1
 	._BatchMin resd 1
+	._FloatMapNextMip resd 1
+	._ConeMapGen resd 1
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
@@ -138,4 +140,10 @@ DefFunc _BatchMax
 
 DefFunc _BatchMin
 	jmp [_SCEAT._BatchMin]
+
+DefFunc _FloatMapNextMip
+	jmp [_SCEAT._FloatMapNextMip]
+
+DefFunc _ConeMapGen
+	jmp [_SCEAT._ConeMapGen]
 

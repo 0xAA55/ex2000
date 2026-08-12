@@ -33,6 +33,8 @@ DefExp _BatchBias
 DefExp _BatchCurve
 DefExp _BatchMax
 DefExp _BatchMin
+DefExp _FloatMapNextMip
+DefExp _ConeMapGen
 
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
@@ -62,5 +64,7 @@ DefExp _BatchMin
 %include "batchcurve.inc"
 %include "batchmax.inc"
 %include "batchmin.inc"
+%include "fmnm.inc"
+%include "conemap.inc"
 
 times 16 - ($ - $$) % 16 int3

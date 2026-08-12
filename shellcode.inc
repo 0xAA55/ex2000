@@ -34,6 +34,9 @@ struc SCHead
 	DefExp _BatchCurve
 	DefExp _BatchMax
 	DefExp _BatchMin
+	DefExp _FloatMapNextMip
+	DefExp _ConeMapGen
+
 .last_ptr:
 	.size equ $ - SCHead
 endstruc
