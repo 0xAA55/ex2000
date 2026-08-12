@@ -16,10 +16,14 @@
 ; Otherwise, the symbols persist from the previous function. Unless manually
 ; `%undef`'d, they cannot be safely reused.
 
+%ifndef StackSegmentAttrib
+%define StackSegmentAttrib info
+%endif
+
 %macro DefFunc 1
 	extern %1
 	%xdefine CurFuncName %1
-	segment .stack_of_ %+ CurFuncName info ;Contents will never get into the final binary
+	segment .stack_of_ %+ CurFuncName StackSegmentAttrib ;Contents will never get into the final binary
 	segment .text
 	%1:
 %endmacro
