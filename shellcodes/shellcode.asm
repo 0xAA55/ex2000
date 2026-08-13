@@ -1,7 +1,5 @@
 bits 32
 
-%define reljmp 0xE9, 0, 0, 0, 0
-
 %macro DefImp 1
 	segment .text
 	%1: db 0xE9, 0xE9, 0xE9, 0xE9, 0xE9
