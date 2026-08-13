@@ -124,14 +124,8 @@ extern _Pi_P
 extern _Pi_N
 extern _2Pi
 extern _2.0f
-extern _0.01f
-extern _M1.0f
-extern _M2.0f
-extern _100.0f
 extern _HaveSSE3
 extern _HaveSSE41
-extern _FMAX
-extern _FMIN
 extern _I1111
 extern _F1000
 extern _F0100
@@ -147,9 +141,6 @@ extern _F4444
 extern _F8888
 extern _FCCCC
 extern _FHHHH
-extern _B0123
-extern _I0123
-extern _F0123
 extern _UF0F0
 extern _UF000
 extern _UFF00

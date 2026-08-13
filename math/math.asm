@@ -20,21 +20,6 @@ extern %1
 
 segment .bss
 alignb 16
-MakeVector _FPMPM
-MakeVector _FMPMP
-MakeVector _FMMMM
-MakeVector _I1111
-MakeVector _F1111
-MakeVector _F2222
-MakeVector _F3333
-MakeVector _F4444
-MakeVector _F8888
-MakeVector _FCCCC
-MakeVector _FHHHH
-MakeVector _I0123
-MakeVector _F0123
-MakeVector _UF0F0
-MakeVector _U0F0F
 MakeVector _UF000
 MakeVector _UFF00
 MakeVector _UFFF0
@@ -42,8 +27,6 @@ MakeVector _UFFFF
 MakeVector _U0FFF
 MakeVector _U00FF
 MakeVector _U000F
-MakeVector _ZeroVector
-MakeVector _FP5P5P5P5
 MakeVector _point_001_vector
 extern _IdentityMatrix
 _IdentityMatrix:
@@ -53,22 +36,8 @@ MakeVector _F0010
 MakeVector _F0001
 
 segment .rdata
-extern _B0123
-_B0123 db 0, 1, 2, 3
-extern _0.1f
-_0.01f dd 0.01
 extern _2.0f
 _2.0f dd 2.0
-extern _100.0f
-_100.0f dd 100.0
-extern _M1.0f
-_M1.0f dd -1.0
-extern _M2.0f
-_M2.0f dd -2.0
-extern _FMAX
-_FMAX dd 0x7F7FFFFF
-extern _FMIN
-_FMIN dd 0xFF7FFFFF
 
 DefFunc _MathInit
 	FrameBegin ebx
@@ -101,66 +70,29 @@ DefFunc _MathInit
 	fchs
 	fstp dword [_Pi_N]
 
-	movd xmm0, [_B0123]
-	pxor xmm1, xmm1
-	punpcklbw xmm0, xmm1
-	punpcklwd xmm0, xmm1
-	movdqa [_I0123], xmm0
-	cvtdq2ps xmm0, xmm0
-	movaps [_F0123], xmm0
-
 	mov eax, __?float32?__(1.0)
 	mov ecx, 4
 	xor edx, edx
 .init_math_loop:
 	mov [_IdentityMatrix + edx], eax
-	mov [_F1111 + (ecx - 1) * 4], eax
 	mov dword [_point_001_vector + (ecx - 1) * 4], __?float32?__(0.001)
-	mov byte  [_FP5P5P5P5 + (ecx - 1) * 4 + 3], 0x3F
-	mov byte  [_I1111 + (ecx - 1) * 4], 1
 	add edx, 20
 	loop .init_math_loop
-	xorps xmm0, xmm0
-	movaps xmm1, [_F1111]
-	movaps xmm2, [_F1111]
-	subps xmm0, xmm1
-	movaps [_FMMMM], xmm0
-	unpcklps xmm1, xmm0
-	unpcklps xmm0, xmm2
-	movaps [_FPMPM], xmm1
-	movaps [_FMPMP], xmm0
 	dec ecx
 	mov [_UF000], ecx
-	movdqa xmm0, [_UF000]
-	pshufd xmm0, xmm0, _MM_SHUFFLE(1, 0, 1, 0)
-	pshufd xmm1, xmm0, _MM_SHUFFLE(0, 0, 0, 0)
-	pshufd xmm2, xmm0, _MM_SHUFFLE(0, 0, 0, 1)
-	pshufd xmm3, xmm0, _MM_SHUFFLE(0, 0, 1, 1)
-	pshufd xmm4, xmm0, _MM_SHUFFLE(0, 1, 1, 1)
-	movdqa [_UF0F0], xmm0
-	movdqa [_UFFFF], xmm1
-	movdqa [_U0FFF], xmm2
-	movdqa [_U00FF], xmm3
-	movdqa [_U000F], xmm4
-	pxor xmm0, xmm1
-	pxor xmm3, xmm1
-	pxor xmm4, xmm1
-	movdqa [_U0F0F], xmm0
-	movdqa [_UFF00], xmm3
-	movdqa [_UFFF0], xmm4
-	movaps xmm0, [_F1111]
-	addps xmm0, xmm0
-	movaps [_F2222], xmm0
-	addps xmm0, [_F1111]
-	movaps [_F3333], xmm0
-	addps xmm0, [_F1111]
-	movaps [_F4444], xmm0
-	mulps xmm0, [_F2222]
-	movaps [_F8888], xmm0
-	addps xmm0, [_F4444]
-	movaps [_FCCCC], xmm0
-	addps xmm0, [_F4444]
-	movaps [_FHHHH], xmm0
+	movd xmm0, ecx
+	pshufd xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0)
+	pshufd xmm1, xmm0, _MM_SHUFFLE(0, 0, 0, 1)
+	pshufd xmm2, xmm0, _MM_SHUFFLE(0, 0, 1, 1)
+	pshufd xmm3, xmm0, _MM_SHUFFLE(0, 1, 1, 1)
+	movdqa [_UFFFF], xmm0
+	movdqa [_U0FFF], xmm1
+	movdqa [_U00FF], xmm2
+	movdqa [_U000F], xmm3
+	pxor xmm2, xmm0
+	pxor xmm3, xmm0
+	movdqa [_UFF00], xmm2
+	movdqa [_UFFF0], xmm3
 .end:
 	FrameEnd
 	ret
