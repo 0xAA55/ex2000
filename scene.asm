@@ -309,7 +309,7 @@ DefFunc _SceneInit
 
 	invoke_cdecl _HRSleepInit
 
-	mov dword [_CameraPos + Vector.y], __?float32?__(200.0)
+	mov dword [_CameraPos + Vector.y], __float32__(200.0)
 
 	xor eax, eax
 	mov [_SceneLoadingProgress], eax
@@ -930,7 +930,7 @@ __SECT__
 .no_ctrl:
 	movaps [_MovementSpeed], xmm0
 	invoke_cdecl _VectorLength, &%$CurMovementSpeed, _MovementSpeed, 3
-	mov eax, __?float32?__(0.00001)
+	mov eax, __float32__(0.00001)
 	movss xmm1, %$CurMovementSpeed
 	movd xmm2, eax
 	ucomiss xmm1, xmm2

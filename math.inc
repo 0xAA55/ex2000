@@ -126,22 +126,10 @@ extern _2Pi
 extern _2.0f
 extern _HaveSSE3
 extern _HaveSSE41
-extern _I1111
 extern _F1000
 extern _F0100
 extern _F0010
 extern _F0001
-extern _FPMPM
-extern _FMMMM
-extern _FMPMP
-extern _F1111
-extern _F2222
-extern _F3333
-extern _F4444
-extern _F8888
-extern _FCCCC
-extern _FHHHH
-extern _UF0F0
 extern _UF000
 extern _UFF00
 extern _UFFF0
@@ -149,8 +137,6 @@ extern _UFFFF
 extern _U0FFF
 extern _U00FF
 extern _U000F
-extern _ZeroVector
-extern _FP5P5P5P5
 extern _point_001_vector
 extern _IdentityMatrix
 

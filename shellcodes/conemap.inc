@@ -78,7 +78,7 @@ DefFunc _ConeMapSearchBlock
 
 	mov ebx, %$CommonData
 	mov edi, %$Best
-	mov dword %$Epsilon, __?float32?__(0.01)
+	mov dword %$Epsilon, __float32__(0.01)
 
 	mov eax, %$X1
 	mov ecx, %$Y1

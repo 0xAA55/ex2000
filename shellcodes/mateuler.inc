@@ -80,7 +80,7 @@ DefFunc _MatrixRotationEuler
 	movss [eax + Matrix.zy], xmm4
 	movss [eax + Matrix.zz], xmm5
 	movss [eax + Matrix.yz], xmm1
-	mov dword[eax + Matrix.ww], __?float32?__(1.0)
+	mov dword[eax + Matrix.ww], __float32__(1.0)
 
 	FrameEnd
 	ret

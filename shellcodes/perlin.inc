@@ -33,7 +33,7 @@ DefFunc _CreatePerlinMap2D
 	and esi, 0xFFFFFFF0
 	invoke_cdecl _CreateSeedVector, esi
 
-	mov eax, __?float32?__(1.0)
+	mov eax, __float32__(1.0)
 	mov ecx, 0x343fD
 	mov edx, 0x269EC3
 	movd xmm2, eax
@@ -114,7 +114,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov %$Steps, eax
 	mov ebx, %$Matrix
 	pxor xmm0, xmm0
-	mov eax, __?float32?__(1.0)
+	mov eax, __float32__(1.0)
 	movd xmm1, eax
 	shufps xmm1, xmm1, 0
 	mov ecx, 4
@@ -126,7 +126,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	shufps xmm0, xmm0, 0
 	movss %$Reciprocal, xmm0
 	movaps [%$_UV1], xmm0
-	mov dword[%$_UV1M + Vector.z], __?float32?__(1.0)
+	mov dword[%$_UV1M + Vector.z], __float32__(1.0)
 	mov [%$_UV2M + Vector.x], ecx
 
 	xor eax, eax
@@ -136,9 +136,9 @@ DefFunc _ConvertPerlinMapToAltitude
 	cvtsi2ss xmm0, eax
 	mulss xmm0, %$Reciprocal
 
-	mov eax, __?float32?__(6.0)
-	mov ecx, __?float32?__(15.0)
-	mov edx, __?float32?__(10.0)
+	mov eax, __float32__(6.0)
+	mov ecx, __float32__(15.0)
+	mov edx, __float32__(10.0)
 
 	movss xmm4, xmm0
 	movd xmm1, eax
@@ -292,7 +292,7 @@ DefFunc _ConvertPerlinMapToAltitude
 	invoke_cdecl _free, %$Steps
 
 	mov ebx, edi
-	mov eax, __?float32?__(0.5)
+	mov eax, __float32__(0.5)
 	movd xmm5, eax
 	shufps xmm5, xmm5, 0
 	movss xmm7, %$Amplitude

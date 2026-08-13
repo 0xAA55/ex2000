@@ -11,7 +11,7 @@ DefFunc _MatrixViewEuler
 	lea ebx, [esi + Matrix.size]
 
 	mov eax, %$Pos
-	mov ecx, __?float32?__(-1.0)
+	mov ecx, __float32__(-1.0)
 	movups xmm0, [eax]
 	movd xmm1, ecx
 	shufps xmm1, xmm1, 0

@@ -11,8 +11,8 @@ DefFunc _MatrixProjection
 	movaps [eax + Matrix.z], xmm0
 	movaps [eax + Matrix.w], xmm0
 
-	mov ecx, __?float32?__(-1.0)
-	mov edx, __?float32?__(2.0)
+	mov ecx, __float32__(-1.0)
+	mov edx, __float32__(2.0)
 
 	movss xmm6, %$ZN
 	movss xmm7, %$ZF

@@ -64,7 +64,7 @@ DefFunc _RaymarchTerrainAltitude
 
 	invoke_cdecl _SampleFloatMap, %$HeightMap, %$VecX, %$VecZ, & %$Sampled
 	movss xmm0, %$Sampled
-	mov eax, __?float32?__(0.00001)
+	mov eax, __float32__(0.00001)
 	movd xmm1, eax
 	mulss xmm0, %$TerrainHeight
 	movss %$CurAltHeight, xmm0

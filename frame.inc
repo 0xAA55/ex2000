@@ -644,7 +644,7 @@
 		fstp qword [esP]
 	%elif __IsFloatF
 		__FlushPassArgs
-		push __?float32?__(%tok(%substr(__ParamStr, 1, -2)))
+		push __float32__(%tok(%substr(__ParamStr, 1, -2)))
 	%elif __IsFloatD
 		__FlushPassArgs
 		%assign __NumParamsPassed 2

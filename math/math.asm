@@ -70,12 +70,12 @@ DefFunc _MathInit
 	fchs
 	fstp dword [_Pi_N]
 
-	mov eax, __?float32?__(1.0)
+	mov eax, __float32__(1.0)
 	mov ecx, 4
 	xor edx, edx
 .init_math_loop:
 	mov [_IdentityMatrix + edx], eax
-	mov dword [_point_001_vector + (ecx - 1) * 4], __?float32?__(0.001)
+	mov dword [_point_001_vector + (ecx - 1) * 4], __float32__(0.001)
 	add edx, 20
 	loop .init_math_loop
 	dec ecx
