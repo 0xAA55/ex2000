@@ -10,6 +10,14 @@
 	DefImp _aligned_free
 	DefImp _AssetsQuery
 	DefImp _PoolRun
+	DefImp _AVLInsert
+	DefImp _AVLSearch
+	DefImp _AVLRemove
+	DefImp _AVLIterate
+	DefImp _AVLClear
+	DefImp _AVLBST_Min
+	DefImp _Get_AVLOps_String
+	DefImp _Get_AVLOps_Integer
 	DefImp _GetNumProcessors
 	DefImp _CheckSSE3
 	DefImp _CheckSSE41

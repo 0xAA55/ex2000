@@ -515,3 +515,11 @@ istruc KeyCompareOps
 	at .on_duplicate_key, dd _AVLDupIntegerKey
 	at .on_free_key, dd _AVLFreeIntegerKey
 iend
+
+DefFunc _Get_AVLOps_String
+	mov eax, _AVLOps_String
+	ret
+
+DefFunc _Get_AVLOps_Integer
+	mov eax, _AVLOps_Integer
+	ret

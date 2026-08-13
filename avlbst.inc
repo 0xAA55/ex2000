@@ -52,6 +52,9 @@ extern _AVLBST_Min
 extern _AVLOps_String
 extern _AVLOps_Integer
 
+extern _Get_AVLOps_String
+extern _Get_AVLOps_Integer
+
 ; All of the `on_free()` or `on_free_key()` allows `NULL` to be used
 
 %endif

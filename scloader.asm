@@ -1,4 +1,5 @@
 %include "loaddll.inc"
+%include "avlbst.inc"
 %include "assets.inc"
 %include "pool.inc"
 %include "shader.inc"
