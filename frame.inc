@@ -20,15 +20,13 @@
 %define StackSegmentAttrib info
 %endif
 
-%ifdef StackSegmentIsBss
-	%macro StackSegmentReserve 1
+%macro StackSegmentReserve 1
+	%ifdef StackSegmentIsBss
 		resd %1
-	%endmacro
-%else
-	%macro StackSegmentReserve 1
+	%else
 		times %1 dd 0
-	%endmacro
-%endif
+	%endif
+%endmacro
 
 %macro DefFunc 1
 	extern %1
