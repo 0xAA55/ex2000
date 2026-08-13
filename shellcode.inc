@@ -1,16 +1,7 @@
 %ifndef _SHELLCODE_INC_
 %define _SHELLCODE_INC_ 1
 
-%macro DefImp 1
-.%1 resb 5
-%endmacro
-
-%macro DefExp 1
-.%1 resd 1
-%endmacro
-
-struc SCHead
-.imports:
+%macro InstImp 0
 	DefImp _malloc
 	DefImp _calloc
 	DefImp _realloc
@@ -22,10 +13,11 @@ struc SCHead
 	DefImp _GetNumProcessors
 	DefImp _CheckSSE3
 	DefImp _CheckSSE41
+	DefImp _ProgramCreate
+	DefImp _SceneLoadShaderProgram
+%endmacro
 
-	%include 'scfuncs.tmp'
-
-.exports:
+%macro InstExp 0
 	DefExp _CreateBitMap
 	DefExp _DuplicateBitMap
 	DefExp _DestroyBitMap
@@ -61,9 +53,6 @@ struc SCHead
 	DefExp _VectorLength
 	DefExp _VectorNormal
 	DefExp _RaymarchTerrainAltitude
-
-.last_ptr:
-	.size equ $ - SCHead
-endstruc
+%endmacro
 
 %endif

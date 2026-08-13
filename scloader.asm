@@ -1,8 +1,30 @@
 %include "loaddll.inc"
-%include "shellcode.inc"
 %include "assets.inc"
 %include "pool.inc"
+%include "shader.inc"
 %include "math.inc"
+
+%macro DefImp 1
+.%1 resb 5
+%endmacro
+
+%macro DefExp 1
+.%1 resd 1
+%endmacro
+
+%include "shellcode.inc"
+
+struc SCHead
+.imports:
+	InstImp
+	%include 'scfuncs.tmp'
+
+.exports:
+	InstExp
+
+.last_ptr:
+	.size equ $ - SCHead
+endstruc
 
 segment .bss
 extern _ShellOldProtect
@@ -17,66 +39,25 @@ _ShellcodeSize resd 1
 extern _FirstDelayLoadFunc
 extern _NumDelayLoadFunc
 
-%macro DefImpSC 1
+%unmacro DefImp 1
+%unmacro DefExp 1
+
+%macro DefExp 1
 	.%1 resd 1
 %endmacro
 
-%macro DefExpSC 1
+%macro DefImp 1
 	.%1 dd %1
 %endmacro
 
 extern _SCEAT
 _SCEAT:
-	DefImpSC _CreateBitMap
-	DefImpSC _DuplicateBitMap
-	DefImpSC _DestroyBitMap
-	DefImpSC _GetBitmapPixelAddress
-	DefImpSC _SampleFloatMap
-	DefImpSC _BatchAdd
-	DefImpSC _BatchBias
-	DefImpSC _BatchCurve
-	DefImpSC _BatchMax
-	DefImpSC _BatchMin
-	DefImpSC _FloatMapNextMip
-	DefImpSC _ConeMapGen
-	DefImpSC _VectorMultMatrix
-	DefImpSC _MatrixMultiply
-	DefImpSC _MatrixMultiplyTo
-	DefImpSC _MatrixProjection
-	DefImpSC _MatrixRotationEuler
-	DefImpSC _MatrixEulerTranslated
-	DefImpSC _MatrixViewEuler
-	DefImpSC _MatrixTranspose
-	DefImpSC _FloatMapApplyGain
-	DefImpSC _CreateSeedVector
-	DefImpSC _CreatePerlinMap2D
-	DefImpSC _ConvertPerlinMapToAltitude
-	DefImpSC _GenPerlinAltitude
-	DefImpSC _AccumulateFloatMap
-	DefImpSC _GenMultiLayerPerlinAltitude
-	DefImpSC _FloatMapCurve
-	DefImpSC _FloatMapGetMinValue
-	DefImpSC _FloatMapGetMaxValue
-	DefImpSC _VectorCross
-	DefImpSC _VectorDot
-	DefImpSC _VectorLength
-	DefImpSC _VectorNormal
-	DefImpSC _RaymarchTerrainAltitude
+	InstExp
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
 _RelocSCIAT:
-	DefExpSC _malloc
-	DefExpSC _calloc
-	DefExpSC _realloc
-	DefExpSC _free
-	DefExpSC _aligned_malloc
-	DefExpSC _aligned_free
-	DefExpSC _AssetsQuery
-	DefExpSC _PoolRun
-	DefExpSC _GetNumProcessors
-	DefExpSC _CheckSSE3
-	DefExpSC _CheckSSE41
+	InstImp
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _GetNumProcessors
