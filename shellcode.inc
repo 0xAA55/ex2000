@@ -32,6 +32,7 @@
 %endmacro
 
 %macro InstExp 0
+	DefExp _ShellcodeInit
 	DefExp _CreateBitMap
 	DefExp _DuplicateBitMap
 	DefExp _DestroyBitMap
@@ -68,7 +69,18 @@
 	DefExp _VectorNormal
 	DefExp _UtfReadCharFromPtr
 	DefExp _Utf32to16
+	DefExp _LfuCreate
+	DefExp _LfuGet
+	DefExp _LfuPut
+	DefExp _LfuDestroy
 	DefExp _RaymarchTerrainAltitude
+%endmacro
+
+%macro GetAbsAddr 2
+	call %%label
+	%%label:
+	pOp %1
+	add %1, %2 - %%label
 %endmacro
 
 %endif

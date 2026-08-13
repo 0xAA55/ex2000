@@ -63,7 +63,6 @@ assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
 tls.asm: loaddll.inc tls.inc
 timer.asm: loaddll.inc timer.inc hrsleep.inc
 avlbst.asm: loaddll.inc avlbst.inc
-lfu.asm: loaddll.inc avlbst.inc lfu.inc
 fontgl.asm: loaddll.inc fontgl.inc avlbst.inc lfu.inc math.inc gl33.inc shader.inc utf.inc
 loaddll.asm: loaddll.inc assets.inc kfuncs.tmp ufuncs.tmp cfuncs.tmp gfuncs.tmp wfuncs.tmp
 buffer.asm: loaddll.inc buffer.inc gl33.inc

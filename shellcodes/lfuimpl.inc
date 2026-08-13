@@ -1,6 +1,6 @@
-%include "loaddll.inc"
-%include "avlbst.inc"
+%include "common.inc"
 %include "lfu.inc"
+%include "avlbst.inc"
 
 struc FreqKey
 	.freq resd 1
@@ -15,6 +15,21 @@ struc DataNode
 	.on_free resd 1
 	.size equ $ - DataNode
 endstruc
+
+DefFunc _LfuInit
+	FrameBegin ebx
+	call .get_addr
+.get_addr:
+	pOp ebx
+	lea eax, [ebx + _FreqKeyCompare - .get_addr]
+	lea ecx, [ebx + _FreqKeyDuplicate - .get_addr]
+	lea edx, [ebx + _FreqKeyFree - .get_addr]
+	add ebx, _FreqKeyOps - .get_addr
+	mov [ebx + KeyCompareOps.on_compare], eax
+	mov [ebx + KeyCompareOps.on_duplicate_key], ecx
+	mov [ebx + KeyCompareOps.on_free_key], edx
+	FrameEnd
+	ret
 
 ; void FreeDataNode(DataNode *dn);
 DefFunc _FreeDataNode
@@ -85,7 +100,8 @@ DefFunc _LfuIncreaseFreq
 	mov [edi + FreqKey.freq], eax
 	mov [edi + FreqKey.data_key], ecx
 	mov [edi + FreqKey.data_keyops], edx
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, _FreqKeyOps
+	GetAbsAddr eax, _FreqKeyOps
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, eax
 
 	FrameEnd
 	ret
@@ -185,7 +201,8 @@ DefFunc _LfuPut
 	mov dword[edi + FreqKey.freq], 1
 	mov [edi + FreqKey.data_key], eax
 	mov [edi + FreqKey.data_keyops], ecx
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, _FreqKeyOps
+	GetAbsAddr eax, _FreqKeyOps
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, eax
 	inc dword[ebx + LfuCache.current_size]
 
 .end:
@@ -261,7 +278,7 @@ DefFunc _FreqKeyDuplicate
 DefFunc _FreqKeyFree
 	jmp _free
 
-segment .rdata
+segment .text
 extern _FreqKeyOps
 _FreqKeyOps:
 istruc KeyCompareOps

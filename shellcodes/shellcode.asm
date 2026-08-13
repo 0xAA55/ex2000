@@ -37,13 +37,6 @@ struc SCHead
 	.size equ $ - SCHead
 endstruc
 
-%macro GetAbsAddr 2
-	call %%label
-	%%label:
-	pOp %1
-	add %1, %2 - %%label
-%endmacro
-
 %macro binform 2
 DefFunc %1
 incbin %strcat(%2, ".bin")
@@ -78,6 +71,13 @@ binform _VectorMultMatrix, "vecmultmat"
 binform _VectorNormal, "vecnormal"
 binform _UtfReadCharFromPtr, "utf8read"
 binform _Utf32to16, "utf16enc"
+%include "lfuimpl.inc"
 %include "raymarch.inc"
+
+DefFunc _ShellcodeInit
+	FrameBegin
+	invoke_cdecl _LfuInit
+	FrameEnd
+	ret
 
 times 16 - ($ - $$) % 16 int3

@@ -120,6 +120,7 @@ DefFunc _LoadShellcode
 	jnz .setup_eat
 
 	invoke_dll_stdcall VirtualProtect, ebx, [_ShellcodeSize], PAGE_EXECUTE_READWRITE, _ShellOldProtect
+	invoke_cdecl _ShellcodeInit
 	mov eax, ebx
 	FrameEnd
 	ret
