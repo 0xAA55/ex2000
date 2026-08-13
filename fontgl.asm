@@ -33,22 +33,25 @@ endstruc
 
 ;void OGLFC_OnLfuKeyRemove(void *key, void *context)
 DefFunc _OGLFC_OnLfuKeyRemove
-	FrameBegin ebx, esi
-	mov ebx, Param(1)
-	invoke_cdecl _LfuGet, [ebx + OGLFC.lfu], Param(0)
+	FrameBegin ebx, esi, edi
+	NameParams %$Key, %$Context
+	mov ebx, %$Context
+	invoke_cdecl _LfuGet, [ebx + OGLFC.lfu], %$Key
 	mov esi, eax
-	mov eax, [esi + LfuData.x]
+	mov edi, [esi + LfuData.x]
 	mov edx, [esi + LfuData.y]
 	shl edx, 16
-	or eax, edx
-	invoke_cdecl _AVLInsert, &[ebx + OGLFC.vacant_coords], eax, eax, NULL, _AVLOps_Integer 
+	or edi, edx
+	invoke_cdecl _Get_AVLOps_Integer
+	invoke_cdecl _AVLInsert, &[ebx + OGLFC.vacant_coords], edi, edi, NULL, eax
 	FrameEnd
 	ret
 
 ;void OGLFC_DescribeVAO(OGLFC *oglfc)
 DefFunc _OGLFC_DescribeVAO
 	FrameBegin ebx, edi
-	mov ebx, Param(0)
+	NameParams %$OGLFC
+	mov ebx, %$OGLFC
 	invoke_dll_stdcall glBindVertexArray, [ebx + OGLFC.vao]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.bbbuf_gl_buffer]
 	GetAttribLocation [ebx + OGLFC.shader_program], "position"
@@ -84,7 +87,7 @@ DefFunc _OGLFC_DescribeVAO
 
 ;OGLFC *OGLFC_Create(HDC hDC, int cap_bits);
 DefFunc _OGLFC_Create
-	FrameBegin ebx
+	FrameBegin ebx, edi
 	NameParams %$hDC, %$CapacitorBits
 	DefVars %$X, %$Y, %$NumCharsInARow
 	DefSizedVar %$TextMetrics, TEXTMETRICW.size
@@ -157,7 +160,8 @@ DefFunc _OGLFC_Create
 	mul eax
 	mov [ebx + OGLFC.capacity], eax
 
-	invoke_cdecl _LfuCreate, eax, _AVLOps_Integer, ebx, _OGLFC_OnLfuKeyRemove
+	invoke_cdecl _Get_AVLOps_Integer
+	invoke_cdecl _LfuCreate, [ebx + OGLFC.capacity], eax, ebx, _OGLFC_OnLfuKeyRemove
 	mov [ebx + OGLFC.lfu], eax
 
 	xor eax, eax
@@ -171,7 +175,9 @@ DefFunc _OGLFC_Create
 	and eax, 0xFFFF
 	shl edx, 16
 	or eax, edx
-	invoke_cdecl _AVLInsert, &[ebx + OGLFC.vacant_coords], eax, eax, NULL, _AVLOps_Integer
+	mov edi, eax
+	invoke_cdecl _Get_AVLOps_Integer
+	invoke_cdecl _AVLInsert, &[ebx + OGLFC.vacant_coords], edi, edi, NULL, eax
 	
 	mov eax, %$X
 	inc eax
@@ -225,8 +231,8 @@ DefFunc _OGLFC_Create
 ;void OGLFC_Destroy(OGLFC *oglfc);
 DefFunc _OGLFC_Destroy
 	FrameBegin ebx
-
-	mov ebx, Param(0)
+	NameParams %$OGLFC
+	mov ebx, %$OGLFC
 
 	invoke_cdecl _LfuDestroy, [ebx + OGLFC.lfu]
 	invoke_cdecl _AVLClear, &[ebx + OGLFC.vacant_coords]
@@ -246,6 +252,7 @@ DefFunc _OGLFC_Destroy
 ;HBITMAP OGLFC_CreateAndSelectBitmap(HDC hDC, int w, int h, void **pptr)
 DefFunc _OGLFC_CreateAndSelectBitmap
 	FrameBegin edi
+	NameParams %$hDC, %$Width, %$Height, %$PPtr
 	DefSizedVar %$BMIF, BITMAPINFOHEADER.size
 	DefSizedVar %$Palette, 1024
 
@@ -253,8 +260,8 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 	lea edi, Variable(0)
 	mov ecx, %$Frame_NumLocals
 	rep stosd
-	mov eax, Param(1)
-	mov ecx, Param(2)
+	mov eax, %$Width
+	mov ecx, %$Height
 	mov dword[%$BMIF_Addr + BITMAPINFOHEADER.biSize], 40
 	neg ecx
 	mov [%$BMIF_Addr + BITMAPINFOHEADER.biWidth], eax
@@ -273,8 +280,8 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 	cmp ax, 256
 	jb .loop_set_palette
 
-	invoke_dll_stdcall CreateDIBSection, Param(0), & %$BMIF, 0, Param(3), NULL, 0
-	invoke_dll_stdcall SelectObject, Param(0), eax
+	invoke_dll_stdcall CreateDIBSection, %$hDC, & %$BMIF, 0, %$PPtr, NULL, 0
+	invoke_dll_stdcall SelectObject, %$hDC, eax
 
 	FrameEnd
 	ret
