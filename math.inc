@@ -128,9 +128,6 @@ extern _0.01f
 extern _M1.0f
 extern _M2.0f
 extern _100.0f
-extern _W6
-extern _W10
-extern _W15
 extern _HaveSSE3
 extern _HaveSSE41
 extern _FMAX
@@ -179,6 +176,12 @@ extern _MathDeInit
 	;void DebugMatrix(int x, int y, Matrix *m);
 	extern _DebugMatrix
 %endif
+
+; int CheckSSE3();
+extern _CheckSSE3
+
+; int CheckSSE41();
+extern _CheckSSE41
 
 ;void BatchAdd(float *dst, float *src, size_t num_floats);
 extern _BatchAdd
@@ -252,9 +255,6 @@ extern _DuplicateBitMap
 
 ;void DestroyBitMap(BitMap *map);
 extern _DestroyBitMap
-
-;float SmootherStep(float x);
-extern _SmootherStep
 
 ;BitMap *CreatePerlinMap2D(int border_len);
 extern _CreatePerlinMap2D

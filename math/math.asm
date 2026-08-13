@@ -69,12 +69,6 @@ extern _FMAX
 _FMAX dd 0x7F7FFFFF
 extern _FMIN
 _FMIN dd 0xFF7FFFFF
-extern _W6
-_W6 dw 6
-extern _W10
-_W10 dw 10
-extern _W15
-_W15 dw 15
 
 DefFunc _MathInit
 	FrameBegin ebx

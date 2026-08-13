@@ -1,4 +1,3 @@
-%include "common.inc"
 
 DefFunc _RaymarchTerrainAltitude
 	FrameBegin esi, edi
@@ -64,7 +63,8 @@ DefFunc _RaymarchTerrainAltitude
 
 	invoke_cdecl _SampleFloatMap, %$HeightMap, %$VecX, %$VecZ, & %$Sampled
 	movss xmm0, %$Sampled
-	movss xmm1, [_0.01f]
+	mov eax, __?float32?__(0.00001)
+	movd xmm1, eax
 	mulss xmm0, %$TerrainHeight
 	movss %$CurAltHeight, xmm0
 	addss xmm1, xmm0

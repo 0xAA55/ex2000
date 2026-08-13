@@ -23,11 +23,11 @@ DefImp _PoolRun
 DefImp _GetNumProcessors
 DefImp _CheckSSE3
 DefImp _CheckSSE41
-DefImp _SmootherStep
 
 %include "scfuncs.tmp"
 
 DefExp _CreateBitMap
+DefExp _DuplicateBitMap
 DefExp _DestroyBitMap
 DefExp _GetBitmapPixelAddress
 DefExp _SampleFloatMap
@@ -43,6 +43,8 @@ DefExp _MatrixMultiply
 DefExp _MatrixMultiplyTo
 DefExp _MatrixProjection
 DefExp _MatrixRotationEuler
+DefExp _MatrixEulerTranslated
+DefExp _MatrixViewEuler
 DefExp _MatrixTranspose
 DefExp _FloatMapApplyGain
 DefExp _CreateSeedVector
@@ -54,6 +56,11 @@ DefExp _GenMultiLayerPerlinAltitude
 DefExp _FloatMapCurve
 DefExp _FloatMapGetMinValue
 DefExp _FloatMapGetMaxValue
+DefExp _VectorCross
+DefExp _VectorDot
+DefExp _VectorLength
+DefExp _VectorNormal
+DefExp _RaymarchTerrainAltitude
 
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
@@ -79,6 +86,7 @@ DefExp _FloatMapGetMaxValue
 %include "math/common.inc"
 
 %include "bitmap.inc"
+%include "bitmapdup.inc"
 %include "samplefmap.inc"
 %include "batchadd.inc"
 %include "batchbias.inc"
@@ -91,6 +99,8 @@ DefExp _FloatMapGetMaxValue
 %include "matmult.inc"
 %include "matproj.inc"
 %include "mateuler.inc"
+%include "matteuler.inc"
+%include "matveuler.inc"
 %include "mattranspose.inc"
 %include "floatmapgain.inc"
 %include "floatmapmax.inc"
@@ -98,5 +108,10 @@ DefExp _FloatMapGetMaxValue
 %include "floatmapcurve.inc"
 %include "seedvec.inc"
 %include "perlin.inc"
+%include "veccross.inc"
+%include "vecdot.inc"
+%include "veclength.inc"
+%include "vecnormal.inc"
+%include "raymarch.inc"
 
 times 16 - ($ - $$) % 16 int3

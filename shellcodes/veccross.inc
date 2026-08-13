@@ -1,11 +1,11 @@
-%include "common.inc"
 
 DefFunc _VectorCross
 	FrameBegin
+	NameParams %$Out, %$V1, %$V2
 
-	mov eax, Param(1)
-	mov ecx, Param(2)
-	mov edx, Param(0)
+	mov eax, %$V1
+	mov ecx, %$V2
+	mov edx, %$Out
 
 	movaps xmm0, [eax]
 	movaps xmm1, xmm0

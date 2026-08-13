@@ -17,15 +17,7 @@ bitmapblt.asm: common.inc
 bitmapdup.asm: common.inc
 bitmappool.asm: common.inc
 math.asm: common.inc
-matteuler.asm: common.inc
-matveuler.asm: common.inc
 raymarch.asm: common.inc
-sstep.asm: common.inc
-terrain.asm: common.inc
-veccross.asm: common.inc
-vecdot.asm: common.inc
-veclength.asm: common.inc
-vecnormal.asm: common.inc
 vfmap: common.inc
 
 $(OBJ_DIR)/%.obj: %.asm

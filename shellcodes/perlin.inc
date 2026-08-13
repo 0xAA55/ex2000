@@ -87,8 +87,10 @@ DefFunc _CreatePerlinMap2D
 
 DefFunc _ConvertPerlinMapToAltitude
 	FrameBegin ebx, esi, edi
+	NameParams %$Ratio, %$Amplitude, %$SrcMap
 	DefVars %$Steps, %$Reciprocal, %$Matrix
 	DefVars %$X, %$Y, %$BX, %$BY, %$IX, %$IY
+	DefSizedVar %$MatrixBuffer, 6 * 0x10 + 0x10
 	%define %$_P00XY_P10XY ebx + 0x00
 	%define %$_P01XY_P11XY ebx + 0x10
 	%define %$_UV1 ebx + 0x20
@@ -96,49 +98,65 @@ DefFunc _ConvertPerlinMapToAltitude
 	%define %$_UV2M ebx + 0x40
 	%define %$_DP_00_10_01_11 ebx + 0x50
 
-	mov esi, Param(2)
-	mov eax, Param(0)
+	mov esi, %$SrcMap
+	mov eax, %$Ratio
 	mul dword [esi + BitMap.border_len]
 	invoke_cdecl _CreateBitMap, eax, 1, 4
 	mov edi, eax
 
-	invoke_cdecl _aligned_malloc, 6 * 0x10, 0x10
+	lea eax, [%$MatrixBuffer_Addr + 0x10]
+	and eax, 0xFFFFFFF0
 	mov %$Matrix, eax
 
-	mov eax, Param(0)
+	mov eax, %$Ratio
 	invoke_cdecl _malloc, &[eax * 4]
 	mov %$Steps, eax
-	xor eax, eax
-	mov %$X, eax
-	fld1
-	fidiv dword Param(0)
-	fst dword %$Reciprocal
 	mov ebx, %$Matrix
-	mov eax, %$Reciprocal
 	pxor xmm0, xmm0
-	mov edx, __?float32?__(1.0)
-	movd xmm1, edx
+	mov eax, __?float32?__(1.0)
+	movd xmm1, eax
 	shufps xmm1, xmm1, 0
 	mov ecx, 4
 	movaps [%$_UV1M], xmm0
 	movaps [%$_UV2M], xmm1
-.init_uv:
-	mov [%$_UV1 + (ecx - 1) * 4], eax
-	loop .init_uv
+	mov eax, %$Ratio
+	cvtsi2ss xmm0, eax
+	rcpss xmm0, xmm0
+	shufps xmm0, xmm0, 0
+	movss %$Reciprocal, xmm0
+	movaps [%$_UV1], xmm0
 	mov dword[%$_UV1M + Vector.z], __?float32?__(1.0)
 	mov [%$_UV2M + Vector.x], ecx
 
+	xor eax, eax
 	mov ebx, %$Steps
+	mov %$X, eax
 .get_steps:
-	fild dword %$X
-	fmul dword %$Reciprocal
-	invoke_cdecl _SmootherStep, st0
-	fstp dword [ebx]
+	cvtsi2ss xmm0, eax
+	mulss xmm0, %$Reciprocal
+
+	mov eax, __?float32?__(6.0)
+	mov ecx, __?float32?__(15.0)
+	mov edx, __?float32?__(10.0)
+
+	movss xmm4, xmm0
+	movd xmm1, eax
+	movd xmm2, ecx
+	movd xmm3, edx
+	mulss xmm0, xmm1
+	subss xmm0, xmm2
+	mulss xmm0, xmm4
+	addss xmm0, xmm3
+	mulss xmm0, xmm4
+	mulss xmm0, xmm4
+	mulss xmm0, xmm4
+	movss [ebx], xmm0
+
 	add ebx, 4
 	mov eax, %$X
 	inc eax
 	mov %$X, eax
-	cmp eax, Param(0)
+	cmp eax, %$Ratio
 	jb .get_steps
 
 	mov ebx, %$Matrix
@@ -146,13 +164,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov %$Y, eax
 .loopy:
 	mov eax, %$Y
-	mul eax, Param(0)
+	mul eax, %$Ratio
 	mov %$BY, eax
 	xor eax, eax
 	mov %$X, eax
 .loopx:
 	mov eax, %$X
-	mul eax, Param(0)
+	mul eax, %$Ratio
 	mov %$BX, eax
 	invoke_cdecl _GetBitmapPixelAddress, %$X, %$Y, esi
 	mov edx, [eax + 4]
@@ -249,13 +267,13 @@ DefFunc _ConvertPerlinMapToAltitude
 	mov eax, %$IX
 	inc eax
 	mov %$IX, eax
-	cmp eax, Param(0)
+	cmp eax, %$Ratio
 	jb .iloopx
 
 	mov eax, %$IY
 	inc eax
 	mov %$IY, eax
-	cmp eax, Param(0)
+	cmp eax, %$Ratio
 	jb .iloopy
 
 	mov eax, %$X
@@ -271,13 +289,12 @@ DefFunc _ConvertPerlinMapToAltitude
 	jb .loopy
 
 	invoke_cdecl _free, %$Steps
-	invoke_cdecl _aligned_free, %$Matrix
 
 	mov ebx, edi
 	mov eax, __?float32?__(0.5)
 	movd xmm5, eax
 	shufps xmm5, xmm5, 0
-	movss xmm7, Param(1)
+	movss xmm7, %$Amplitude
 	mov esi, [ebx + BitMap.data]
 	mov eax, [ebx + BitMap.num_floats]
 	test al, 0xF

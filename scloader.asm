@@ -28,6 +28,7 @@ extern _NumDelayLoadFunc
 extern _SCEAT
 _SCEAT:
 	DefImpSC _CreateBitMap
+	DefImpSC _DuplicateBitMap
 	DefImpSC _DestroyBitMap
 	DefImpSC _GetBitmapPixelAddress
 	DefImpSC _SampleFloatMap
@@ -43,6 +44,8 @@ _SCEAT:
 	DefImpSC _MatrixMultiplyTo
 	DefImpSC _MatrixProjection
 	DefImpSC _MatrixRotationEuler
+	DefImpSC _MatrixEulerTranslated
+	DefImpSC _MatrixViewEuler
 	DefImpSC _MatrixTranspose
 	DefImpSC _FloatMapApplyGain
 	DefImpSC _CreateSeedVector
@@ -54,6 +57,11 @@ _SCEAT:
 	DefImpSC _FloatMapCurve
 	DefImpSC _FloatMapGetMinValue
 	DefImpSC _FloatMapGetMaxValue
+	DefImpSC _VectorCross
+	DefImpSC _VectorDot
+	DefImpSC _VectorLength
+	DefImpSC _VectorNormal
+	DefImpSC _RaymarchTerrainAltitude
 	.num_fps equ ($ - _SCEAT) / 4
 
 segment .rdata
@@ -69,7 +77,6 @@ _RelocSCIAT:
 	DefExpSC _GetNumProcessors
 	DefExpSC _CheckSSE3
 	DefExpSC _CheckSSE41
-	DefExpSC _SmootherStep
 	.num_fps equ ($ - _RelocSCIAT) / 4
 
 DefFunc _GetNumProcessors
@@ -160,6 +167,7 @@ DefFunc _UnloadShellcode
 %endmacro
 
 RedirCall _CreateBitMap
+RedirCall _DuplicateBitMap
 RedirCall _DestroyBitMap
 RedirCall _GetBitmapPixelAddress
 RedirCall _SampleFloatMap
@@ -175,6 +183,8 @@ RedirCall _MatrixMultiply
 RedirCall _MatrixMultiplyTo
 RedirCall _MatrixProjection
 RedirCall _MatrixRotationEuler
+RedirCall _MatrixEulerTranslated
+RedirCall _MatrixViewEuler
 RedirCall _MatrixTranspose
 RedirCall _FloatMapApplyGain
 RedirCall _CreateSeedVector
@@ -186,3 +196,8 @@ RedirCall _GenMultiLayerPerlinAltitude
 RedirCall _FloatMapCurve
 RedirCall _FloatMapGetMinValue
 RedirCall _FloatMapGetMaxValue
+RedirCall _VectorCross
+RedirCall _VectorDot
+RedirCall _VectorLength
+RedirCall _VectorNormal
+RedirCall _RaymarchTerrainAltitude

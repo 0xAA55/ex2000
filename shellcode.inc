@@ -22,13 +22,12 @@ struc SCHead
 	DefImp _GetNumProcessors
 	DefImp _CheckSSE3
 	DefImp _CheckSSE41
-	DefImp _SmootherStep
 
 	%include 'scfuncs.tmp'
 
 .exports:
-	DefExp _ShellcodeInit
 	DefExp _CreateBitMap
+	DefExp _DuplicateBitMap
 	DefExp _DestroyBitMap
 	DefExp _GetBitmapPixelAddress
 	DefExp _SampleFloatMap
@@ -44,6 +43,8 @@ struc SCHead
 	DefExp _MatrixMultiplyTo
 	DefExp _MatrixProjection
 	DefExp _MatrixRotationEuler
+	DefExp _MatrixEulerTranslated
+	DefExp _MatrixViewEuler
 	DefExp _MatrixTranspose
 	DefExp _FloatMapApplyGain
 	DefExp _CreateSeedVector
@@ -55,6 +56,11 @@ struc SCHead
 	DefExp _FloatMapCurve
 	DefExp _FloatMapGetMinValue
 	DefExp _FloatMapGetMaxValue
+	DefExp _VectorCross
+	DefExp _VectorDot
+	DefExp _VectorLength
+	DefExp _VectorNormal
+	DefExp _RaymarchTerrainAltitude
 
 .last_ptr:
 	.size equ $ - SCHead
