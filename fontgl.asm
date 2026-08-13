@@ -7,9 +7,6 @@
 %include "shader.inc"
 %include "utf.inc"
 
-extern _BillBoardVertices
-extern _BillboardVerticesBuffer
-
 struc LfuData
 	.x resd 1
 	.y resd 1
@@ -53,7 +50,7 @@ DefFunc _OGLFC_DescribeVAO
 	FrameBegin ebx, edi
 	mov ebx, Param(0)
 	invoke_dll_stdcall glBindVertexArray, [ebx + OGLFC.vao]
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer + GlBuffer.gl_buffer]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.bbbuf_gl_buffer]
 	GetAttribLocation [ebx + OGLFC.shader_program], "position"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
@@ -213,6 +210,10 @@ DefFunc _OGLFC_Create
 	GetUniformLocation [ebx + OGLFC.shader_program], "offset"
 	mov [ebx + OGLFC.location_offset], eax
 
+	DefSizedVar %$BillBoardVertices, 8
+	mov dword [%$BillBoardVertices_Addr + 0], 0x00010000
+	mov dword [%$BillBoardVertices_Addr + 4], 0x01010100
+	invoke_cdecl _InitBuffer, &[ebx + OGLFC.billboard_buffer], GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, 4, & %$BillBoardVertices
 	invoke_cdecl _InitBuffer, &[ebx + OGLFC.instance_buffer], GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, InstBufferData.size, 64, 0
 
 	invoke_dll_stdcall glGenVertexArrays, 1, &[ebx + OGLFC.vao]

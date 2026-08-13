@@ -31,6 +31,8 @@ struc OGLFC ;OpenGL Font Cache
 	.lfu resd 1 ;LfuCache
 	.vacant_coords resd 1 ;AVLBST
 	.shader_program resd 1
+	.billboard_buffer:
+		InstGlBuffer bbbuf_
 	.location_font_map resd 1
 	.location_grid_size resd 1
 	.location_font_color resd 1
