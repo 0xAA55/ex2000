@@ -47,7 +47,6 @@ wfuncs.tmp: assets/WFUNC
 loaddll.inc: frame.inc expfuncs.tmp
 shader.inc: gl33.inc
 fontgl.inc: buffer.inc
-shellcode.inc: scfuncs.tmp
 main.asm: loaddll.inc assets.inc math.inc tls.inc vblank.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
 tls.asm: loaddll.inc tls.inc
@@ -66,7 +65,7 @@ utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 scloader.asm: loaddll.inc shellcode.inc assets.inc
 
-shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp
+shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
 	make -C shellcodes
 	copy shellcodes\\shellcode.bin shellcode.bin
 out/stub.bin: stub.asm

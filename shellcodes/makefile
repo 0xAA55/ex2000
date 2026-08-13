@@ -11,7 +11,7 @@ ASMFLAGS=-i..
 	copy $@+
 
 all: shellcode.bin
-shellcode.asm: $(BINS)
+shellcode.asm: $(BINS) ../shellcode.inc ../scfuncs.tmp
 ../loaddll.inc: ../frame.inc ../expfuncs.tmp
 common.inc: ../loaddll.inc
 
