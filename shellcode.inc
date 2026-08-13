@@ -66,6 +66,8 @@
 	DefExp _VectorDot
 	DefExp _VectorLength
 	DefExp _VectorNormal
+	DefExp _UtfReadCharFromPtr
+	DefExp _Utf32to16
 	DefExp _RaymarchTerrainAltitude
 %endmacro
 

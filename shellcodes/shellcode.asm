@@ -76,6 +76,8 @@ binform _VectorDot, "vecdot"
 binform _VectorLength, "veclength"
 binform _VectorMultMatrix, "vecmultmat"
 binform _VectorNormal, "vecnormal"
+binform _UtfReadCharFromPtr, "utf8read"
+binform _Utf32to16, "utf16enc"
 %include "raymarch.inc"
 
 times 16 - ($ - $$) % 16 int3
