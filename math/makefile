@@ -1,8 +1,8 @@
-OBJ_DIR:=../out
+OUT_DIR:=../out
 SRCS=$(wildcard *.asm)
-OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
+OBJS=$(patsubst %.asm, $(OUT_DIR)/%.obj, $(SRCS))
 DEFS:=
-ASMFLAGS=
+ASMFLAGS=-i..
 
 %.inc:
 	copy $@+
@@ -20,8 +20,8 @@ math.asm: common.inc
 raymarch.asm: common.inc
 vfmap: common.inc
 
-$(OBJ_DIR)/%.obj: %.asm
-	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-	nasm -I.. -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
-$(OBJ_DIR)/math.lib: $(OBJS)
+$(OUT_DIR)/%.obj: %.asm
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
+$(OUT_DIR)/math.lib: $(OBJS)
 	lib /NOLOGO /OUT:$@ /NODEFAULTLIB $^

@@ -1,3 +1,4 @@
+%include "common.inc"
 
 DefFunc _FloatMapApplyGain
 	FrameBegin ebx, esi

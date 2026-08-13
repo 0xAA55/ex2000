@@ -1,3 +1,4 @@
+%include "common.inc"
 
 DefFunc _MatrixEulerTranslated
 	FrameBegin edi

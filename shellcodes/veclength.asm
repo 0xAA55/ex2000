@@ -1,5 +1,6 @@
+%include "common.inc"
 
-DefFunc _VectorNormal
+DefFunc _VectorLength
 	FrameBegin
 	NameParams %$Out, %$V, %$Dim
 
@@ -10,24 +11,15 @@ DefFunc _VectorNormal
 	mov ecx, %$Dim
 	mov edx, %$Out
 
-.loop_dot:
+.loop_components:
 	movss xmm1, [eax + (ecx - 1) * 4]
 	mulss xmm1, xmm1
 	addss xmm0, xmm1
 	dec ecx
-	jnz .loop_dot
+	jnz .loop_components
 
-	rsqrtss xmm0, xmm0
-
-	mov ecx, %$Dim
-
-.loop_normalize:
-	movss xmm1, [eax + (ecx - 1) * 4]
-	mulss xmm1, xmm0
-	movss [edx + (ecx - 1) * 4], xmm1
-	dec ecx
-	jnz .loop_normalize
+	sqrtss xmm0, xmm0
+	movss [edx], xmm0
 
 	FrameEnd
 	ret
-

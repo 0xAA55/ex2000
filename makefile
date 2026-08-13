@@ -1,7 +1,7 @@
-OBJ_DIR:=out
-SRCS=$(filter-out stub.asm shellcode.asm, $(wildcard *.asm))
-OBJS=$(patsubst %.asm, $(OBJ_DIR)/%.obj, $(SRCS))
-OBJS_D=$(patsubst %.asm, $(OBJ_DIR)/%_d.obj, $(SRCS))
+OUT_DIR:=out
+SRCS=$(filter-out stub.asm, $(wildcard *.asm))
+OBJS=$(patsubst %.asm, $(OUT_DIR)/%.obj, $(SRCS))
+OBJS_D=$(patsubst %.asm, $(OUT_DIR)/%_d.obj, $(SRCS))
 LIBS=out/math.lib lib/kernel32.lib
 DEFS:=
 ASMFLAGS=
@@ -65,20 +65,20 @@ shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
 utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 scloader.asm: loaddll.inc shellcode.inc assets.inc
-shellcode.asm: shellcode.inc scfuncs.tmp $(wildcard shellcodes/*)
 
-shellcode.bin: shellcode.asm
-	nasm $^ $(DEFS) -ishellcodes $(ASMFLAGS) -o $@
+shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp
+	make -C shellcodes
+	copy shellcodes\\shellcode.bin shellcode.bin
 out/stub.bin: stub.asm
 	nasm $^ -o $@
 out/%_d.obj: %.asm
-	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) $^ -o $@
 out/%.obj: %.asm
-	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
 out/assets.cab: $(wildcard assets/*) shellcode.bin
-	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\* shellcode.bin
 out/math.lib: $(wildcard math/*) loaddll.inc pool.inc math.inc
 	make -C math
@@ -90,6 +90,7 @@ ex2000d.exe: $(OBJS_D) $(LIBS) out/stub.bin
 	link /NOLOGO /NODEFAULTLIB /NOENTRY /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /STUB:out\\stub.bin /SUBSYSTEM:CONSOLE $(OBJS_D) $(LIBS)
 
 clean:
+	make -C shellcodes clean
 	del /f /s /q *.tmp out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb shellcode.bin ex2000.exe ex2000d.exe
 
 again:

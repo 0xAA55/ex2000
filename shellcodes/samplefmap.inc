@@ -1,3 +1,4 @@
+%include "common.inc"
 
 ;void SampleFloatMap(BitMap *map, float u, float v, float *ret);
 DefFunc _SampleFloatMap

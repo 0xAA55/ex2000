@@ -1,3 +1,4 @@
+%include "common.inc"
 
 struc CMGData
 	.border_len resd 1

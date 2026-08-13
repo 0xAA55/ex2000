@@ -1,3 +1,4 @@
+%include "common.inc"
 
 struc PoolProcParam
 .bitmap resd 1

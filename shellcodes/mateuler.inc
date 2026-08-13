@@ -1,3 +1,4 @@
+%include "common.inc"
 
 ; %define _EULER_DEBUG 1
 

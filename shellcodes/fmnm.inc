@@ -1,3 +1,4 @@
+%include "common.inc"
 
 segment .text
 extern _FMNMProcs

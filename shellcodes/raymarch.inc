@@ -1,3 +1,4 @@
+%include "common.inc"
 
 DefFunc _RaymarchTerrainAltitude
 	FrameBegin esi, edi

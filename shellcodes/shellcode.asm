@@ -62,14 +62,6 @@ DefExp _VectorLength
 DefExp _VectorNormal
 DefExp _RaymarchTerrainAltitude
 
-%define StackSegmentAttrib nobits
-%define StackSegmentIsBss 1
-[warning -pp-macro-redef-multi]
-%unmacro extern 1-*
-%macro extern 1-*
-%endmacro
-[warning +pp-macro-redef-multi]
-
 %unmacro DefImp 1
 %unmacro DefExp 1
 
@@ -80,38 +72,40 @@ DefExp _RaymarchTerrainAltitude
 	add %1, %2 - %%label
 %endmacro
 
-%define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
-
 %include "shellcode.inc"
-%include "math/common.inc"
+
+%macro binform 2
+DefFunc %1
+incbin %strcat(%2, ".bin")
+%endmacro
 
 %include "bitmap.inc"
 %include "bitmapdup.inc"
 %include "samplefmap.inc"
-%include "batchadd.inc"
-%include "batchbias.inc"
-%include "batchcurve.inc"
-%include "batchmax.inc"
-%include "batchmin.inc"
+binform _BatchAdd, "batchadd"
+binform _BatchBias, "batchbias"
+binform _BatchCurve, "batchcurve"
+binform _BatchMax, "batchmax"
+binform _BatchMin, "batchmin"
 %include "fmnm.inc"
 %include "conemap.inc"
-%include "vecmultmat.inc"
 %include "matmult.inc"
-%include "matproj.inc"
+binform _MatrixProjection, "matproj"
 %include "mateuler.inc"
 %include "matteuler.inc"
 %include "matveuler.inc"
-%include "mattranspose.inc"
-%include "floatmapgain.inc"
+binform _MatrixTranspose, "mattranspose"
+binform _FloatMapApplyGain, "floatmapgain"
 %include "floatmapmax.inc"
 %include "floatmapmin.inc"
 %include "floatmapcurve.inc"
 %include "seedvec.inc"
 %include "perlin.inc"
-%include "veccross.inc"
-%include "vecdot.inc"
-%include "veclength.inc"
-%include "vecnormal.inc"
+binform _VectorCross, "veccross"
+binform _VectorDot, "vecdot"
+binform _VectorLength, "veclength"
+binform _VectorMultMatrix, "vecmultmat"
+binform _VectorNormal, "vecnormal"
 %include "raymarch.inc"
 
 times 16 - ($ - $$) % 16 int3

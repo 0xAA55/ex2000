@@ -1,3 +1,4 @@
+%include "common.inc"
 
 DefFunc _CreatePerlinMap2D
 	FrameBegin ebx, esi

@@ -1,3 +1,4 @@
+%include "common.inc"
 
 ; BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
 DefFunc _CreateBitMap
