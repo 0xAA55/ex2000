@@ -14,10 +14,7 @@ all: ../out/math.lib
 ../loaddll.inc: ../frame.inc ../expfuncs.tmp
 common.inc: ../math.inc ../pool.inc ../loaddll.inc
 bitmapblt.asm: common.inc
-bitmapdup.asm: common.inc
-bitmappool.asm: common.inc
 math.asm: common.inc
-raymarch.asm: common.inc
 vfmap: common.inc
 
 $(OUT_DIR)/%.obj: %.asm

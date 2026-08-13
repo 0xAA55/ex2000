@@ -12,9 +12,7 @@ bits 32
 
 %include "shellcode.inc"
 
-InstImp
-%include 'scfuncs.tmp'
-%include 'glfuncs.tmp'
+InstImpFull
 InstExp
 
 %unmacro DefImp 1
@@ -30,9 +28,7 @@ InstExp
 
 struc SCHead
 .imports:
-	InstImp
-	%include 'scfuncs.tmp'
-	%include 'glfuncs.tmp'
+	InstImpFull
 
 .exports:
 	InstExp

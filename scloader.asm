@@ -17,9 +17,7 @@
 
 struc SCHead
 .imports:
-	InstImp
-	%include 'scfuncs.tmp'
-	%include 'glfuncs.tmp'
+	InstImpFull
 
 .exports:
 	InstExp

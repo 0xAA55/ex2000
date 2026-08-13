@@ -75,6 +75,7 @@ shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
 utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 scloader.asm: loaddll.inc shellcode.inc assets.inc
+shellcode.inc: scfuncs.tmp glfuncs.tmp
 
 shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
 	make -C shellcodes

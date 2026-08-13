@@ -11,9 +11,10 @@ ASMFLAGS=-i..
 	copy $@+ >nul 2>&1
 
 all: shellcode.bin
-shellcode.asm: $(BINS) ../shellcode.inc ../scfuncs.tmp ../glfuncs.tmp
+shellcode.asm: $(BINS) ../shellcode.inc
+../shellcode.inc: ../scfuncs.tmp ../glfuncs.tmp
 ../loaddll.inc: ../frame.inc ../expfuncs.tmp
-common.inc: ../loaddll.inc
+common.inc: ../frame.inc ../math.inc ../shellcode.inc
 
 %.bin: %.asm
 	if not exist $(OUT_DIR) mkdir $(OUT_DIR)

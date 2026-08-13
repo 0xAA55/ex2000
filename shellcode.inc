@@ -25,6 +25,12 @@
 	DefImp _SceneLoadShaderProgram
 %endmacro
 
+%macro InstImpFull 0
+	InstImp
+	%include 'scfuncs.tmp'
+	%include 'glfuncs.tmp'
+%endmacro
+
 %macro InstExp 0
 	DefExp _CreateBitMap
 	DefExp _DuplicateBitMap
