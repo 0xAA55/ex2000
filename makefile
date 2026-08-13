@@ -10,10 +10,10 @@ all: ex2000.exe
 .PHONY: clean again
 
 %.inc:
-	copy $@+
+	copy $@+ >nul 2>&1
 
 %.asm:
-	copy $@+
+	copy $@+ >nul 2>&1
 
 expfuncs.tmp: assets/KFUNC assets/UFUNC assets/CFUNC assets/GFUNC assets/WFUNC
 	break>$@

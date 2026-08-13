@@ -5,10 +5,10 @@ DEFS:=
 ASMFLAGS=-i..
 
 %.inc:
-	copy $@+
+	copy $@+ >nul 2>&1
 
 %.asm: common.inc
-	copy $@+
+	copy $@+ >nul 2>&1
 
 all: shellcode.bin
 shellcode.asm: $(BINS) ../shellcode.inc ../scfuncs.tmp ../glfuncs.tmp

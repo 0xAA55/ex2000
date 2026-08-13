@@ -5,10 +5,10 @@ DEFS:=
 ASMFLAGS=-i..
 
 %.inc:
-	copy $@+
+	copy $@+ >nul 2>&1
 
 %.asm:
-	copy $@+
+	copy $@+ >nul 2>&1
 
 all: ../out/math.lib
 ../loaddll.inc: ../frame.inc ../expfuncs.tmp
