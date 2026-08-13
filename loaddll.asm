@@ -71,8 +71,8 @@ dll_func_group_start_without_name WFunc_DelayedLoad
 dll_func_group_end WFunc_DelayedLoad
 
 segment .bss
-extern _NumDelayLoadFunc
-_NumDelayLoadFunc equ ($ - _FirstDelayLoadFunc) / 4
+extern _NumDelayLoadFuncs
+_NumDelayLoadFuncs equ ($ - _FirstDelayLoadFunc) / 4
 
 segment .rdata
 extern _name_of_User32

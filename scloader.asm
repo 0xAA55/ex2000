@@ -19,6 +19,7 @@ struc SCHead
 .imports:
 	InstImp
 	%include 'scfuncs.tmp'
+	%include 'glfuncs.tmp'
 
 .exports:
 	InstExp
@@ -38,7 +39,10 @@ extern _ShellcodeSize
 _ShellcodeSize resd 1
 
 extern _FirstDelayLoadFunc
-extern _NumDelayLoadFunc
+extern _NumDelayLoadFuncs
+
+extern _FirstGLFunc
+extern _NumGLFuncs
 
 %unmacro DefImp 1
 %unmacro DefExp 1
@@ -100,21 +104,12 @@ DefFunc _LoadShellcode
 	jnz .setup_iat
 
 	mov esi, _FirstDelayLoadFunc
-	mov ecx, _NumDelayLoadFunc
-.setup_iat_delay_load_api:
-	lodsd
-	test eax, eax
-	jz .nullptr
-	sub eax, edx
-	jmp .after_get_offset
-.nullptr:
-	dec eax
-.after_get_offset:
-	stosd
-	inc edi
-	add edx, 5
-	dec ecx
-	jnz .setup_iat_delay_load_api
+	mov ecx, _NumDelayLoadFuncs
+	call .setup_iat_delay_load_api
+
+	mov esi, _FirstGLFunc
+	mov ecx, _NumGLFuncs
+	call .setup_iat_delay_load_api
 
 	lea esi, [ebx + SCHead.exports]
 	mov edi, _SCEAT
@@ -129,6 +124,21 @@ DefFunc _LoadShellcode
 	invoke_dll_stdcall VirtualProtect, ebx, [_ShellcodeSize], PAGE_EXECUTE_READWRITE, _ShellOldProtect
 	mov eax, ebx
 	FrameEnd
+	ret
+.setup_iat_delay_load_api:
+	lodsd
+	test eax, eax
+	jz .nullptr
+	sub eax, edx
+	jmp .after_get_offset
+.nullptr:
+	dec eax
+.after_get_offset:
+	stosd
+	inc edi
+	add edx, 5
+	dec ecx
+	jnz .setup_iat_delay_load_api
 	ret
 
 DefFunc _UnloadShellcode

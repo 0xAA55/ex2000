@@ -14,6 +14,7 @@ bits 32
 
 InstImp
 %include 'scfuncs.tmp'
+%include 'glfuncs.tmp'
 InstExp
 
 %unmacro DefImp 1
@@ -31,6 +32,7 @@ struc SCHead
 .imports:
 	InstImp
 	%include 'scfuncs.tmp'
+	%include 'glfuncs.tmp'
 
 .exports:
 	InstExp

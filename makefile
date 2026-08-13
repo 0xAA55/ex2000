@@ -44,6 +44,17 @@ gfuncs.tmp: assets/GFUNC
 wfuncs.tmp: assets/WFUNC
 	break>$@
 	addpre assets\\WFUNC def_dll_func_addr $@
+wglfuncs.tmp: assets/WGLFUNC
+	break>$@
+	addpre assets\\WGLFUNC def_dll_func_addr $@
+gl33funcs.tmp: assets/GL33FUNC
+	break>$@
+	addpre assets\\GL33FUNC def_dll_func_addr $@
+glfuncs.tmp: assets/WGLFUNC assets/GL33FUNC
+	break>$@
+	addpre assets\\WGLFUNC DefImp $@
+	addpre assets\\GL33FUNC DefImp $@
+gl33.inc: glfuncs.tmp
 loaddll.inc: frame.inc expfuncs.tmp
 shader.inc: gl33.inc
 fontgl.inc: buffer.inc
@@ -56,7 +67,7 @@ lfu.asm: loaddll.inc avlbst.inc lfu.inc
 fontgl.asm: loaddll.inc fontgl.inc avlbst.inc lfu.inc math.inc gl33.inc shader.inc utf.inc
 loaddll.asm: loaddll.inc assets.inc kfuncs.tmp ufuncs.tmp cfuncs.tmp gfuncs.tmp wfuncs.tmp
 buffer.asm: loaddll.inc buffer.inc gl33.inc
-gl33.asm: loaddll.inc gl33.inc assets.inc
+gl33.asm: loaddll.inc gl33.inc assets.inc wglfuncs.tmp gl33funcs.tmp
 pool.asm: loaddll.inc pool.inc
 scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc fontgl.inc hrsleep.inc
 vblank.asm: loaddll.inc vblank.inc timer.inc
