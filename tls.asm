@@ -44,8 +44,9 @@ DefFunc _TlsDeInit
 
 DefFunc _TlsRegisterCallback
 	FrameBegin ebx
+	NameParams %$NewCB
 
-	mov ecx, Param(0)
+	mov ecx, %$NewCB
 	mov edx, [_TlsCallbackListCap]
 	mov eax, [_TlsCallbackListSize]
 	cmp eax, edx
@@ -67,10 +68,11 @@ DefFunc _TlsRegisterCallback
 
 DefFunc _TlsInvokeCallbacks
 	FrameBegin ebx, esi, edi
+	NameParams %$What
 
 	mov esi, [_TlsCallbackList]
 	xor edi, edi
-	mov ebx, Param(0)
+	mov ebx, %$What
 .loop_call:
 	cmp edi, [_TlsCallbackListSize]
 	jae .quit_loop

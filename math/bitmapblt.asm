@@ -2,18 +2,19 @@
 
 DefFunc _BitMapBlt
 	FrameBegin ebx, esi, edi
+	NameParams %$DstMap, %$DstX, %$DstY, %$DstW, %$DstH, %$SrcMap, %$SrcX, %$SrcY, %$Userdata, %$LineProc
 	DefVars %$DX, %$DY, %$DW, %$DH, %$DR, %$DB, %$SX, %$SY
 
-	mov eax, Param(9)
+	mov eax, %$LineProc
 	mov ecx, _BitMapBltDefLineProc
-	mov edi, Param(0) ;dst
-	mov esi, Param(5) ;src
-	mov ebx, Param(8) ;userdata
+	mov edi, %$DstMap ;dst
+	mov esi, %$SrcMap ;src
+	mov ebx, %$Userdata ;userdata
 
 	test eax, eax
 	cmovz eax, ecx
 	cmovz ebx, esi
-	mov Param(9), eax
+	mov %$LineProc, eax
 
 	;(smx, smy) = min((sx, sy), (0, 0))
 	;(dmx, dmy) = min((dx, dy), (0, 0))
@@ -32,11 +33,11 @@ DefFunc _BitMapBlt
 	;(dw, dh) = (dr, db) - (dx, dy)
 	;(dw, dh) = min((dw, dh), (sl, sl))
 
-	movq xmm0, Param(6) ;sx, sy
-	movq xmm1, Param(1) ;dx, dy
-	movq xmm2, Param(6) ;sx, sy
-	movq xmm3, Param(1) ;dx, dy
-	movq xmm4, Param(3) ;dw, dh
+	movq xmm0, %$SrcX ;sx, sy
+	movq xmm1, %$DstX ;dx, dy
+	movq xmm2, %$SrcX ;sx, sy
+	movq xmm3, %$DstX ;dx, dy
+	movq xmm4, %$DstW ;dw, dh
 	pxor xmm7, xmm7
 	pcmpgtd xmm0, xmm7
 	pcmpgtd xmm1, xmm7
@@ -114,7 +115,7 @@ DefFunc _BitMapBlt
 
 	add eax, %$DX
 	add edx, %$SX
-	invoke_cdecl Param(9), eax, edx, %$DW, ebx
+	invoke_cdecl %$LineProc, eax, edx, %$DW, ebx
 
 	mov eax, %$DY
 	inc eax
@@ -134,11 +135,12 @@ DefFunc _BitMapBlt
 
 DefFunc _BitMapBltDefLineProc
 	FrameBegin ebx
+	NameParams %$DstRow, %$SrcRow, %$NumPixels, %$Userdata
 
-	mov ebx, Param(3)
+	mov ebx, %$Userdata
 	mov eax, [ebx + BitMap.dims]
-	mul dword Param(2)
-	invoke_dll_cdecl memcpy, Param(0), Param(1), &[eax * 4]
+	mul dword %$NumPixels
+	invoke_dll_cdecl memcpy, %$DstRow, %$SrcRow, &[eax * 4]
 
 	FrameEnd
 	ret

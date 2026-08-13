@@ -83,8 +83,9 @@ DefFunc _AssetsInitLoadDll
 
 DefFunc _AssetsDestroyFileStruct
 	FrameBegin ebx
+	NameParams %$FileStruct
 
-	mov ebx, Param(0)
+	mov ebx, %$FileStruct
 	invoke_cdecl _free, [ebx + FileStruct.data]
 	invoke_cdecl _free, ebx
 
@@ -93,12 +94,13 @@ DefFunc _AssetsDestroyFileStruct
 
 DefFunc _AssetsFnOpen
 	FrameBegin esi
+	NameParams %$Path
 
-	invoke_dll_cdecl strcmp, Param(0), _AssetsCabName
+	invoke_dll_cdecl strcmp, %$Path, _AssetsCabName
 	test eax, eax
 	jz .is_cab_file
 
-	invoke_cdecl _AVLSearch, [_AssetsTree], Param(0)
+	invoke_cdecl _AVLSearch, [_AssetsTree], %$Path
 	test eax, eax
 	jnz .found
 
@@ -106,7 +108,7 @@ DefFunc _AssetsFnOpen
 	mov esi, eax
 	mov [esi + FileStruct.opened], eax
 
-	invoke_cdecl _AVLInsert, _AssetsTree, Param(0), esi, _AssetsDestroyFileStruct, _AVLOps_String
+	invoke_cdecl _AVLInsert, _AssetsTree, %$Path, esi, _AssetsDestroyFileStruct, _AVLOps_String
 	mov eax, esi
 	jmp .end
 .found:
@@ -147,8 +149,9 @@ DefFunc _AssetsFnOpen
 
 DefFunc _AssetsTrimFileMemory
 	FrameBegin esi
+	NameParams %$FileStruct
 
-	mov esi, Param(0)
+	mov esi, %$FileStruct
 	mov eax, [esi + FileStruct.file_size]
 	test eax, eax
 	jz .is_empty_file
@@ -183,8 +186,9 @@ DefFunc _AssetsTrimFileMemory
 
 DefFunc _AssetsAssertFileIsOpened
 	FrameBegin
+	NameParams %$FileStruct
 
-	mov eax, Param(0)
+	mov eax, %$FileStruct
 	test eax, eax
 	jz .is_bad_condition
 	cmp eax, MAX_CAB_OPEN_TIMES
@@ -207,8 +211,9 @@ DefFunc _AssetsAssertFileIsOpened
 
 DefFunc _AssetsFnClose
 	FrameBegin esi
+	NameParams %$FileStruct
 
-	mov esi, Param(0)
+	mov esi, %$FileStruct
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
 	cmp esi, MAX_CAB_OPEN_TIMES
 	jle .is_cab_file
@@ -230,8 +235,9 @@ DefFunc _AssetsFnClose
 
 DefFunc _AssetsFnRead
 	FrameBegin esi
+	NameParams %$FileStruct, %$DstPtr, %$Size
 
-	mov esi, Param(0)
+	mov esi, %$FileStruct
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
 	cmp esi, MAX_CAB_OPEN_TIMES
 	jle .is_cab_file
@@ -239,16 +245,16 @@ DefFunc _AssetsFnRead
 	mov eax, [esi + FileStruct.file_size]
 	sub eax, [esi + FileStruct.file_pointer]
 	jle .eof
-	mov edx, Param(2)
+	mov edx, %$Size
 	cmp eax, edx
 	jle .proceed_file
 	mov eax, edx
 .proceed_file:
-	mov Param(2), eax
+	mov %$Size, eax
 	mov eax, [esi + FileStruct.data]
-	add eax, Param(2)
-	invoke_dll_cdecl memcpy, Param(1), eax, Param(2)
-	mov eax, Param(2)
+	add eax, %$Size
+	invoke_dll_cdecl memcpy, %$DstPtr, eax, %$Size
+	mov eax, %$Size
 	add [esi + FileStruct.file_pointer], eax
 	jmp .end
 
@@ -257,16 +263,16 @@ DefFunc _AssetsFnRead
 	mov eax, _AssetsCabSize
 	sub eax, [esi]
 	jle .eof
-	mov edx, Param(2)
+	mov edx, %$Size
 	cmp eax, edx
 	jle .proceed_cab
 	mov eax, edx
 .proceed_cab:
-	mov Param(2), eax
+	mov %$Size, eax
 	mov eax, _AssetsCab
 	add eax, [esi]
-	invoke_dll_cdecl memcpy, Param(1), eax, Param(2)
-	mov eax, Param(2)
+	invoke_dll_cdecl memcpy, %$DstPtr, eax, %$Size
+	mov eax, %$Size
 	add [esi], eax
 	jmp .end
 .eof:
@@ -280,9 +286,10 @@ DefFunc _AssetsFnRead
 ; int AssetsFileGrowCapacity(FileStruct *f, size_t desired_minimal_capacity)
 DefFunc _AssetsFileGrowCapacity
 	FrameBegin esi
+	NameParams %$FileStruct, %$DesiredMinimalCapacity
 	DefVars %$NewCap
 
-	mov esi, Param(0)
+	mov esi, %$FileStruct
 	mov eax, [esi + FileStruct.file_capacity]
 	mov ecx, 2
 	mov edx, ecx
@@ -290,14 +297,12 @@ DefFunc _AssetsFileGrowCapacity
 	mul edx
 	div ecx
 	inc eax
-	cmp eax, Param(1)
+	cmp eax, %$DesiredMinimalCapacity
 	jge .enough_size
-	mov eax, Param(1)
+	mov eax, %$DesiredMinimalCapacity
 .enough_size:
 	mov %$NewCap, eax
 	invoke_cdecl _realloc, [esi + FileStruct.data], eax
-	test eax, eax
-	jz .failed
 	mov [esi + FileStruct.data], eax
 	mov ecx, %$NewCap
 	add eax, [esi + FileStruct.file_capacity]
@@ -307,13 +312,6 @@ DefFunc _AssetsFileGrowCapacity
 .cleared:
 	mov eax, %$NewCap
 	mov [esi + FileStruct.file_capacity], eax
-	jmp .end
-.failed:
-	invoke_cdecl _free, [esi + FileStruct.data]
-	xor eax, eax
-	mov [esi + FileStruct.data], eax
-	mov [esi + FileStruct.file_size], eax
-	mov [esi + FileStruct.file_capacity], eax
 
 .end:
 	FrameEnd
@@ -321,33 +319,31 @@ DefFunc _AssetsFileGrowCapacity
 
 DefFunc _AssetsFnWrite
 	FrameBegin esi
+	NameParams %$FileStruct, %$SrcPtr, %$Size
 
-	mov esi, Param(0)
+	mov esi, %$FileStruct
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
 	cmp esi, MAX_CAB_OPEN_TIMES
 	jle .is_cab_file
 
 	mov eax, [esi + FileStruct.file_pointer]
-	add eax, Param(2)
+	add eax, %$Size
 	cmp eax, [esi + FileStruct.file_capacity]
 	jle .good_capacity
 	invoke_cdecl _AssetsFileGrowCapacity, esi, eax
-	test eax, eax
-	jz .grow_fail
 .good_capacity:
 	mov eax, [esi + FileStruct.data]
 	add eax, [esi + FileStruct.file_pointer]
-	invoke_dll_cdecl memcpy, eax, Param(1), Param(2)
+	invoke_dll_cdecl memcpy, eax, %$SrcPtr, %$Size
 	mov eax, [esi + FileStruct.file_pointer]
-	add eax, Param(2)
+	add eax, %$Size
 	mov [esi + FileStruct.file_pointer], eax
 	cmp eax, [esi + FileStruct.file_size]
 	jle .end
 	mov [esi + FileStruct.file_size], eax
-	mov eax, Param(2)
+	mov eax, %$Size
 	jmp .end
 .is_cab_file:
-.grow_fail:
 	int3
 	jmp .is_cab_file
 
@@ -357,13 +353,14 @@ DefFunc _AssetsFnWrite
 
 DefFunc _AssetsFnSeek
 	FrameBegin esi
+	NameParams %$FileStruct, %$Offset, %$SeekFrom
 
-	mov esi, Param(0)
+	mov esi, %$FileStruct
 	invoke_cdecl _AssetsAssertFileIsOpened, esi
 	cmp esi, MAX_CAB_OPEN_TIMES
 	jle .is_cab_file
 
-	mov eax, Param(2)
+	mov eax, %$SeekFrom
 	cmp eax, 0
 	jz .seek_set
 	cmp eax, 1
@@ -374,17 +371,17 @@ DefFunc _AssetsFnSeek
 	int3
 	jmp .bad_seek
 .seek_set:
-	mov eax, Param(1)
+	mov eax, %$Offset
 	mov [esi + FileStruct.file_pointer], eax
 	jmp .end
 .seek_cur:
 	mov eax, [esi + FileStruct.file_pointer]
-	add eax, Param(1)
+	add eax, %$Offset
 	mov [esi + FileStruct.file_pointer], eax
 	jmp .end
 .seek_end:
 	mov eax, [esi + FileStruct.file_size]
-	add eax, Param(1)
+	add eax, %$Offset
 	mov [esi + FileStruct.file_pointer], eax
 	jmp .end
 .is_null_file:
@@ -393,7 +390,7 @@ DefFunc _AssetsFnSeek
 
 .is_cab_file:
 	lea esi, [_AssetsCabFile.file_pointers + (esi - 1) * 4]
-	mov eax, Param(2)
+	mov eax, %$SeekFrom
 	cmp eax, 0
 	jz .cab_seek_set
 	cmp eax, 1
@@ -404,17 +401,17 @@ DefFunc _AssetsFnSeek
 	int3
 	jmp .cab_bad_seek
 .cab_seek_set:
-	mov eax, Param(1)
+	mov eax, %$Offset
 	mov [esi], eax
 	jmp .end
 .cab_seek_cur:
 	mov eax, [esi]
-	add eax, Param(1)
+	add eax, %$Offset
 	mov [esi], eax
 	jmp .end
 .cab_seek_end:
 	mov eax, _AssetsCabSize
-	add eax, Param(1)
+	add eax, %$Offset
 	mov [esi], eax
 
 .end:
@@ -423,9 +420,10 @@ DefFunc _AssetsFnSeek
 
 DefFunc _AssetsFnOnNotify
 	FrameBegin esi
+	NameParams %$What, %$Notification
 
-	mov eax, Param(0)
-	mov esi, Param(1)
+	mov eax, %$What
+	mov esi, %$Notification
 	cmp eax, 0
 	jz .cab_info
 	cmp eax, 1
@@ -461,8 +459,9 @@ DefFunc _AssetsFnOnNotify
 
 ;DefFunc _AssetsShow
 ;	FrameBegin esi
+;	NameParams %$Root
 ;
-;	mov esi, Param(0)
+;	mov esi, %$Root
 ;	test esi, esi
 ;	jz .end
 ;	debug_printf `height: %d, key: %s\n`, [esi + AVLBST_Node.height], [esi + AVLBST_Node.key]

@@ -19,8 +19,9 @@ endstruc
 ; void FreeDataNode(DataNode *dn);
 DefFunc _FreeDataNode
 	FrameBegin ebx
+	NameParams %$DataNode
 
-	mov ebx, Param(0)
+	mov ebx, %$DataNode
 	test ebx, ebx
 	jz .end
 	invoke_cdecl [ebx + DataNode.on_free], [ebx + DataNode.userdata]
@@ -32,19 +33,20 @@ DefFunc _FreeDataNode
 ; LfuCache *LfuCreate(int capacity, KeyCompareOps *user_ops, void *context, void (*on_key_remove)(void *key, void *context));
 DefFunc _LfuCreate
 	FrameBegin ebx
+	NameParams %$Capacity, %$UserOps, %$Context, %$OnKeyRemove
 
 	invoke_cdecl _calloc, 1, LfuCache.size
 	mov ebx, eax
 
-	mov eax, Param(0)
-	mov ecx, Param(1)
-	mov edx, Param(2)
+	mov eax, %$Capacity
+	mov ecx, %$UserOps
+	mov edx, %$Context
 	mov [ebx + LfuCache.capacity], eax
 	mov [ebx + LfuCache.user_keyops], ecx
 	jecxz .bad
 	mov eax, .ret_op
 	test edx, edx
-	mov ecx, Param(3)
+	mov ecx, %$OnKeyRemove
 	cmovz edx, eax
 	mov [ebx + LfuCache.on_key_remove], edx
 	mov [ebx + LfuCache.context], ecx
@@ -60,14 +62,15 @@ DefFunc _LfuCreate
 ; void LfuIncreaseFreq(LfuCache *cache, void *user_key, DataNode *dn);
 DefFunc _LfuIncreaseFreq
 	FrameBegin ebx, esi, edi
+	NameParams %$Cache, %$UserKey, %$DataNode
 	DefSizedVar %$FreqKey, FreqKey.size
 
-	mov ebx, Param(0)
-	mov esi, Param(2)
+	mov ebx, %$Cache
+	mov esi, %$DataNode
 	lea edi, %$FreqKey
 
 	mov eax, [esi + DataNode.freq]
-	mov ecx, Param(1)
+	mov ecx, %$UserKey
 	mov edx, [ebx + LfuCache.user_keyops]
 	mov [edi + FreqKey.freq], eax
 	mov [edi + FreqKey.data_key], ecx
@@ -77,7 +80,7 @@ DefFunc _LfuIncreaseFreq
 	inc dword[esi + DataNode.freq]
 
 	mov eax, [esi + DataNode.freq]
-	mov ecx, Param(1)
+	mov ecx, %$UserKey
 	mov edx, [ebx + LfuCache.user_keyops]
 	mov [edi + FreqKey.freq], eax
 	mov [edi + FreqKey.data_key], ecx
@@ -90,12 +93,13 @@ DefFunc _LfuIncreaseFreq
 ; void* LfuGet(LfuCache *cache, void *key);
 DefFunc _LfuGet
 	FrameBegin ebx, esi
+	NameParams %$Cache, %$Key
 
-	mov eax, Param(0)
+	mov eax, %$Cache
 	test eax, eax
 	jz .end
 	mov ebx, eax
-	invoke_cdecl _AVLSearch, [ebx + LfuCache.data_tree], Param(1)
+	invoke_cdecl _AVLSearch, [ebx + LfuCache.data_tree], %$Key
 	test eax, eax
 	jz .end
 	mov esi, [eax + AVLBST_Node.userdata]
@@ -108,29 +112,30 @@ DefFunc _LfuGet
 ; void LfuPut(LfuCache *cache, void *key, void *value, void(*on_free)(void *userdata));
 DefFunc _LfuPut
 	FrameBegin ebx, esi, edi
+	NameParams %$Cache, %$Key, %$Value, %$OnFree
 	DefSizedVar %$FreqKey, FreqKey.size
 
-	mov eax, Param(3)
+	mov eax, %$OnFree
 	mov ecx, .ret_op
 	test eax, eax
 	cmovz eax, ecx
-	mov Param(3), eax
+	mov %$OnFree, eax
 
-	mov eax, Param(0)
+	mov eax, %$Cache
 	test eax, eax
 	jz .end
 	mov ebx, eax
 	mov eax, [eax + LfuCache.capacity]
 	test eax, eax
 	jz .end
-	invoke_cdecl _AVLSearch, [ebx + LfuCache.data_tree], Param(1)
+	invoke_cdecl _AVLSearch, [ebx + LfuCache.data_tree], %$Key
 	test eax, eax
 	jz .insert
 	mov esi, [eax + AVLBST_Node.userdata]
 	mov edi, [eax + AVLBST_Node.key]
 	invoke_cdecl [esi + DataNode.on_free], [esi + DataNode.userdata]
-	mov eax, Param(2)
-	mov ecx, Param(3)
+	mov eax, %$Value
+	mov ecx, %$OnFree
 	mov [esi + DataNode.userdata], eax
 	mov [esi + DataNode.on_free], ecx
 	invoke_cdecl _LfuIncreaseFreq, ebx, edi, esi
@@ -165,13 +170,13 @@ DefFunc _LfuPut
 .after_removal:
 	invoke_cdecl _malloc, DataNode.size
 	mov esi, eax
-	mov eax, Param(2)
-	mov ecx, Param(3)
+	mov eax, %$Value
+	mov ecx, %$OnFree
 	mov dword[esi + DataNode.freq], 1
 	mov [esi + DataNode.userdata], eax
 	mov [esi + DataNode.on_free], ecx
 
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], Param(1), esi, _FreeDataNode, [ebx + LfuCache.user_keyops]
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], %$Key, esi, _FreeDataNode, [ebx + LfuCache.user_keyops]
 	test eax, eax
 	jz .bad
 	lea edi, %$FreqKey
@@ -191,8 +196,9 @@ DefFunc _LfuPut
 ; void LfuDestroy(LfuCache *cache)
 DefFunc _LfuDestroy
 	FrameBegin ebx
+	NameParams %$Cache
 
-	mov ebx, Param(0)
+	mov ebx, %$Cache
 	test ebx, ebx
 	jz .end
 
@@ -207,9 +213,10 @@ DefFunc _LfuDestroy
 ; int FreqKeyCompare(FreqKey *a, FreqKey *b);
 DefFunc _FreqKeyCompare
 	FrameBegin esi, edi
+	NameParams %$KeyA, %$KeyB
 
-	mov esi, Param(0)
-	mov edi, Param(1)
+	mov esi, %$KeyA
+	mov edi, %$KeyB
 
 	xor eax, eax
 	mov ecx, [esi + FreqKey.freq]
@@ -233,8 +240,9 @@ DefFunc _FreqKeyCompare
 ; FreqKey *FreqKeyDuplicate(FreqKey *key);
 DefFunc _FreqKeyDuplicate
 	FrameBegin esi, edi
+	NameParams %$Key
 
-	mov esi, Param(0)
+	mov esi, %$Key
 	invoke_cdecl _malloc, FreqKey.size
 	mov edi, eax
 

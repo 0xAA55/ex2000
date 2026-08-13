@@ -2,15 +2,16 @@
 
 DefFunc _CreatePerlinMap2D
 	FrameBegin ebx, esi
+	NameParams %$BorderLen
 	DefVars %$AndVal
 	DefSizedVar %$VectorBuffer, 0x20
 
-	invoke_cdecl _CreateBitMap, Param(0), 2, 8
+	invoke_cdecl _CreateBitMap, %$BorderLen, 2, 8
 	mov ebx, eax
 
 	mov dword %$AndVal, 0xFFFF
 
-	mov eax, Param(0)
+	mov eax, %$BorderLen
 	cmp eax, 1
 	jae .blae1
 
@@ -344,9 +345,10 @@ DefFunc _ConvertPerlinMapToAltitude
 
 DefFunc _GenPerlinAltitude
 	FrameBegin ebx, edi
-	invoke_cdecl _CreatePerlinMap2D, Param(0)
+	NameParams %$BorderLen, %$Ratio, %$Amplitude
+	invoke_cdecl _CreatePerlinMap2D, %$BorderLen
 	mov ebx, eax
-	invoke_cdecl _ConvertPerlinMapToAltitude, Param(1), Param(2), ebx
+	invoke_cdecl _ConvertPerlinMapToAltitude, %$Ratio, %$Amplitude, ebx
 	mov edi, eax
 	invoke_cdecl _DestroyBitMap, ebx
 	mov eax, edi
@@ -355,9 +357,10 @@ DefFunc _GenPerlinAltitude
 
 DefFunc _AccumulateFloatMap
 	FrameBegin esi, edi
+	NameParams %$DstMap, %$AccumMap
 
-	mov esi, Param(1)
-	mov edi, Param(0)
+	mov esi, %$AccumMap
+	mov edi, %$DstMap
 	mov ecx, [esi + BitMap.num_floats]
 	mov eax, [edi + BitMap.num_floats]
 	cmp eax, ecx
@@ -408,9 +411,10 @@ endstruc
 
 DefFunc _GenPerlinLayerPoolProc
 	FrameBegin ebx
+	NameParams %$Param, %$CommonData, %$Index
 
-	mov ebx, Param(0)
-	invoke_cdecl srand, Param(2)
+	mov ebx, %$Param
+	invoke_cdecl srand, %$Index
 	invoke_cdecl _GenPerlinAltitude, \
 		[ebx + GenPerlinLayerData.perlin_border_len], \
 		[ebx + GenPerlinLayerData.ratio], \

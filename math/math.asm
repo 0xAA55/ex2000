@@ -105,9 +105,10 @@ DefFunc _MathDeInit
 %ifdef _DEBUG
 	DefFunc _FMatrix2DMatrix
 		FrameBegin ebx, esi
+		NameParams %$DstMat, %$SrcMat
 
-		mov esi, Param(1)
-		mov edi, Param(0)
+		mov esi, %$SrcMat
+		mov edi, %$DstMat
 
 		movaps xmm0, [esi + Matrix.x]
 		movaps xmm1, [esi + Matrix.y]
@@ -139,20 +140,4 @@ DefFunc _MathDeInit
 
 		FrameEnd
 		ret
-
-	DefFunc _DebugMatrix
-		FrameBegin ebx
-		invoke_cdecl _aligned_malloc, Matrix.size * 2, 0x10
-		mov ebx, eax
-		invoke_cdecl _FMatrix2DMatrix, ebx, Param(2)
-		invoke_cdecl _DebugShowV, Param(0), Param(1), .format, ebx
-		invoke_cdecl _aligned_free, ebx
-		FrameEnd
-		ret
-	segment .rdata
-		.format:
-			db "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, 0xd, 0xa
-			db "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, 0xd, 0xa
-			db "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, 0xd, 0xa
-			db "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, "%.2f", 0x9, 0xd, 0xa, 0
 %endif

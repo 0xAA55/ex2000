@@ -233,9 +233,10 @@ DefFunc _NextString
 
 DefFunc _NLtoNUL
 	FrameBegin esi, edi
+	NameParams %$Str, %$Len
 
-	mov esi, Param(0)
-	mov ecx, Param(1)
+	mov esi, %$Str
+	mov ecx, %$Len
 	mov edi, esi
 	xor edx, edx
 .proc:
@@ -341,9 +342,10 @@ DefFunc _DeInitDbg
 
 DefFunc _DebugMsg
 	FrameBegin
+	NameParams %$Format, %$Args
 
-	lea eax, Param(1)
-	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, Param(0), eax
+	lea eax, %$Args
+	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, %$Format, eax
 	invoke_dll_stdcall MessageBoxA, 0, [_DebugMsgBuffer], 0, 0
 
 .end:
@@ -353,9 +355,10 @@ DefFunc _DebugMsg
 
 DefFunc _snprintf
 	FrameBegin
+	NameParams %$Buffer, %$BufLen, %$Format, %$Args
 
-	lea eax, Param(3)
-	invoke_dll_cdecl vsnprintf, Param(0), Param(1), Param(2), eax
+	lea eax, %$Args
+	invoke_dll_cdecl vsnprintf, %$Buffer, %$BufLen, %$Format, eax
 
 .end:
 	FrameEnd
@@ -363,15 +366,17 @@ DefFunc _snprintf
 
 DefFunc _malloc
 	FrameBegin
-	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(0)
+	NameParams %$Size
+	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, %$Size
 	FrameEnd
 	ret
 
 DefFunc _calloc
 	FrameBegin
+	NameParams %$Count, %$Size
 
-	mov eax, Param(0)
-	mul dword Param(1)
+	mov eax, %$Count
+	mul dword %$Size
 	invoke_dll_stdcall HeapAlloc, [_hHeap], 8|4, eax
 
 	FrameEnd
@@ -379,39 +384,42 @@ DefFunc _calloc
 
 DefFunc _realloc
 	FrameBegin
-	mov eax, Param(0)
+	NameParams %$Pointer, %$NewSize
+	mov eax, %$Pointer
 	test eax, eax
 	jz .ptr_is_null
-	invoke_dll_stdcall HeapReAlloc, [_hHeap], 4, Param(0), Param(1)
+	invoke_dll_stdcall HeapReAlloc, [_hHeap], 4, %$Pointer, %$NewSize
 	jmp .end
 .ptr_is_null:
-	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, Param(1)
+	invoke_dll_stdcall HeapAlloc, [_hHeap], 4, %$NewSize
 .end:
 	FrameEnd
 	ret
 
 DefFunc _free
 	FrameBegin
-	invoke_dll_stdcall HeapFree, [_hHeap], 4, Param(0)
+	NameParams %$Pointer
+	invoke_dll_stdcall HeapFree, [_hHeap], 4, %$Pointer
 	FrameEnd
 	ret
 
 DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
 	FrameBegin
+	NameParams %$Size, %$Alignment
 
-	mov eax, Param(1)
+	mov eax, %$Alignment
 	cmp eax, 8
 	jae .good
 .bad:
 	int3
 	jmp .bad
 .good:
-	mov eax, Param(0)
-	add eax, Param(1)
+	mov eax, %$Size
+	add eax, %$Alignment
 	invoke_cdecl _malloc, eax
 
 	mov edx, eax
-	mov ecx, Param(1)
+	mov ecx, %$Alignment
 	add eax, ecx
 	neg ecx
 	and eax, ecx
@@ -422,8 +430,9 @@ DefFunc _aligned_malloc ;void * aligned_malloc(size_t size, int align_bytes);
 
 DefFunc _aligned_free
 	FrameBegin
+	NameParams %$Pointer
 
-	mov eax, Param(0)
+	mov eax, %$Pointer
 	test eax, eax
 	jz .end
 
@@ -435,14 +444,16 @@ DefFunc _aligned_free
 
 DefFunc _ReleaseComObj
 	FrameBegin
-	invoke_com Param(0), IUnknown.Release
+	NameParams %$Object
+	invoke_com %$Object, IUnknown.Release
 	FrameEnd
 	ret
 
 DefFunc _SafeRelease
 	FrameBegin ebx
+	NameParams %$PObject
 
-	mov ebx, Param(0)
+	mov ebx, %$PObject
 	mov eax, [ebx]
 	test eax, eax
 	jz .end

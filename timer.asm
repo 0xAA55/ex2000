@@ -31,15 +31,17 @@ DefFunc _GetSysTimerVal
 
 DefFunc _GetTimerVal
 	FrameBegin
-	mov eax, Param(0)
+	NameParams %$Timer
+	mov eax, %$Timer
 	fld qword [eax + Timer.TimerVal]
 	FrameEnd
 	ret
 
 DefFunc _InitTimer
 	FrameBegin
+	NameParams %$Timer
 	invoke_cdecl _GetSysTimerVal
-	mov edx, Param(0)
+	mov edx, %$Timer
 	fst qword [edx + Timer.PausedTime]
 	fstp qword [edx + Timer.StartTime]
 	xor eax, eax
@@ -49,8 +51,9 @@ DefFunc _InitTimer
 
 DefFunc _UpdateTimer
 	FrameBegin esi
+	NameParams %$Timer
 
-	mov esi, Param(0)
+	mov esi, %$Timer
 	mov eax, [esi + Timer.IsPaused]
 	test eax, eax
 	jnz .paused
@@ -69,15 +72,17 @@ DefFunc _UpdateTimer
 
 DefFunc _IsTimerPaused
 	FrameBegin
-	mov eax, Param(0)
+	NameParams %$Timer
+	mov eax, %$Timer
 	mov eax, [eax + Timer.IsPaused]
 	FrameEnd
 	ret
 
 DefFunc _PauseTimer
 	FrameBegin esi
+	NameParams %$Timer
 
-	mov esi, Param(0)
+	mov esi, %$Timer
 	mov eax, [esi + Timer.IsPaused]
 	test eax, eax
 	jnz .end
@@ -94,8 +99,9 @@ DefFunc _PauseTimer
 
 DefFunc _UnpauseTimer
 	FrameBegin esi
+	NameParams %$Timer
 
-	mov esi, Param(0)
+	mov esi, %$Timer
 	mov eax, [esi + Timer.IsPaused]
 	test eax, eax
 	jz .end

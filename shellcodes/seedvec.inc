@@ -2,9 +2,10 @@
 
 DefFunc _CreateSeedVector
 	FrameBegin ebx
+	NameParams %$VecOut
 	DefVars %$AndVal
 
-	mov ebx, Param(0)
+	mov ebx, %$VecOut
 
 	mov dword %$AndVal, 0x7FFF
 

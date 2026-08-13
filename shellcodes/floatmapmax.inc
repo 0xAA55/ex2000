@@ -2,8 +2,9 @@
 
 DefFunc _FloatMapGetMaxValue
 	FrameBegin ebx
+	NameParams %$FloatMap
 
-	mov ebx, Param(0)
+	mov ebx, %$FloatMap
 	mov eax, [ebx + BitMap.num_floats]
 	test eax, eax
 	jnz .good

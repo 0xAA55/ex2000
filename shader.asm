@@ -24,15 +24,16 @@ _ST_Offsets db 0, _ST_Geometry_Shader - _ST_Vertex_Shader, _ST_Fragment_Shader -
 ; int ShaderCreate(int program, int shader_type, char *shader_code, char **pp_out_infolog)
 DefFunc _ShaderCreate
 	FrameBegin
+	NameParams %$Program, %$ShaderType, %$ShaderCode, %$PPOutInfoLog
 	DefVars %$Shader, %$SourceLen, %$CompileStatus, %$InfoLogLen, %$InfoLogBuf
 
-	invoke_dll_stdcall glCreateShader, Param(1)
+	invoke_dll_stdcall glCreateShader, %$ShaderType
 	mov %$Shader, eax
 
-	invoke_dll_cdecl strlen, Param(2)
+	invoke_dll_cdecl strlen, %$ShaderCode
 	mov %$SourceLen, eax
 
-	invoke_dll_stdcall glShaderSource, %$Shader, 1, &Param(2), &%$SourceLen
+	invoke_dll_stdcall glShaderSource, %$Shader, 1, & %$ShaderCode, &%$SourceLen
 	invoke_dll_stdcall glCompileShader, %$Shader
 	invoke_dll_stdcall glGetShaderiv, %$Shader, GL_COMPILE_STATUS, &%$CompileStatus
 
@@ -48,7 +49,7 @@ DefFunc _ShaderCreate
 
 	invoke_dll_stdcall glGetShaderInfoLog, %$Shader, %$InfoLogLen, 0, eax
 	invoke_dll_stdcall glDeleteShader, %$Shader
-	mov eax, Param(3)
+	mov eax, %$PPOutInfoLog
 	mov edx, %$InfoLogBuf
 	mov [eax], edx
 
@@ -56,7 +57,7 @@ DefFunc _ShaderCreate
 	xor eax, eax
 	jmp .end
 .success:
-	invoke_dll_stdcall glAttachShader, Param(0), %$Shader
+	invoke_dll_stdcall glAttachShader, %$Program, %$Shader
 	invoke_dll_stdcall glDeleteShader, %$Shader
 	xor eax, eax
 	inc eax
@@ -68,11 +69,12 @@ DefFunc _ShaderCreate
 ; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 DefFunc _ProgramCreate
 	FrameBegin esi, edi
+	NameParams %$VertexShader, %$GeometryShader, %$FragmentShader
 	DefVars %$ECXHome, %$Program, %$InfoLog, %$InfoLogLen, %$LinkStatus, %$ShaderType, %$FormatBuffer
 
-	mov eax, Param(0)
-	or eax, Param(1)
-	or eax, Param(2)
+	mov eax, %$VertexShader
+	or eax, %$GeometryShader
+	or eax, %$FragmentShader
 	jz .bad_param
 
 	xor eax, eax
@@ -145,14 +147,15 @@ DefFunc _ProgramCreate
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 DefFunc _SceneLoadShaderProgram
 	FrameBegin esi
+	NameParams %$PProgramOut, %$VSPath, %$GSPath, %$FSPath
 	DefVars %$VSString, %$GSString, %$FSString
 
-	mov esi, Param(0)
-	invoke_cdecl _AssetsQuery, Param(1), 0
+	mov esi, %$PProgramOut
+	invoke_cdecl _AssetsQuery, %$VSPath, 0
 	mov %$VSString, eax
-	invoke_cdecl _AssetsQuery, Param(2), 0
+	invoke_cdecl _AssetsQuery, %$GSPath, 0
 	mov %$GSString, eax
-	invoke_cdecl _AssetsQuery, Param(3), 0
+	invoke_cdecl _AssetsQuery, %$FSPath, 0
 	mov %$FSString, eax
 
 	invoke_cdecl _ProgramCreate, %$VSString, %$GSString, %$FSString

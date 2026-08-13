@@ -98,8 +98,9 @@ DefFunc _isdigit_al
 
 DefFunc _CheckOpenGLProcAddress
 	FrameBegin
+	NameParams %$FuncPtr
 
-	mov eax, Param(0)
+	mov eax, %$FuncPtr
 	test eax, eax
 	jnz .success
 
@@ -120,7 +121,8 @@ DefFunc _CheckOpenGLProcAddress
 
 DefFunc _GetGLProcAddress ; Using OpenGL32.dll `wglGetProcAddress`
 	FrameBegin
-	invoke_dll_cdecl strcpy, [_FuncNameBuf], Param(0)
+	NameParams %$FuncName
+	invoke_dll_cdecl strcpy, [_FuncNameBuf], %$FuncName
 	invoke_dll_stdcall GetProcAddress, [_addr_of_OpenGL32], [_FuncNameBuf]
 	test eax, eax
 	jnz .end

@@ -64,8 +64,9 @@ DefFunc _InitBuffer
 ; void DeInitBuffer(GlBuffer *p_buffer);
 DefFunc _DeInitBuffer
 	FrameBegin edi
+	NameParams %$Buffer
 
-	mov edi, Param(0)
+	mov edi, %$Buffer
 	invoke_cdecl _free, [edi + GlBuffer.pointer]
 
 	lea eax, [edi + GlBuffer.gl_buffer]
@@ -82,10 +83,11 @@ DefFunc _DeInitBuffer
 ; void BufferCleanNewMemory(GlBuffer *p_buffer, size_t old_cap, size_t new_cap)
 DefFunc _BufferCleanNewMemory
 	FrameBegin ebx, esi
+	NameParams %$Buffer, %$OldCap, %$NewCap
 
-	mov ebx, Param(0)
-	mov eax, Param(1)
-	mov ecx, Param(2)
+	mov ebx, %$Buffer
+	mov eax, %$OldCap
+	mov ecx, %$NewCap
 	mov esi, [ebx + GlBuffer.size_of_item]
 	sub ecx, eax
 	jbe .end
@@ -101,9 +103,10 @@ DefFunc _BufferCleanNewMemory
 
 DefFunc _BufferSizeGrow
 	FrameBegin ebx, esi, edi
+	NameParams %$Buffer
 	DefVars %$NewCap, %$OldCap
 
-	mov ebx, Param(0)
+	mov ebx, %$Buffer
 	mov esi, [ebx + GlBuffer.size_of_item]
 	mov eax, [ebx + GlBuffer.capacity]
 	mov %$OldCap, eax
@@ -136,8 +139,9 @@ DefFunc _BufferSizeGrow
 ; void BufferPushItem(GlBuffer *p_buffer, void *item);
 DefFunc _BufferPushItem
 	FrameBegin esi, edi
+	NameParams %$Buffer, %$Item
 
-	mov esi, Param(0)
+	mov esi, %$Buffer
 	mov eax, [esi + GlBuffer.num_items]
 	cmp eax, [esi + GlBuffer.capacity]
 	jb .proceed_to_push
@@ -150,11 +154,11 @@ DefFunc _BufferPushItem
 	add eax, [esi + GlBuffer.pointer]
 
 	; Proceed to copy item data
-	mov esi, Param(1)
+	mov esi, %$Item
 	mov edi, eax
 	rep movsb
 
-	mov esi, Param(0)
+	mov esi, %$Buffer
 	mov [esi + GlBuffer.flushed], ecx
 	inc dword[esi + GlBuffer.num_items]
 .end:
@@ -164,9 +168,10 @@ DefFunc _BufferPushItem
 ; void BufferPopItem(GlBuffer *p_buffer, void *item_or_null);
 DefFunc _BufferPopItem
 	FrameBegin ebx, esi, edi
+	NameParams %$Buffer, %$ItemOrNull
 
-	mov ebx, Param(0)
-	mov edi, Param(1)
+	mov ebx, %$Buffer
+	mov edi, %$ItemOrNull
 
 	xor edx, edx
 	mov eax, [ebx + GlBuffer.num_items]
@@ -193,8 +198,9 @@ DefFunc _BufferPopItem
 ; void BufferClear(GlBuffer *p_buffer);
 DefFunc _BufferClear
 	FrameBegin
+	NameParams %$Buffer
 	xor eax, eax
-	mov edx, Param(0)
+	mov edx, %$Buffer
 	mov [edx + GlBuffer.num_items], eax
 	FrameEnd
 	ret
@@ -202,8 +208,9 @@ DefFunc _BufferClear
 ; void BufferFlush(GlBuffer *p_buffer);
 DefFunc _BufferFlush
 	FrameBegin ebx, esi, edi
+	NameParams %$Buffer
 
-	mov ebx, Param(0)
+	mov ebx, %$Buffer
 
 	cmp dword[ebx + GlBuffer.flushed], 0
 	jnz .end
@@ -251,8 +258,9 @@ DefFunc _BufferFlush
 ; void BufferTrimExcess(GlBuffer *p_buffer);
 DefFunc _BufferTrimExcess
 	FrameBegin ebx
+	NameParams %$Buffer
 
-	mov ebx, Param(0)
+	mov ebx, %$Buffer
 	mov eax, [ebx + GlBuffer.num_items]
 	cmp eax, [ebx + GlBuffer.capacity]
 	je .end
@@ -273,10 +281,11 @@ DefFunc _BufferTrimExcess
 ; void BufferResize(GlBuffer *p_buffer, size_t new_num_items);
 DefFunc _BufferResize
 	FrameBegin ebx
+	NameParams %$Buffer, %$NumNewItems
 	DefVars %$OldCap
 
-	mov ebx, Param(0)
-	mov eax, Param(1)
+	mov ebx, %$Buffer
+	mov eax, %$NumNewItems
 	mov ecx, [ebx + GlBuffer.capacity]
 	cmp eax, ecx
 	jbe .change_size_only

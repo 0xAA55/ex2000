@@ -274,8 +274,9 @@ _VBlankFrameStartTime resq 1
 
 DefFunc _FreeMonitorData
 	FrameBegin ebx
+	NameParams %$MonitorData
 
-	mov ebx, Param(0)
+	mov ebx, %$MonitorData
 	invoke_cdecl _SafeRelease, &[ebx + MonitorData.IDXGIOutput]
 	invoke_cdecl _SafeRelease, &[ebx + MonitorData.IDirectDraw]
 	invoke_cdecl _free, ebx
@@ -380,16 +381,17 @@ DefFunc _VBlankInit
 
 DefFunc _DDEnumCallbackExA@20
 	FrameBegin edi
+	NameParams %$GUID, %$DriverName, %$DriverDesc, %$Userdata, %$HMonitor
 	DefVars %$DDrawObj
 
-	mov eax, Param(0)
+	mov eax, %$GUID
 	test eax, eax
 	jz .end
 
 	xor eax, eax
 	mov %$DDrawObj, eax
 
-	invoke_dll_stdcall DirectDrawCreate, Param(0), &%$DDrawObj, NULL
+	invoke_dll_stdcall DirectDrawCreate, %$GUID, &%$DDrawObj, NULL
 	cmp eax, 0
 	jl .fail
 
@@ -397,7 +399,7 @@ DefFunc _DDEnumCallbackExA@20
 	mov ecx, %$DDrawObj
 	mov [eax + MonitorData.IDirectDraw], ecx
 
-	invoke_cdecl _AVLInsert, _MonitorsData, Param(4), eax, _FreeMonitorData, _AVLOps_Integer
+	invoke_cdecl _AVLInsert, _MonitorsData, %$HMonitor, eax, _FreeMonitorData, _AVLOps_Integer
 	xor eax, eax
 	jmp .end
 
@@ -411,6 +413,7 @@ DefFunc _DDEnumCallbackExA@20
 
 DefFunc _SetupMonitorDataProc
 	FrameBegin ebx, esi, edi
+	NameParams %$Key, %$Userdata, %$Context
 	DefSizedVar %$MonitorInfoExW, MONITORINFOEXW.size
 	DefSizedVar %$DevModeW, DEVMODEW.size
 	DefSizedVar %$DesiredMode, DXGI_MODE_DESC.size
@@ -421,14 +424,14 @@ DefFunc _SetupMonitorDataProc
 	lea edi, Variable(0)
 	rep stosd
 
-	mov ebx, Param(1)
+	mov ebx, %$Userdata
 	mov byte[%$MonitorInfoExW_Addr + MONITORINFOEXW.cbSize], MONITORINFOEXW.size
 	mov byte[%$DevModeW_Addr + DEVMODEW.dmSize], DEVMODEW.size
 	mov byte[ebx + MonitorData.RefreshRate], 60
 	mov byte[ebx + MonitorData.RefreshIntervalMs], 16
 	mov word[ebx + MonitorData.RefreshIntervalUs], 16666
 
-	invoke_dll_stdcall GetMonitorInfoW, Param(0), &%$MonitorInfoExW
+	invoke_dll_stdcall GetMonitorInfoW, %$Key, &%$MonitorInfoExW
 	test eax, eax
 	jz .end
 	invoke_dll_stdcall EnumDisplaySettingsW, &[%$MonitorInfoExW_Addr + MONITORINFOEXW.szDevice], ENUM_CURRENT_SETTINGS, &%$DevModeW

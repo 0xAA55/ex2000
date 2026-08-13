@@ -115,8 +115,9 @@ DefFunc _PoolRun
 
 DefFunc _PoolThreadProc@4
 	FrameBegin ebx, esi, edi
+	NameParams %$PoolStatus
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
-	mov ebx, Param(0)
+	mov ebx, %$PoolStatus
 	mov edi, [ebx + Pool.results]
 .find_next_job:
 	invoke_dll_stdcall InterlockedIncrement, &[ebx + Pool.cur_job_index]

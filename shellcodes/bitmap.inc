@@ -3,8 +3,9 @@
 ; BitMap *CreateBitMap(int border_len, int dims, int bytes_per_pixel);
 DefFunc _CreateBitMap
 	FrameBegin ebx, edi
+	NameParams %$BorderLen, %$Dims, %$BytesPerPixel
 
-	mov eax, Param(0)
+	mov eax, %$BorderLen
 	lea ecx, [eax - 1]
 	test eax, ecx
 	jz .good
@@ -12,19 +13,19 @@ DefFunc _CreateBitMap
 	int3
 	jmp .bad
 .good:
-	mov eax, Param(0)
+	mov eax, %$BorderLen
 	invoke_cdecl _calloc, &[eax * 4 + BitMap.head_size], 1
 	mov ebx, eax
 
-	mov eax, Param(0)
+	mov eax, %$BorderLen
 	mov [ebx + BitMap.border_len], eax
 	lea edi, [ebx + BitMap.row_ptr]
 	mul eax ;eax = border_len * border_len
-	mov ecx, Param(1)
+	mov ecx, %$Dims
 	mov [ebx + BitMap.num_pixels], eax
 	lea edx, [ecx * 4]
 	mov [ebx + BitMap.dims], ecx
-	cmp edx, Param(2)
+	cmp edx, %$BytesPerPixel
 	jnz .not_floats
 	mov [ebx + BitMap.bytes_per_pixel], edx
 	mul ecx
@@ -33,7 +34,7 @@ DefFunc _CreateBitMap
 	mov [ebx + BitMap.num_bytes], eax
 	jmp .ready_to_allocate
 .not_floats:
-	mov ecx, Param(2)
+	mov ecx, %$BytesPerPixel
 	mul ecx
 	mov [ebx + BitMap.bytes_per_pixel], ecx
 	mov [ebx + BitMap.num_bytes], eax
@@ -58,8 +59,9 @@ DefFunc _CreateBitMap
 
 DefFunc _DestroyBitMap
 	FrameBegin ebx
+	NameParams %$Map
 
-	mov ebx, Param(0)
+	mov ebx, %$Map
 	test ebx, ebx
 	jz .end
 	invoke_cdecl _aligned_free, [ebx + BitMap.data]
@@ -72,13 +74,14 @@ DefFunc _DestroyBitMap
 ; float *GetBitmapPixelAddress(int x, int y, BitMap *map);
 DefFunc _GetBitmapPixelAddress
 	FrameBegin ebx
+	NameParams %$X, %$Y, %$Map
 
-	mov ebx, Param(2)
+	mov ebx, %$Map
 
 	mov ecx, [ebx + BitMap.border_len]
 	lea edx, [ecx - 1]
-	mov eax, Param(0)
-	mov ecx, Param(1)
+	mov eax, %$X
+	mov ecx, %$Y
 	and eax, edx
 	and ecx, edx
 	mul dword [ebx + BitMap.bytes_per_pixel]
