@@ -147,38 +147,7 @@ DefFunc _UnloadShellcode
 	jmp [_SCEAT.%1]
 %endmacro
 
-RedirCall _CreateBitMap
-RedirCall _DuplicateBitMap
-RedirCall _DestroyBitMap
-RedirCall _GetBitmapPixelAddress
-RedirCall _SampleFloatMap
-RedirCall _BatchAdd
-RedirCall _BatchBias
-RedirCall _BatchCurve
-RedirCall _BatchMax
-RedirCall _BatchMin
-RedirCall _FloatMapNextMip
-RedirCall _ConeMapGen
-RedirCall _VectorMultMatrix
-RedirCall _MatrixMultiply
-RedirCall _MatrixMultiplyTo
-RedirCall _MatrixProjection
-RedirCall _MatrixRotationEuler
-RedirCall _MatrixEulerTranslated
-RedirCall _MatrixViewEuler
-RedirCall _MatrixTranspose
-RedirCall _FloatMapApplyGain
-RedirCall _CreateSeedVector
-RedirCall _CreatePerlinMap2D
-RedirCall _ConvertPerlinMapToAltitude
-RedirCall _GenPerlinAltitude
-RedirCall _AccumulateFloatMap
-RedirCall _GenMultiLayerPerlinAltitude
-RedirCall _FloatMapCurve
-RedirCall _FloatMapGetMinValue
-RedirCall _FloatMapGetMaxValue
-RedirCall _VectorCross
-RedirCall _VectorDot
-RedirCall _VectorLength
-RedirCall _VectorNormal
-RedirCall _RaymarchTerrainAltitude
+%unmacro DefExp 1
+%define DefExp RedirCall
+
+InstExp
