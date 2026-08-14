@@ -44,6 +44,7 @@ incbin %strcat(%2, ".bin")
 
 %include "tls.imp"
 %include "bitmap.imp"
+binform _GetBitmapPixelAddress, "bmpaddr"
 %include "bitmapdup.imp"
 %include "samplefmap.imp"
 binform _BatchAdd, "batchadd"
