@@ -433,7 +433,8 @@ DefFunc _OGLFC_Compose
 	invoke_cdecl _malloc, eax
 	mov %$Buffer, eax
 .have_buffer:
-	invoke_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, &%$GlyphMetrics, %$BufferSize, %$Buffer, .mat2
+	GetAbsAddr ecx, .mat2
+	invoke_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, & %$GlyphMetrics, %$BufferSize, %$Buffer, ecx
 	cmp eax, 0xFFFFFFFF
 	jz .non_ttf
 	mov eax, %$Buffer
