@@ -75,9 +75,7 @@ DefFunc _ProgramCreate
 
 	mov ecx, 3
 	GetAbsAddr esi, _ST_Offsets
-	dec edi
 .add_shaders:
-	inc edi
 	mov %$ECXHome, ecx
 
 	xor eax, eax
@@ -98,6 +96,7 @@ DefFunc _ProgramCreate
 	debug_msg "Shader compilation error :%s Shader: %s", %$ShaderType, %$InfoLog
 	jmp .bad_end
 .skip_shader:
+	inc edi
 	mov ecx, %$ECXHome
 	dec ecx
 	jnz .add_shaders
