@@ -27,8 +27,6 @@
 	DefImp _GetNumProcessors
 	DefImp _CheckSSE3
 	DefImp _CheckSSE41
-	DefImp _ProgramCreate
-	DefImp _SceneLoadShaderProgram
 %endmacro
 
 %macro InstImpP 0
@@ -96,6 +94,8 @@
 	DefExp _LfuGet
 	DefExp _LfuPut
 	DefExp _LfuDestroy
+	DefExp _ProgramCreate
+	DefExp _SceneLoadShaderProgram
 	DefExp _InitBuffer
 	DefExp _DeInitBuffer
 	DefExp _BufferPushItem

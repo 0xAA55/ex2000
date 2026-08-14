@@ -1,20 +1,9 @@
-%include "loaddll.inc"
+%include "common.inc"
 %include "shader.inc"
 %include "gl33.inc"
 %include "assets.inc"
 
-extern _calloc
-extern _free
-
-import_dll_func strlen
-
 segment .rdata
-extern _ShaderTypes
-extern _ST_Vertex_Shader
-extern _ST_Geometry_Shader
-extern _ST_Fragment_Shader
-extern _ST_Offsets
-
 _ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
 _ST_Vertex_Shader db "Vertex", 0
 _ST_Geometry_Shader db "Geometry", 0
@@ -27,28 +16,28 @@ DefFunc _ShaderCreate
 	NameParams %$Program, %$ShaderType, %$ShaderCode, %$PPOutInfoLog
 	DefVars %$Shader, %$SourceLen, %$CompileStatus, %$InfoLogLen, %$InfoLogBuf
 
-	invoke_dll_stdcall glCreateShader, %$ShaderType
+	invoke_stdcall glCreateShader, %$ShaderType
 	mov %$Shader, eax
 
-	invoke_dll_cdecl strlen, %$ShaderCode
+	invoke_cdecl strlen, %$ShaderCode
 	mov %$SourceLen, eax
 
-	invoke_dll_stdcall glShaderSource, %$Shader, 1, & %$ShaderCode, &%$SourceLen
-	invoke_dll_stdcall glCompileShader, %$Shader
-	invoke_dll_stdcall glGetShaderiv, %$Shader, GL_COMPILE_STATUS, &%$CompileStatus
+	invoke_stdcall glShaderSource, %$Shader, 1, & %$ShaderCode, &%$SourceLen
+	invoke_stdcall glCompileShader, %$Shader
+	invoke_stdcall glGetShaderiv, %$Shader, GL_COMPILE_STATUS, &%$CompileStatus
 
 	mov eax, %$CompileStatus
 	test eax, eax
 	jnz .success
 
-	invoke_dll_stdcall glGetShaderiv, %$Shader, GL_INFO_LOG_LENGTH, &%$InfoLogLen
+	invoke_stdcall glGetShaderiv, %$Shader, GL_INFO_LOG_LENGTH, &%$InfoLogLen
 	mov eax, %$InfoLogLen
 	inc eax
 	invoke_cdecl _calloc, eax, 1
 	mov %$InfoLogBuf, eax
 
-	invoke_dll_stdcall glGetShaderInfoLog, %$Shader, %$InfoLogLen, 0, eax
-	invoke_dll_stdcall glDeleteShader, %$Shader
+	invoke_stdcall glGetShaderInfoLog, %$Shader, %$InfoLogLen, 0, eax
+	invoke_stdcall glDeleteShader, %$Shader
 	mov eax, %$PPOutInfoLog
 	mov edx, %$InfoLogBuf
 	mov [eax], edx
@@ -57,8 +46,8 @@ DefFunc _ShaderCreate
 	xor eax, eax
 	jmp .end
 .success:
-	invoke_dll_stdcall glAttachShader, %$Program, %$Shader
-	invoke_dll_stdcall glDeleteShader, %$Shader
+	invoke_stdcall glAttachShader, %$Program, %$Shader
+	invoke_stdcall glDeleteShader, %$Shader
 	xor eax, eax
 	inc eax
 
@@ -81,11 +70,11 @@ DefFunc _ProgramCreate
 	mov %$InfoLog, eax
 	mov edi, eax
 
-	invoke_dll_stdcall glCreateProgram
+	invoke_stdcall glCreateProgram
 	mov %$Program, eax
 
 	mov ecx, 3
-	mov esi, _ST_Offsets
+	GetAbsAddr esi, _ST_Offsets
 	dec edi
 .add_shaders:
 	inc edi
@@ -93,14 +82,17 @@ DefFunc _ProgramCreate
 
 	xor eax, eax
 	lodsb
-	add eax, _ST_Vertex_Shader
+	GetAbsAddr ecx, _ST_Vertex_Shader
+	add eax, ecx
 	mov %$ShaderType, eax
 
 	mov eax, Param(edi)
 	test eax, eax
 	jz .skip_shader
 
-	invoke_cdecl _ShaderCreate, %$Program, [_ShaderTypes + edi * 4], eax, &%$InfoLog
+	GetAbsAddr ecx, _ShaderTypes
+
+	invoke_cdecl _ShaderCreate, %$Program, [ecx + edi * 4], eax, &%$InfoLog
 	test eax, eax
 	jnz .skip_shader
 	debug_msg "Shader compilation error :%s Shader: %s", %$ShaderType, %$InfoLog
@@ -110,19 +102,19 @@ DefFunc _ProgramCreate
 	dec ecx
 	jnz .add_shaders
 
-	invoke_dll_stdcall glLinkProgram, %$Program
-	invoke_dll_stdcall glGetProgramiv, %$Program, GL_LINK_STATUS, &%$LinkStatus
+	invoke_stdcall glLinkProgram, %$Program
+	invoke_stdcall glGetProgramiv, %$Program, GL_LINK_STATUS, &%$LinkStatus
 	mov eax, %$LinkStatus
 	test eax, eax
 	jnz .good_link
 
-	invoke_dll_stdcall glGetProgramiv, %$Program, GL_INFO_LOG_LENGTH, &%$InfoLogLen
+	invoke_stdcall glGetProgramiv, %$Program, GL_INFO_LOG_LENGTH, &%$InfoLogLen
 	mov eax, %$InfoLogLen
 	inc eax
 	invoke_cdecl _calloc, eax, 1
 	mov %$InfoLog, eax
 
-	invoke_dll_stdcall glGetProgramInfoLog, %$Program, %$InfoLogLen, &%$InfoLogLen, %$InfoLog
+	invoke_stdcall glGetProgramInfoLog, %$Program, %$InfoLogLen, &%$InfoLogLen, %$InfoLog
 
 	debug_msg "Shader linkage error: %s", %$InfoLog
 	jmp .bad_end
@@ -137,7 +129,7 @@ DefFunc _ProgramCreate
 
 .bad_end:
 	invoke_cdecl _free, %$InfoLog
-	invoke_dll_stdcall glDeleteProgram, %$Program
+	invoke_stdcall glDeleteProgram, %$Program
 	xor eax, eax
 
 .end:
