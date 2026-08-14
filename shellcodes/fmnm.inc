@@ -1,12 +1,5 @@
 %include "common.inc"
 
-segment .text
-extern _FMNMProcs
-_FMNMProcs:
-	dd _FloatMapNextAvrMipPoolProc
-	dd _FloatMapNextMaxMipPoolProc
-.num_methods equ ($ - _FMNMProcs) / 4
-
 DefFunc _FloatMapNextMip
 	FrameBegin ebx, esi, edi
 	NameParams %$SrcMap, %$Method, %$ThreadPoolSize
