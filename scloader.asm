@@ -60,15 +60,15 @@ extern _NumGLFuncs
 	.%1 dd %1
 %endmacro
 
-extern _SCEAT
-_SCEAT:
+extern _ShellcodeEAT
+_ShellcodeEAT:
 	InstExp
-	.num_fps equ ($ - _SCEAT) / 4
+	.num_fps equ ($ - _ShellcodeEAT) / 4
 
 segment .rdata
-_RelocSCIAT:
+_RelocShellcodeIAT:
 	InstImp
-	.num_fps equ ($ - _RelocSCIAT) / 4
+	.num_fps equ ($ - _RelocShellcodeIAT) / 4
 
 DefFunc _GetNumProcessors
 	FrameBegin
@@ -107,8 +107,8 @@ DefFunc _LoadShellcode
 	mov ebx, eax
 	mov [_ShellcodeBase], eax
 
-	mov ecx, _RelocSCIAT.num_fps
-	mov esi, _RelocSCIAT
+	mov ecx, _RelocShellcodeIAT.num_fps
+	mov esi, _RelocShellcodeIAT
 	lea edi, [ebx + SCHead.imports + 1]
 	lea edx, [edi + 4]
 .setup_iat:
@@ -131,8 +131,8 @@ DefFunc _LoadShellcode
 	mov [_WGLFuncWritePos], edi
 
 	lea esi, [ebx + SCHead.exports]
-	mov edi, _SCEAT
-	mov ecx, _SCEAT.num_fps
+	mov edi, _ShellcodeEAT
+	mov ecx, _ShellcodeEAT.num_fps
 .setup_eat:
 	lodsd
 	add eax, ebx
@@ -204,7 +204,7 @@ DefFunc _UnloadShellcode
 
 %macro RedirCall 1
 	DefFunc %1
-	jmp [_SCEAT.%1]
+	jmp [_ShellcodeEAT.%1]
 %endmacro
 
 %unmacro DefExp 1

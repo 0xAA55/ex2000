@@ -8,7 +8,7 @@ extern _UnloadShellcode
 
 extern _ShellcodeBase
 extern _ShellcodeSize
-extern _SCEAT
+extern _ShellcodeEAT
 
 extern _CreateBitMap
 extern _DestroyBitMap
