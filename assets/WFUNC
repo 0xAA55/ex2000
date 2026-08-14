@@ -1,7 +1,9 @@
 waveOutBreakLoop
 waveOutClose
-waveOutGetDevCaps
-waveOutGetErrorText
+waveOutGetDevCapsA
+waveOutGetDevCapsW
+waveOutGetErrorTextA
+waveOutGetErrorTextW
 waveOutGetID
 waveOutGetNumDevs
 waveOutGetPitch
@@ -12,7 +14,6 @@ waveOutMessage
 waveOutOpen
 waveOutPause
 waveOutPrepareHeader
-waveOutProc
 waveOutReset
 waveOutRestart
 waveOutSetPitch
