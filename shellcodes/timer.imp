@@ -8,6 +8,7 @@ struc TimerData
 endstruc
 
 segment .data
+align 4
 _TimerData:
 istruc TimerData
 	at .PerfFreq, dq 0

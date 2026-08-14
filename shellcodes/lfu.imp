@@ -278,7 +278,8 @@ DefFunc _FreqKeyDuplicate
 DefFunc _FreqKeyFree
 	jmp _free
 
-segment .text
+segment .data
+align 4
 extern _FreqKeyOps
 _FreqKeyOps:
 istruc KeyCompareOps

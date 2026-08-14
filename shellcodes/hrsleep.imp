@@ -2,7 +2,8 @@
 %include "hrsleep.inc"
 
 segment .data
-_hWaitableTimer dd 1
+align 4
+_hWaitableTimer dd 0
 
 DefFunc _HRSleepInit
 	FrameBegin ebx
@@ -30,7 +31,8 @@ DefFunc _HRSleep500us
 	cmp dword[ebx], 0
 	jz .fallback
 
-	invoke_stdcall SetWaitableTimer, [ebx], .wait_time, 0, NULL, NULL, 0
+	GetAbsAddr eax, .wait_time
+	invoke_stdcall SetWaitableTimer, [ebx], eax, 0, NULL, NULL, 0
 	test eax, eax
 	jz .fallback
 	invoke_stdcall WaitForSingleObject, [ebx], 0xFFFFFFFF
@@ -42,4 +44,5 @@ DefFunc _HRSleep500us
 	FrameEnd
 	ret
 [segment .rdata]
+	align 4
 	.wait_time dq -5000

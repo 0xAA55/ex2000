@@ -9,6 +9,8 @@ struc TlsMetadata
 endstruc
 
 segment .data
+align 4
+
 _TlsMetadata:
 istruc TlsMetadata
 	at .TlsIndex, dd 0
