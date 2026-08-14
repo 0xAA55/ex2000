@@ -42,6 +42,7 @@ DefFunc %1
 incbin %strcat(%2, ".bin")
 %endmacro
 
+%include "tls.imp"
 %include "bitmap.imp"
 %include "bitmapdup.imp"
 %include "samplefmap.imp"
@@ -79,7 +80,14 @@ binform _Utf32to16, "utf16enc"
 
 DefFunc _ShellcodeInit
 	FrameBegin
+	invoke_cdecl _TlsInit
 	invoke_cdecl _LfuInit
+	FrameEnd
+	ret
+
+DefFunc _ShellcodeDeInit
+	FrameBegin
+	invoke_cdecl _TlsDeInit
 	FrameEnd
 	ret
 

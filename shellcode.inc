@@ -22,8 +22,6 @@
 	DefImp _Get_AVLOps_Integer
 	DefImp _GetDebugConsoleBuffer
 	DefImp _GetDebugMsgBuffer
-	DefImp _TlsRegisterCallback
-	DefImp _TlsInvokeCallbacks
 	DefImp _GetNumProcessors
 	DefImp _CheckSSE3
 	DefImp _CheckSSE41
@@ -54,6 +52,9 @@
 
 %macro InstExp 0
 	DefExp _ShellcodeInit
+	DefExp _ShellcodeDeInit
+	DefExp _TlsRegisterCallback
+	DefExp _TlsInvokeCallbacks
 	DefExp _CreateBitMap
 	DefExp _DuplicateBitMap
 	DefExp _DestroyBitMap

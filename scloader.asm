@@ -194,6 +194,8 @@ DefFunc _UnloadShellcode
 	FrameBegin
 	DefVars %$OldProtect
 
+	invoke_cdecl _ShellcodeDeInit
+
 	invoke_dll_stdcall VirtualProtect, [_ShellcodeBase], [_ShellcodeSize], [_ShellOldProtect], & %$OldProtect
 	xor eax, eax
 	mov [_ShellcodeBase], eax

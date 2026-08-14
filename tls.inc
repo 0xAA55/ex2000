@@ -4,9 +4,6 @@
 %define TLS_CALLBACK_REASON_ON_INIT 'init'
 %define TLS_CALLBACK_REASON_ON_FINI 'fini'
 
-; DWORD TlsIndex;
-extern _TlsIndex
-
 ; void TlsInit();
 extern _TlsInit
 

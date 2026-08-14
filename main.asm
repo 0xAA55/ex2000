@@ -48,7 +48,6 @@ DefFunc _entry
 	invoke_cdecl _AssetsInit
 	invoke_cdecl _InitDelayedLoadFunc
 	invoke_cdecl _LoadShellcode
-	invoke_cdecl _TlsInit
 	invoke_cdecl _MathInit
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_INIT
 	invoke_cdecl _InitDbg
@@ -57,7 +56,6 @@ DefFunc _entry
 	invoke_cdecl _DeInitDbg
 	invoke_cdecl _TlsInvokeCallbacks, TLS_CALLBACK_REASON_ON_FINI
 	invoke_cdecl _MathDeInit
-	invoke_cdecl _TlsDeInit
 	invoke_cdecl _UnloadShellcode
 	invoke_cdecl _AssetsDestroy
 	invoke_dll_stdcall ExitProcess, ebx
