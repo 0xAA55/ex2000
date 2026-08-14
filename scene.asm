@@ -307,8 +307,6 @@ DefFunc _SceneInit
 	invoke_cdecl _OGLFC_Create, [_hDC], 12
 	mov [_OGLFC], eax
 
-	invoke_cdecl _HRSleepInit
-
 	mov dword [_CameraPos + Vector.y], __float32__(200.0)
 
 	xor eax, eax
@@ -588,7 +586,6 @@ DefFunc _SceneLoadInitProgress
 DefFunc _SceneUnload
 	FrameBegin esi
 
-	invoke_cdecl _HRSleepDeInit
 	invoke_cdecl _VBlankDeInit
 
 	invoke_cdecl _DeInitBuffer, _BillboardVerticesBuffer

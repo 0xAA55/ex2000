@@ -72,6 +72,8 @@ binform _VectorMultMatrix, "vecmultmat"
 binform _VectorNormal, "vecnormal"
 binform _UtfReadCharFromPtr, "utf8read"
 binform _Utf32to16, "utf16enc"
+%include "hrsleep.imp"
+%include "timer.imp"
 %include "shader.imp"
 %include "buffer.imp"
 %include "lfu.imp"
@@ -82,11 +84,13 @@ DefFunc _ShellcodeInit
 	FrameBegin
 	invoke_cdecl _TlsInit
 	invoke_cdecl _LfuInit
+	invoke_cdecl _HRSleepInit
 	FrameEnd
 	ret
 
 DefFunc _ShellcodeDeInit
 	FrameBegin
+	invoke_cdecl _HRSleepDeInit
 	invoke_cdecl _TlsDeInit
 	FrameEnd
 	ret

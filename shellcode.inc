@@ -91,6 +91,15 @@
 	DefExp _VectorNormal
 	DefExp _UtfReadCharFromPtr
 	DefExp _Utf32to16
+	DefExp _HRSleep500us
+	DefExp _GetSysTimerVal
+	DefExp _GetTimerVal
+	DefExp _InitTimer
+	DefExp _UpdateTimer
+	DefExp _IsTimerPaused
+	DefExp _PauseTimer
+	DefExp _UnpauseTimer
+	DefExp _HybridWaitUs
 	DefExp _LfuCreate
 	DefExp _LfuGet
 	DefExp _LfuPut

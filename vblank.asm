@@ -514,6 +514,9 @@ segment .bss
 DefFunc _WaitForVBlank
 	FrameBegin ebx
 	DefVars %$VBlankStartTimeL, %$VBlankStartTimeH, %$NewFrameStartTimeL, %$NewFrameStartTimeH
+	DefVars %$Thousand
+
+	mov dword %$Thousand, __float32__(1000.0)
 
 	invoke_dll_stdcall MonitorFromWindow, [_hWnd], MONITOR_DEFAULTTONEAREST
 	invoke_cdecl _AVLSearch, [_MonitorsData], eax
@@ -524,9 +527,9 @@ DefFunc _WaitForVBlank
 	invoke_cdecl _UpdateTimer, _VBlankTimer
 	fst qword %$VBlankStartTimeL
 	fsub qword [_VBlankFrameStartTime]
-	fimul word [_WThousand]
+	fmul dword %$Thousand
 	fist dword [_LastFrameRenderTimeMs]
-	fimul word [_WThousand]
+	fmul dword %$Thousand
 	fistp qword [_LastFrameRenderTimeUs]
 
 	mov eax, [_LastFrameRenderTimeUs + 0]
@@ -554,9 +557,9 @@ DefFunc _WaitForVBlank
 	invoke_cdecl _UpdateTimer, _VBlankTimer
 	fst qword %$NewFrameStartTimeL
 	fsub qword %$VBlankStartTimeL
-	fimul word [_WThousand]
+	fmul dword %$Thousand
 	fist dword [_VBlankTimeUsedMs]
-	fimul word [_WThousand]
+	fmul dword %$Thousand
 	fistp qword [_VBlankTimeUsedUs]
 
 	mov eax, [ebx + MonitorData.RefreshIntervalUs]
@@ -570,7 +573,7 @@ DefFunc _WaitForVBlank
 	mov [_FrameRenderDelayUs + 4], ecx
 	invoke_cdecl _HybridWaitUs, eax, ecx
 	fild qword[_FrameRenderDelayUs]
-	fidiv word[_WThousand]
+	fdiv dword %$Thousand
 	fist dword[_FrameRenderDelayMs]
 
 	mov eax, [_FrameRenderDelayMs]

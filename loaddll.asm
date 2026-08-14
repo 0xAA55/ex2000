@@ -300,7 +300,17 @@ DefFunc _InitDelayedLoadFunc
 
 	invoke_dll_stdcall GetSystemInfo, _SystemInfo
 
+	cmp dword[_addr_of_CreateWaitableTimerExW], 0
+	jnz .cwt_good
+	mov dword[_addr_of_CreateWaitableTimerExW], .ret_op
+.cwt_good:
+	cmp dword[_addr_of_SetWaitableTimer], 0
+	jnz .swt_good
+	mov dword[_addr_of_SetWaitableTimer], .ret_op
+.swt_good:
+
 	FrameEnd
+.ret_op:
 	ret
 
 segment .bss
