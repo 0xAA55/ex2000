@@ -28,20 +28,20 @@ DefFunc _InitBuffer
 	invoke_cdecl _malloc, eax
 	mov [ebx + GlBuffer.pointer], eax
 
-	invoke_dll_stdcall glGenBuffers, 1, &[ebx + GlBuffer.gl_buffer]
+	invoke_stdcall glGenBuffers, 1, &[ebx + GlBuffer.gl_buffer]
 
 	mov eax, %$BufData
 	test eax, eax
 	jz .after_copy
-	invoke_dll_cdecl memcpy, [ebx + GlBuffer.pointer], %$BufData, %$CBSize
+	invoke_cdecl memcpy, [ebx + GlBuffer.pointer], %$BufData, %$CBSize
 	mov eax, %$BufCapacity
 	mov %$NumData, eax
 .after_copy:
 	mov edi, %$BufType
 
-	invoke_dll_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glBufferData, edi, %$CBSize, %$BufData, %$BufUsage
-	invoke_dll_stdcall glBindBuffer, edi, 0
+	invoke_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
+	invoke_stdcall glBufferData, edi, %$CBSize, %$BufData, %$BufUsage
+	invoke_stdcall glBindBuffer, edi, 0
 
 	mov eax, %$BufCapacity
 	mov ecx, %$BufItemSize
@@ -70,7 +70,7 @@ DefFunc _DeInitBuffer
 	invoke_cdecl _free, [edi + GlBuffer.pointer]
 
 	lea eax, [edi + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glDeleteBuffers, 1, eax
+	invoke_stdcall glDeleteBuffers, 1, eax
 
 .end:
 	xor eax, eax
@@ -96,7 +96,7 @@ DefFunc _BufferCleanNewMemory
 	mov eax, ecx
 	add edi, [ebx + GlBuffer.pointer]
 	mul esi
-	invoke_dll_cdecl memset, edi, 0, eax
+	invoke_cdecl memset, edi, 0, eax
 .end:
 	FrameEnd
 	ret
@@ -232,19 +232,19 @@ DefFunc _BufferFlush
 	je .map
 	mov [ebx + GlBuffer.gl_buffer_cap], eax
 	mov edi, [ebx + GlBuffer.gl_buffer_type]
-	invoke_dll_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glBufferData, edi, esi, [ebx + GlBuffer.pointer], [ebx + GlBuffer.gl_buffer_usage]
-	invoke_dll_stdcall glBindBuffer, edi, 0
+	invoke_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
+	invoke_stdcall glBufferData, edi, esi, [ebx + GlBuffer.pointer], [ebx + GlBuffer.gl_buffer_usage]
+	invoke_stdcall glBindBuffer, edi, 0
 	xor eax, eax
 	jmp .flushed
 
 .map:
 	mov edi, [ebx + GlBuffer.gl_buffer_type]
-	invoke_dll_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
-	invoke_dll_stdcall glMapBuffer, edi, GL_WRITE_ONLY
-	invoke_dll_cdecl memcpy, eax, [ebx + GlBuffer.pointer], esi
-	invoke_dll_stdcall glUnmapBuffer, edi
-	invoke_dll_stdcall glBindBuffer, edi, 0
+	invoke_stdcall glBindBuffer, edi, [ebx + GlBuffer.gl_buffer]
+	invoke_stdcall glMapBuffer, edi, GL_WRITE_ONLY
+	invoke_cdecl memcpy, eax, [ebx + GlBuffer.pointer], esi
+	invoke_stdcall glUnmapBuffer, edi
+	invoke_stdcall glBindBuffer, edi, 0
 	xor eax, eax
 
 .flushed:

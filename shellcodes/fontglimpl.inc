@@ -1,11 +1,7 @@
-%include "loaddll.inc"
-%include "fontgl.inc"
-%include "avlbst.inc"
-%include "lfu.inc"
-%include "math.inc"
-%include "gl33.inc"
+%include "common.inc"
 %include "shader.inc"
-%include "utf.inc"
+%include "buffer.inc"
+%include "fontgl.inc"
 
 struc LfuData
 	.x resd 1
@@ -49,45 +45,46 @@ DefFunc _OGLFC_OnLfuKeyRemove
 
 ;void OGLFC_DescribeVAO(OGLFC *oglfc)
 DefFunc _OGLFC_DescribeVAO
-	FrameBegin ebx, edi
+	FrameBegin ebx, esi, edi
 	NameParams %$OGLFC
 	mov ebx, %$OGLFC
-	invoke_dll_stdcall glBindVertexArray, [ebx + OGLFC.vao]
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.bbbuf_gl_buffer]
-	GetAttribLocation [ebx + OGLFC.shader_program], "position"
+	mov esi, [ebx + OGLFC.shader_program]
+	invoke_stdcall glBindVertexArray, [ebx + OGLFC.vao]
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.bbbuf_gl_buffer]
+	GetAttribLocation esi, "position"
 	mov edi, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.instbuf_gl_buffer]
-	GetAttribLocation [ebx + OGLFC.shader_program], "xy"
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, [ebx + OGLFC.instbuf_gl_buffer]
+	GetAttribLocation esi, "xy"
 	mov edi, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, InstBufferData.size, 0x00
-	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
-	GetAttribLocation [ebx + OGLFC.shader_program], "wh"
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, InstBufferData.size, 0x00
+	invoke_stdcall glVertexAttribDivisor, edi, 1
+	GetAttribLocation esi, "wh"
 	mov edi, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, InstBufferData.size, 0x08
-	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
-	GetAttribLocation [ebx + OGLFC.shader_program], "txy"
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_FLOAT, 0, InstBufferData.size, 0x08
+	invoke_stdcall glVertexAttribDivisor, edi, 1
+	GetAttribLocation esi, "txy"
 	mov edi, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribIPointer, edi, 2, GL_INT, InstBufferData.size, 0x10
-	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
-	GetAttribLocation [ebx + OGLFC.shader_program], "twh"
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribIPointer, edi, 2, GL_INT, InstBufferData.size, 0x10
+	invoke_stdcall glVertexAttribDivisor, edi, 1
+	GetAttribLocation esi, "twh"
 	mov edi, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribIPointer, edi, 2, GL_INT, InstBufferData.size, 0x18
-	invoke_dll_stdcall glVertexAttribDivisor, edi, 1
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
-	invoke_dll_stdcall glBindVertexArray, 0
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribIPointer, edi, 2, GL_INT, InstBufferData.size, 0x18
+	invoke_stdcall glVertexAttribDivisor, edi, 1
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
+	invoke_stdcall glBindVertexArray, 0
 
 	FrameEnd
 	ret
 
 ;OGLFC *OGLFC_Create(HDC hDC, int cap_bits);
 DefFunc _OGLFC_Create
-	FrameBegin ebx, edi
+	FrameBegin ebx, esi, edi
 	NameParams %$hDC, %$CapacitorBits
 	DefVars %$X, %$Y, %$NumCharsInARow
 	DefSizedVar %$TextMetrics, TEXTMETRICW.size
@@ -105,7 +102,7 @@ DefFunc _OGLFC_Create
 	cvtsd2si eax, xmm0
 	mov %$NumCharsInARow, eax
 
-	invoke_dll_stdcall GetTextMetricsW, %$hDC, &%$TextMetrics
+	invoke_stdcall GetTextMetricsW, %$hDC, &%$TextMetrics
 
 	mov %$CapacitorBits, eax
 	invoke_cdecl _calloc, 1, OGLFC.size
@@ -118,16 +115,16 @@ DefFunc _OGLFC_Create
 	shl eax, 31
 	mov [ebx + OGLFC.back_color], eax
 
-	invoke_dll_stdcall CreateCompatibleDC, 0
+	invoke_stdcall CreateCompatibleDC, 0
 	mov [ebx + OGLFC.hdc_canvas], eax
 
-	invoke_dll_stdcall GetCurrentObject, %$hDC, OBJ_FONT
-	invoke_dll_stdcall SelectObject, [ebx + OGLFC.hdc_canvas], eax
-	invoke_dll_stdcall DeleteObject, eax
+	invoke_stdcall GetCurrentObject, %$hDC, OBJ_FONT
+	invoke_stdcall SelectObject, [ebx + OGLFC.hdc_canvas], eax
+	invoke_stdcall DeleteObject, eax
 
-	invoke_dll_stdcall SetBkColor, [ebx + OGLFC.hdc_canvas], 0
-	invoke_dll_stdcall SetTextColor, [ebx + OGLFC.hdc_canvas], 0xFFFFFF
-	invoke_dll_stdcall SetBkMode, [ebx + OGLFC.hdc_canvas], OPAQUE
+	invoke_stdcall SetBkColor, [ebx + OGLFC.hdc_canvas], 0
+	invoke_stdcall SetTextColor, [ebx + OGLFC.hdc_canvas], 0xFFFFFF
+	invoke_stdcall SetBkMode, [ebx + OGLFC.hdc_canvas], OPAQUE
 
 	mov eax, %$hDC
 	mov ecx, [%$TextMetrics_Addr + TEXTMETRICW.tmAscent]
@@ -191,29 +188,30 @@ DefFunc _OGLFC_Create
 	cmp eax, %$NumCharsInARow
 	jb .loop_y
 
-	invoke_dll_stdcall glGenTextures, 1, &[ebx + OGLFC.font_map]
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RED, [ebx + OGLFC.font_map_size], [ebx + OGLFC.font_map_size], 0, GL_RED, GL_UNSIGNED_BYTE, NULL
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_stdcall glGenTextures, 1, &[ebx + OGLFC.font_map]
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
+	invoke_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RED, [ebx + OGLFC.font_map_size], [ebx + OGLFC.font_map_size], 0, GL_RED, GL_UNSIGNED_BYTE, NULL
+	invoke_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
+	invoke_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
+	invoke_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+	invoke_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, 0
 
 	SceneLoadShaderProgram &[ebx + OGLFC.shader_program], "assets\font.vsh", 0, "assets\font.fsh"
 	mov [ebx + OGLFC.shader_program], eax
-
-	GetUniformLocation [ebx + OGLFC.shader_program], "font_map"
+	mov esi, eax
+	
+	GetUniformLocation esi, "font_map"
 	mov [ebx + OGLFC.location_font_map], eax
-	GetUniformLocation [ebx + OGLFC.shader_program], "grid_size"
+	GetUniformLocation esi, "grid_size"
 	mov [ebx + OGLFC.location_grid_size], eax
-	GetUniformLocation [ebx + OGLFC.shader_program], "font_color"
+	GetUniformLocation esi, "font_color"
 	mov [ebx + OGLFC.location_font_color], eax
-	GetUniformLocation [ebx + OGLFC.shader_program], "bkgr_color"
+	GetUniformLocation esi, "bkgr_color"
 	mov [ebx + OGLFC.location_bkgr_color], eax
-	GetUniformLocation [ebx + OGLFC.shader_program], "resolution"
+	GetUniformLocation esi, "resolution"
 	mov [ebx + OGLFC.location_resolution], eax
-	GetUniformLocation [ebx + OGLFC.shader_program], "offset"
+	GetUniformLocation esi, "offset"
 	mov [ebx + OGLFC.location_offset], eax
 
 	DefSizedVar %$BillBoardVertices, 8
@@ -222,7 +220,7 @@ DefFunc _OGLFC_Create
 	invoke_cdecl _InitBuffer, &[ebx + OGLFC.billboard_buffer], GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, 4, & %$BillBoardVertices
 	invoke_cdecl _InitBuffer, &[ebx + OGLFC.instance_buffer], GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, InstBufferData.size, 64, 0
 
-	invoke_dll_stdcall glGenVertexArrays, 1, &[ebx + OGLFC.vao]
+	invoke_stdcall glGenVertexArrays, 1, &[ebx + OGLFC.vao]
 	invoke_cdecl _OGLFC_DescribeVAO, ebx
 	mov eax, ebx
 	FrameEnd
@@ -238,11 +236,11 @@ DefFunc _OGLFC_Destroy
 	invoke_cdecl _AVLClear, &[ebx + OGLFC.vacant_coords]
 	invoke_cdecl _DeInitBuffer, &[ebx + OGLFC.instance_buffer]
 
-	invoke_dll_stdcall glDeleteProgram, [ebx + OGLFC.shader_program]
-	invoke_dll_stdcall glDeleteTextures, 1, &[ebx + OGLFC.font_map]
-	invoke_dll_stdcall glDeleteVertexArrays, 1, &[ebx + OGLFC.vao]
+	invoke_stdcall glDeleteProgram, [ebx + OGLFC.shader_program]
+	invoke_stdcall glDeleteTextures, 1, &[ebx + OGLFC.font_map]
+	invoke_stdcall glDeleteVertexArrays, 1, &[ebx + OGLFC.vao]
 
-	invoke_dll_stdcall DeleteDC, [ebx + OGLFC.hdc_canvas]
+	invoke_stdcall DeleteDC, [ebx + OGLFC.hdc_canvas]
 
 	invoke_cdecl _free, ebx
 
@@ -280,8 +278,8 @@ DefFunc _OGLFC_CreateAndSelectBitmap
 	cmp ax, 256
 	jb .loop_set_palette
 
-	invoke_dll_stdcall CreateDIBSection, %$hDC, & %$BMIF, 0, %$PPtr, NULL, 0
-	invoke_dll_stdcall SelectObject, %$hDC, eax
+	invoke_stdcall CreateDIBSection, %$hDC, & %$BMIF, 0, %$PPtr, NULL, 0
+	invoke_stdcall SelectObject, %$hDC, eax
 
 	FrameEnd
 	ret
@@ -313,7 +311,7 @@ DefFunc _OGLFC_Compose
 	invoke_cdecl _BufferClear, &[ebx + OGLFC.instance_buffer]
 	;Push a placeholder for the background
 	invoke_cdecl _BufferPushItem, &[ebx + OGLFC.instance_buffer], &[%$MInstBufferData_Addr]
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
 
 .loop_compose:
 	invoke_cdecl _UtfReadCharFromPtr, &%$PointerToChar
@@ -435,7 +433,7 @@ DefFunc _OGLFC_Compose
 	invoke_cdecl _malloc, eax
 	mov %$Buffer, eax
 .have_buffer:
-	invoke_dll_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, &%$GlyphMetrics, %$BufferSize, %$Buffer, .mat2
+	invoke_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, &%$GlyphMetrics, %$BufferSize, %$Buffer, .mat2
 	cmp eax, 0xFFFFFFFF
 	jz .non_ttf
 	mov eax, %$Buffer
@@ -470,7 +468,7 @@ DefFunc _OGLFC_Compose
 	mov [edi + LfuData.blackbox_h], edx
 	mov ecx, [eax + GLYPHMETRICS.gmCellIncX] ;gmCellIncX, gmCellIncY
 	mov [edi + LfuData.xinc], ecx ;xinc, yinc
-	invoke_dll_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, %$Buffer
+	invoke_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, %$Buffer
 .lfudata_ready:
 	invoke_cdecl _LfuPut, [ebx + OGLFC.lfu], esi, edi, _free
 	jmp .after_new_glyph_cached
@@ -479,7 +477,7 @@ DefFunc _OGLFC_Compose
 	mov %$WCharPtr, eax
 	invoke_cdecl _Utf32to16, esi, &%$WCharPtr
 	mov %$WCharLen, eax
-	invoke_dll_stdcall GetTextExtentPoint32W, [ebx + OGLFC.hdc_font], &%$WCharBuf, eax, &%$SizeW
+	invoke_stdcall GetTextExtentPoint32W, [ebx + OGLFC.hdc_font], &%$WCharBuf, eax, &%$SizeW
 	mov eax, %$SizeW
 	mov ecx, [ebx + OGLFC.font_size]
 	mov %$CanvasW, eax
@@ -490,23 +488,23 @@ DefFunc _OGLFC_Compose
 	je .have_canvas
 .recreate_canvas:
 	invoke_cdecl _OGLFC_CreateAndSelectBitmap, [ebx + OGLFC.hdc_canvas], %$CanvasW, %$CanvasH, &[ebx + OGLFC.canvas_pointer]
-	invoke_dll_stdcall DeleteObject, eax
+	invoke_stdcall DeleteObject, eax
 	mov eax, %$CanvasW
 	mov ecx, %$CanvasH
 	mov [ebx + OGLFC.canvas_width], eax
 	mov [ebx + OGLFC.canvas_height], ecx
 .have_canvas:
-	invoke_dll_stdcall ExtTextOutW, [ebx + OGLFC.hdc_canvas], 0, 0, ETO_OPAQUE, NULL, &%$WCharBuf, %$WCharLen, NULL
+	invoke_stdcall ExtTextOutW, [ebx + OGLFC.hdc_canvas], 0, 0, ETO_OPAQUE, NULL, &%$WCharBuf, %$WCharLen, NULL
 	mov eax, [ebx + OGLFC.canvas_width]
 	mov ecx, [ebx + OGLFC.canvas_height]
 	mov [edi + LfuData.blackbox_w], eax
 	mov [edi + LfuData.blackbox_h], ecx
 	mov [edi + LfuData.xinc], ax
-	invoke_dll_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, [ebx + OGLFC.canvas_pointer]
+	invoke_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, [ebx + OGLFC.canvas_pointer]
 	jmp .lfudata_ready
 
 .loop_end:
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_cdecl _free, %$Buffer
 
 	mov edi, [ebx + OGLFC.instbuf_pointer]
@@ -536,7 +534,7 @@ DefFunc _OGLFC_Present
 	mov ebx, %$Inst
 	lea esi, [ebx + OGLFC.instance_buffer]
 
-	invoke_dll_stdcall glGetIntegerv, GL_VIEWPORT, & %$VPX
+	invoke_stdcall glGetIntegerv, GL_VIEWPORT, & %$VPX
 	movq xmm0, %$X
 	movq xmm1, %$VPW
 	cvtdq2ps xmm0, xmm0
@@ -550,17 +548,17 @@ DefFunc _OGLFC_Present
 	je .buffer_not_changed
 	invoke_cdecl _OGLFC_DescribeVAO, ebx
 .buffer_not_changed:
-	invoke_dll_stdcall glEnable, GL_BLEND
-	invoke_dll_stdcall glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+	invoke_stdcall glEnable, GL_BLEND
+	invoke_stdcall glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
-	invoke_dll_stdcall glUseProgram, [ebx + OGLFC.shader_program]
-	invoke_dll_stdcall glBindVertexArray, [ebx + OGLFC.vao]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
-	invoke_dll_stdcall glUniform1i, [ebx + OGLFC.location_font_map], 0
-	invoke_dll_stdcall glUniform1i, [ebx + OGLFC.location_grid_size], [ebx + OGLFC.grid_size]
-	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_resolution], %$VPW, %$VPH
-	invoke_dll_stdcall glUniform2f, [ebx + OGLFC.location_offset], %$X, %$Y
+	invoke_stdcall glUseProgram, [ebx + OGLFC.shader_program]
+	invoke_stdcall glBindVertexArray, [ebx + OGLFC.vao]
+	invoke_stdcall glActiveTexture, GL_TEXTURE0
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + OGLFC.font_map]
+	invoke_stdcall glUniform1i, [ebx + OGLFC.location_font_map], 0
+	invoke_stdcall glUniform1i, [ebx + OGLFC.location_grid_size], [ebx + OGLFC.grid_size]
+	invoke_stdcall glUniform2f, [ebx + OGLFC.location_resolution], %$VPW, %$VPH
+	invoke_stdcall glUniform2f, [ebx + OGLFC.location_offset], %$X, %$Y
 	xor eax, eax
 	dec al
 	movd xmm0, [ebx + OGLFC.fore_color]
@@ -579,11 +577,11 @@ DefFunc _OGLFC_Present
 	mulps xmm1, xmm2
 	movups %$FCR, xmm0
 	movups %$BCR, xmm1
-	invoke_dll_stdcall glUniform4f, [ebx + OGLFC.location_font_color], %$FCR, %$FCG, %$FCB, %$FCA
-	invoke_dll_stdcall glUniform4f, [ebx + OGLFC.location_bkgr_color], %$BCR, %$BCG, %$BCB, %$BCA
-	invoke_dll_stdcall glDrawArraysInstanced, GL_TRIANGLE_STRIP, 0, 4, [esi + GlBuffer.num_items]
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-	invoke_dll_stdcall glBindVertexArray, 0
+	invoke_stdcall glUniform4f, [ebx + OGLFC.location_font_color], %$FCR, %$FCG, %$FCB, %$FCA
+	invoke_stdcall glUniform4f, [ebx + OGLFC.location_bkgr_color], %$BCR, %$BCG, %$BCB, %$BCA
+	invoke_stdcall glDrawArraysInstanced, GL_TRIANGLE_STRIP, 0, 4, [esi + GlBuffer.num_items]
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_stdcall glBindVertexArray, 0
 
 	FrameEnd
 	ret
@@ -595,12 +593,14 @@ DefFunc _GLPrintf
 	DefVars %$ConLengthAll, %$PrintfLength
 
 	mov ebx, %$OGLFC
-	lea eax, %$Args
-	mov edi, [_DebugConsoleBuffer]
-	invoke_dll_cdecl vsnprintf, [_DebugMsgBuffer], _DebugMsgBufferSize, %$Fmt, eax
+
+	invoke_cdecl _GetDebugConsoleBuffer
+	mov edi, eax
+	invoke_cdecl _GetDebugMsgBuffer
+	invoke_cdecl vsnprintf, eax, _DebugMsgBufferSize, %$Fmt, & %$Args
 	mov %$PrintfLength, eax
 
-	invoke_dll_cdecl strlen, edi
+	invoke_cdecl strlen, edi
 	mov %$ConLengthAll, eax
 	mov ecx, eax
 	add ecx, %$PrintfLength
@@ -626,11 +626,12 @@ DefFunc _GLPrintf
 	jb .find_last_lines
 	inc esi
 
-	invoke_dll_cdecl strlen, esi
-	invoke_dll_cdecl memmove, edi, esi, &[eax + 1]
+	invoke_cdecl strlen, esi
+	invoke_cdecl memmove, edi, esi, &[eax + 1]
 
 .ready_to_concat:
-	invoke_dll_cdecl strcat, edi, [_DebugMsgBuffer]
+	invoke_cdecl _GetDebugMsgBuffer
+	invoke_cdecl strcat, edi, eax
 
 	invoke_cdecl _OGLFC_Compose, ebx, 0xFFFFFFFF, 0xFFFFFFFF, edi
 	invoke_cdecl _OGLFC_Present, ebx, 0, 0
@@ -645,9 +646,9 @@ DefFunc _GLPrintfXY
 	NameParams %$OGLFC, %$X, %$Y, %$Fmt, %$Args
 
 	mov ebx, %$OGLFC
-	lea eax, %$Args
-	mov edi, [_DebugMsgBuffer]
-	invoke_dll_cdecl vsnprintf, edi, _DebugMsgBufferSize, %$Fmt, eax
+	invoke_cdecl _GetDebugMsgBuffer
+	mov edi, eax
+	invoke_cdecl vsnprintf, edi, _DebugMsgBufferSize, %$Fmt, & %$Args
 
 	invoke_cdecl _OGLFC_Compose, ebx, 0xFFFFFFFF, 0xFFFFFFFF, edi
 	invoke_cdecl _OGLFC_Present, ebx, %$X, %$Y

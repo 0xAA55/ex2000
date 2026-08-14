@@ -71,7 +71,9 @@ binform _VectorMultMatrix, "vecmultmat"
 binform _VectorNormal, "vecnormal"
 binform _UtfReadCharFromPtr, "utf8read"
 binform _Utf32to16, "utf16enc"
+%include "bufferimpl.inc"
 %include "lfuimpl.inc"
+%include "fontglimpl.inc"
 %include "raymarch.inc"
 
 DefFunc _ShellcodeInit
