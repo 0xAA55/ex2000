@@ -4,6 +4,7 @@
 %include "pool.inc"
 %include "shader.inc"
 %include "math.inc"
+%include "tls.inc"
 
 %macro DefImp 1
 .%1 resb 5
@@ -36,8 +37,14 @@ _ShellcodeBase resd 1
 extern _ShellcodeSize
 _ShellcodeSize resd 1
 
+extern _WGLFuncWritePos
+_WGLFuncWritePos resd 1
+
 extern _FirstDelayLoadFunc
 extern _NumDelayLoadFuncs
+
+extern _FirstImmeLoadFunc
+extern _NumImmeLoadFuncs
 
 extern _FirstGLFunc
 extern _NumGLFuncs
@@ -81,6 +88,18 @@ DefFunc _CheckSSE41
 	FrameEnd
 	ret
 
+DefFunc _GetDebugConsoleBuffer
+	FrameBegin
+	mov eax, [_DebugConsoleBuffer]
+	FrameEnd
+	ret
+
+DefFunc _GetDebugMsgBuffer
+	FrameBegin
+	mov eax, [_DebugMsgBuffer]
+	FrameEnd
+	ret
+
 DefFunc _LoadShellcode
 	FrameBegin ebx, esi, edi
 
@@ -101,13 +120,15 @@ DefFunc _LoadShellcode
 	dec ecx
 	jnz .setup_iat
 
+	mov esi, _FirstImmeLoadFunc
+	mov ecx, _NumImmeLoadFuncs
+	call .setup_iat_delay_load_api
+
 	mov esi, _FirstDelayLoadFunc
 	mov ecx, _NumDelayLoadFuncs
 	call .setup_iat_delay_load_api
 
-	mov esi, _FirstGLFunc
-	mov ecx, _NumGLFuncs
-	call .setup_iat_delay_load_api
+	mov [_WGLFuncWritePos], edi
 
 	lea esi, [ebx + SCHead.exports]
 	mov edi, _SCEAT
@@ -128,17 +149,46 @@ DefFunc _LoadShellcode
 	lodsd
 	test eax, eax
 	jz .nullptr
-	sub eax, edx
 	jmp .after_get_offset
 .nullptr:
 	dec eax
 .after_get_offset:
+	sub eax, edx
 	stosd
 	inc edi
 	add edx, 5
 	dec ecx
 	jnz .setup_iat_delay_load_api
 	ret
+
+DefFunc _ImportOpenGLFuncsToShellcode
+	FrameBegin ebx, esi, edi
+	DefVars %$OldProtect
+
+	mov ecx, _NumGLFuncs
+	mov esi, _FirstGLFunc
+	mov edi, [_WGLFuncWritePos]
+	lea edx, [edi + 4]
+.loop_import:
+	lodsd
+	test eax, eax
+	jz .nullptr
+	jmp .after_get_offset
+.nullptr:
+	mov eax, .bad
+.after_get_offset:
+	sub eax, edx
+	stosd
+	inc edi
+	add edx, 5
+	dec ecx
+	jnz .loop_import
+
+	FrameEnd
+	ret
+.bad:
+	int3
+	jmp .bad
 
 DefFunc _UnloadShellcode
 	FrameBegin

@@ -24,6 +24,10 @@ _SystemInfo:
 segment .rdata
 _name_of_LoadLibraryA db "LoadLibraryA", 0
 
+segment .bss
+extern _FirstImmeLoadFunc
+_FirstImmeLoadFunc:
+
 dll_func_group_start KFunc
 def_dll_func ExitProcess
 def_dll_func GetProcessHeap
@@ -47,6 +51,8 @@ def_dll_func_alias vsnprintf, '_vsnprintf'
 dll_func_group_end CFunc
 
 segment .bss
+extern _NumImmeLoadFuncs
+_NumImmeLoadFuncs equ ($ - _FirstImmeLoadFunc) / 4
 extern _FirstDelayLoadFunc
 _FirstDelayLoadFunc:
 

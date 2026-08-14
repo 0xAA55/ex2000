@@ -9,6 +9,7 @@ extern _InitDelayedLoadFunc
 extern _LoadShellcode
 extern _UnloadShellcode
 extern _InitGL33
+extern _ImportOpenGLFuncsToShellcode
 extern _DeInitGL33
 extern _Scene
 extern _SceneInit
@@ -196,6 +197,8 @@ DefFunc _WndProc@16
 	invoke_cdecl _InitGL33
 	test eax, eax
 	jz .failed_end
+
+	invoke_cdecl _ImportOpenGLFuncsToShellcode
 	jmp .normal_end
 .on_WM_DESTROY:
 	invoke_cdecl _SceneUnload

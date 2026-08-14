@@ -18,6 +18,10 @@
 	DefImp _AVLBST_Min
 	DefImp _Get_AVLOps_String
 	DefImp _Get_AVLOps_Integer
+	DefImp _GetDebugConsoleBuffer
+	DefImp _GetDebugMsgBuffer
+	DefImp _TlsRegisterCallback
+	DefImp _TlsInvokeCallbacks
 	DefImp _GetNumProcessors
 	DefImp _CheckSSE3
 	DefImp _CheckSSE41
@@ -25,8 +29,25 @@
 	DefImp _SceneLoadShaderProgram
 %endmacro
 
+%macro InstImpP 0
+	DefImp ExitProcess
+	DefImp GetProcessHeap
+	DefImp HeapAlloc
+	DefImp HeapReAlloc
+	DefImp HeapFree
+	DefImp MessageBoxA
+	DefImp strcpy
+	DefImp strlen
+	DefImp strcmp
+	DefImp printf
+	DefImp memset
+	DefImp memcpy
+	DefImp vsnprintf
+%endmacro
+
 %macro InstImpFull 0
 	InstImp
+	InstImpP
 	%include 'scfuncs.tmp'
 	%include 'glfuncs.tmp'
 %endmacro
@@ -73,14 +94,43 @@
 	DefExp _LfuGet
 	DefExp _LfuPut
 	DefExp _LfuDestroy
+	DefExp _InitBuffer
+	DefExp _DeInitBuffer
+	DefExp _BufferPushItem
+	DefExp _BufferPopItem
+	DefExp _BufferClear
+	DefExp _BufferFlush
+	DefExp _BufferTrimExcess
+	DefExp _BufferResize
+	DefExp _OGLFC_Create
+	DefExp _OGLFC_Destroy
+	DefExp _OGLFC_Compose
+	DefExp _GLPrintf
+	DefExp _GLPrintfXY
 	DefExp _RaymarchTerrainAltitude
 %endmacro
 
-%macro GetAbsAddr 2
+%macro GetAbsAddr 2-*
 	call %%label
 	%%label:
 	pOp %1
-	add %1, %2 - %%label
+	%if %0 == 2
+		add %1, %2 - %%label
+	%elif %0 == 4
+		lea %2, [%1 + %4 - %%label]
+		add %1, %3 - %%label
+	%elif %0 == 6
+		lea %2, [%1 + %5 - %%label]
+		lea %3, [%1 + %6 - %%label]
+		add %1, %4 - %%label
+	%elif %0 == 8
+		lea %2, [%1 + %6 - %%label]
+		lea %3, [%1 + %7 - %%label]
+		lea %4, [%1 + %8 - %%label]
+		add %1, %5 - %%label
+	%else
+		%error Bad usage of `GetAbsAddr`
+	%endif
 %endmacro
 
 %endif
