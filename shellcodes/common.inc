@@ -16,15 +16,4 @@ bits 32
 %endmacro
 [warning +pp-macro-redef-multi]
 
-%include "shellcode.inc"
-
-%define DefImp extern
-%define DefExp extern
-
-InstImpFull
-InstExp
-
-%undef DefImp
-%undef DefExp
-
 %endif
