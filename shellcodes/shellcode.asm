@@ -96,12 +96,10 @@ DefFunc _ShellcodeDeInit
 	ret
 
 segment .text
-%assign __TextSize ($ - $$)
+align 4
 
 segment .data
-%assign __DataSize ($ - $$)
+align 4
 
 segment .rdata
-%assign __RDataSize ($ - $$)
-%assign __FileSize (__TextSize + __DataSize + __RDataSize)
-times 15 - __FileSize % 16 int3
+align 4
