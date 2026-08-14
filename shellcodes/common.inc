@@ -3,7 +3,7 @@
 
 bits 32
 
-%include "frame.inc"
+%include "loaddll.inc"
 %include "math.inc"
 
 %define SHELLCODE 1

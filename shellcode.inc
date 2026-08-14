@@ -9,6 +9,8 @@
 	DefImp _aligned_malloc
 	DefImp _aligned_free
 	DefImp _AssetsQuery
+	DefImp _snprintf
+	DefImp _DebugMsg
 	DefImp _PoolRun
 	DefImp _AVLInsert
 	DefImp _AVLSearch

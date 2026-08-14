@@ -169,10 +169,23 @@
 	%%format db %1, 0
 
 	__SECT__
-	%if %0 >= 2
-		invoke_cdecl _DebugMsg, %%format, %2
+	%ifndef SHELLCODE
+		%if %0 >= 2
+			invoke_cdecl _DebugMsg, %%format, %2
+		%else
+			invoke_dll_stdcall MessageBoxA, 0, %%format, 0, 0
+		%endif
 	%else
-		invoke_dll_stdcall MessageBoxA, 0, %%format, 0, 0
+		__ResetPassReg
+		%define __NoResetPassReg
+		__PickOutRegToAvoid %1
+		__RotatePassReg
+		GetAbsAddr __PassReg, %%format
+		%if %0 >= 2
+			invoke_cdecl _DebugMsg, __PassReg, %2
+		%else
+			invoke_stdcall MessageBoxA, 0, __PassReg, 0, 0
+		%endif
 	%endif
 %endmacro
 
@@ -181,10 +194,23 @@
 	%%format db %1, 0
 
 	__SECT__
-	%if %0 >= 2
-		invoke_dll_cdecl printf, %%format, %2
+	%ifndef SHELLCODE
+		%if %0 >= 2
+			invoke_dll_cdecl printf, %%format, %2
+		%else
+			invoke_dll_cdecl printf, %%format
+		%endif
 	%else
-		invoke_dll_cdecl printf, %%format
+		__ResetPassReg
+		%define __NoResetPassReg
+		__PickOutRegToAvoid %1
+		__RotatePassReg
+		GetAbsAddr __PassReg, %%format
+		%if %0 >= 2
+			invoke_cdecl printf, __PassReg, %2
+		%else
+			invoke_cdecl printf, __PassReg
+		%endif
 	%endif
 %endmacro
 
@@ -193,10 +219,23 @@
 	%%format db %3, 0
 
 	__SECT__
-	%if %0 >= 4
-		invoke_cdecl _snprintf, %1, %2, %%format, %4
+	%ifndef SHELLCODE
+		%if %0 >= 4
+			invoke_cdecl _snprintf, %1, %2, %%format, %4
+		%else
+			invoke_cdecl _snprintf, %1, %2, %%format
+		%endif
 	%else
-		invoke_cdecl _snprintf, %1, %2, %%format
+		__ResetPassReg
+		%define __NoResetPassReg
+		__PickOutRegToAvoid %1
+		__RotatePassReg
+		GetAbsAddr __PassReg, %%format
+		%if %0 >= 4
+			invoke_cdecl _snprintf, %1, %2, __PassReg, %4
+		%else
+			invoke_cdecl _snprintf, %1, %2, __PassReg
+		%endif
 	%endif
 %endmacro
 
@@ -211,6 +250,10 @@ extern _LoadFuncGroup
 ;void LoadFuncsFromAssets(void *output, void *dll_base, const char *asset_path, size_t count)
 extern _LoadFuncsFromAssets
 %macro LoadFuncsFromAssets 4
+	%ifdef SHELLCODE
+		%error `LoadFuncsFromAssets` can not be used in shellcode
+	%endif
+
 	[segment .rdata]
 	%%AssetName db %3, 0
 
