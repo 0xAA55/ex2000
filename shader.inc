@@ -33,7 +33,7 @@ extern _SceneLoadShaderProgram
 		invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
 	%else
 		GetAbsAddr eax, %%AttribName
-		invoke_dll_stdcall glGetAttribLocation, %1, eax
+		invoke_stdcall glGetAttribLocation, %1, eax
 	%endif
 %endmacro
 
@@ -46,7 +46,7 @@ extern _SceneLoadShaderProgram
 		invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
 	%else
 		GetAbsAddr eax, %%UniformName
-		invoke_dll_stdcall glGetUniformLocation, %1, eax
+		invoke_stdcall glGetUniformLocation, %1, eax
 	%endif
 %endmacro
 
@@ -59,7 +59,7 @@ extern _SceneLoadShaderProgram
 		invoke_dll_stdcall glGetFragDataLocation, %1, %%FragDataName
 	%else
 		GetAbsAddr eax, %%FragDataName
-		invoke_dll_stdcall glGetFragDataLocation, %1, eax
+		invoke_stdcall glGetFragDataLocation, %1, eax
 	%endif
 %endmacro
 
