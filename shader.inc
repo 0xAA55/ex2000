@@ -16,7 +16,12 @@ extern _SceneLoadShaderProgram
 	%%FSAssetsPath db %4, 0
 
 	__SECT__
-	invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
+	%ifndef SHELLCODE
+		invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
+	%else
+		GetAbsAddr eax, ecx, edx, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
+		invoke_cdecl _SceneLoadShaderProgram, %1, eax, ecx, edx
+	%endif
 %endmacro
 
 %macro GetAttribLocation 2
@@ -24,7 +29,12 @@ extern _SceneLoadShaderProgram
 	%%AttribName db %2, 0
 
 	__SECT__
-	invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
+	%ifndef SHELLCODE
+		invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
+	%else
+		GetAbsAddr eax, %%AttribName
+		invoke_dll_stdcall glGetAttribLocation, %1, eax
+	%endif
 %endmacro
 
 %macro GetUniformLocation 2
@@ -32,7 +42,12 @@ extern _SceneLoadShaderProgram
 	%%UniformName db %2, 0
 
 	__SECT__
-	invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
+	%ifndef SHELLCODE
+		invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
+	%else
+		GetAbsAddr eax, %%UniformName
+		invoke_dll_stdcall glGetUniformLocation, %1, eax
+	%endif
 %endmacro
 
 %macro GetFragDataLocation 2
@@ -40,7 +55,12 @@ extern _SceneLoadShaderProgram
 	%%FragDataName db %2, 0
 
 	__SECT__
-	invoke_dll_stdcall glGetFragDataLocation, %1, %%FragDataName
+	%ifndef SHELLCODE
+		invoke_dll_stdcall glGetFragDataLocation, %1, %%FragDataName
+	%else
+		GetAbsAddr eax, %%FragDataName
+		invoke_dll_stdcall glGetFragDataLocation, %1, eax
+	%endif
 %endmacro
 
 %endif
