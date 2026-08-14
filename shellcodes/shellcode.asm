@@ -80,4 +80,13 @@ DefFunc _ShellcodeInit
 	FrameEnd
 	ret
 
-times 16 - ($ - $$) % 16 int3
+segment .text
+%assign __TextSize ($ - $$)
+
+segment .data
+%assign __DataSize ($ - $$)
+
+segment .rdata
+%assign __RDataSize ($ - $$)
+%assign __FileSize (__TextSize + __DataSize + __RDataSize)
+times 15 - __FileSize % 16 int3
