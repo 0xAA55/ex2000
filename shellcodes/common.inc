@@ -6,6 +6,8 @@ bits 32
 %include "frame.inc"
 %include "math.inc"
 
+%define SHELLCODE 1
+
 %define StackSegmentAttrib nobits
 %define StackSegmentIsBss 1
 [warning -pp-macro-redef-multi]
