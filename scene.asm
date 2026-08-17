@@ -47,30 +47,20 @@ _TerrainConeTexture resd 1
 extern _RTTFramebuffer
 _RTTFramebuffer resd 1
 
+extern _RTTDepthBuffer
+_RTTDepthBuffer resd 1
+
 extern _AuxBufTexture
 _AuxBufTexture resd 1
 
 extern _HDRLensTexture
 _HDRLensTexture resd 1
 
-extern _RTTBufferSize
-_RTTBufferSize:
-	.w resw 1
-	.h resw 1
-
 extern _HDRBlurTexture
 _HDRBlurTexture resd 1
 
-extern _HDRBlurTextureSize
-_HDRBlurTextureSize:
-	.w resw 1
-	.h resw 1
-
-extern _RTTDepthBuffer
-_RTTDepthBuffer resd 1
-
-extern _RTTDepthBufferSize
-_RTTDepthBufferSize:
+extern _RTTBufferSize
+_RTTBufferSize:
 	.w resw 1
 	.h resw 1
 
@@ -626,24 +616,30 @@ DefFunc _SceneLoadInitProgress
 DefFunc _DeleteTexture
 	FrameBegin ebx
 	NameParams %$PtrToDel
-
 	mov ebx, %$PtrToDel
 	invoke_dll_stdcall glDeleteTextures, 1, ebx
 	xor eax, eax
 	mov [ebx], eax
-
 	FrameEnd
 	ret
 
 DefFunc _DeleteProgram
 	FrameBegin ebx
 	NameParams %$PtrToDel
-
 	mov ebx, %$PtrToDel
 	invoke_dll_stdcall glDeleteProgram, [ebx]
 	xor eax, eax
 	mov [ebx], eax
+	FrameEnd
+	ret
 
+DefFunc _DeleteRenderbuffer
+	FrameBegin ebx
+	NameParams %$PtrToDel
+	mov ebx, %$PtrToDel
+	invoke_dll_stdcall glDeleteRenderbuffers, 1, ebx
+	xor eax, eax
+	mov [ebx], eax
 	FrameEnd
 	ret
 
@@ -659,7 +655,8 @@ DefFunc _SceneUnload
 	invoke_cdecl _OGLFC_Destroy, [_OGLFC]
 
 	invoke_dll_stdcall glDeleteFramebuffers, 1, _RTTFramebuffer
-	invoke_dll_stdcall glDeleteRenderbuffers, 1, _RTTDepthBuffer
+
+	invoke_cdecl _DeleteRenderbuffer, _RTTDepthBuffer
 
 	invoke_cdecl _DeleteTexture, _TerrainTexture
 	invoke_cdecl _DeleteTexture, _TerrainTextureMipLinear
@@ -692,7 +689,6 @@ DefFunc _SceneUnload
 	dd _TerrainConeBitmap
 	dd _OGLFC
 	dd _RTTFramebuffer
-	dd _RTTDepthBuffer
 	dd _DrawBillboardVAO
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
 
@@ -799,70 +795,35 @@ __SECT__
 	cmp eax, [_RTTBufferSize]
 	jz .rtt_size_good
 
-	invoke_cdecl _DeleteTexture, 1, _AuxBufTexture
-	invoke_cdecl _DeleteTexture, 1, _HDRLensTexture
-
-.rtt_size_good:
-	cmp dword[ebx], 0
-	jnz .hdr_texture_good
+	invoke_cdecl _DeleteTexture, _AuxBufTexture
+	invoke_cdecl _DeleteTexture, _HDRLensTexture
+	invoke_cdecl _DeleteTexture, _HDRBlurTexture
+	invoke_cdecl _DeleteRenderbuffer, _RTTDepthBuffer
 
 	invoke_dll_stdcall glGenTextures, 1, _AuxBufTexture
-	invoke_dll_stdcall glGenTextures, 1, _HDRLensTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_AuxBufTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
 	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
+
+	invoke_dll_stdcall glGenTextures, 1, _HDRLensTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
 	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
-	mov eax, %$VPSize
-	mov [_RTTBufferSize], eax
+	invoke_dll_stdcall glGenTextures, 1, _HDRBlurTexture
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRBlurTexture]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidthLow, %$VPHeightLow, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
-.hdr_texture_good:
-	mov eax, %$VPSize
-	mov ebx, _RTTDepthBuffer
-	cmp eax, [_RTTDepthBufferSize]
-	jz .depth_buffer_size_good
-
-	invoke_dll_stdcall glDeleteRenderbuffers, 1, ebx
-	xor eax, eax
-	mov [ebx], eax
-
-.depth_buffer_size_good:
-	cmp dword[ebx], 0
-	jnz .depth_buffer_good
-
-	invoke_dll_stdcall glGenRenderbuffers, 1, ebx
-	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [ebx]
+	invoke_dll_stdcall glGenRenderbuffers, 1, _RTTDepthBuffer
+	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [_RTTDepthBuffer]
 	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, %$VPWidth, %$VPHeight
 	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, 0
 
 	mov eax, %$VPSize
-	mov [_RTTDepthBufferSize], eax
+	mov [_RTTBufferSize], eax
+.rtt_size_good:
 
-.depth_buffer_good:
-	mov eax, %$VPSizeLow
-	mov ebx, _HDRBlurTexture
-	cmp eax, [_HDRBlurTextureSize]
-	jz .hdr_blur_texture_size_good
-
-	invoke_dll_stdcall glDeleteTextures, 1, ebx
-	xor eax, eax
-	mov [ebx], eax
-
-.hdr_blur_texture_size_good:
-	cmp dword[ebx], 0
-	jnz .hdr_blur_texture_good
-
-	invoke_dll_stdcall glGenTextures, 1, ebx
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidthLow, %$VPHeightLow, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
-	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
-
-	mov eax, %$VPSizeLow
-	mov [_HDRBlurTextureSize], eax
-
-.hdr_blur_texture_good:
 	invoke_cdecl _SceneLoadProgressive
 	mov ebx, _NumItemsToLoad
 	cmp eax, ebx
