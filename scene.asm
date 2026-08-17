@@ -50,8 +50,8 @@ _RTTFramebuffer resd 1
 extern _HDRLensTexture
 _HDRLensTexture resd 1
 
-extern _HDRLensTextureSize
-_HDRLensTextureSize:
+extern _RTTBufferSize
+_RTTBufferSize:
 	.w resw 1
 	.h resw 1
 
@@ -742,14 +742,14 @@ __SECT__
 	or eax, ecx
 	mov %$VPSizeLow, eax
 	mov eax, %$VPSize
-	cmp eax, [_HDRLensTextureSize]
-	jz .hdr_texture_size_good
+	cmp eax, [_RTTBufferSize]
+	jz .rtt_size_good
 
 	invoke_dll_stdcall glDeleteTextures, 1, ebx
 	xor eax, eax
 	mov [ebx], eax
 
-.hdr_texture_size_good:
+.rtt_size_good:
 	cmp dword[ebx], 0
 	jnz .hdr_texture_good
 
