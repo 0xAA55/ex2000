@@ -583,6 +583,30 @@ DefFunc _SceneLoadInitProgress
 	FrameEnd
 	ret
 
+DefFunc _DeleteTexture
+	FrameBegin ebx
+	NameParams %$PtrToDel
+
+	mov ebx, %$PtrToDel
+	invoke_dll_stdcall glDeleteTextures, 1, ebx
+	xor eax, eax
+	mov [ebx], eax
+
+	FrameEnd
+	ret
+
+DefFunc _DeleteProgram
+	FrameBegin ebx
+	NameParams %$PtrToDel
+
+	mov ebx, %$PtrToDel
+	invoke_dll_stdcall glDeleteProgram, [ebx]
+	xor eax, eax
+	mov [ebx], eax
+
+	FrameEnd
+	ret
+
 DefFunc _SceneUnload
 	FrameBegin esi
 
@@ -597,16 +621,17 @@ DefFunc _SceneUnload
 	invoke_dll_stdcall glDeleteFramebuffers, 1, _RTTFramebuffer
 	invoke_dll_stdcall glDeleteRenderbuffers, 1, _RTTDepthBuffer
 
-	invoke_dll_stdcall glDeleteTextures, 1, _TerrainTexture
-	invoke_dll_stdcall glDeleteTextures, 1, _TerrainTextureMipLinear
-	invoke_dll_stdcall glDeleteTextures, 1, _TerrainConeTexture
-	invoke_dll_stdcall glDeleteTextures, 1, _HDRLensTexture
-	invoke_dll_stdcall glDeleteTextures, 1, _HDRBlurTexture
+	invoke_cdecl _DeleteTexture, _TerrainTexture
+	invoke_cdecl _DeleteTexture, _TerrainTextureMipLinear
+	invoke_cdecl _DeleteTexture, _TerrainConeTexture
+	invoke_cdecl _DeleteTexture, _AuxBufTexture
+	invoke_cdecl _DeleteTexture, _HDRLensTexture
+	invoke_cdecl _DeleteTexture, _HDRBlurTexture
 
-	invoke_dll_stdcall glDeleteProgram, [_DrawProgressProgram]
-	invoke_dll_stdcall glDeleteProgram, [_DrawSceneProgram]
-	invoke_dll_stdcall glDeleteProgram, [_DrawBlurProgram]
-	invoke_dll_stdcall glDeleteProgram, [_DrawHDR2LDRProgram]
+	invoke_cdecl _DeleteProgram, _DrawProgressProgram
+	invoke_cdecl _DeleteProgram, _DrawSceneProgram
+	invoke_cdecl _DeleteProgram, _DrawBlurProgram
+	invoke_cdecl _DeleteProgram, _DrawHDR2LDRProgram
 
 	invoke_dll_stdcall glDeleteVertexArrays, 1, _DrawBillboardVAO
 
@@ -628,18 +653,8 @@ DefFunc _SceneUnload
 	dd _OGLFC
 	dd _RTTFramebuffer
 	dd _RTTDepthBuffer
-	dd _DrawProgressProgram
-	dd _DrawSceneProgram
-	dd _DrawBlurProgram
-	dd _DrawHDR2LDRProgram
 	dd _DrawBillboardVAO
-	dd _TerrainTexture
-	dd _TerrainTextureMipLinear
-	dd _TerrainConeTexture
-	dd _HDRLensTexture
-	dd _HDRBlurTexture
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
-
 
 DefFunc _Scene_OnKeyDown
 	FrameBegin
@@ -745,9 +760,7 @@ __SECT__
 	cmp eax, [_RTTBufferSize]
 	jz .rtt_size_good
 
-	invoke_dll_stdcall glDeleteTextures, 1, ebx
-	xor eax, eax
-	mov [ebx], eax
+	invoke_cdecl _DeleteTexture, 1, _HDRLensTexture
 
 .rtt_size_good:
 	cmp dword[ebx], 0
