@@ -47,6 +47,9 @@ _TerrainConeTexture resd 1
 extern _RTTFramebuffer
 _RTTFramebuffer resd 1
 
+extern _AuxBufTexture
+_AuxBufTexture resd 1
+
 extern _HDRLensTexture
 _HDRLensTexture resd 1
 
@@ -259,6 +262,56 @@ _PtrStrQualities:
 	dd _StrMidQuality
 	dd _StrBestQuality
 
+DefFunc _InitTexRepeatLinear
+	FrameBegin ebx
+	NameParams %$Target
+	mov ebx, %$Target
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glBindTexture, ebx, 0
+	FrameEnd
+	ret
+
+DefFunc _InitTexRepeatMipmap
+	FrameBegin ebx
+	NameParams %$Target
+	mov ebx, %$Target
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_REPEAT
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glGenerateMipmap, ebx
+	invoke_dll_stdcall glBindTexture, ebx, 0
+	FrameEnd
+	ret
+
+DefFunc _InitTexClampLinear
+	FrameBegin ebx
+	NameParams %$Target
+	mov ebx, %$Target
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glBindTexture, ebx, 0
+	FrameEnd
+	ret
+
+DefFunc _InitTexClampMipmap
+	FrameBegin ebx
+	NameParams %$Target
+	mov ebx, %$Target
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
+	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+	invoke_dll_stdcall glGenerateMipmap, ebx
+	invoke_dll_stdcall glBindTexture, ebx, 0
+	FrameEnd
+	ret
+
 ;int SceneInit();
 DefFunc _SceneInit
 	FrameBegin ebx, esi
@@ -345,21 +398,12 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glGenTextures, 1, _TerrainTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_cdecl _InitTexRepeatLinear, GL_TEXTURE_2D
 	mov ebx, [_NoiseBitmap]
 	invoke_dll_stdcall glGenTextures, 1, _TerrainTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_cdecl _InitTexRepeatMipmap, GL_TEXTURE_2D
 	invoke_cdecl _DestroyBitMap, ebx
 	xor eax, eax
 	mov [_NoiseBitmap], eax
@@ -367,11 +411,7 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glGenTextures, 1, _TerrainConeTexture
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_cdecl _InitTexRepeatLinear, GL_TEXTURE_2D
 	FrameEnd
 	ret
 
@@ -727,7 +767,6 @@ __SECT__
 	cmp eax, [_ClientRect.top]
 	jbe .end_after_swap_buffers
 
-	mov ebx, _HDRLensTexture
 	mov eax, [_ClientRect.right]
 	mov ecx, [_ClientRect.bottom]
 	sub eax, [_ClientRect.left]
@@ -760,23 +799,24 @@ __SECT__
 	cmp eax, [_RTTBufferSize]
 	jz .rtt_size_good
 
+	invoke_cdecl _DeleteTexture, 1, _AuxBufTexture
 	invoke_cdecl _DeleteTexture, 1, _HDRLensTexture
 
 .rtt_size_good:
 	cmp dword[ebx], 0
 	jnz .hdr_texture_good
 
-	invoke_dll_stdcall glGenTextures, 1, ebx
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
+	invoke_dll_stdcall glGenTextures, 1, _AuxBufTexture
+	invoke_dll_stdcall glGenTextures, 1, _HDRLensTexture
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_AuxBufTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
+	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
 	mov eax, %$VPSize
-	mov [_HDRLensTextureSize], eax
+	mov [_RTTBufferSize], eax
 
 .hdr_texture_good:
 	mov eax, %$VPSize
@@ -817,11 +857,7 @@ __SECT__
 	invoke_dll_stdcall glGenTextures, 1, ebx
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidthLow, %$VPHeightLow, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
-	invoke_dll_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
+	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
 	mov eax, %$VPSizeLow
 	mov [_HDRBlurTextureSize], eax
