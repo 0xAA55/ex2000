@@ -59,6 +59,12 @@ _HDRLensTexture resd 1
 extern _HDRBlurTexture
 _HDRBlurTexture resd 1
 
+extern _AuxBufHalfSizeTexture
+_AuxBufHalfSizeTexture resd 1
+
+extern _RTTHalfSizeDepthBuffer
+_RTTHalfSizeDepthBuffer resd 1
+
 extern _RTTBufferSize
 _RTTBufferSize:
 	.w resw 1
@@ -657,11 +663,13 @@ DefFunc _SceneUnload
 	invoke_dll_stdcall glDeleteFramebuffers, 1, _RTTFramebuffer
 
 	invoke_cdecl _DeleteRenderbuffer, _RTTDepthBuffer
+	invoke_cdecl _DeleteRenderbuffer, _RTTHalfSizeDepthBuffer
 
 	invoke_cdecl _DeleteTexture, _TerrainTexture
 	invoke_cdecl _DeleteTexture, _TerrainTextureMipLinear
 	invoke_cdecl _DeleteTexture, _TerrainConeTexture
 	invoke_cdecl _DeleteTexture, _AuxBufTexture
+	invoke_cdecl _DeleteTexture, _AuxBufHalfSizeTexture
 	invoke_cdecl _DeleteTexture, _HDRLensTexture
 	invoke_cdecl _DeleteTexture, _HDRBlurTexture
 
@@ -691,6 +699,33 @@ DefFunc _SceneUnload
 	dd _RTTFramebuffer
 	dd _DrawBillboardVAO
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
+
+DefFunc _InitRGBA32FBufferTexture
+	FrameBegin ebx
+	NameParams %$SaveTo, %$Width, %$Height
+
+	mov ebx, %$SaveTo
+	invoke_cdecl _DeleteTexture, ebx
+	invoke_dll_stdcall glGenTextures, 1, ebx
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$Width, %$Height, 0, GL_RGBA, GL_FLOAT, NULL
+
+	FrameEnd
+	ret
+
+DefFunc _InitDepthBuffer
+	FrameBegin ebx
+	NameParams %$SaveTo, %$Width, %$Height
+
+	mov ebx, %$SaveTo
+	invoke_cdecl _DeleteRenderbuffer, ebx
+	invoke_dll_stdcall glGenRenderbuffers, 1, ebx
+	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [ebx]
+	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, %$Width, %$Height
+	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, 0
+
+	FrameEnd
+	ret
 
 DefFunc _Scene_OnKeyDown
 	FrameBegin
@@ -728,7 +763,10 @@ DefFunc _Scene_OnKeyUp
 DefFunc _Scene
 	FrameBegin ebx, esi, edi
 	DefVars %$TimerValue32, %$DeltaTimeL, %$DeltaTimeH, %$DeltaTime32
-	DefVars %$VPWidth, %$VPHeight, %$VPSize, %$VPWidthLow, %$VPHeightLow, %$VPSizeLow
+	DefVars %$VPSize
+	DefVars %$VPWidth, %$VPHeight
+	DefVars %$VPWidthHalf, %$VPHeightHalf
+	DefVars %$VPWidthLow, %$VPHeightLow
 	DefVars %$CurMovementSpeed, %$FramesPerSec
 
 [segment .rdata]
@@ -780,45 +818,43 @@ __SECT__
 	inc edx
 	mov eax, %$VPWidth
 	mov ecx, %$VPHeight
-	shr eax, 2
-	shr ecx, 2
+	shr eax, 1
+	shr ecx, 1
+	cmp eax, edx
+	cmovb eax, edx
+	cmp ecx, edx
+	cmovb ecx, edx
+	mov %$VPWidthHalf, eax
+	mov %$VPHeightHalf, ecx
+	shr eax, 1
+	shr ecx, 1
 	cmp eax, edx
 	cmovb eax, edx
 	cmp ecx, edx
 	cmovb ecx, edx
 	mov %$VPWidthLow, eax
 	mov %$VPHeightLow, ecx
-	shl ecx, 16
-	or eax, ecx
-	mov %$VPSizeLow, eax
 	mov eax, %$VPSize
 	cmp eax, [_RTTBufferSize]
 	jz .rtt_size_good
 
-	invoke_cdecl _DeleteTexture, _AuxBufTexture
-	invoke_cdecl _DeleteTexture, _HDRLensTexture
-	invoke_cdecl _DeleteTexture, _HDRBlurTexture
 	invoke_cdecl _DeleteRenderbuffer, _RTTDepthBuffer
+	invoke_cdecl _DeleteRenderbuffer, _RTTHalfSizeDepthBuffer
 
-	invoke_dll_stdcall glGenTextures, 1, _AuxBufTexture
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_AuxBufTexture]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
+	invoke_cdecl _InitRGBA32FBufferTexture, _AuxBufTexture, %$VPWidth, %$VPHeight
 	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
-	invoke_dll_stdcall glGenTextures, 1, _HDRLensTexture
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidth, %$VPHeight, 0, GL_RGBA, GL_FLOAT, NULL
+	invoke_cdecl _InitRGBA32FBufferTexture, _AuxBufHalfSizeTexture, %$VPWidthHalf, %$VPHeightHalf
 	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
-	invoke_dll_stdcall glGenTextures, 1, _HDRBlurTexture
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRBlurTexture]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$VPWidthLow, %$VPHeightLow, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	invoke_cdecl _InitRGBA32FBufferTexture, _HDRLensTexture, %$VPWidth, %$VPHeight
 	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
 
-	invoke_dll_stdcall glGenRenderbuffers, 1, _RTTDepthBuffer
-	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [_RTTDepthBuffer]
-	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, %$VPWidth, %$VPHeight
-	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, 0
+	invoke_cdecl _InitRGBA32FBufferTexture, _HDRBlurTexture, %$VPWidthLow, %$VPHeightLow
+	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
+
+	invoke_cdecl _InitDepthBuffer, _RTTDepthBuffer, %$VPWidth, %$VPHeight
+	invoke_cdecl _InitDepthBuffer, _RTTHalfSizeDepthBuffer, %$VPWidthHalf, %$VPHeightHalf
 
 	mov eax, %$VPSize
 	mov [_RTTBufferSize], eax
