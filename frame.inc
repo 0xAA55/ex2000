@@ -32,7 +32,11 @@
 	extern %1
 	%xdefine CurFuncName %1
 	segment .stack_of_ %+ CurFuncName StackSegmentAttrib ;Contents will never get into the final binary
-	segment .text
+	%ifdef DefFuncTextSeg
+		segment DefFuncTextSeg
+	%else
+		segment .text
+	%endif
 	%1:
 %endmacro
 
