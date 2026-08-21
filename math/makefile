@@ -4,11 +4,12 @@ OBJS=$(patsubst %.asm, $(OUT_DIR)/%.obj, $(SRCS))
 DEFS:=
 ASMFLAGS=-i..
 
+../%.inc:
+	copy /b ..\\$(notdir $@)+ >nul 2>&1
 %.inc:
-	copy $@+ >nul 2>&1
-
+	copy /b $@+ >nul 2>&1
 %.asm:
-	copy $@+ >nul 2>&1
+	copy /b $@+ >nul 2>&1
 
 all: ../out/math.lib
 ../loaddll.inc: ../frame.inc ../expfuncs.tmp
