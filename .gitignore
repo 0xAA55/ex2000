@@ -8,4 +8,9 @@ ex2000d.exe
 *.o
 test*.bmp
 *.tmp
-*.bin
+shellcode.bin
+shellcodes/*.obj
+shellcodes/*.exp
+shellcodes/*.lib
+shellcodes/*.dll
+
