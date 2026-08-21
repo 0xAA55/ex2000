@@ -1,4 +1,4 @@
-%include "loaddll.inc"
+%include "common.inc"
 %include "gl33.inc"
 %include "buffer.inc"
 

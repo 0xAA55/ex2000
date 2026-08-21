@@ -53,8 +53,10 @@
 %macro InstExp 0
 	DefExp _ShellcodeInit
 	DefExp _ShellcodeDeInit
+	DefExp _TlsInit
 	DefExp _TlsRegisterCallback
 	DefExp _TlsInvokeCallbacks
+	DefExp _TlsDeInit
 	DefExp _CreateBitMap
 	DefExp _DuplicateBitMap
 	DefExp _DestroyBitMap
@@ -91,6 +93,8 @@
 	DefExp _VectorNormal
 	DefExp _UtfReadCharFromPtr
 	DefExp _Utf32to16
+	DefExp _HRSleepInit
+	DefExp _HRSleepDeInit
 	DefExp _HRSleep500us
 	DefExp _GetSysTimerVal
 	DefExp _GetTimerVal
@@ -100,6 +104,7 @@
 	DefExp _PauseTimer
 	DefExp _UnpauseTimer
 	DefExp _HybridWaitUs
+	DefExp _LfuInit
 	DefExp _LfuCreate
 	DefExp _LfuGet
 	DefExp _LfuPut
@@ -120,29 +125,6 @@
 	DefExp _GLPrintf
 	DefExp _GLPrintfXY
 	DefExp _RaymarchTerrainAltitude
-%endmacro
-
-%macro GetAbsAddr 2-*
-	call %%label
-	%%label:
-	pOp %1
-	%if %0 == 2
-		add %1, %2 - %%label
-	%elif %0 == 4
-		lea %2, [%1 + %4 - %%label]
-		add %1, %3 - %%label
-	%elif %0 == 6
-		lea %2, [%1 + %5 - %%label]
-		lea %3, [%1 + %6 - %%label]
-		add %1, %4 - %%label
-	%elif %0 == 8
-		lea %2, [%1 + %6 - %%label]
-		lea %3, [%1 + %7 - %%label]
-		lea %4, [%1 + %8 - %%label]
-		add %1, %5 - %%label
-	%else
-		%error Bad usage of `GetAbsAddr`
-	%endif
 %endmacro
 
 %endif

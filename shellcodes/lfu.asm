@@ -21,8 +21,8 @@ DefFunc _LfuInit
 	call .get_addr
 .get_addr:
 	pOp ebx
-	lea eax, [ebx + _FreqKeyCompare - .get_addr]
-	lea ecx, [ebx + _FreqKeyDuplicate - .get_addr]
+	lea eax, [ebx + _LfuFreqKeyCompare - .get_addr]
+	lea ecx, [ebx + _LfuFreqKeyDuplicate - .get_addr]
 	lea edx, [ebx + _FreqKeyFree - .get_addr]
 	add ebx, _FreqKeyOps - .get_addr
 	mov [ebx + KeyCompareOps.on_compare], eax
@@ -32,7 +32,7 @@ DefFunc _LfuInit
 	ret
 
 ; void FreeDataNode(DataNode *dn);
-DefFunc _FreeDataNode
+DefFunc _LfuFreeDataNode
 	FrameBegin ebx
 	NameParams %$DataNode
 
@@ -192,7 +192,7 @@ DefFunc _LfuPut
 	mov [esi + DataNode.userdata], eax
 	mov [esi + DataNode.on_free], ecx
 
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], %$Key, esi, _FreeDataNode, [ebx + LfuCache.user_keyops]
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], %$Key, esi, _LfuFreeDataNode, [ebx + LfuCache.user_keyops]
 	test eax, eax
 	jz .bad
 	lea edi, %$FreqKey
@@ -228,7 +228,7 @@ DefFunc _LfuDestroy
 	ret
 
 ; int FreqKeyCompare(FreqKey *a, FreqKey *b);
-DefFunc _FreqKeyCompare
+DefFunc _LfuFreqKeyCompare
 	FrameBegin esi, edi
 	NameParams %$KeyA, %$KeyB
 
@@ -255,7 +255,7 @@ DefFunc _FreqKeyCompare
 	ret
 
 ; FreqKey *FreqKeyDuplicate(FreqKey *key);
-DefFunc _FreqKeyDuplicate
+DefFunc _LfuFreqKeyDuplicate
 	FrameBegin esi, edi
 	NameParams %$Key
 
@@ -283,7 +283,7 @@ align 4
 extern _FreqKeyOps
 _FreqKeyOps:
 istruc KeyCompareOps
-	at .on_compare, dd _FreqKeyCompare
-	at .on_duplicate_key, dd _FreqKeyDuplicate
+	at .on_compare, dd _LfuFreqKeyCompare
+	at .on_duplicate_key, dd _LfuFreqKeyDuplicate
 	at .on_free_key, dd _FreqKeyFree
 iend

@@ -1,4 +1,5 @@
 %include "common.inc"
+%include "avlbst.inc"
 %include "shader.inc"
 %include "buffer.inc"
 %include "fontgl.inc"
