@@ -54,8 +54,9 @@ glfuncs.tmp: assets/WGLFUNC assets/GL33FUNC
 	addpre assets\\WGLFUNC DefImp $@
 	addpre assets\\GL33FUNC DefImp $@
 gl33.inc: glfuncs.tmp
-loaddll.inc: frame.inc expfuncs.tmp
-shader.inc: gl33.inc
+loaddll.inc: frame.inc strpool.inc expfuncs.tmp
+assets.inc: strpool.inc
+shader.inc: gl33.inc strpool.inc
 fontgl.inc: buffer.inc
 main.asm: loaddll.inc assets.inc math.inc tls.inc vblank.inc
 assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab

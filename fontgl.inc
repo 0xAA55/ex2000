@@ -2,6 +2,7 @@
 %define _FONT_GL_
 
 %include "buffer.inc"
+%include "strpool.inc"
 
 struc OGLFC ;OpenGL Font Cache
 .public_rw:
@@ -62,10 +63,8 @@ extern _GLPrintf
 extern _GLPrintfXY
 
 %macro GLPrintf 2-3+
-	[segment .rdata]
-	%%format db %2, 0
+	DefStr %%format, %2
 
-	__SECT__
 	%if %0 >= 3
 		invoke_cdecl _GLPrintf, %1, %%format, %3
 	%else
@@ -74,10 +73,8 @@ extern _GLPrintfXY
 %endmacro
 
 %macro GLPrintfXY 4-5+
-	[segment .rdata]
-	%%format db %4, 0
+	DefStr %%format, %4
 
-	__SECT__
 	%if %0 >= 5
 		invoke_cdecl _GLPrintfXY, %1, %2, %3, %%format, %5
 	%else

@@ -4,6 +4,7 @@
 ; %define INVOKE_CHECK
 
 %include "frame.inc"
+%include "strpool.inc"
 
 %define NULL 0
 
@@ -165,10 +166,8 @@
 %endmacro
 
 %macro debug_msg 1-2+
-	[segment .rdata]
-	%%format db %1, 0
+	DefStr %%format, %1
 
-	__SECT__
 	%ifndef SHELLCODE
 		%if %0 >= 2
 			invoke_cdecl _DebugMsg, %%format, %2
@@ -190,10 +189,8 @@
 %endmacro
 
 %macro debug_printf 1-2+
-	[segment .rdata]
-	%%format db %1, 0
+	DefStr %%format, %1
 
-	__SECT__
 	%ifndef SHELLCODE
 		%if %0 >= 2
 			invoke_dll_cdecl printf, %%format, %2
@@ -215,10 +212,8 @@
 %endmacro
 
 %macro snprintf 3-4+
-	[segment .rdata]
-	%%format db %3, 0
+	DefStr %%format, %3
 
-	__SECT__
 	%ifndef SHELLCODE
 		%if %0 >= 4
 			invoke_cdecl _snprintf, %1, %2, %%format, %4
@@ -254,10 +249,8 @@ extern _LoadFuncsFromAssets
 		%error `LoadFuncsFromAssets` can not be used in shellcode
 	%endif
 
-	[segment .rdata]
-	%%AssetName db %3, 0
+	DefStr %%AssetName, %3
 
-	__SECT__
 	invoke_cdecl _LoadFuncsFromAssets, %1, %2, %%AssetName, %4
 %endmacro
 

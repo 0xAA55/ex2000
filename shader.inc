@@ -2,6 +2,7 @@
 %define _SHADER_INC_ 1
 
 %include "gl33.inc"
+%include "strpool.inc"
 
 ; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 extern _ProgramCreate
@@ -10,12 +11,10 @@ extern _ProgramCreate
 extern _SceneLoadShaderProgram
 
 %macro SceneLoadShaderProgram 4
-	[segment .rdata]
-	%%VSAssetsPath db %2, 0
-	%%GSAssetsPath db %3, 0
-	%%FSAssetsPath db %4, 0
+	DefStr %%VSAssetsPath, %2
+	DefStr %%GSAssetsPath, %3
+	DefStr %%FSAssetsPath, %4
 
-	__SECT__
 	%ifndef SHELLCODE
 		invoke_cdecl _SceneLoadShaderProgram, %1, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
 	%else
@@ -25,10 +24,8 @@ extern _SceneLoadShaderProgram
 %endmacro
 
 %macro GetAttribLocation 2
-	[segment .rdata]
-	%%AttribName db %2, 0
+	DefStr %%AttribName, %2
 
-	__SECT__
 	%ifndef SHELLCODE
 		invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
 	%else
@@ -38,10 +35,8 @@ extern _SceneLoadShaderProgram
 %endmacro
 
 %macro GetUniformLocation 2
-	[segment .rdata]
-	%%UniformName db %2, 0
+	DefStr %%UniformName, %2
 
-	__SECT__
 	%ifndef SHELLCODE
 		invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
 	%else
@@ -51,10 +46,8 @@ extern _SceneLoadShaderProgram
 %endmacro
 
 %macro GetFragDataLocation 2
-	[segment .rdata]
-	%%FragDataName db %2, 0
+	DefStr %%FragDataName, %2
 
-	__SECT__
 	%ifndef SHELLCODE
 		invoke_dll_stdcall glGetFragDataLocation, %1, %%FragDataName
 	%else

@@ -16,7 +16,9 @@ all: shellcode.bin
 %.obj: %.asm
 	nasm -f win32 $(DEFS) $(ASMFLAGS) $^ -o $@
 
-../loaddll.inc: ../frame.inc ../expfuncs.tmp
+../assets.inc: ../strpool.inc
+../loaddll.inc: ../frame.inc ../strpool.inc ../expfuncs.tmp
+../shader.inc: ../gl33.inc ../strpool.inc
 ../shellcode.inc: ../scfuncs.tmp ../glfuncs.tmp
 common.inc: ../loaddll.inc ../math.inc ../shellcode.inc
 tls.asm: common.inc ../tls.inc

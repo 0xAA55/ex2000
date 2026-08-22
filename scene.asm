@@ -334,7 +334,7 @@ DefFunc _SceneInit
 	fmul dword [_CurveToSeaLevel]
 	fstp dword [_SeaLevel]
 
-	SceneLoadShaderProgram _DrawProgressProgram, "assets\loading.vsh", 0, "assets\loading.fsh"
+	SceneLoadShaderProgram _DrawProgressProgram, "assets\loading.vsh", "", "assets\loading.fsh"
 	test eax, eax
 	jz .end
 
@@ -419,7 +419,7 @@ DefFunc _SceneLoad04
 DefFunc _SceneLoad05
 	FrameBegin ebx, edi
 	mov ebx, _DrawSceneProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", 0, "assets\terrain.fsh"
+	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\terrain.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -469,7 +469,7 @@ DefFunc _SceneLoad06
 	FrameBegin ebx, edi
 	invoke_dll_stdcall glGenFramebuffers, 1, _RTTFramebuffer
 	mov ebx, _DrawBlurProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", 0, "assets\blur.fsh"
+	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\blur.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -499,7 +499,7 @@ DefFunc _SceneLoad07
 	FrameBegin ebx, edi
 	invoke_dll_stdcall glGenFramebuffers, 1, _RTTFramebuffer
 	mov ebx, _DrawHDR2LDRProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", 0, "assets\hdr2ldr.fsh"
+	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\hdr2ldr.fsh"
 	test eax, eax
 	jz .bad_end
 
