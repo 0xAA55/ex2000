@@ -23,18 +23,6 @@ _BillboardVerticesBuffer:
 extern _DrawBillboardVAO
 _DrawBillboardVAO resd 1
 
-extern _DrawProgressProgram
-_DrawProgressProgram resd 1
-
-extern _DrawSceneProgram
-_DrawSceneProgram resd 1
-
-extern _DrawHDR2LDRProgram
-_DrawHDR2LDRProgram resd 1
-
-extern _DrawBlurProgram
-_DrawBlurProgram resd 1
-
 extern _TerrainTexture
 _TerrainTexture resd 1
 
@@ -44,26 +32,61 @@ _TerrainTextureMipLinear resd 1
 extern _TerrainConeTexture
 _TerrainConeTexture resd 1
 
-extern _RTTFramebuffer
-_RTTFramebuffer resd 1
+extern _DrawTerrainFBO
+extern _DrawTerrainHalfSizeFBO
+extern _DrawWaterFBO
+extern _DrawWaterHalfSizeFBO
+extern _CompositeFBO
+extern _HDRBlurFBO
 
-extern _RTTDepthBuffer
-_RTTDepthBuffer resd 1
+_FirstFBO:
+_DrawTerrainFBO resd 1
+_DrawTerrainHalfSizeFBO resd 1
+_DrawWaterFBO resd 1
+_DrawWaterHalfSizeFBO resd 1
+_CompositeFBO resd 1
+_HDRBlurFBO resd 1
+_NumFBOs equ ($ - _FirstFBO) / 4
 
-extern _AuxBufTexture
-_AuxBufTexture resd 1
+extern _CompositeDepthBuffer
+_CompositeDepthBuffer resd 1
+
+extern _CompositeHalfSizeDepthBuffer
+_CompositeHalfSizeDepthBuffer resd 1
+
+extern _SSNormalDistTexture
+extern _SSDiffuseTexture
+extern _SSSpecularTexture
+extern _SSEmissiveTexture
+extern _SSScatterTexture
+
+extern _SSNormalDistHalfSizeTexture
+extern _SSDiffuseHalfSizeTexture
+extern _SSSpecularHalfSizeTexture
+extern _SSEmissiveHalfSizeTexture
+extern _SSScatterHalfSizeTexture
+
+_SSTextures:
+_SSNormalDistTexture resd 1
+_SSDiffuseTexture resd 1
+_SSSpecularTexture resd 1
+_SSEmissiveTexture resd 1
+_SSScatterTexture resd 1
+_NumSSTextures equ ($ - _SSTextures) / 4
 
 extern _HDRLensTexture
 _HDRLensTexture resd 1
 
+_SSHalfSizeTextures:
+_SSNormalDistHalfSizeTexture resd 1
+_SSDiffuseHalfSizeTexture resd 1
+_SSSpecularHalfSizeTexture resd 1
+_SSEmissiveHalfSizeTexture resd 1
+_SSScatterHalfSizeTexture resd 1
+_NumSSHalfSizeTextures equ ($ - _SSHalfSizeTextures) / 4
+
 extern _HDRBlurTexture
 _HDRBlurTexture resd 1
-
-extern _AuxBufHalfSizeTexture
-_AuxBufHalfSizeTexture resd 1
-
-extern _RTTHalfSizeDepthBuffer
-_RTTHalfSizeDepthBuffer resd 1
 
 extern _RTTBufferSize
 _RTTBufferSize:
@@ -74,23 +97,71 @@ extern _Timer
 _Timer:
 	InstTimer
 
+extern _DrawProgressProgram
+_DrawProgressProgram resd 1
+
+extern _DrawTerrainProgram
+_DrawTerrainProgram resd 1
+
+extern _DrawWaterProgram
+_DrawWaterProgram resd 1
+
+extern _DrawCompositeProgram
+_DrawCompositeProgram resd 1
+
+extern _DrawHDR2LDRProgram
+_DrawHDR2LDRProgram resd 1
+
+extern _DrawBlurProgram
+_DrawBlurProgram resd 1
+
 extern _ProgressProgramLocations
 _ProgressProgramLocations:
 	.Progress resd 1
 
-extern _DrawSceneProgramLocations
-_DrawSceneProgramLocations:
+extern _DrawTerrainProgramLocations
+_DrawTerrainProgramLocations:
+	.CameraMatrix resd 1
+	.CameraPosition resd 1
+	.ProjMatrix resd 1
+	.RenderDistance resd 1
+	.TerrainAltitudeMap resd 1
+	.TerrainConeMap resd 1
+	.TerrainHeight resd 1
+	.TerrainScaling resd 1
+	.TextureQuality resd 1
+.first_output:
+	.OutNormalDist resd 1
+	.OutDiffuse resd 1
+	.OutSpecular resd 1
+	.OutEmissive resd 1
+	.OutScatter resd 1
+
+extern _DrawWaterProgramLocations
+_DrawWaterProgramLocations:
 	.CameraMatrix resd 1
 	.CameraPosition resd 1
 	.ProjMatrix resd 1
 	.Time resd 1
-	.Cloud resd 1
-	.Terrain resd 1
-	.TerrainConeMap resd 1
-	.TerrainHeight resd 1
-	.TerrainScaling resd 1
-	.SeaLevel resd 1
+	.RenderDistance resd 1
 	.TextureQuality resd 1
+.first_output:
+	.OutNormalDist resd 1
+	.OutDiffuse resd 1
+	.OutSpecular resd 1
+	.OutEmissive resd 1
+	.OutScatter resd 1
+
+extern _DrawCompositeProgramLocations
+_DrawCompositeProgramLocations:
+	.CameraMatrix resd 1
+	.CameraPosition resd 1
+	.ProjMatrix resd 1
+	.TexSSNormalDist resd 1
+	.TexSSDiffuse resd 1
+	.TexSSSpecular resd 1
+	.TexSSEmissive resd 1
+	.TexSSScatter resd 1
 	.OutColor resd 1
 
 extern _DrawBlurProgramLocations
@@ -270,7 +341,7 @@ DefFunc _InitTexRepeatLinear
 	FrameEnd
 	ret
 
-DefFunc _InitTexRepeatMipmap
+DefFunc _InitTexRepeatLinearMipmap
 	FrameBegin ebx
 	NameParams %$Target
 	mov ebx, %$Target
@@ -283,19 +354,7 @@ DefFunc _InitTexRepeatMipmap
 	FrameEnd
 	ret
 
-DefFunc _InitTexClampLinear
-	FrameBegin ebx
-	NameParams %$Target
-	mov ebx, %$Target
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, ebx, 0
-	FrameEnd
-	ret
-
-DefFunc _InitTexClampMipmap
+DefFunc _InitTexRenderTarget
 	FrameBegin ebx
 	NameParams %$Target
 	mov ebx, %$Target
@@ -303,7 +362,6 @@ DefFunc _InitTexClampMipmap
 	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
 	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
 	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glGenerateMipmap, ebx
 	invoke_dll_stdcall glBindTexture, ebx, 0
 	FrameEnd
 	ret
@@ -353,6 +411,8 @@ DefFunc _SceneInit
 	GetUniformLocation [_DrawProgressProgram], "progress"
 	mov [_ProgressProgramLocations.Progress], eax
 
+	invoke_dll_stdcall glGenFramebuffers, _NumFBOs, _FirstFBO
+
 	invoke_cdecl _OGLFC_Create, [_hDC], 12
 	mov [_OGLFC], eax
 
@@ -399,7 +459,7 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glGenTextures, 1, _TerrainTextureMipLinear
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
-	invoke_cdecl _InitTexRepeatMipmap, GL_TEXTURE_2D
+	invoke_cdecl _InitTexRepeatLinearMipmap, GL_TEXTURE_2D
 	invoke_cdecl _DestroyBitMap, ebx
 	xor eax, eax
 	mov [_NoiseBitmap], eax
@@ -412,13 +472,9 @@ DefFunc _SceneLoad03
 	ret
 
 DefFunc _SceneLoad04
-	FrameBegin
-	FrameEnd
-	ret
-
-DefFunc _SceneLoad05
 	FrameBegin ebx, edi
-	mov ebx, _DrawSceneProgram
+
+	mov ebx, _DrawTerrainProgram
 	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\terrain.fsh"
 	test eax, eax
 	jz .bad_end
@@ -432,30 +488,81 @@ DefFunc _SceneLoad05
 	invoke_dll_stdcall glBindVertexArray, 0
 
 	GetUniformLocation [ebx], "camorient"
-	mov [_DrawSceneProgramLocations.CameraMatrix], eax
+	mov [_DrawTerrainProgramLocations.CameraMatrix], eax
 	GetUniformLocation [ebx], "proj"
-	mov [_DrawSceneProgramLocations.ProjMatrix], eax
+	mov [_DrawTerrainProgramLocations.ProjMatrix], eax
 	GetUniformLocation [ebx], "campos"
-	mov [_DrawSceneProgramLocations.CameraPosition], eax
-	GetUniformLocation [ebx], "time"
-	mov [_DrawSceneProgramLocations.Time], eax
-	GetUniformLocation [ebx], "cloud"
-	mov [_DrawSceneProgramLocations.Cloud], eax
-	GetUniformLocation [ebx], "terrain"
-	mov [_DrawSceneProgramLocations.Terrain], eax
+	mov [_DrawTerrainProgramLocations.CameraPosition], eax
+	GetUniformLocation [ebx], "render_distance"
+	mov [_DrawTerrainProgramLocations.RenderDistance], eax
+	GetUniformLocation [ebx], "terrain_altmap"
+	mov [_DrawTerrainProgramLocations.TerrainAltitudeMap], eax
 	GetUniformLocation [ebx], "terrain_conemap"
-	mov [_DrawSceneProgramLocations.TerrainConeMap], eax
+	mov [_DrawTerrainProgramLocations.TerrainConeMap], eax
 	GetUniformLocation [ebx], "terrain_height"
-	mov [_DrawSceneProgramLocations.TerrainHeight], eax
+	mov [_DrawTerrainProgramLocations.TerrainHeight], eax
 	GetUniformLocation [ebx], "terrain_scaling"
-	mov [_DrawSceneProgramLocations.TerrainScaling], eax
-	GetUniformLocation [ebx], "sea_level"
-	mov [_DrawSceneProgramLocations.SeaLevel], eax
+	mov [_DrawTerrainProgramLocations.TerrainScaling], eax
 	GetUniformLocation [ebx], "texture_quality"
-	mov [_DrawSceneProgramLocations.TextureQuality], eax
+	mov [_DrawTerrainProgramLocations.TextureQuality], eax
 
-	GetFragDataLocation [ebx], "color"
-	mov [_DrawSceneProgramLocations.OutColor], eax
+	GetFragDataLocation [ebx], "out_normal_dist"
+	mov [_DrawTerrainProgramLocations.OutNormalDist], eax
+	GetFragDataLocation [ebx], "out_diffuse"
+	mov [_DrawTerrainProgramLocations.OutDiffuse], eax
+	GetFragDataLocation [ebx], "out_specular"
+	mov [_DrawTerrainProgramLocations.OutSpecular], eax
+	GetFragDataLocation [ebx], "out_emissive"
+	mov [_DrawTerrainProgramLocations.OutEmissive], eax
+	GetFragDataLocation [ebx], "out_scatter"
+	mov [_DrawTerrainProgramLocations.OutScatter], eax
+
+	jmp .end
+.bad_end:
+	dec eax
+	mov [_SceneLoadingProgress], eax
+.end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad05
+	FrameBegin ebx, edi
+	mov ebx, _DrawWaterProgram
+	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\water.fsh"
+	test eax, eax
+	jz .bad_end
+
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
+	GetAttribLocation [ebx], "position"
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_dll_stdcall glBindVertexArray, 0
+
+	GetUniformLocation [ebx], "camorient"
+	mov [_DrawWaterProgramLocations.CameraMatrix], eax
+	GetUniformLocation [ebx], "proj"
+	mov [_DrawWaterProgramLocations.ProjMatrix], eax
+	GetUniformLocation [ebx], "campos"
+	mov [_DrawWaterProgramLocations.CameraPosition], eax
+	GetUniformLocation [ebx], "time"
+	mov [_DrawWaterProgramLocations.Time], eax
+	GetUniformLocation [ebx], "render_distance"
+	mov [_DrawWaterProgramLocations.RenderDistance], eax
+	GetUniformLocation [ebx], "texture_quality"
+	mov [_DrawWaterProgramLocations.TextureQuality], eax
+
+	GetFragDataLocation [ebx], "out_normal_dist"
+	mov [_DrawWaterProgramLocations.OutNormalDist], eax
+	GetFragDataLocation [ebx], "out_diffuse"
+	mov [_DrawWaterProgramLocations.OutDiffuse], eax
+	GetFragDataLocation [ebx], "out_specular"
+	mov [_DrawWaterProgramLocations.OutSpecular], eax
+	GetFragDataLocation [ebx], "out_emissive"
+	mov [_DrawWaterProgramLocations.OutEmissive], eax
+	GetFragDataLocation [ebx], "out_scatter"
+	mov [_DrawWaterProgramLocations.OutScatter], eax
 
 	jmp .end
 .bad_end:
@@ -467,7 +574,49 @@ DefFunc _SceneLoad05
 
 DefFunc _SceneLoad06
 	FrameBegin ebx, edi
-	invoke_dll_stdcall glGenFramebuffers, 1, _RTTFramebuffer
+	mov ebx, _DrawCompositeProgram
+	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\composite.fsh"
+	test eax, eax
+	jz .bad_end
+
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
+	GetAttribLocation [ebx], "position"
+	mov edi, eax
+	invoke_dll_stdcall glEnableVertexAttribArray, edi
+	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_dll_stdcall glBindVertexArray, 0
+
+	GetUniformLocation [ebx], "camorient"
+	mov [_DrawCompositeProgramLocations.CameraMatrix], eax
+	GetUniformLocation [ebx], "proj"
+	mov [_DrawCompositeProgramLocations.ProjMatrix], eax
+	GetUniformLocation [ebx], "campos"
+	mov [_DrawCompositeProgramLocations.CameraPosition], eax
+	GetUniformLocation [ebx], "normal_distance"
+	mov [_DrawCompositeProgramLocations.TexSSNormalDist], eax
+	GetUniformLocation [ebx], "diffuse"
+	mov [_DrawCompositeProgramLocations.TexSSDiffuse], eax
+	GetUniformLocation [ebx], "specular"
+	mov [_DrawCompositeProgramLocations.TexSSSpecular], eax
+	GetUniformLocation [ebx], "emissive"
+	mov [_DrawCompositeProgramLocations.TexSSEmissive], eax
+	GetUniformLocation [ebx], "scatter"
+	mov [_DrawCompositeProgramLocations.TexSSScatter], eax
+
+	GetFragDataLocation [ebx], "color"
+	mov [_DrawCompositeProgramLocations.OutColor], eax
+
+	jmp .end
+.bad_end:
+	dec eax
+	mov [_SceneLoadingProgress], eax
+.end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoad07
+	FrameBegin ebx, edi
 	mov ebx, _DrawBlurProgram
 	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\blur.fsh"
 	test eax, eax
@@ -495,9 +644,8 @@ DefFunc _SceneLoad06
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad07
+DefFunc _SceneLoad08
 	FrameBegin ebx, edi
-	invoke_dll_stdcall glGenFramebuffers, 1, _RTTFramebuffer
 	mov ebx, _DrawHDR2LDRProgram
 	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\hdr2ldr.fsh"
 	test eax, eax
@@ -527,11 +675,6 @@ DefFunc _SceneLoad07
 	FrameEnd
 	ret
 
-DefFunc _SceneLoad08
-	FrameBegin
-	FrameEnd
-	ret
-
 DefFunc _SceneLoad09
 	FrameBegin
 	FrameEnd
@@ -544,6 +687,10 @@ DefFunc _SceneLoad0A
 
 DefFunc _SceneLoad0B
 	FrameBegin
+
+	xor eax, eax
+	mov [_RTTBufferSize], eax
+
 	FrameEnd
 	ret
 
@@ -660,21 +807,31 @@ DefFunc _SceneUnload
 
 	invoke_cdecl _OGLFC_Destroy, [_OGLFC]
 
-	invoke_dll_stdcall glDeleteFramebuffers, 1, _RTTFramebuffer
+	invoke_dll_stdcall glDeleteFramebuffers, _NumFBOs, _FirstFBO
 
-	invoke_cdecl _DeleteRenderbuffer, _RTTDepthBuffer
-	invoke_cdecl _DeleteRenderbuffer, _RTTHalfSizeDepthBuffer
+	invoke_cdecl _DeleteRenderbuffer, _CompositeDepthBuffer
+	invoke_cdecl _DeleteRenderbuffer, _CompositeHalfSizeDepthBuffer
 
 	invoke_cdecl _DeleteTexture, _TerrainTexture
 	invoke_cdecl _DeleteTexture, _TerrainTextureMipLinear
 	invoke_cdecl _DeleteTexture, _TerrainConeTexture
-	invoke_cdecl _DeleteTexture, _AuxBufTexture
-	invoke_cdecl _DeleteTexture, _AuxBufHalfSizeTexture
+	invoke_cdecl _DeleteTexture, _SSNormalDistTexture
+	invoke_cdecl _DeleteTexture, _SSDiffuseTexture
+	invoke_cdecl _DeleteTexture, _SSSpecularTexture
+	invoke_cdecl _DeleteTexture, _SSEmissiveTexture
+	invoke_cdecl _DeleteTexture, _SSScatterTexture
+	invoke_cdecl _DeleteTexture, _SSNormalDistHalfSizeTexture
+	invoke_cdecl _DeleteTexture, _SSDiffuseHalfSizeTexture
+	invoke_cdecl _DeleteTexture, _SSSpecularHalfSizeTexture
+	invoke_cdecl _DeleteTexture, _SSEmissiveHalfSizeTexture
+	invoke_cdecl _DeleteTexture, _SSScatterHalfSizeTexture
 	invoke_cdecl _DeleteTexture, _HDRLensTexture
 	invoke_cdecl _DeleteTexture, _HDRBlurTexture
 
 	invoke_cdecl _DeleteProgram, _DrawProgressProgram
-	invoke_cdecl _DeleteProgram, _DrawSceneProgram
+	invoke_cdecl _DeleteProgram, _DrawTerrainProgram
+	invoke_cdecl _DeleteProgram, _DrawWaterProgram
+	invoke_cdecl _DeleteProgram, _DrawCompositeProgram
 	invoke_cdecl _DeleteProgram, _DrawBlurProgram
 	invoke_cdecl _DeleteProgram, _DrawHDR2LDRProgram
 
@@ -696,7 +853,11 @@ DefFunc _SceneUnload
 	dd _TerrainBitmap
 	dd _TerrainConeBitmap
 	dd _OGLFC
-	dd _RTTFramebuffer
+	dd _DrawTerrainFBO
+	dd _DrawTerrainHalfSizeFBO
+	dd _DrawWaterFBO
+	dd _DrawWaterHalfSizeFBO
+	dd _CompositeFBO
 	dd _DrawBillboardVAO
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
 
@@ -713,6 +874,43 @@ DefFunc _InitRGBA32FBufferTexture
 	FrameEnd
 	ret
 
+DefFunc _InitRGBA8BufferTexture
+	FrameBegin ebx
+	NameParams %$SaveTo, %$Width, %$Height
+
+	mov ebx, %$SaveTo
+	invoke_cdecl _DeleteTexture, ebx
+	invoke_dll_stdcall glGenTextures, 1, ebx
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
+	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA, %$Width, %$Height, 0, GL_RGBA, GL_UNSIGNED_INT, NULL
+
+	FrameEnd
+	ret
+
+DefFunc _InitSSTextureSets
+	FrameBegin ebx, esi, edi
+	NameParams %$Textures, %$VPWidth, %$VPHeight
+[segment .rdata]
+.function_list:
+	dd _InitRGBA32FBufferTexture
+	dd _InitRGBA8BufferTexture
+	dd _InitRGBA8BufferTexture
+	dd _InitRGBA32FBufferTexture
+	dd _InitRGBA32FBufferTexture
+__SECT__
+	mov ebx, %$Textures
+	mov esi, .function_list
+	xor edi, edi
+.loop_init:
+	invoke_cdecl [esi + edi * 4], & [ebx + edi * 4], %$VPWidth, %$VPHeight
+	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
+	inc edi
+	cmp edi, 5
+	jb .loop_init
+
+	FrameEnd
+	ret
+
 DefFunc _InitDepthBuffer
 	FrameBegin ebx
 	NameParams %$SaveTo, %$Width, %$Height
@@ -723,6 +921,78 @@ DefFunc _InitDepthBuffer
 	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [ebx]
 	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, %$Width, %$Height
 	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, 0
+
+	FrameEnd
+	ret
+
+DefFunc _SetupSSFBOOutputs
+	FrameBegin ebx, esi, edi
+	NameParams %$FirstOutput
+	DefSizedVar %$Attachments, 32 * 4
+
+	lea ebx, %$Attachments
+	mov esi, %$FirstOutput
+	xor edi, edi
+.loop_set_ss_outputs:
+	lodsd
+	add eax, GL_COLOR_ATTACHMENT0
+	mov [ebx + edi * 4], eax
+	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_SSTextures + edi * 4], 0
+	inc edi
+	cmp edi, _NumSSTextures
+	jb .loop_set_ss_outputs
+
+	invoke_dll_stdcall glDrawBuffers, edi, ebx
+
+	FrameEnd
+	ret
+
+DefFunc _SetupSSFBOHalfSizeOutputs
+	FrameBegin esi, edi
+	NameParams %$FirstOutput
+	DefSizedVar %$Attachments, 32 * 4
+
+	lea ebx, %$Attachments
+	mov esi, %$FirstOutput
+	xor edi, edi
+.loop_set_ss_half_outputs:
+	lodsd
+	add eax, GL_COLOR_ATTACHMENT0
+	mov [ebx + edi * 4], eax
+	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_SSHalfSizeTextures + edi * 4], 0
+	inc edi
+	cmp edi, _NumSSHalfSizeTextures
+	jb .loop_set_ss_half_outputs
+
+	invoke_dll_stdcall glDrawBuffers, edi, ebx
+
+	FrameEnd
+	ret
+
+DefFunc _SetupSSTextureMipmaps
+	FrameBegin esi, edi
+
+	mov esi, _SSTextures
+	xor edi, edi
+.loop_gen_mipmaps:
+	lodsd
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, eax
+	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
+	inc edi
+	cmp edi, _NumSSTextures
+	jb .loop_gen_mipmaps
+
+	mov esi, _SSHalfSizeTextures
+	xor edi, edi
+.loop_gen_halfsize_mipmaps:
+	lodsd
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, eax
+	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
+	inc edi
+	cmp edi, _NumSSHalfSizeTextures
+	jb .loop_gen_halfsize_mipmaps
+
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
 
 	FrameEnd
 	ret
@@ -834,31 +1104,6 @@ __SECT__
 	cmovb ecx, edx
 	mov %$VPWidthLow, eax
 	mov %$VPHeightLow, ecx
-	mov eax, %$VPSize
-	cmp eax, [_RTTBufferSize]
-	jz .rtt_size_good
-
-	invoke_cdecl _DeleteRenderbuffer, _RTTDepthBuffer
-	invoke_cdecl _DeleteRenderbuffer, _RTTHalfSizeDepthBuffer
-
-	invoke_cdecl _InitRGBA32FBufferTexture, _AuxBufTexture, %$VPWidth, %$VPHeight
-	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
-
-	invoke_cdecl _InitRGBA32FBufferTexture, _AuxBufHalfSizeTexture, %$VPWidthHalf, %$VPHeightHalf
-	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
-
-	invoke_cdecl _InitRGBA32FBufferTexture, _HDRLensTexture, %$VPWidth, %$VPHeight
-	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
-
-	invoke_cdecl _InitRGBA32FBufferTexture, _HDRBlurTexture, %$VPWidthLow, %$VPHeightLow
-	invoke_cdecl _InitTexClampMipmap, GL_TEXTURE_2D
-
-	invoke_cdecl _InitDepthBuffer, _RTTDepthBuffer, %$VPWidth, %$VPHeight
-	invoke_cdecl _InitDepthBuffer, _RTTHalfSizeDepthBuffer, %$VPWidthHalf, %$VPHeightHalf
-
-	mov eax, %$VPSize
-	mov [_RTTBufferSize], eax
-.rtt_size_good:
 
 	invoke_cdecl _SceneLoadProgressive
 	mov ebx, _NumItemsToLoad
@@ -869,7 +1114,7 @@ __SECT__
 	jl .quit
 
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
-	invoke_cdecl Scene_clear_buffers
+	invoke_cdecl Scene_clear_color
 
 	invoke_dll_stdcall glUseProgram, [_DrawProgressProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
@@ -928,6 +1173,75 @@ __SECT__
 
 	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
 .after_check_input:
+
+	mov eax, %$VPSize
+	cmp eax, [_RTTBufferSize]
+	jz .rtt_size_good
+
+	invoke_cdecl _DeleteRenderbuffer, _CompositeDepthBuffer
+	invoke_cdecl _DeleteRenderbuffer, _CompositeHalfSizeDepthBuffer
+
+	invoke_cdecl _InitSSTextureSets, _SSNormalDistTexture, %$VPWidth, %$VPHeight
+	invoke_cdecl _InitSSTextureSets, _SSNormalDistHalfSizeTexture, %$VPWidthHalf, %$VPHeightHalf
+
+	invoke_cdecl _InitRGBA32FBufferTexture, _HDRLensTexture, %$VPWidth, %$VPHeight
+	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
+	invoke_cdecl _InitRGBA32FBufferTexture, _HDRBlurTexture, %$VPWidthLow, %$VPHeightLow
+	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
+
+	invoke_cdecl _InitDepthBuffer, _CompositeDepthBuffer, %$VPWidth, %$VPHeight
+	invoke_cdecl _InitDepthBuffer, _CompositeHalfSizeDepthBuffer, %$VPWidthHalf, %$VPHeightHalf
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
+	invoke_cdecl _SetupSSFBOOutputs, _DrawTerrainProgramLocations.first_output
+	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
+	invoke_cdecl Scene_check_fbo
+	test eax, eax
+	jz .quit
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterFBO]
+	invoke_cdecl _SetupSSFBOOutputs, _DrawWaterProgramLocations.first_output
+	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
+	invoke_cdecl Scene_check_fbo
+	test eax, eax
+	jz .quit
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainHalfSizeFBO]
+	invoke_cdecl _SetupSSFBOHalfSizeOutputs, _DrawTerrainProgramLocations.first_output
+	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeHalfSizeDepthBuffer]
+	invoke_cdecl Scene_check_fbo
+	test eax, eax
+	jz .quit
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterHalfSizeFBO]
+	invoke_cdecl _SetupSSFBOHalfSizeOutputs, _DrawWaterProgramLocations.first_output
+	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeHalfSizeDepthBuffer]
+	invoke_cdecl Scene_check_fbo
+	test eax, eax
+	jz .quit
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_CompositeFBO]
+	mov eax, [_DrawCompositeProgramLocations.OutColor]
+	add eax, GL_COLOR_ATTACHMENT0
+	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRLensTexture], 0
+	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
+	invoke_cdecl Scene_check_fbo
+	test eax, eax
+	jz .quit
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_HDRBlurFBO]
+	mov eax, [_DrawBlurProgramLocations.OutColor]
+	add eax, GL_COLOR_ATTACHMENT0
+	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRBlurTexture], 0
+	invoke_cdecl Scene_check_fbo
+	test eax, eax
+	jz .quit
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0
+
+	mov eax, %$VPSize
+	mov [_RTTBufferSize], eax
+.rtt_size_good:
 
 	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
 	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
@@ -1002,53 +1316,85 @@ __SECT__
 	movaps [_MovementSpeed], xmm0
 .finished_decel:
 
-	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_RTTFramebuffer]
-	mov eax, [_DrawSceneProgramLocations.OutColor]
-	add eax, GL_COLOR_ATTACHMENT0
-	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRLensTexture], 0
-	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_RTTDepthBuffer]
-	invoke_cdecl Scene_check_fbo
-	test eax, eax
-	jz .quit
-
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
+	invoke_cdecl Scene_clear_buffers
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainHalfSizeFBO]
+	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthHalf, %$VPHeightHalf
 	invoke_cdecl Scene_clear_buffers
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	invoke_dll_stdcall glDepthFunc, GL_LEQUAL
-	invoke_dll_stdcall glUseProgram, [_DrawSceneProgram]
+
+	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawSceneProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawSceneProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
-	invoke_dll_stdcall glUniform3fv, [_DrawSceneProgramLocations.CameraPosition], 1, _CameraPos
-	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.Time], %$TimerValue32
-	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainHeight], [_TerrainMapHeight]
-	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.TerrainScaling], [_TerrainMapScaling]
-	invoke_dll_stdcall glUniform1f, [_DrawSceneProgramLocations.SeaLevel], [_SeaLevel]
-	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.TextureQuality], [_CurTextureQuality]
+	invoke_dll_stdcall glUniformMatrix4fv, [_DrawTerrainProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_DrawTerrainProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
+	invoke_dll_stdcall glUniform3fv, [_DrawTerrainProgramLocations.CameraPosition], 1, _CameraPos
+	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.RenderDistance], 3000.0f
+	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.TerrainHeight], [_TerrainMapHeight]
+	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.TerrainScaling], [_TerrainMapScaling]
+	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TextureQuality], [_CurTextureQuality]
 
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
-	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.Cloud], 0
-	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.Terrain], 1
-	invoke_dll_stdcall glUniform1i, [_DrawSceneProgramLocations.TerrainConeMap], 2
+	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TerrainAltitudeMap], 0
+	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TerrainConeMap], 1
+	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	invoke_dll_stdcall glBindVertexArray, 0
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterHalfSizeFBO]
+	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthHalf, %$VPHeightHalf
+
+	invoke_dll_stdcall glUseProgram, [_DrawWaterProgram]
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
+	invoke_dll_stdcall glUniform3fv, [_DrawWaterProgramLocations.CameraPosition], 1, _CameraPos
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.Time], %$TimerValue32
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.RenderDistance], 3000.0f
+	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TextureQuality], [_CurTextureQuality]
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
 
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
-	mov eax, [_DrawBlurProgramLocations.OutColor]
-	add eax, GL_COLOR_ATTACHMENT0
-	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRBlurTexture], 0
-	invoke_cdecl Scene_check_fbo
-	test eax, eax
-	jz .quit
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_CompositeFBO]
+	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
+	invoke_cdecl Scene_clear_color
+
+	invoke_cdecl _SetupSSTextureMipmaps
+
+	invoke_dll_stdcall glUseProgram, [_DrawCompositeProgram]
+	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
+	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
+	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.CameraPosition], 1, _CameraPos
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSDiffuseHalfSizeTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSSpecularHalfSizeTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 3
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSEmissiveHalfSizeTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 4
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSScatterHalfSizeTexture]
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSNormalDist], 0
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSDiffuse], 1
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSSpecular], 2
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSEmissive], 3
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSScatter], 4
+	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	invoke_dll_stdcall glBindVertexArray, 0
+	invoke_dll_stdcall glUseProgram, 0
+
+	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_HDRBlurFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthLow, %$VPHeightLow
-	invoke_cdecl Scene_clear_buffers
+	invoke_cdecl Scene_clear_color
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
@@ -1065,7 +1411,7 @@ __SECT__
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
-	invoke_cdecl Scene_clear_buffers
+	invoke_cdecl Scene_clear_color
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRBlurTexture]
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
@@ -1083,6 +1429,13 @@ __SECT__
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
+	invoke_dll_stdcall glGetError
+	test eax, eax
+	jz .no_error
+	debug_msg "glGetError() == %p", eax
+	jmp .quit
+.no_error:
+
 	fld1
 	fdiv qword %$DeltaTimeL
 	fstp dword %$FramesPerSec
@@ -1093,7 +1446,6 @@ __SECT__
 		qw [_LastFrameRenderTimeUs]
 	mov eax, [_CurTextureQuality]
 	GLPrintfXY [_OGLFC], 0, 20, `质量：%s。按 Page Up 切换质量。`, [_PtrStrQualities + eax * 4]
-
 
 .end_of_frame:
 	invoke_cdecl _SwapBuffers
@@ -1121,13 +1473,42 @@ DefFunc Scene_check_fbo
 .check_fbo_ret:
 	FrameEnd
 	ret
-DefFunc Scene_clear_buffers
+DefFunc Scene_clear_color
 	FrameBegin
 	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
 	invoke_dll_stdcall glClearDepth, 1.0
 	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 	FrameEnd
 	ret
+DefFunc Scene_clear_buffers
+	FrameBegin edi
+	DefSizedVar %$ClearNormalDistance, 16
+	DefSizedVar %$ClearScatter, 16
+
+	xor eax, eax
+	lea edi, %$ClearNormalDistance
+	stosd
+	stosd
+	stosd
+	mov eax, FLT_MAX
+	stosd
+	mov eax, __float32__(1.0)
+	stosd
+	stosd
+	stosd
+	stosd
+
+	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 0, & %$ClearNormalDistance
+	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 1, .clear_zeroes
+	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 2, .clear_zeroes
+	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 3, .clear_zeroes
+	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 4, & %$ClearScatter
+	invoke_dll_stdcall glClearDepth, 1.0
+	invoke_dll_stdcall glClear, GL_DEPTH_BUFFER_BIT
+	FrameEnd
+	ret
+[segment .bss]
+.clear_zeroes resd 4
 
 DefFunc _SwapBuffersNoVSync
 	FrameBegin
