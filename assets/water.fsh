@@ -10,6 +10,7 @@ uniform mat4 proj;
 uniform vec3 campos;
 uniform float time;
 
+uniform sampler2D terrain_normal_depth;
 uniform float render_distance = 3000.0;
 uniform float sea_level = 0.6 * 200.0;
 uniform float sea_wave_height = 1.0;
@@ -145,6 +146,9 @@ void main()
 	vec4 camdir_z = inverse(proj) * ndc;
 	vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
 
+	float terrain_ray_dist = texture2D(terrain_normal_depth, texcoord).w;
+	vec3 terrain_pos = campos + fragdir * terrain_ray_dist;
+
 	if (campos.y <= get_water_height(campos.xz, num_waves_surface, 0.0))
 	{
 		is_underwater = true;
@@ -154,10 +158,12 @@ void main()
 
 	if (!is_underwater)
 	{
+		if (terrain_pos.y > sea_level) discard;
 		if (!raymarch_water(campos, fragdir, render_distance, ray_dist)) discard;
 	}
 	else
 	{
+		if (terrain_pos.y < sea_level - sea_wave_height) discard;
 		if (!raymarch_water_underwater(campos, fragdir, render_distance, ray_dist)) discard;
 	}
 

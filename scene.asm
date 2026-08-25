@@ -144,6 +144,7 @@ _DrawWaterProgramLocations:
 	.ProjMatrix resd 1
 	.Time resd 1
 	.RenderDistance resd 1
+	.SSTerrainNormalDepth resd 1
 	.TextureQuality resd 1
 .first_output:
 	.OutNormalDist resd 1
@@ -550,6 +551,8 @@ DefFunc _SceneLoad05
 	mov [_DrawWaterProgramLocations.Time], eax
 	GetUniformLocation [ebx], "render_distance"
 	mov [_DrawWaterProgramLocations.RenderDistance], eax
+	GetUniformLocation [ebx], "terrain_normal_depth"
+	mov [_DrawWaterProgramLocations.SSTerrainNormalDepth], eax
 	GetUniformLocation [ebx], "texture_quality"
 	mov [_DrawWaterProgramLocations.TextureQuality], eax
 
@@ -1351,6 +1354,9 @@ __SECT__
 
 	invoke_dll_stdcall glUseProgram, [_DrawWaterProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
+	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.SSTerrainNormalDepth], 0
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform3fv, [_DrawWaterProgramLocations.CameraPosition], 1, _CameraPos
