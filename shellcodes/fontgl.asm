@@ -584,6 +584,7 @@ DefFunc _OGLFC_Present
 	invoke_stdcall glDrawArraysInstanced, GL_TRIANGLE_STRIP, 0, 4, [esi + GlBuffer.num_items]
 	invoke_stdcall glBindTexture, GL_TEXTURE_2D, 0
 	invoke_stdcall glBindVertexArray, 0
+	invoke_stdcall glDisable, GL_BLEND
 
 	FrameEnd
 	ret
