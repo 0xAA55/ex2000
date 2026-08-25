@@ -26,7 +26,11 @@ void main()
 		sum += texture2D(blur_texture, texcoord + vec2(0, y) / standard_size_mod).xyz * dist_mod;
 	}
 	vec3 bloom = sum / count;
-	color.xyz = color_hdr * length(vec3(1.0)) / (avr_brightness * 2.0);
+	color.xyz = vec3(0.0);
+	if (avr_brightness >= 0.1)
+	{
+		color.xyz = color_hdr * length(vec3(1.0)) / (avr_brightness * 2.0);
+	}
 	color.xyz += bloom;
 	color.w = 1.0;
 }

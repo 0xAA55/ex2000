@@ -24,6 +24,10 @@ void main()
 		sum += texture2D(hdr_texture, texcoord + vec2(x, 0) / standard_size_mod).xyz * dist_mod;
 	}
 	vec3 bloom = sum / count;
-	color.xyz = bloom * 1.0 / (avr_brightness * 2.0);
+	color.xyz = vec3(0.0);
+	if (avr_brightness >= 0.1)
+	{
+		color.xyz = bloom * 1.0 / (avr_brightness * 2.0);
+	}
 	color.w = 1.0;
 }
