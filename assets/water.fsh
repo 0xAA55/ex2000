@@ -154,11 +154,11 @@ void main()
 
 	if (!is_underwater)
 	{
-		if (!raymarch_water_underwater(campos, fragdir, render_distance, ray_dist)) discard;
+		if (!raymarch_water(campos, fragdir, render_distance, ray_dist)) discard;
 	}
 	else
 	{
-		if (!raymarch_water(campos, fragdir, render_distance, ray_dist)) discard;
+		if (!raymarch_water_underwater(campos, fragdir, render_distance, ray_dist)) discard;
 	}
 
 	vec3 hitpos = campos + fragdir * ray_dist;
