@@ -111,7 +111,9 @@
 	DefExp _LfuDestroy
 	DefExp _ProgramCreate
 	DefExp _ProgramCreateEx
+	DefExp _ProgramCreateExV
 	DefExp _SceneLoadShaderProgram
+	DefExp _SceneLoadShaderProgramEx
 	DefExp _InitBuffer
 	DefExp _DeInitBuffer
 	DefExp _BufferPushItem

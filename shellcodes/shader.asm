@@ -66,8 +66,16 @@ DefFunc _ProgramCreate
 
 ; GLuint _ProgramCreateEx(int shader_type, const char *shader_source, ...);
 DefFunc _ProgramCreateEx
-	FrameBegin ebx, esi, edi
+	FrameBegin
 	NameParams %$Args
+	invoke_cdecl _ProgramCreateExV, & %$Args
+	FrameEnd
+	ret
+
+; GLuint _ProgramCreateExV(void *ap_list);
+DefFunc _ProgramCreateExV
+	FrameBegin ebx, esi, edi
+	NameParams %$APList
 	DefVars %$InfoLog, %$InfoLogLen, %$LinkStatus, %$ShaderType, %$ShaderTypeStr
 
 	xor eax, eax
@@ -78,7 +86,7 @@ DefFunc _ProgramCreateEx
 	invoke_stdcall glCreateProgram
 	mov ebx, eax
 
-	lea esi, %$Args
+	mov esi, %$APList
 .next_shader:
 	lodsd
 	test eax, eax
@@ -149,7 +157,6 @@ DefFunc _SceneLoadShaderProgram
 	FrameBegin esi
 	NameParams %$PProgramOut, %$VSPath, %$GSPath, %$FSPath
 	DefVars %$VSString, %$GSString, %$FSString
-
 	mov esi, %$PProgramOut
 	invoke_cdecl _AssetsQuery, %$VSPath, 0
 	mov %$VSString, eax
@@ -157,9 +164,34 @@ DefFunc _SceneLoadShaderProgram
 	mov %$GSString, eax
 	invoke_cdecl _AssetsQuery, %$FSPath, 0
 	mov %$FSString, eax
-
 	invoke_cdecl _ProgramCreate, %$VSString, %$GSString, %$FSString
 	mov [esi], eax
+
+	FrameEnd
+	ret
+
+; void SceneLoadShaderProgramEx(_out_ GLuint *program, int shader_type, const char *shader_source, ...);
+DefFunc _SceneLoadShaderProgramEx
+	FrameBegin ebx, esi
+	NameParams %$PProgramOut, %$Args
+
+	lea esi, %$Args
+	mov ebx, %$PProgramOut
+	mov edi, esi
+.loop_translate_path:
+	lodsd
+	test eax, eax
+	jz .proceed_compile
+	lodsd
+	test eax, eax
+	jz .loop_translate_path
+	invoke_cdecl _AssetsQuery, eax, 0
+	mov [esi - 4], eax
+	jmp .loop_translate_path
+.proceed_compile:
+
+	invoke_cdecl _ProgramCreateExV, & %$Args
+	mov [ebx], eax
 
 	FrameEnd
 	ret
