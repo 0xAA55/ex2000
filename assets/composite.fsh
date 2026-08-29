@@ -8,25 +8,17 @@ uniform sampler2D diffuse;
 uniform sampler2D specular;
 uniform sampler2D emissive;
 uniform sampler2D scatter;
+uniform float render_distance = 3000.0;
 
 in vec2 texcoord;
 out vec4 color;
 
-mat3 view_rot_inv = inverse(mat3(camorient));
-
-float get_z(vec3 ray, float dist)
-{
-	vec3 zdir = view_rot_inv * (ray * dist);
-	vec4 clip = proj * vec4(zdir, 1.0);
-	float ndc_z = clip.z / clip.w;
-	return ndc_z * 0.5 + 0.5;
-}
+float get_z(vec3 ray, float dist);
+vec3 get_fragdir(vec2 uv);
 
 void main()
 {
-	vec4 ndc = vec4(texcoord * 2.0 - 1.0, 1.0, 1.0);
-	vec4 camdir_z = inverse(proj) * ndc;
-	vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
+	vec3 fragdir = get_fragdir(texcoord);
 
 	vec4 ss_nd = texture2D(normal_distance, texcoord);
 	vec4 ss_diffuse = texture2D(diffuse, texcoord);
@@ -34,6 +26,9 @@ void main()
 	vec4 ss_emissive = texture2D(emissive, texcoord);
 	vec4 ss_scatter = texture2D(scatter, texcoord);
 
-	color = vec4(ss_nd.xyz, 1.0);
+	vec3 normal = ss_nd.xyz;
+	vec3 position = campos + normal * ss_nd.w;
 	gl_FragDepth = get_z(fragdir, ss_nd.w);
+
+	color = vec4(normal, 1.0);
 }

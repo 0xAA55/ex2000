@@ -1,33 +1,17 @@
 #version 330
 
-const float PI = 3.14159265358979;
 const int num_waves_surface = 12;
 const int num_waves_normal = num_waves_surface * 2;
 const int num_waves_caustic = num_waves_normal;
-
-uniform mat4 camorient;
-uniform mat4 proj;
-uniform vec3 campos;
-uniform float time;
-
-uniform sampler2D terrain_normal_depth;
-uniform float render_distance = 3000.0;
-uniform float sea_level = 0.6 * 200.0;
-uniform float sea_wave_height = 1.0;
-uniform float sea_wave_size = 1.0;
-
-uniform int texture_quality = 3;
 const float lowq_preci = 0.5;
 
-in vec2 texcoord;
-out vec4 out_normal_dist;
-out vec4 out_diffuse;
-out vec4 out_specular;
-out vec4 out_emissive;
-out vec4 out_scatter;
+uniform float time;
 
-mat3 view_rot_inv = inverse(mat3(camorient));
-bool is_underwater = false;
+uniform float sea_level;
+uniform float sea_wave_height;
+uniform float sea_wave_size;
+
+uniform int texture_quality;
 
 float get_water_height(vec2 pos, int num_waves, float phase_shift)
 {
@@ -130,48 +114,4 @@ vec3 get_water_normal(vec3 pos, float e, int num_waves, float phase_shift)
 			a - vec3(pos.x, get_water_height(pos.xz + ex.yx, num_waves, phase_shift), pos.z + e)
 		)
 	);
-}
-
-float get_z(vec3 ray, float dist)
-{
-	vec3 zdir = view_rot_inv * (ray * dist);
-	vec4 clip = proj * vec4(zdir, 1.0);
-	float ndc_z = clip.z / clip.w;
-	return ndc_z * 0.5 + 0.5;
-}
-
-void main()
-{
-	vec4 ndc = vec4(texcoord * 2.0 - 1.0, 1.0, 1.0);
-	vec4 camdir_z = inverse(proj) * ndc;
-	vec3 fragdir = normalize(mat3(camorient) * camdir_z.xyz);
-
-	float terrain_ray_dist = texture2D(terrain_normal_depth, texcoord).w;
-	vec3 terrain_pos = campos + fragdir * terrain_ray_dist;
-
-	if (campos.y <= get_water_height(campos.xz, num_waves_surface, 0.0))
-	{
-		is_underwater = true;
-	}
-
-	float ray_dist;
-
-	if (!is_underwater)
-	{
-		if (terrain_pos.y > sea_level) discard;
-		if (!raymarch_water(campos, fragdir, render_distance, ray_dist)) discard;
-	}
-	else
-	{
-		if (terrain_pos.y < sea_level - sea_wave_height) discard;
-		if (!raymarch_water_underwater(campos, fragdir, render_distance, ray_dist)) discard;
-	}
-
-	vec3 hitpos = campos + fragdir * ray_dist;
-	gl_FragDepth = get_z(fragdir, ray_dist);
-	out_normal_dist = vec4(get_water_normal(hitpos, 0.1, num_waves_normal, 0.0), ray_dist);
-	out_diffuse = vec4(1.0);
-	out_specular = vec4(1.0, 1.0, 1.0, 10.0);
-	out_emissive = vec4(0.0);
-	out_scatter = vec4(1.0);
 }

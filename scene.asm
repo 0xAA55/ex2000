@@ -144,8 +144,15 @@ _DrawWaterProgramLocations:
 	.ProjMatrix resd 1
 	.Time resd 1
 	.RenderDistance resd 1
-	.SSTerrainNormalDepth resd 1
+	.TerrainAltitudeMap resd 1
+	.TerrainConeMap resd 1
+	.TerrainHeight resd 1
+	.TerrainScaling resd 1
 	.TextureQuality resd 1
+	.SeaLevel resd 1
+	.SeaWaveHeight resd 1
+	.SeaWaveSize resd 1
+	.SSTerrainNormalDepth resd 1
 .first_output:
 	.OutNormalDist resd 1
 	.OutDiffuse resd 1
@@ -476,7 +483,11 @@ DefFunc _SceneLoad04
 	FrameBegin ebx, edi
 
 	mov ebx, _DrawTerrainProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\terrain.fsh"
+	SceneLoadShaderProgramEx ebx, GL_VERTEX_SHADER, "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, "assets\ssample.fsh", \
+		GL_FRAGMENT_SHADER, "assets\terrain.fsh", \
+		GL_FRAGMENT_SHADER, "assets\terrain_out.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -529,7 +540,12 @@ DefFunc _SceneLoad04
 DefFunc _SceneLoad05
 	FrameBegin ebx, edi
 	mov ebx, _DrawWaterProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\water.fsh"
+	SceneLoadShaderProgramEx ebx, GL_VERTEX_SHADER, "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, "assets\ssample.fsh", \
+		GL_FRAGMENT_SHADER, "assets\terrain.fsh", \
+		GL_FRAGMENT_SHADER, "assets\water.fsh", \
+		GL_FRAGMENT_SHADER, "assets\water_out.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -551,10 +567,24 @@ DefFunc _SceneLoad05
 	mov [_DrawWaterProgramLocations.Time], eax
 	GetUniformLocation [ebx], "render_distance"
 	mov [_DrawWaterProgramLocations.RenderDistance], eax
-	GetUniformLocation [ebx], "terrain_normal_depth"
-	mov [_DrawWaterProgramLocations.SSTerrainNormalDepth], eax
+	GetUniformLocation [ebx], "terrain_altmap"
+	mov [_DrawWaterProgramLocations.TerrainAltitudeMap], eax
+	GetUniformLocation [ebx], "terrain_conemap"
+	mov [_DrawWaterProgramLocations.TerrainConeMap], eax
+	GetUniformLocation [ebx], "terrain_height"
+	mov [_DrawWaterProgramLocations.TerrainHeight], eax
+	GetUniformLocation [ebx], "terrain_scaling"
+	mov [_DrawWaterProgramLocations.TerrainScaling], eax
 	GetUniformLocation [ebx], "texture_quality"
 	mov [_DrawWaterProgramLocations.TextureQuality], eax
+	GetUniformLocation [ebx], "sea_level"
+	mov [_DrawWaterProgramLocations.SeaLevel], eax
+	GetUniformLocation [ebx], "sea_wave_height"
+	mov [_DrawWaterProgramLocations.SeaWaveHeight], eax
+	GetUniformLocation [ebx], "sea_wave_size"
+	mov [_DrawWaterProgramLocations.SeaWaveSize], eax
+	GetUniformLocation [ebx], "terrain_normal_depth"
+	mov [_DrawWaterProgramLocations.SSTerrainNormalDepth], eax
 
 	GetFragDataLocation [ebx], "out_normal_dist"
 	mov [_DrawWaterProgramLocations.OutNormalDist], eax
@@ -578,7 +608,9 @@ DefFunc _SceneLoad05
 DefFunc _SceneLoad06
 	FrameBegin ebx, edi
 	mov ebx, _DrawCompositeProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\composite.fsh"
+	SceneLoadShaderProgramEx ebx, GL_VERTEX_SHADER, "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, "assets\composite.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -830,6 +862,8 @@ DefFunc _SceneUnload
 	invoke_cdecl _DeleteTexture, _SSScatterHalfSizeTexture
 	invoke_cdecl _DeleteTexture, _HDRLensTexture
 	invoke_cdecl _DeleteTexture, _HDRBlurTexture
+
+	invoke_cdecl _SceneOnDisposeShaders
 
 	invoke_cdecl _DeleteProgram, _DrawProgressProgram
 	invoke_cdecl _DeleteProgram, _DrawTerrainProgram
@@ -1339,7 +1373,6 @@ __SECT__
 	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.TerrainHeight], [_TerrainMapHeight]
 	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.TerrainScaling], [_TerrainMapScaling]
 	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TextureQuality], [_CurTextureQuality]
-
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
@@ -1354,18 +1387,28 @@ __SECT__
 
 	invoke_dll_stdcall glUseProgram, [_DrawWaterProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
-	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.SSTerrainNormalDepth], 0
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform3fv, [_DrawWaterProgramLocations.CameraPosition], 1, _CameraPos
 	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.Time], %$TimerValue32
 	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.RenderDistance], 3000.0f
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.TerrainHeight], [_TerrainMapHeight]
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.TerrainScaling], [_TerrainMapScaling]
 	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TextureQuality], [_CurTextureQuality]
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.SeaLevel], 120.0f
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.SeaWaveHeight], 1.0f
+	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.SeaWaveSize], 1.0f
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
+	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
+	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TerrainAltitudeMap], 0
+	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TerrainConeMap], 1
+	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.SSTerrainNormalDepth], 2
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 	invoke_dll_stdcall glBindVertexArray, 0
-
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_CompositeFBO]
