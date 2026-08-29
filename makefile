@@ -70,7 +70,7 @@ gl33.asm: loaddll.inc gl33.inc assets.inc wglfuncs.tmp gl33funcs.tmp
 pool.asm: loaddll.inc pool.inc
 scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc fontgl.inc hrsleep.inc
 vblank.asm: loaddll.inc vblank.inc timer.inc
-shader.asm: loaddll.inc shader.inc gl33.inc assets.inc
+shader.asm: loaddll.inc shader.inc gl33.inc assets.inc strpool.inc
 utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 scloader.asm: loaddll.inc shellcode.inc assets.inc

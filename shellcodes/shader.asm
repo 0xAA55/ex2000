@@ -2,13 +2,14 @@
 %include "shader.inc"
 %include "gl33.inc"
 %include "assets.inc"
+%include "strpool.inc"
 
 segment .rdata
-_ShaderTypes dd GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
-_ST_Vertex_Shader db "Vertex", 0
-_ST_Geometry_Shader db "Geometry", 0
-_ST_Fragment_Shader db "Fragment", 0
-_ST_Offsets db 0, _ST_Geometry_Shader - _ST_Vertex_Shader, _ST_Fragment_Shader - _ST_Vertex_Shader
+DefStr _STVertexShader, "Vertex"
+DefStr _STGeometryShader, "Geometry"
+DefStr _STFragmentShader, "Fragment"
+DefStr _ShaderCompileError, "Shader compilation error"
+DefStr _ShaderLinkageError, "Shader linkage error"
 
 ; int ShaderCreate(int program, int shader_type, char *shader_code, char **pp_out_infolog)
 DefFunc _ShaderCreate
@@ -57,79 +58,87 @@ DefFunc _ShaderCreate
 
 ; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
 DefFunc _ProgramCreate
-	FrameBegin esi, edi
-	NameParams %$VertexShader, %$GeometryShader, %$FragmentShader
-	DefVars %$ECXHome, %$Program, %$InfoLog, %$InfoLogLen, %$LinkStatus, %$ShaderType, %$FormatBuffer
+	FrameBegin
+	NameParams %$VS, %$GS, %$FS
+	invoke_cdecl _ProgramCreateEx, GL_VERTEX_SHADER, %$VS, GL_GEOMETRY_SHADER, %$GS, GL_FRAGMENT_SHADER, %$FS,0
+	FrameEnd
+	ret
 
-	mov eax, %$VertexShader
-	or eax, %$GeometryShader
-	or eax, %$FragmentShader
-	jz .bad_param
+; GLuint _ProgramCreateEx(int shader_type, const char *shader_source, ...);
+DefFunc _ProgramCreateEx
+	FrameBegin ebx, esi, edi
+	NameParams %$Args
+	DefVars %$InfoLog, %$InfoLogLen, %$LinkStatus, %$ShaderType, %$ShaderTypeStr
 
 	xor eax, eax
-	mov %$InfoLog, eax
-	mov edi, eax
+	mov ecx, %$Frame_NumLocals
+	lea edi, Variable(0)
+	rep stosd
 
 	invoke_stdcall glCreateProgram
-	mov %$Program, eax
+	mov ebx, eax
 
-	mov ecx, 3
-	GetAbsAddr esi, _ST_Offsets
-.add_shaders:
-	mov %$ECXHome, ecx
-
-	xor eax, eax
-	lodsb
-	GetAbsAddr ecx, _ST_Vertex_Shader
-	add eax, ecx
+	lea esi, %$Args
+.next_shader:
+	lodsd
+	test eax, eax
+	jz .proceed_link
 	mov %$ShaderType, eax
-
-	mov eax, Param(edi)
-	test eax, eax
-	jz .skip_shader
-
-	GetAbsAddr ecx, _ShaderTypes
-
-	invoke_cdecl _ShaderCreate, %$Program, [ecx + edi * 4], eax, &%$InfoLog
-	test eax, eax
-	jnz .skip_shader
-	debug_msg "Shader compilation error :%s Shader: %s", %$ShaderType, %$InfoLog
+	cmp eax, GL_VERTEX_SHADER
+	jz .is_vs
+	cmp eax, GL_GEOMETRY_SHADER
+	jz .is_gs
+	cmp eax, GL_FRAGMENT_SHADER
+	jz .is_fs
+	GetAbsAddr ecx, _ShaderCompileError
+	debug_msg "%s: Unknown shader type %d", ecx, %$ShaderType
 	jmp .bad_end
-.skip_shader:
-	inc edi
-	mov ecx, %$ECXHome
-	dec ecx
-	jnz .add_shaders
+.is_vs:
+	GetAbsAddr ecx, _STVertexShader
+	jmp .load_shader
+.is_gs:
+	GetAbsAddr ecx, _STGeometryShader
+	jmp .load_shader
+.is_fs:
+	GetAbsAddr ecx, _STFragmentShader
+.load_shader:
+	mov %$ShaderTypeStr, ecx
+	lodsd
+	test eax, eax
+	jz .next_shader
+	invoke_cdecl _ShaderCreate, ebx, %$ShaderType, eax, & %$InfoLog
+	test eax, eax
+	jnz .next_shader
+	GetAbsAddr ecx, _ShaderCompileError
+	debug_msg "%s: %s Shader: %s", ecx, %$ShaderTypeStr, %$InfoLog
+	jmp .bad_end
+.proceed_link:
 
-	invoke_stdcall glLinkProgram, %$Program
-	invoke_stdcall glGetProgramiv, %$Program, GL_LINK_STATUS, &%$LinkStatus
+	invoke_stdcall glLinkProgram, ebx
+	invoke_stdcall glGetProgramiv, ebx, GL_LINK_STATUS, &%$LinkStatus
 	mov eax, %$LinkStatus
 	test eax, eax
 	jnz .good_link
 
-	invoke_stdcall glGetProgramiv, %$Program, GL_INFO_LOG_LENGTH, &%$InfoLogLen
+	invoke_stdcall glGetProgramiv, ebx, GL_INFO_LOG_LENGTH, &%$InfoLogLen
 	mov eax, %$InfoLogLen
 	inc eax
 	invoke_cdecl _calloc, eax, 1
 	mov %$InfoLog, eax
 
-	invoke_stdcall glGetProgramInfoLog, %$Program, %$InfoLogLen, &%$InfoLogLen, %$InfoLog
+	invoke_stdcall glGetProgramInfoLog, ebx, %$InfoLogLen, &%$InfoLogLen, %$InfoLog
 
-	debug_msg "Shader linkage error: %s", %$InfoLog
+	GetAbsAddr ecx, _ShaderLinkageError
+	debug_msg "%s: %s", ecx, %$InfoLog
 	jmp .bad_end
-
-.good_link:
-	mov eax, %$Program
-	jmp .end
-
-.bad_param:
-	int3
-	jmp .bad_param
 
 .bad_end:
 	invoke_cdecl _free, %$InfoLog
-	invoke_stdcall glDeleteProgram, %$Program
-	xor eax, eax
+	invoke_stdcall glDeleteProgram, ebx
+	xor ebx, ebx
+
+.good_link:
+	mov eax, ebx
 
 .end:
 	FrameEnd

@@ -110,6 +110,7 @@
 	DefExp _LfuPut
 	DefExp _LfuDestroy
 	DefExp _ProgramCreate
+	DefExp _ProgramCreateEx
 	DefExp _SceneLoadShaderProgram
 	DefExp _InitBuffer
 	DefExp _DeInitBuffer
