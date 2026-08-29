@@ -177,7 +177,7 @@
 	%else
 		__ResetPassReg
 		%define __NoResetPassReg
-		__PickOutRegToAvoid %1
+		__PickOutRegToAvoid %str(%2)
 		__RotatePassReg
 		GetAbsAddr __PassReg, %%format
 		%if %0 >= 2
@@ -200,7 +200,7 @@
 	%else
 		__ResetPassReg
 		%define __NoResetPassReg
-		__PickOutRegToAvoid %1
+		__PickOutRegToAvoid %str(%2)
 		__RotatePassReg
 		GetAbsAddr __PassReg, %%format
 		%if %0 >= 2
@@ -223,7 +223,7 @@
 	%else
 		__ResetPassReg
 		%define __NoResetPassReg
-		__PickOutRegToAvoid %1
+		__PickOutRegToAvoid %str(%4)
 		__RotatePassReg
 		GetAbsAddr __PassReg, %%format
 		%if %0 >= 4
