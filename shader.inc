@@ -4,11 +4,14 @@
 %include "gl33.inc"
 %include "strpool.inc"
 
-; GLuint ProgramCreate(char *VertexShader, char *GeometryShader, char *FragmentShader);
-extern _ProgramCreate
-
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 extern _SceneLoadShaderProgram
+
+; void SceneLoadShaderProgramEx(_out_ GLuint *program, int shader_type, const char *shader_source, ...);
+extern _SceneLoadShaderProgramEx
+
+; void SceneOnDisposeShaders();
+extern _SceneOnDisposeShaders
 
 %macro SceneLoadShaderProgram 4
 	DefStr %%VSAssetsPath, %2
@@ -21,6 +24,37 @@ extern _SceneLoadShaderProgram
 		GetAbsAddr eax, ecx, edx, %%VSAssetsPath, %%GSAssetsPath, %%FSAssetsPath
 		invoke_cdecl _SceneLoadShaderProgram, %1, eax, ecx, edx
 	%endif
+%endmacro
+
+%macro SceneLoadShaderProgramEx 2-*
+	%if (%0 & 1) == 0
+		%error Usage: SceneLoadShaderProgramEx out_program, shader_type, shader_path, ...
+		%exitmacro
+	%endif
+	Push 0
+	%assign %%IsPath 1
+	%assign %%Index 0
+	%rep %0 - 1
+		%rotate -1
+		%if %%IsPath
+			DefStr %%AssetPath%[%%Index], %1
+			%ifndef SHELLCODE
+				Push %%AssetPath%[%%Index]
+			%else
+				GetAbsAddr eax, %%AssetPath%[%%Index]
+				Push eax
+			%endif
+			%assign %%IsPath 0
+		%else
+			Push %1
+			%assign %%IsPath 1
+		%endif
+		%assign %%Index %%Index + 1
+	%endrep
+	%rotate -1
+	Push %1
+	call _SceneLoadShaderProgramEx
+	add esp, (%0 + 1) * 4
 %endmacro
 
 %macro GetAttribLocation 2
