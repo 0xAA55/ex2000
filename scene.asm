@@ -165,6 +165,7 @@ _DrawCompositeProgramLocations:
 	.CameraMatrix resd 1
 	.CameraPosition resd 1
 	.ProjMatrix resd 1
+	.SunPosition resd 1
 	.TexSSNormalDist resd 1
 	.TexSSDiffuse resd 1
 	.TexSSSpecular resd 1
@@ -219,6 +220,9 @@ _SeaLevel resd 1
 extern _OGLFC
 _OGLFC resd 1
 
+extern _DayTime
+_DayTime resd 1
+
 segment .bss
 alignb 16
 extern _ModelMatrix
@@ -247,6 +251,10 @@ _MovementSpeed:
 
 extern _CameraPos
 _CameraPos:
+	InstVector
+
+extern _SunPosition
+_SunPosition:
 	InstVector
 
 extern _TerrainMapScalingVector
@@ -622,12 +630,16 @@ DefFunc _SceneLoad06
 	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
+	mov dword[_DayTime], __float32__(0.3333)
+
 	GetUniformLocation [ebx], "camorient"
 	mov [_DrawCompositeProgramLocations.CameraMatrix], eax
 	GetUniformLocation [ebx], "proj"
 	mov [_DrawCompositeProgramLocations.ProjMatrix], eax
 	GetUniformLocation [ebx], "campos"
 	mov [_DrawCompositeProgramLocations.CameraPosition], eax
+	GetUniformLocation [ebx], "sunpos"
+	mov [_DrawCompositeProgramLocations.SunPosition], eax
 	GetUniformLocation [ebx], "normal_distance"
 	mov [_DrawCompositeProgramLocations.TexSSNormalDist], eax
 	GetUniformLocation [ebx], "diffuse"
@@ -1353,6 +1365,23 @@ __SECT__
 	movaps [_MovementSpeed], xmm0
 .finished_decel:
 
+	mov eax, __float32__(229.18311805) ; 12 * 60 / pi
+	movd xmm1, eax
+	movss xmm0, %$DeltaTime32
+	divss xmm0, xmm1
+	addss xmm0, [_DayTime]
+	movss [_DayTime], xmm0
+
+	fld dword[_DayTime]
+	fsincos
+	fchs
+	fstp dword[_SunPosition.z]
+	fchs
+	fstp dword[_SunPosition.y]
+	mov dword[_SunPosition.x], __float32__(0.4)
+
+	invoke_cdecl _VectorNormal, _SunPosition, _SunPosition, 3
+
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
 	invoke_cdecl Scene_clear_buffers
@@ -1422,6 +1451,7 @@ __SECT__
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.CameraPosition], 1, _CameraPos
+	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.SunPosition], 1, _SunPosition
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
