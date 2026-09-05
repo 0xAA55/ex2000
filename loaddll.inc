@@ -1,8 +1,6 @@
 %ifndef _LOADDLL_INC_
 %define _LOADDLL_INC_ 1
 
-; %define INVOKE_CHECK
-
 %include "frame.inc"
 
 %define NULL 0
@@ -52,55 +50,44 @@
 %endmacro
 
 %macro load_dll 1
-	invoke_dll_stdcall LoadLibraryA, _name_of_ %+ %1
-	mov [_addr_of_ %+ %1], eax
-	%ifdef INVOKE_CHECK
-		[segment .rdata]
-		%%dllfail db %str(CurFuncName), ": On load dll `", %str(%1), "`: failed", 0
-
-		__SECT__
-		test eax, eax
-		jnz %%success
-		import_dll_func MessageBoxA
-		invoke_dll_stdcall MessageBoxA, 0, label %%dllfail, 0, 0
-		int3
-	%%success:
+	%ifndef SHELLCODE
+		invoke_dll_stdcall LoadLibraryA, label _name_of_ %+ %1
+		mov [_addr_of_ %+ %1], eax
+	%else
+		invoke_stdcall LoadLibraryA, label _name_of_ %+ %1
+		GetAbsAddr ecx, _addr_of_ %+ %1
+		mov [ecx], eax
 	%endif
 %endmacro
 
 %macro dont_load_dll 1
 	xor eax, eax
-	mov [_addr_of_ %+ %1], eax
+	%ifndef SHELLCODE
+		mov [_addr_of_ %+ %1], eax
+	%else
+		GetAbsAddr ecx, _addr_of_ %+ %1
+		mov [ecx], eax
+	%endif
 %endmacro
 
 %macro load_dll_func 2
-	invoke_dll_stdcall GetProcAddress, [_addr_of_ %+ %1], _name_of_ %+ %2
-	mov [_addr_of_ %+ %2], eax
-	%ifdef INVOKE_CHECK
-		test eax, eax
-		jnz %%success
-		int3
-	%%success:
+	%ifndef SHELLCODE
+		invoke_dll_stdcall GetProcAddress, [_addr_of_ %+ %1], _name_of_ %+ %2
+		mov [_addr_of_ %+ %2], eax
+	%else
+		GetAbsAddr eax, _addr_of_ %+ %1
+		invoke_stdcall GetProcAddress, [eax], label _name_of_ %+ %2
+		GetAbsAddr ecx, _addr_of_ %+ %2
+		mov [ecx], eax
 	%endif
 %endmacro
 
 %macro invoke_dll_func 1
-	%ifdef INVOKE_CHECK
-		mov eax, [_addr_of_ %+ %1]
-		test eax, eax
-		jnz %%success
-		[segment .rdata]
-		%%func_name db %str(CurFuncName), ": On call `", %str(%1), "`: NULL function pointer", 0
-
-		__SECT__
-		import_dll_func MessageBoxA
-		invoke_dll_stdcall MessageBoxA, 0, label %%func_name, 0, 0
-		jmp %%unsuccess
-		%%success:
+	%ifndef SHELLCODE
 		call [_addr_of_ %+ %1]
-		%%unsuccess:
 	%else
-		call [_addr_of_ %+ %1]
+		GetAbsAddr eax, _addr_of_ %+ %1
+		call [eax]
 	%endif
 %endmacro
 
