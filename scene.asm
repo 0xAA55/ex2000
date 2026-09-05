@@ -703,7 +703,7 @@ __SECT__
 	jl .quit
 
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
-	invoke_cdecl Scene_clear_color
+	invoke_cdecl _Scene_clear_color
 
 	invoke_dll_stdcall glUseProgram, [_DrawProgressProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
@@ -784,28 +784,28 @@ __SECT__
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
 	invoke_cdecl _SetupSSFBOOutputs, _SSTextures, _DrawTerrainProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
-	invoke_cdecl Scene_check_fbo
+	invoke_cdecl _Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterFBO]
 	invoke_cdecl _SetupSSFBOOutputs, _SSTextures, _DrawWaterProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
-	invoke_cdecl Scene_check_fbo
+	invoke_cdecl _Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainHalfSizeFBO]
 	invoke_cdecl _SetupSSFBOOutputs, _SSHalfSizeTextures, _DrawTerrainProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeHalfSizeDepthBuffer]
-	invoke_cdecl Scene_check_fbo
+	invoke_cdecl _Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterHalfSizeFBO]
 	invoke_cdecl _SetupSSFBOOutputs, _SSHalfSizeTextures, _DrawWaterProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeHalfSizeDepthBuffer]
-	invoke_cdecl Scene_check_fbo
+	invoke_cdecl _Scene_check_fbo
 	test eax, eax
 	jz .quit
 
@@ -814,7 +814,7 @@ __SECT__
 	add eax, GL_COLOR_ATTACHMENT0
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRLensTexture], 0
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
-	invoke_cdecl Scene_check_fbo
+	invoke_cdecl _Scene_check_fbo
 	test eax, eax
 	jz .quit
 
@@ -822,7 +822,7 @@ __SECT__
 	mov eax, [_DrawBlurProgramLocations.OutColor]
 	add eax, GL_COLOR_ATTACHMENT0
 	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_HDRBlurTexture], 0
-	invoke_cdecl Scene_check_fbo
+	invoke_cdecl _Scene_check_fbo
 	test eax, eax
 	jz .quit
 
@@ -924,11 +924,11 @@ __SECT__
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
-	invoke_cdecl Scene_clear_buffers
+	invoke_cdecl _Scene_clear_buffers
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainHalfSizeFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthHalf, %$VPHeightHalf
-	invoke_cdecl Scene_clear_buffers
+	invoke_cdecl _Scene_clear_buffers
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	invoke_dll_stdcall glDepthFunc, GL_LEQUAL
@@ -982,7 +982,7 @@ __SECT__
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_CompositeFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
-	invoke_cdecl Scene_clear_color
+	invoke_cdecl _Scene_clear_color
 
 	invoke_cdecl _SetupSSTextureMipmaps, _SSTextures
 	invoke_cdecl _SetupSSTextureMipmaps, _SSHalfSizeTextures
@@ -1005,7 +1005,7 @@ __SECT__
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_HDRBlurFBO]
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthLow, %$VPHeightLow
-	invoke_cdecl Scene_clear_color
+	invoke_cdecl _Scene_clear_color
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
@@ -1022,7 +1022,7 @@ __SECT__
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0
 	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
-	invoke_cdecl Scene_clear_color
+	invoke_cdecl _Scene_clear_color
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRBlurTexture]
 	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
@@ -1070,56 +1070,6 @@ __SECT__
 .end:
 	FrameEnd
 	ret
-DefFunc Scene_check_fbo
-	FrameBegin
-	invoke_dll_stdcall glCheckFramebufferStatus, GL_DRAW_FRAMEBUFFER
-	cmp eax, GL_FRAMEBUFFER_COMPLETE
-	jne .fbo_not_complete
-	xor eax, eax
-	inc eax
-	jmp .check_fbo_ret
-.fbo_not_complete:
-	debug_msg `glCheckFramebufferStatus() returns %d`, eax
-	xor eax, eax
-.check_fbo_ret:
-	FrameEnd
-	ret
-DefFunc Scene_clear_color
-	FrameBegin
-	invoke_dll_stdcall glClearColor, 0, 0, 0, 0
-	invoke_dll_stdcall glClearDepth, 1.0
-	invoke_dll_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
-	FrameEnd
-	ret
-DefFunc Scene_clear_buffers
-	FrameBegin edi
-	DefSizedVar %$ClearNormalDistance, 16
-	DefSizedVar %$ClearScatter, 16
-
-	xor eax, eax
-	lea edi, %$ClearNormalDistance
-	stosd
-	stosd
-	stosd
-	mov eax, FLT_MAX
-	stosd
-	mov eax, __float32__(1.0)
-	stosd
-	stosd
-	stosd
-	stosd
-
-	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 0, & %$ClearNormalDistance
-	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 1, .clear_zeroes
-	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 2, .clear_zeroes
-	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 3, .clear_zeroes
-	invoke_dll_stdcall glClearBufferfv, GL_COLOR, 4, & %$ClearScatter
-	invoke_dll_stdcall glClearDepth, 1.0
-	invoke_dll_stdcall glClear, GL_DEPTH_BUFFER_BIT
-	FrameEnd
-	ret
-[segment .bss]
-.clear_zeroes resd 4
 
 DefFunc _SwapBuffersNoVSync
 	FrameBegin

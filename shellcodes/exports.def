@@ -68,6 +68,9 @@ SceneLoadDrawWaterProgram
 SceneLoadDrawCompositeProgram
 SceneLoadDrawBlurProgram
 SceneLoadDrawHDR2LDRProgram
+Scene_check_fbo
+Scene_clear_color
+Scene_clear_buffers
 SetupSSFBOOutputs
 SetupSSTextureMipmaps
 SetupSSTextureShaderInput

@@ -458,3 +458,43 @@ DefFunc _SceneLoadDrawHDR2LDRProgram
 .bad_end:
 	FrameEnd
 	ret
+
+DefFunc _Scene_check_fbo
+	FrameBegin
+	invoke_stdcall glCheckFramebufferStatus, GL_DRAW_FRAMEBUFFER
+	cmp eax, GL_FRAMEBUFFER_COMPLETE
+	jne .fbo_not_complete
+	xor eax, eax
+	inc eax
+	jmp .check_fbo_ret
+.fbo_not_complete:
+	debug_msg `glCheckFramebufferStatus() returns %d`, eax
+	xor eax, eax
+.check_fbo_ret:
+	FrameEnd
+	ret
+
+DefFunc _Scene_clear_color
+	FrameBegin
+	invoke_stdcall glClearColor, 0, 0, 0, 0
+	invoke_stdcall glClearDepth, 1.0
+	invoke_stdcall glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
+	FrameEnd
+	ret
+
+DefFunc _Scene_clear_buffers
+	FrameBegin edi
+
+	invoke_stdcall glClearBufferfv, GL_COLOR, 0, label .clear_nd
+	invoke_stdcall glClearBufferfv, GL_COLOR, 1, label .clear_zeroes
+	invoke_stdcall glClearBufferfv, GL_COLOR, 2, label .clear_zeroes
+	invoke_stdcall glClearBufferfv, GL_COLOR, 3, label .clear_zeroes
+	invoke_stdcall glClearBufferfv, GL_COLOR, 4, label .clear_ones
+	invoke_stdcall glClearDepth, 1.0
+	invoke_stdcall glClear, GL_DEPTH_BUFFER_BIT
+	FrameEnd
+	ret
+[segment .data]
+	.clear_nd dd 0, 0, 0, FLT_MAX
+	.clear_zeroes dd 0, 0, 0, 0
+	.clear_ones dd __float32__(1.0), __float32__(1.0), __float32__(1.0), __float32__(1.0)

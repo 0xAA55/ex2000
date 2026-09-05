@@ -118,6 +118,9 @@
 	DefExp _SceneLoadDrawCompositeProgram
 	DefExp _SceneLoadDrawBlurProgram
 	DefExp _SceneLoadDrawHDR2LDRProgram
+	DefExp _Scene_check_fbo
+	DefExp _Scene_clear_color
+	DefExp _Scene_clear_buffers
 	DefExp _SetupSSFBOOutputs
 	DefExp _SetupSSTextureMipmaps
 	DefExp _SetupSSTextureShaderInput
