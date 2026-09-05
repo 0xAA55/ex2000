@@ -2,7 +2,6 @@
 %define _SHADER_INC_ 1
 
 %include "gl33.inc"
-%include "strpool.inc"
 
 ; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
 extern _SceneLoadShaderProgram
@@ -31,35 +30,26 @@ extern _SceneOnDisposeShaders
 %endmacro
 
 %macro GetAttribLocation 2
-	DefStr %%AttribName, %2
-
 	%ifndef SHELLCODE
-		invoke_dll_stdcall glGetAttribLocation, %1, %%AttribName
+		invoke_dll_stdcall glGetAttribLocation, %1, str %2
 	%else
-		GetAbsAddr eax, %%AttribName
-		invoke_stdcall glGetAttribLocation, %1, eax
+		invoke_stdcall glGetAttribLocation, %1, str %2
 	%endif
 %endmacro
 
 %macro GetUniformLocation 2
-	DefStr %%UniformName, %2
-
 	%ifndef SHELLCODE
-		invoke_dll_stdcall glGetUniformLocation, %1, %%UniformName
+		invoke_dll_stdcall glGetUniformLocation, %1, str %2
 	%else
-		GetAbsAddr eax, %%UniformName
-		invoke_stdcall glGetUniformLocation, %1, eax
+		invoke_stdcall glGetUniformLocation, %1, str %2
 	%endif
 %endmacro
 
 %macro GetFragDataLocation 2
-	DefStr %%FragDataName, %2
-
 	%ifndef SHELLCODE
-		invoke_dll_stdcall glGetFragDataLocation, %1, %%FragDataName
+		invoke_dll_stdcall glGetFragDataLocation, %1, str %2
 	%else
-		GetAbsAddr eax, %%FragDataName
-		invoke_stdcall glGetFragDataLocation, %1, eax
+		invoke_stdcall glGetFragDataLocation, %1, str %2
 	%endif
 %endmacro
 

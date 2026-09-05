@@ -58,7 +58,7 @@ frame.inc: strpool.inc
 shellcode.inc: scfuncs.tmp glfuncs.tmp
 loaddll.inc: frame.inc expfuncs.tmp
 assets.inc: strpool.inc
-shader.inc: gl33.inc strpool.inc
+shader.inc: gl33.inc
 fontgl.inc: buffer.inc
 main.asm: loaddll.inc assets.inc math.inc tls.inc vblank.inc
 tls.asm: loaddll.inc tls.inc
