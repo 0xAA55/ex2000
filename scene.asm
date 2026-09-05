@@ -452,10 +452,6 @@ DefFunc _SceneLoad0A
 
 DefFunc _SceneLoad0B
 	FrameBegin
-
-	xor eax, eax
-	mov [_RTTBufferSize], eax
-
 	FrameEnd
 	ret
 
