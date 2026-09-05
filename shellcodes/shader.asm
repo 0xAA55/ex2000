@@ -196,8 +196,8 @@ DefFunc _SceneOnDisposeShaders
 	FrameEnd
 	ret
 
-; void SceneLoadShaderProgramEx(_out_ GLuint *program, int shader_type, const char *shader_asset_path, ...);
-DefFunc _SceneLoadShaderProgramEx
+; void SceneLoadShaderProgram(_out_ GLuint *program, int shader_type, const char *shader_asset_path, ...);
+DefFunc _SceneLoadShaderProgram
 	FrameBegin ebx, esi, edi
 	NameParams %$PProgramOut, %$Args
 	DefVars %$ShaderType, %$NumShaders

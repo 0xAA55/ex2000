@@ -198,7 +198,7 @@ DefFunc _OGLFC_Create
 	invoke_stdcall glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
 	invoke_stdcall glBindTexture, GL_TEXTURE_2D, 0
 
-	SceneLoadShaderProgramEx &[ebx + OGLFC.shader_program], \
+	SceneLoadShaderProgram &[ebx + OGLFC.shader_program], \
 		GL_VERTEX_SHADER, str "assets\font.vsh", \
 		GL_FRAGMENT_SHADER, str "assets\font.fsh"
 	mov [ebx + OGLFC.shader_program], eax

@@ -3,14 +3,14 @@
 
 %include "gl33.inc"
 
-; void SceneLoadShaderProgramEx(_out_ GLuint *program, int shader_type, const char *shader_source, ...);
-extern _SceneLoadShaderProgramEx
+; void SceneLoadShaderProgram(_out_ GLuint *program, int shader_type, const char *shader_source, ...);
+extern _SceneLoadShaderProgram
 
 ; void SceneOnDisposeShaders();
 extern _SceneOnDisposeShaders
 
-%macro SceneLoadShaderProgramEx 2+
-	invoke_cdecl _SceneLoadShaderProgramEx, %1, %2, 0
+%macro SceneLoadShaderProgram 2+
+	invoke_cdecl _SceneLoadShaderProgram, %1, %2, 0
 %endmacro
 
 %macro GetAttribLocation 2
