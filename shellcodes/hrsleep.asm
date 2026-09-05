@@ -31,8 +31,7 @@ DefFunc _HRSleep500us
 	cmp dword[ebx], 0
 	jz .fallback
 
-	GetAbsAddr eax, .wait_time
-	invoke_stdcall SetWaitableTimer, [ebx], eax, 0, NULL, NULL, 0
+	invoke_stdcall SetWaitableTimer, [ebx], label .wait_time, 0, NULL, NULL, 0
 	test eax, eax
 	jz .fallback
 	invoke_stdcall WaitForSingleObject, [ebx], 0xFFFFFFFF

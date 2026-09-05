@@ -100,8 +100,7 @@ DefFunc _LfuIncreaseFreq
 	mov [edi + FreqKey.freq], eax
 	mov [edi + FreqKey.data_key], ecx
 	mov [edi + FreqKey.data_keyops], edx
-	GetAbsAddr eax, _FreqKeyOps
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, eax
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, label _FreqKeyOps
 
 	FrameEnd
 	ret
@@ -192,7 +191,7 @@ DefFunc _LfuPut
 	mov [esi + DataNode.userdata], eax
 	mov [esi + DataNode.on_free], ecx
 
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], %$Key, esi, _LfuFreeDataNode, [ebx + LfuCache.user_keyops]
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.data_tree], %$Key, esi, label _LfuFreeDataNode, [ebx + LfuCache.user_keyops]
 	test eax, eax
 	jz .bad
 	lea edi, %$FreqKey
@@ -201,8 +200,7 @@ DefFunc _LfuPut
 	mov dword[edi + FreqKey.freq], 1
 	mov [edi + FreqKey.data_key], eax
 	mov [edi + FreqKey.data_keyops], ecx
-	GetAbsAddr eax, _FreqKeyOps
-	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, eax
+	invoke_cdecl _AVLInsert, &[ebx + LfuCache.freq_tree], edi, NULL, NULL, label _FreqKeyOps
 	inc dword[ebx + LfuCache.current_size]
 
 .end:

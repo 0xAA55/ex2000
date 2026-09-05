@@ -35,8 +35,7 @@ DefFunc _FloatMapCurve
 	test eax, eax
 	cmovz eax, ecx
 	mov %$ThreadPoolSize, eax
-	GetAbsAddr ecx, _FloatMapCurvePoolProc
-	invoke_cdecl _PoolRun, ecx, & %$Map, %$ThreadPoolSize, [ebx + BitMap.border_len], &[ebx + BitMap.row_ptr], 0, 0
+	invoke_cdecl _PoolRun, label _FloatMapCurvePoolProc, & %$Map, %$ThreadPoolSize, [ebx + BitMap.border_len], &[ebx + BitMap.row_ptr], 0, 0
 
 	FrameEnd
 	ret

@@ -159,7 +159,7 @@ DefFunc _OGLFC_Create
 	mov [ebx + OGLFC.capacity], eax
 
 	invoke_cdecl _Get_AVLOps_Integer
-	invoke_cdecl _LfuCreate, [ebx + OGLFC.capacity], eax, ebx, _OGLFC_OnLfuKeyRemove
+	invoke_cdecl _LfuCreate, [ebx + OGLFC.capacity], eax, ebx, label _OGLFC_OnLfuKeyRemove
 	mov [ebx + OGLFC.lfu], eax
 
 	xor eax, eax
@@ -436,8 +436,7 @@ DefFunc _OGLFC_Compose
 	invoke_cdecl _malloc, eax
 	mov %$Buffer, eax
 .have_buffer:
-	GetAbsAddr ecx, .mat2
-	invoke_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, & %$GlyphMetrics, %$BufferSize, %$Buffer, ecx
+	invoke_stdcall GetGlyphOutlineW, [ebx + OGLFC.hdc_font], esi, GGO_GRAY8_BITMAP, & %$GlyphMetrics, %$BufferSize, %$Buffer, label .mat2
 	cmp eax, 0xFFFFFFFF
 	jz .non_ttf
 	mov eax, %$Buffer
@@ -474,7 +473,7 @@ DefFunc _OGLFC_Compose
 	mov [edi + LfuData.xinc], ecx ;xinc, yinc
 	invoke_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, %$Buffer
 .lfudata_ready:
-	invoke_cdecl _LfuPut, [ebx + OGLFC.lfu], esi, edi, _free
+	invoke_cdecl _LfuPut, [ebx + OGLFC.lfu], esi, edi, label _free
 	jmp .after_new_glyph_cached
 .non_ttf:
 	lea eax, %$WCharBuf

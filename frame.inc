@@ -550,6 +550,15 @@
 		%else
 			%error Unknown param __ParamStr
 		%endif
+	%elif %substr(__ParamStr, 1, 6) == "label " ;address label
+		__FlushPassArgs
+		%xdefine __ParamStr %substr(__ParamStr, 7)
+		%define __Param %tok(__ParamStr)
+		%ifndef SHELLCODE
+			push __Param
+		%else
+			PushAbsAddr __Param
+		%endif
 	%elif %substr(__ParamStr, 1, 4) == "str " ;string
 		__FlushPassArgs
 		%xdefine __ParamStr %substr(__ParamStr, 5)
