@@ -55,12 +55,12 @@ glfuncs.tmp: assets/WGLFUNC assets/GL33FUNC
 	addpre assets\\GL33FUNC DefImp $@
 gl33.inc: glfuncs.tmp
 frame.inc: strpool.inc
+shellcode.inc: scfuncs.tmp glfuncs.tmp
 loaddll.inc: frame.inc expfuncs.tmp
 assets.inc: strpool.inc
 shader.inc: gl33.inc strpool.inc
 fontgl.inc: buffer.inc
 main.asm: loaddll.inc assets.inc math.inc tls.inc vblank.inc
-assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab out/assets_d.cab
 tls.asm: loaddll.inc tls.inc
 timer.asm: loaddll.inc timer.inc hrsleep.inc
 avlbst.asm: loaddll.inc avlbst.inc
@@ -75,7 +75,13 @@ shader.asm: loaddll.inc shader.inc gl33.inc assets.inc avlbst.inc
 utf.asm: loaddll.inc utf.inc
 hrsleep.asm: loaddll.inc hrsleep.inc
 scloader.asm: loaddll.inc shellcode.inc assets.inc
-shellcode.inc: scfuncs.tmp glfuncs.tmp
+assets.asm: loaddll.inc assets.inc avlbst.inc
+$(OUT_DIR)/assets.obj: assets.asm out/assets.cab
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) assets.asm -o $@
+$(OUT_DIR)/assets_d.obj: assets.asm out/assets_d.cab
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) assets.asm -o $@
 
 shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
 	make -C shellcodes
