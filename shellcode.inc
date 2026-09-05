@@ -58,20 +58,21 @@
 	DefExp _TlsInvokeCallbacks
 	DefExp _TlsDeInit
 	DefExp _CreateBitMap
-	DefExp _DeleteProgram
-	DefExp _DeleteRenderbuffer
-	DefExp _DeleteTexture
-	DefExp _DeInitSSTextureSets
 	DefExp _DestroyBitMap
 	DefExp _DuplicateBitMap
 	DefExp _GetBitmapPixelAddress
 	DefExp _SampleFloatMap
+	DefExp _FloatMapNextMip
+	DefExp _FloatMapApplyGain
+	DefExp _FloatMapCurve
+	DefExp _FloatMapGetMinValue
+	DefExp _FloatMapGetMaxValue
+	DefExp _AccumulateFloatMap
 	DefExp _BatchAdd
 	DefExp _BatchBias
 	DefExp _BatchCurve
 	DefExp _BatchMax
 	DefExp _BatchMin
-	DefExp _FloatMapNextMip
 	DefExp _ConeMapGen
 	DefExp _VectorMultMatrix
 	DefExp _MatrixMultiply
@@ -81,16 +82,11 @@
 	DefExp _MatrixEulerTranslated
 	DefExp _MatrixViewEuler
 	DefExp _MatrixTranspose
-	DefExp _FloatMapApplyGain
 	DefExp _CreateSeedVector
 	DefExp _CreatePerlinMap2D
 	DefExp _ConvertPerlinMapToAltitude
 	DefExp _GenPerlinAltitude
-	DefExp _AccumulateFloatMap
 	DefExp _GenMultiLayerPerlinAltitude
-	DefExp _FloatMapCurve
-	DefExp _FloatMapGetMinValue
-	DefExp _FloatMapGetMaxValue
 	DefExp _VectorCross
 	DefExp _VectorDot
 	DefExp _VectorLength
@@ -114,27 +110,31 @@
 	DefExp _LfuPut
 	DefExp _LfuDestroy
 	DefExp _ProgramCreate
+	DefExp _DeleteProgram
 	DefExp _SceneLoadShaderProgram
 	DefExp _SceneLoadShaderProgramEx
 	DefExp _SceneOnDisposeShaders
 	DefExp _SetupSSFBOOutputs
 	DefExp _SetupSSTextureMipmaps
 	DefExp _SetupSSTextureShaderInput
-	DefExp _InitBuffer
 	DefExp _InitDepthBuffer
+	DefExp _DeleteRenderbuffer
 	DefExp _InitRGBA32FBufferTexture
 	DefExp _InitRGBA8BufferTexture
 	DefExp _InitSSTextureSets
 	DefExp _InitTexRenderTarget
 	DefExp _InitTexRepeatLinear
 	DefExp _InitTexRepeatLinearMipmap
-	DefExp _DeInitBuffer
+	DefExp _DeleteTexture
+	DefExp _DeInitSSTextureSets
+	DefExp _InitBuffer
 	DefExp _BufferPushItem
 	DefExp _BufferPopItem
 	DefExp _BufferClear
 	DefExp _BufferFlush
 	DefExp _BufferTrimExcess
 	DefExp _BufferResize
+	DefExp _DeInitBuffer
 	DefExp _OGLFC_Create
 	DefExp _OGLFC_Destroy
 	DefExp _OGLFC_Compose
