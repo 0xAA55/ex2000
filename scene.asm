@@ -108,68 +108,23 @@ _ProgressProgramLocations:
 
 extern _DrawTerrainProgramLocations
 _DrawTerrainProgramLocations:
-	.CameraMatrix resd 1
-	.CameraPosition resd 1
-	.ProjMatrix resd 1
-	.RenderDistance resd 1
-	.TerrainAltitudeMap resd 1
-	.TerrainConeMap resd 1
-	.TerrainHeight resd 1
-	.TerrainScaling resd 1
-	.TextureQuality resd 1
-.first_output:
-	.OutNormalDist resd 1
-	.OutDiffuse resd 1
-	.OutSpecular resd 1
-	.OutEmissive resd 1
-	.OutScatter resd 1
+	InstDrawTerrainProgramLocations
 
 extern _DrawWaterProgramLocations
 _DrawWaterProgramLocations:
-	.CameraMatrix resd 1
-	.CameraPosition resd 1
-	.ProjMatrix resd 1
-	.Time resd 1
-	.RenderDistance resd 1
-	.TerrainAltitudeMap resd 1
-	.TerrainConeMap resd 1
-	.TerrainHeight resd 1
-	.TerrainScaling resd 1
-	.TextureQuality resd 1
-	.SeaLevel resd 1
-	.SeaWaveHeight resd 1
-	.SeaWaveSize resd 1
-	.SSTerrainNormalDepth resd 1
-.first_output:
-	.OutNormalDist resd 1
-	.OutDiffuse resd 1
-	.OutSpecular resd 1
-	.OutEmissive resd 1
-	.OutScatter resd 1
+	InstDrawWaterProgramLocations
 
 extern _DrawCompositeProgramLocations
 _DrawCompositeProgramLocations:
-	.CameraMatrix resd 1
-	.CameraPosition resd 1
-	.ProjMatrix resd 1
-	.SunPosition resd 1
-	.TexSSNormalDist resd 1
-	.TexSSDiffuse resd 1
-	.TexSSSpecular resd 1
-	.TexSSEmissive resd 1
-	.TexSSScatter resd 1
-	.OutColor resd 1
+	InstDrawCompositeProgramLocations
 
 extern _DrawBlurProgramLocations
 _DrawBlurProgramLocations:
-	.HDRTexture resd 1
-	.OutColor resd 1
+	InstDrawBlurProgramLocations
 
 extern _DrawHDR2LDRProgramLocations
 _DrawHDR2LDRProgramLocations:
-	.BlurTexture resd 1
-	.HDRTexture resd 1
-	.OutColor resd 1
+	InstDrawHDR2LDRProgramLocations
 
 extern _MinPitch
 _MinPitch resd 1
