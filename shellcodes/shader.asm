@@ -3,7 +3,6 @@
 %include "gl33.inc"
 %include "assets.inc"
 %include "avlbst.inc"
-%include "strpool.inc"
 
 segment .bss
 _ShadersTree resd 1

@@ -4,7 +4,6 @@
 ; %define INVOKE_CHECK
 
 %include "frame.inc"
-%include "strpool.inc"
 
 %define NULL 0
 

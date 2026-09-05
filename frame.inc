@@ -57,6 +57,8 @@
 	add dword[esP], %1 - %%label
 %endmacro
 
+%include "strpool.inc"
+
 %macro DefFunc 1
 	extern %1
 	%xdefine CurFuncName %1
@@ -547,6 +549,16 @@
 			movdqu [esP], %tok(__XmmParamStr)
 		%else
 			%error Unknown param __ParamStr
+		%endif
+	%elif %substr(__ParamStr, 1, 4) == "str " ;string
+		__FlushPassArgs
+		%xdefine __ParamStr %substr(__ParamStr, 5)
+		%undef __Param
+		DefStr %%StrParam, %tok(__ParamStr)
+		%ifndef SHELLCODE
+			push %%StrParam
+		%else
+			PushAbsAddr %%StrParam
 		%endif
 	%elif %substr(__ParamStr, 1, 3) == "qw "
 		%xdefine __ParamStr %substr(__ParamStr, 4)

@@ -12,7 +12,8 @@ ASMFLAGS=-i..
 	copy /b $@+ >nul 2>&1
 
 all: ../out/math.lib
-../loaddll.inc: ../frame.inc ../strpool.inc ../expfuncs.tmp
+../frame.inc: ../strpool.inc
+../loaddll.inc: ../frame.inc ../expfuncs.tmp
 common.inc: ../math.inc ../pool.inc ../loaddll.inc
 bitmapblt.asm: common.inc
 math.asm: common.inc

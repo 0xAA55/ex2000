@@ -26,35 +26,8 @@ extern _SceneOnDisposeShaders
 	%endif
 %endmacro
 
-%macro SceneLoadShaderProgramEx 2-*
-	%if (%0 & 1) == 0
-		%error Usage: SceneLoadShaderProgramEx out_program, shader_type, shader_path, ...
-		%exitmacro
-	%endif
-	Push 0
-	%assign %%IsPath 1
-	%assign %%Index 0
-	%rep %0 - 1
-		%rotate -1
-		%if %%IsPath
-			DefStr %%AssetPath%[%%Index], %1
-			%ifndef SHELLCODE
-				Push %%AssetPath%[%%Index]
-			%else
-				GetAbsAddr eax, %%AssetPath%[%%Index]
-				Push eax
-			%endif
-			%assign %%IsPath 0
-		%else
-			Push %1
-			%assign %%IsPath 1
-		%endif
-		%assign %%Index %%Index + 1
-	%endrep
-	%rotate -1
-	Push %1
-	call _SceneLoadShaderProgramEx
-	add esp, (%0 + 1) * 4
+%macro SceneLoadShaderProgramEx 2+
+	invoke_cdecl _SceneLoadShaderProgramEx, %1, %2, 0
 %endmacro
 
 %macro GetAttribLocation 2

@@ -358,7 +358,10 @@ DefFunc _SceneInit
 	fmul dword [_CurveToSeaLevel]
 	fstp dword [_SeaLevel]
 
-	SceneLoadShaderProgram _DrawProgressProgram, "assets\loading.vsh", "", "assets\loading.fsh"
+	mov ebx, _DrawProgressProgram
+	SceneLoadShaderProgramEx ebx, \
+		GL_VERTEX_SHADER, str "assets\loading.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\loading.fsh"
 	test eax, eax
 	jz .end
 
@@ -367,14 +370,14 @@ DefFunc _SceneInit
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
-	GetAttribLocation [_DrawProgressProgram], "position"
+	GetAttribLocation [ebx], "position"
 	mov edi, eax
 	invoke_dll_stdcall glEnableVertexAttribArray, edi
 	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
 	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
-	GetUniformLocation [_DrawProgressProgram], "progress"
+	GetUniformLocation [ebx], "progress"
 	mov [_ProgressProgramLocations.Progress], eax
 
 	invoke_dll_stdcall glGenFramebuffers, _NumFBOs, _FirstFBO
@@ -441,11 +444,12 @@ DefFunc _SceneLoad04
 	FrameBegin ebx, edi
 
 	mov ebx, _DrawTerrainProgram
-	SceneLoadShaderProgramEx ebx, GL_VERTEX_SHADER, "assets\billboard.vsh", \
-		GL_FRAGMENT_SHADER, "assets\ray.fsh", \
-		GL_FRAGMENT_SHADER, "assets\ssample.fsh", \
-		GL_FRAGMENT_SHADER, "assets\terrain.fsh", \
-		GL_FRAGMENT_SHADER, "assets\terrain_out.fsh"
+	SceneLoadShaderProgramEx ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\ssample.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\terrain.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\terrain_out.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -498,12 +502,13 @@ DefFunc _SceneLoad04
 DefFunc _SceneLoad05
 	FrameBegin ebx, edi
 	mov ebx, _DrawWaterProgram
-	SceneLoadShaderProgramEx ebx, GL_VERTEX_SHADER, "assets\billboard.vsh", \
-		GL_FRAGMENT_SHADER, "assets\ray.fsh", \
-		GL_FRAGMENT_SHADER, "assets\ssample.fsh", \
-		GL_FRAGMENT_SHADER, "assets\terrain.fsh", \
-		GL_FRAGMENT_SHADER, "assets\water.fsh", \
-		GL_FRAGMENT_SHADER, "assets\water_out.fsh"
+	SceneLoadShaderProgramEx ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\ssample.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\terrain.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\water.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\water_out.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -566,9 +571,10 @@ DefFunc _SceneLoad05
 DefFunc _SceneLoad06
 	FrameBegin ebx, edi
 	mov ebx, _DrawCompositeProgram
-	SceneLoadShaderProgramEx ebx, GL_VERTEX_SHADER, "assets\billboard.vsh", \
-		GL_FRAGMENT_SHADER, "assets\ray.fsh", \
-		GL_FRAGMENT_SHADER, "assets\composite.fsh"
+	SceneLoadShaderProgramEx ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\composite.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -615,7 +621,9 @@ DefFunc _SceneLoad06
 DefFunc _SceneLoad07
 	FrameBegin ebx, edi
 	mov ebx, _DrawBlurProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\blur.fsh"
+	SceneLoadShaderProgramEx ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\blur.fsh"
 	test eax, eax
 	jz .bad_end
 
@@ -644,7 +652,9 @@ DefFunc _SceneLoad07
 DefFunc _SceneLoad08
 	FrameBegin ebx, edi
 	mov ebx, _DrawHDR2LDRProgram
-	SceneLoadShaderProgram ebx, "assets\billboard.vsh", "", "assets\hdr2ldr.fsh"
+	SceneLoadShaderProgramEx ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\hdr2ldr.fsh"
 	test eax, eax
 	jz .bad_end
 
