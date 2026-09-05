@@ -531,6 +531,7 @@
 		%define __Param %tok(%substr(__ParamStr, 2))
 		__PassParam lea, __Param, %tok(__ParamStr)
 	%elif %substr(__ParamStr, 1, 3) == "xmm"
+		__FlushPassArgs
 		%undef __XmmParamStr
 		StripStringFromDot __XmmParamStr, __ParamStr
 		%if %substr(__ParamStr, __ParamStrLen -1) == ".x"
@@ -578,9 +579,9 @@
 			%error `f2d` only supports convert float number from memory address.
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "f2i "
+		__FlushPassArgs
 		%xdefine __ParamStr %substr(__ParamStr, 5)
 		%define __Param %tok(__ParamStr)
-		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
 			__ModifyEsp -1
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
@@ -590,9 +591,9 @@
 			%error `f2i` only supports convert float number from memory address.
 		%endif
 	%elif %substr(__ParamStr, 1, 4) == "i2f "
+		__FlushPassArgs
 		%xdefine __ParamStr %substr(__ParamStr, 5)
 		%define __Param %tok(__ParamStr)
-		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
 			__ModifyEsp -1
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
@@ -645,7 +646,6 @@
 	%elif %substr(__ParamStr, 1, 7) == "f2ichs "
 		%xdefine __ParamStr %substr(__ParamStr, 8)
 		%define __Param %tok(__ParamStr)
-		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
 			__ModifyEsp -1
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
@@ -658,7 +658,6 @@
 	%elif %substr(__ParamStr, 1, 7) == "i2fchs "
 		%xdefine __ParamStr %substr(__ParamStr, 8)
 		%define __Param %tok(__ParamStr)
-		%assign __NumParamsPassed 2
 		%if %substr(__ParamStr, 1, 1) == "["
 			__ModifyEsp -1
 			%xdefine __InnerStr %substr(__ParamStr, 2, -2)
