@@ -28,6 +28,20 @@
 	%endif
 %endmacro
 
+%macro __OnPushed 0
+	%assign %$Frame_NumPushes %$Frame_NumPushes + 1
+	%ifdef __EspBias
+		%assign __EspBias __EspBias + 4
+	%endif
+%endmacro
+
+%macro __OnPopping 0
+	%assign %$Frame_NumPushes %$Frame_NumPushes - 1
+	%ifdef __EspBias
+		%assign __EspBias __EspBias - 4
+	%endif
+%endmacro
+
 %macro GetAbsAddr 2-* ;For shellcode
 	call %%label
 	%%label:
@@ -48,20 +62,6 @@
 		add %1, %5 - %%label
 	%else
 		%error Bad usage of `GetAbsAddr`
-	%endif
-%endmacro
-
-%macro __OnPushed 0
-	%assign %$Frame_NumPushes %$Frame_NumPushes + 1
-	%ifdef __EspBias
-		%assign __EspBias __EspBias + 4
-	%endif
-%endmacro
-
-%macro __OnPopping 0
-	%assign %$Frame_NumPushes %$Frame_NumPushes - 1
-	%ifdef __EspBias
-		%assign __EspBias __EspBias - 4
 	%endif
 %endmacro
 
