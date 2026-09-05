@@ -303,13 +303,13 @@ DefFunc _OGLFC_Compose
 	mov ecx, %$Frame_NumLocals
 	rep stosd
 
-	mov eax, [ebx + OGLFC.space_size]
-	mul dword[ebx + OGLFC.tab_width]
-	mov [ebx + OGLFC.tab_width_px], eax
-
 	mov ebx, %$Inst
 	mov eax, %$Text
 	mov %$PointerToChar, eax
+
+	mov eax, [ebx + OGLFC.space_size]
+	mul dword[ebx + OGLFC.tab_width]
+	mov [ebx + OGLFC.tab_width_px], eax
 
 	invoke_cdecl _BufferClear, &[ebx + OGLFC.instance_buffer]
 	;Push a placeholder for the background
