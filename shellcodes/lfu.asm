@@ -59,7 +59,7 @@ DefFunc _LfuCreate
 	mov [ebx + LfuCache.capacity], eax
 	mov [ebx + LfuCache.user_keyops], ecx
 	jecxz .bad
-	mov eax, .ret_op
+	GetAbsAddr eax, .ret_op
 	test edx, edx
 	mov ecx, %$OnKeyRemove
 	cmovz edx, eax
@@ -131,7 +131,7 @@ DefFunc _LfuPut
 	DefSizedVar %$FreqKey, FreqKey.size
 
 	mov eax, %$OnFree
-	mov ecx, .ret_op
+	GetAbsAddr ecx, .ret_op
 	test eax, eax
 	cmovz eax, ecx
 	mov %$OnFree, eax
