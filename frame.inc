@@ -51,9 +51,24 @@
 	%endif
 %endmacro
 
+%macro __OnPushed 0
+	%assign %$Frame_NumPushes %$Frame_NumPushes + 1
+	%ifdef __EspBias
+		%assign __EspBias __EspBias + 4
+	%endif
+%endmacro
+
+%macro __OnPopping 0
+	%assign %$Frame_NumPushes %$Frame_NumPushes - 1
+	%ifdef __EspBias
+		%assign __EspBias __EspBias - 4
+	%endif
+%endmacro
+
 %macro PushAbsAddr 1 ;For shellcode
 	call %%label
 	%%label:
+	__OnPushed
 	add dword[esP], %1 - %%label
 %endmacro
 
@@ -100,18 +115,12 @@
 	%define Variable(x) [AddrOfVariable(x)]
 	%macro push 1
 		push %1
-		%assign %$Frame_NumPushes %$Frame_NumPushes + 1
-		%ifdef __EspBias
-			%assign __EspBias __EspBias + 4
-		%endif
+		__OnPushed
 	%endmacro
 
 	%macro pop 1
 		%define esp (esP - 4)
-		%assign %$Frame_NumPushes %$Frame_NumPushes - 1
-		%ifdef __EspBias
-			%assign __EspBias __EspBias - 4
-		%endif
+		__OnPopping
 		pop %1
 		%undef esp
 	%endmacro
