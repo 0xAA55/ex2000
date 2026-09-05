@@ -765,8 +765,14 @@
 %endmacro
 
 %macro invoke_stdcall 1-*
-	%if %0 == 1
+	%ifmacro invoke_on_call 1
+	%else
+		%macro invoke_on_call 1
 		call %1
+		%endmacro
+	%endif
+	%if %0 == 1
+		invoke_on_call %1
 	%else
 		%ifdef esP
 			%undef esP
@@ -823,20 +829,13 @@
 		%rotate -1
 		__FlushPassArgs
 		%define __ESP_PLACE_HOLDER__ (esP + __EspBias)
-		call %1
+		invoke_on_call %1
 		%undef __ESP_PLACE_HOLDER__
 		%undef esp
 		%assign %$Frame_NumPushes %%CurPushRegs
 		%undef __EspBias
 	%endif
-%endmacro
-
-%macro invoke_dll_stdcall 1-2+
-	%if %0 == 1
-		invoke_stdcall [_addr_of_ %+ %1]
-	%else
-		invoke_stdcall [_addr_of_ %+ %1], %2
-	%endif
+	%unmacro invoke_on_call 1
 %endmacro
 
 %macro invoke_cdecl 1-2+
@@ -856,14 +855,6 @@
 		add esp, __ParamIndex * 4
 	%endif
 	%assign %$Frame_NumPushes %%CurPushRegs
-%endmacro
-
-%macro invoke_dll_cdecl 1-2+
-	%if %0 == 1
-		invoke_cdecl [_addr_of_ %+ %1]
-	%else
-		invoke_cdecl [_addr_of_ %+ %1], %2
-	%endif
 %endmacro
 
 %macro invoke_com 2-3+

@@ -82,12 +82,34 @@
 	%endif
 %endmacro
 
-%macro invoke_dll_func 1
-	%ifndef SHELLCODE
-		call [_addr_of_ %+ %1]
+%macro __def_invoke_on_call 0
+	%macro invoke_on_call 1
+		%ifndef SHELLCODE
+			call [%1]
+		%else
+			GetAbsAddr eax, %1
+			call [eax]
+		%endif
+	%endmacro
+%endmacro
+
+%macro invoke_dll_stdcall 1-2+
+	__def_invoke_on_call
+	%define %%addr _addr_of_ %+ %1
+	%if %0 == 1
+		invoke_stdcall %%addr
 	%else
-		GetAbsAddr eax, _addr_of_ %+ %1
-		call [eax]
+		invoke_stdcall %%addr, %2
+	%endif
+%endmacro
+
+%macro invoke_dll_cdecl 1-2+
+	__def_invoke_on_call
+	%define %%addr _addr_of_ %+ %1
+	%if %0 == 1
+		invoke_cdecl %%addr
+	%else
+		invoke_cdecl %%addr, %2
 	%endif
 %endmacro
 
