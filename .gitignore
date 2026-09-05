@@ -9,6 +9,7 @@ ex2000d.exe
 test*.bmp
 *.tmp
 shellcode.bin
+shellcode_d.bin
 shellcodes/*.obj
 shellcodes/*.exp
 shellcodes/*.lib
