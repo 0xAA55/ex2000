@@ -70,6 +70,12 @@ _RelocShellcodeIAT:
 	InstImp
 	.num_fps equ ($ - _RelocShellcodeIAT) / 4
 
+DefFunc _LoadLibrary
+	jmp [_addr_of_LoadLibraryA]
+
+DefFunc _GetProcAddress
+	jmp [_addr_of_GetProcAddress]
+
 DefFunc _GetNumProcessors
 	FrameBegin
 	mov eax, [_SystemInfo + SYSTEM_INFO.dwNumberOfProcessors]

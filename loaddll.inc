@@ -54,7 +54,7 @@
 		invoke_dll_stdcall LoadLibraryA, label _name_of_ %+ %1
 		mov [_addr_of_ %+ %1], eax
 	%else
-		invoke_stdcall LoadLibraryA, label _name_of_ %+ %1
+		invoke_stdcall _LoadLibrary, label _name_of_ %+ %1
 		GetAbsAddr ecx, _addr_of_ %+ %1
 		mov [ecx], eax
 	%endif
@@ -76,7 +76,7 @@
 		mov [_addr_of_ %+ %2], eax
 	%else
 		GetAbsAddr eax, _addr_of_ %+ %1
-		invoke_stdcall GetProcAddress, [eax], label _name_of_ %+ %2
+		invoke_stdcall _GetProcAddress, [eax], label _name_of_ %+ %2
 		GetAbsAddr ecx, _addr_of_ %+ %2
 		mov [ecx], eax
 	%endif

@@ -2,6 +2,9 @@
 %define _SHELLCODE_INC_ 1
 
 %macro InstImp 0
+	DefImp _LoadLibrary
+	DefImp _GetProcAddress
+	DefImp _SafeRelease
 	DefImp _malloc
 	DefImp _calloc
 	DefImp _realloc
