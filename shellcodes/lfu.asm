@@ -18,16 +18,10 @@ endstruc
 
 DefFunc _LfuInit
 	FrameBegin ebx
-	call .get_addr
-.get_addr:
-	pOp ebx
-	lea eax, [ebx + _LfuFreqKeyCompare - .get_addr]
-	lea ecx, [ebx + _LfuFreqKeyDuplicate - .get_addr]
-	lea edx, [ebx + _FreqKeyFree - .get_addr]
-	add ebx, _FreqKeyOps - .get_addr
-	mov [ebx + KeyCompareOps.on_compare], eax
-	mov [ebx + KeyCompareOps.on_duplicate_key], ecx
-	mov [ebx + KeyCompareOps.on_free_key], edx
+	GetAbsAddr ebx, eax, ecx, edx, _FreqKeyOps, _LfuFreqKeyCompare, _LfuFreqKeyDuplicate, _free
+	mov [ebx + 0], eax
+	mov [ebx + 4], ecx
+	mov [ebx + 8], edx
 	FrameEnd
 	ret
 
@@ -273,8 +267,7 @@ DefFunc _LfuFreqKeyDuplicate
 	ret
 
 ; void FreqKeyFree(FreqKey *key);
-DefFunc _FreqKeyFree
-	jmp _free
+;jmp free
 
 segment .data
 align 4
@@ -283,5 +276,5 @@ _FreqKeyOps:
 istruc KeyCompareOps
 	at .on_compare, dd _LfuFreqKeyCompare
 	at .on_duplicate_key, dd _LfuFreqKeyDuplicate
-	at .on_free_key, dd _FreqKeyFree
+	at .on_free_key, dd _free
 iend
