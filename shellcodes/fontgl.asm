@@ -359,7 +359,7 @@ DefFunc _OGLFC_Compose
 	jmp .after_advance
 
 .draw_glyph:
-	mov esi, eax
+	mov esi, eax ;Unicode
 
 .after_new_glyph_cached:
 	invoke_cdecl _LfuGet, [ebx + OGLFC.lfu], esi
@@ -474,8 +474,9 @@ DefFunc _OGLFC_Compose
 	mov [edi + LfuData.blackbox_h], edx
 	mov ecx, [eax + GLYPHMETRICS.gmCellIncX] ;gmCellIncX, gmCellIncY
 	mov [edi + LfuData.xinc], ecx ;xinc, yinc
-	invoke_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, %$Buffer
-.lfudata_ready:
+	mov ecx, %$Buffer
+.upload_glyph_image:
+	invoke_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, ecx
 	invoke_cdecl _LfuPut, [ebx + OGLFC.lfu], esi, edi, label _free
 	jmp .after_new_glyph_cached
 .non_ttf:
@@ -506,8 +507,8 @@ DefFunc _OGLFC_Compose
 	mov [edi + LfuData.blackbox_w], eax
 	mov [edi + LfuData.blackbox_h], ecx
 	mov [edi + LfuData.xinc], ax
-	invoke_stdcall glTexSubImage2D, GL_TEXTURE_2D, 0, %$SrcX, %$SrcY, [edi + LfuData.blackbox_w], [edi + LfuData.blackbox_h], GL_RED, GL_UNSIGNED_BYTE, [ebx + OGLFC.canvas_pointer]
-	jmp .lfudata_ready
+	mov ecx, [ebx + OGLFC.canvas_pointer]
+	jmp .upload_glyph_image
 
 .loop_end:
 	invoke_stdcall glBindTexture, GL_TEXTURE_2D, 0
