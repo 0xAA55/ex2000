@@ -196,27 +196,6 @@ DefFunc _SceneOnDisposeShaders
 	FrameEnd
 	ret
 
-; void SceneLoadShaderProgram(_out_ GLuint *program, _in_ char *VertexShaderAssetPath, _in_ char *GeometryShaderAssetPath, _in_ char *FragmentShaderAssetPath);
-DefFunc _SceneLoadShaderProgram
-	FrameBegin ebx, esi
-	NameParams %$PProgramOut, %$VSPath, %$GSPath, %$FSPath
-	DefVars %$VSObj, %$GSObj, %$FSObj
-
-	invoke_stdcall glCreateProgram
-	mov ebx, eax
-	mov esi, %$PProgramOut
-	invoke_cdecl _SceneQueryShader, GL_VERTEX_SHADER, %$VSPath
-	mov %$VSObj, eax
-	invoke_cdecl _SceneQueryShader, GL_GEOMETRY_SHADER, %$GSPath
-	mov %$GSObj, eax
-	invoke_cdecl _SceneQueryShader, GL_FRAGMENT_SHADER, %$FSPath
-	mov %$FSObj, eax
-	invoke_cdecl _ProgramCreate, 3, & %$VSObj
-	mov [esi], eax
-
-	FrameEnd
-	ret
-
 ; void SceneLoadShaderProgramEx(_out_ GLuint *program, int shader_type, const char *shader_asset_path, ...);
 DefFunc _SceneLoadShaderProgramEx
 	FrameBegin ebx, esi, edi

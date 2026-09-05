@@ -61,7 +61,6 @@ LfuPut
 LfuDestroy
 ProgramCreate
 DeleteProgram
-SceneLoadShaderProgram
 SceneLoadShaderProgramEx
 SceneOnDisposeShaders
 SetupSSFBOOutputs

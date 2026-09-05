@@ -111,7 +111,6 @@
 	DefExp _LfuDestroy
 	DefExp _ProgramCreate
 	DefExp _DeleteProgram
-	DefExp _SceneLoadShaderProgram
 	DefExp _SceneLoadShaderProgramEx
 	DefExp _SceneOnDisposeShaders
 	DefExp _SetupSSFBOOutputs
