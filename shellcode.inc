@@ -151,6 +151,10 @@
 	DefExp _GLPrintf
 	DefExp _GLPrintfXY
 	DefExp _RaymarchTerrainAltitude
+	DefExp _VBlankInit
+	DefExp _VBlankDeInit
+	DefExp _VBlankReInit
+	DefExp _WaitForVBlank
 %endmacro
 
 %endif

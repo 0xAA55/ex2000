@@ -98,3 +98,7 @@ OGLFC_Compose
 GLPrintf
 GLPrintfXY
 RaymarchTerrainAltitude
+VBlankInit
+VBlankDeInit
+VBlankReInit
+WaitForVBlank

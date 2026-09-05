@@ -1,4 +1,4 @@
-%include "loaddll.inc"
+%include "common.inc"
 %include "vblank.inc"
 %include "avlbst.inc"
 %include "timer.inc"
@@ -406,10 +406,10 @@ DefFunc _SetupMonitorDataProc
 	mov byte[ebx + MonitorData.RefreshIntervalMs], 16
 	mov word[ebx + MonitorData.RefreshIntervalUs], 16666
 
-	invoke_dll_stdcall GetMonitorInfoW, %$Key, &%$MonitorInfoExW
+	invoke_stdcall GetMonitorInfoW, %$Key, &%$MonitorInfoExW
 	test eax, eax
 	jz .end
-	invoke_dll_stdcall EnumDisplaySettingsW, &[%$MonitorInfoExW_Addr + MONITORINFOEXW.szDevice], ENUM_CURRENT_SETTINGS, &%$DevModeW
+	invoke_stdcall EnumDisplaySettingsW, &[%$MonitorInfoExW_Addr + MONITORINFOEXW.szDevice], ENUM_CURRENT_SETTINGS, &%$DevModeW
 	test eax, eax
 	jz .end
 
@@ -487,7 +487,7 @@ DefFunc _FakeWaitForVBlank
 
 	inc [eax]
 .end:
-	invoke_dll_stdcall Sleep, 1
+	invoke_stdcall Sleep, 1
 	xor eax, eax
 	FrameEnd
 	ret
@@ -504,7 +504,7 @@ DefFunc _WaitForVBlank
 	mov dword %$Thousand, __float32__(1000.0)
 	mov esi, %$VBlankData
 
-	invoke_dll_stdcall MonitorFromWindow, %$hWnd, MONITOR_DEFAULTTONEAREST
+	invoke_stdcall MonitorFromWindow, %$hWnd, MONITOR_DEFAULTTONEAREST
 	invoke_cdecl _AVLSearch, [esi + VBlankData.MonitorsData], eax
 	test eax, eax
 	jz .not_found
