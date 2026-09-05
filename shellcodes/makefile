@@ -2,10 +2,12 @@ OUT_DIR:=../out
 SRCS=$(filter-out shellcode.asm, $(wildcard *.asm))
 INCS=$(wildcard *.inc)
 OBJS=shellcode.obj $(patsubst %.asm, %.obj, $(SRCS))
+OBJS_D=shellcode_d.obj $(patsubst %.asm, %_d.obj, $(SRCS))
 DEFS:=
 ASMFLAGS=-i..
 
 all: shellcode.bin
+alld: shellcode_d.bin
 
 ../%.inc:
 	copy /b ..\\$(notdir $@)+ >nul 2>&1
@@ -14,7 +16,9 @@ all: shellcode.bin
 %.asm: common.inc
 	copy /b $@+ >nul 2>&1
 %.obj: %.asm
-	nasm -f win32 $(DEFS) $(ASMFLAGS) $^ -o $@
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
+%_d.obj: %.asm
+	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) $^ -o $@
 
 ../assets.inc: ../strpool.inc
 ../frame.inc: ../strpool.inc
@@ -35,7 +39,13 @@ shellcode.dll: $(OBJS) exports.def
 	link /NOLOGO /NODEFAULTLIB /NOENTRY /BASE:0x70000000 /DYNAMICBASE:NO /DLL /DEF:exports.def /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /IGNORE:4254 /MERGE:.edata=.zzz /MERGE:.rdata=.data /MERGE:.data=.code /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /PDBALTPATH:%_PDB% $(OBJS)
 
 shellcode.bin: shellcode.dll
-	objcopy -j .code -O binary shellcode.dll shellcode.bin
+	objcopy -j .code -O binary $^ $@
+
+shellcode_d.dll: $(OBJS_D) exports.def
+	link /NOLOGO /NODEFAULTLIB /NOENTRY /BASE:0x70000000 /DYNAMICBASE:NO /DLL /DEF:exports.def /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /IGNORE:4254 /MERGE:.edata=.zzz /MERGE:.rdata=.data /MERGE:.data=.code /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /PDBALTPATH:%_PDB% $(OBJS_D)
+
+shellcode_d.bin: shellcode_d.dll
+	objcopy -j .code -O binary $^ $@
 
 clean:
-	del /f /q *.obj shellcode.dll
+	del /f /q *.obj shellcode.dll shellcode_d.dll shellcode.bin shellcode_d.bin

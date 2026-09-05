@@ -103,7 +103,11 @@ DefFunc _GetDebugMsgBuffer
 DefFunc _LoadShellcode
 	FrameBegin ebx, esi, edi
 
-	AssetsQuery `shellcode.bin`, _ShellcodeSize
+	%ifdef _DEBUG
+		AssetsQuery `shellcode_d.bin`, _ShellcodeSize
+	%else
+		AssetsQuery `shellcode.bin`, _ShellcodeSize
+	%endif
 	mov ebx, eax
 	mov [_ShellcodeBase], eax
 

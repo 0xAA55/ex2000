@@ -67,9 +67,14 @@ _AssetsFDIERF:
 segment .rdata
 extern _AssetsCab
 _AssetsCab:
-incbin "out/assets.cab"
+%ifdef _DEBUG
+	incbin "out/assets_d.cab"
+%else
+	incbin "out/assets.cab"
+%endif
 _AssetsCabSize equ $ - _AssetsCab
 extern _AssetsCabName
+
 _AssetsCabName db "assets.cab", 0
 
 def_dll Cabinet, "cabinet.dll"

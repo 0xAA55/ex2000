@@ -60,7 +60,7 @@ assets.inc: strpool.inc
 shader.inc: gl33.inc strpool.inc
 fontgl.inc: buffer.inc
 main.asm: loaddll.inc assets.inc math.inc tls.inc vblank.inc
-assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab
+assets.asm: loaddll.inc assets.inc avlbst.inc out/assets.cab out/assets_d.cab
 tls.asm: loaddll.inc tls.inc
 timer.asm: loaddll.inc timer.inc hrsleep.inc
 avlbst.asm: loaddll.inc avlbst.inc
@@ -80,6 +80,9 @@ shellcode.inc: scfuncs.tmp glfuncs.tmp
 shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
 	make -C shellcodes
 	copy shellcodes\\shellcode.bin shellcode.bin
+shellcode_d.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
+	make -C shellcodes alld
+	copy shellcodes\\shellcode_d.bin shellcode_d.bin
 out/stub.bin: stub.asm
 	nasm $^ -o $@
 out/%_d.obj: %.asm
@@ -91,6 +94,9 @@ out/%.obj: %.asm
 out/assets.cab: $(wildcard assets/*) shellcode.bin
 	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\* shellcode.bin
+out/assets_d.cab: $(wildcard assets/*) shellcode_d.bin
+	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	cabarc -r -p -m LZX:21 N $@ assets\\* shellcode_d.bin
 out/math.lib: $(wildcard math/*) loaddll.inc pool.inc math.inc
 	make -C math
 
