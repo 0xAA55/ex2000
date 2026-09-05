@@ -62,7 +62,7 @@
 		test eax, eax
 		jnz %%success
 		import_dll_func MessageBoxA
-		invoke_dll_stdcall MessageBoxA, 0, %%dllfail, 0, 0
+		invoke_dll_stdcall MessageBoxA, 0, label %%dllfail, 0, 0
 		int3
 	%%success:
 	%endif
@@ -94,7 +94,7 @@
 
 		__SECT__
 		import_dll_func MessageBoxA
-		invoke_dll_stdcall MessageBoxA, 0, %%func_name, 0, 0
+		invoke_dll_stdcall MessageBoxA, 0, label %%func_name, 0, 0
 		jmp %%unsuccess
 		%%success:
 		call [_addr_of_ %+ %1]
@@ -153,7 +153,7 @@
 	%define %%Count (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
 	%define %%Names _First %+ %2 %+ Name
 	%define %%Pointers _First %+ %2 %+ Addr
-	invoke_cdecl _LoadFuncGroup, %%DllBase, %%Count, %%Names, %%Pointers
+	invoke_cdecl _LoadFuncGroup, %%DllBase, %%Count, %%Names, label %%Pointers
 %endmacro
 
 %macro dll_func_group_load_alter_name 3
@@ -161,28 +161,19 @@
 	%define %%Count (_Last %+ %2 %+ Addr - _First %+ %2 %+ Addr) / 4
 	%define %%Names %3
 	%define %%Pointers _First %+ %2 %+ Addr
-	invoke_cdecl _LoadFuncGroup, %%DllBase, %%Count, %%Names, %%Pointers
+	invoke_cdecl _LoadFuncGroup, %%DllBase, %%Count, %%Names, label %%Pointers
 %endmacro
 
 %macro debug_msg 1-2+
 	DefStr %%format, %1
 
-	%ifndef SHELLCODE
-		%if %0 >= 2
-			invoke_cdecl _DebugMsg, %%format, %2
-		%else
-			invoke_dll_stdcall MessageBoxA, 0, %%format, 0, 0
-		%endif
+	%if %0 >= 2
+		invoke_cdecl _DebugMsg, label %%format, %2
 	%else
-		__ResetPassReg
-		%define __NoResetPassReg
-		__PickOutRegToAvoid %str(%2)
-		__RotatePassReg
-		GetAbsAddr __PassReg, %%format
-		%if %0 >= 2
-			invoke_cdecl _DebugMsg, __PassReg, %2
+		%ifndef SHELLCODE
+			invoke_dll_stdcall MessageBoxA, 0, label %%format, 0, 0
 		%else
-			invoke_stdcall MessageBoxA, 0, __PassReg, 0, 0
+			invoke_stdcall MessageBoxA, 0, label %%format, 0, 0
 		%endif
 	%endif
 %endmacro
@@ -192,20 +183,15 @@
 
 	%ifndef SHELLCODE
 		%if %0 >= 2
-			invoke_dll_cdecl printf, %%format, %2
+			invoke_dll_cdecl printf, label %%format, %2
 		%else
-			invoke_dll_cdecl printf, %%format
+			invoke_dll_cdecl printf, label %%format
 		%endif
 	%else
-		__ResetPassReg
-		%define __NoResetPassReg
-		__PickOutRegToAvoid %str(%2)
-		__RotatePassReg
-		GetAbsAddr __PassReg, %%format
 		%if %0 >= 2
-			invoke_cdecl printf, __PassReg, %2
+			invoke_cdecl printf, label %%format, %2
 		%else
-			invoke_cdecl printf, __PassReg
+			invoke_cdecl printf, label %%format
 		%endif
 	%endif
 %endmacro
@@ -213,23 +199,10 @@
 %macro snprintf 3-4+
 	DefStr %%format, %3
 
-	%ifndef SHELLCODE
-		%if %0 >= 4
-			invoke_cdecl _snprintf, %1, %2, %%format, %4
-		%else
-			invoke_cdecl _snprintf, %1, %2, %%format
-		%endif
+	%if %0 >= 4
+		invoke_cdecl _snprintf, %1, %2, label %%format, %4
 	%else
-		__ResetPassReg
-		%define __NoResetPassReg
-		__PickOutRegToAvoid %str(%4)
-		__RotatePassReg
-		GetAbsAddr __PassReg, %%format
-		%if %0 >= 4
-			invoke_cdecl _snprintf, %1, %2, __PassReg, %4
-		%else
-			invoke_cdecl _snprintf, %1, %2, __PassReg
-		%endif
+		invoke_cdecl _snprintf, %1, %2, label %%format
 	%endif
 %endmacro
 
@@ -250,7 +223,7 @@ extern _LoadFuncsFromAssets
 
 	DefStr %%AssetName, %3
 
-	invoke_cdecl _LoadFuncsFromAssets, %1, %2, %%AssetName, %4
+	invoke_cdecl _LoadFuncsFromAssets, %1, %2, label %%AssetName, %4
 %endmacro
 
 extern _DebugMsg ;void DebugMsg(const char *format, ...);
