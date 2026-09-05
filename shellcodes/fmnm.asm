@@ -35,12 +35,12 @@ DefFunc _FloatMapNextMip
 	jz .method_1
 	jmp .bad
 .method_0:
-	GetAbsAddr ecx, _FloatMapNextAvrMipPoolProc
+	GetAbsAddr ebx, _FloatMapNextAvrMipPoolProc
 	jmp .ready_to_run
 .method_1:
-	GetAbsAddr ecx, _FloatMapNextMaxMipPoolProc
+	GetAbsAddr ebx, _FloatMapNextMaxMipPoolProc
 .ready_to_run:
-	invoke_cdecl _PoolRun, ecx, & %$DstMap, %$ThreadPoolSize, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
+	invoke_cdecl _PoolRun, ebx, & %$DstMap, %$ThreadPoolSize, [edi + BitMap.border_len], &[edi + BitMap.row_ptr], 0, 0
 	mov eax, edi
 .end:
 	FrameEnd
