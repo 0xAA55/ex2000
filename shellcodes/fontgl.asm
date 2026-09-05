@@ -203,7 +203,7 @@ DefFunc _OGLFC_Create
 		GL_FRAGMENT_SHADER, str "assets\font.fsh"
 	mov [ebx + OGLFC.shader_program], eax
 	mov esi, eax
-	
+
 	GetUniformLocation esi, "font_map"
 	mov [ebx + OGLFC.location_font_map], eax
 	GetUniformLocation esi, "grid_size"
@@ -217,17 +217,20 @@ DefFunc _OGLFC_Create
 	GetUniformLocation esi, "offset"
 	mov [ebx + OGLFC.location_offset], eax
 
-	DefSizedVar %$BillBoardVertices, 8
-	mov dword [%$BillBoardVertices_Addr + 0], 0x00010000
-	mov dword [%$BillBoardVertices_Addr + 4], 0x01010100
-	invoke_cdecl _InitBuffer, &[ebx + OGLFC.billboard_buffer], GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, 4, & %$BillBoardVertices
+	invoke_cdecl _InitBuffer, &[ebx + OGLFC.billboard_buffer], GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, 4, label .billboard_vertices
 	invoke_cdecl _InitBuffer, &[ebx + OGLFC.instance_buffer], GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, InstBufferData.size, 64, 0
 
 	invoke_stdcall glGenVertexArrays, 1, &[ebx + OGLFC.vao]
 	invoke_cdecl _OGLFC_DescribeVAO, ebx
+
 	mov eax, ebx
 	FrameEnd
 	ret
+.billboard_vertices:
+	db 0, 0
+	db 1, 0
+	db 0, 1
+	db 1, 1
 
 ;void OGLFC_Destroy(OGLFC *oglfc);
 DefFunc _OGLFC_Destroy
