@@ -114,7 +114,7 @@ ex2000d.exe: $(OBJS_D) $(LIBS) out/stub.bin
 
 clean:
 	make -C shellcodes clean
-	del /f /s /q *.tmp out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb shellcode.bin ex2000.exe ex2000d.exe
+	del /f /s /q *.tmp out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb shellcode.bin shellcode_d.bin ex2000.exe ex2000d.exe
 
 again:
 	make clean

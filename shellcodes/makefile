@@ -48,4 +48,4 @@ shellcode_d.bin: shellcode_d.dll
 	objcopy -j .code -O binary $^ $@
 
 clean:
-	del /f /q *.obj shellcode.dll shellcode_d.dll shellcode.bin shellcode_d.bin
+	del /f /q *.obj shellcode.dll shellcode_d.dll shellcode.bin shellcode_d.bin shellcode.lib shellcode_d.lib shellcode.exp shellcode_d.exp
