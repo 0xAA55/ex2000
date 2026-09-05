@@ -7,7 +7,7 @@
 	.PausedTime resq 1
 	.TimerVal resq 1
 	.IsPaused resd 1
-	.size equ $ - .Address
+	.size_of_timer equ $ - .Address
 %endmacro
 
 struc Timer
@@ -57,7 +57,7 @@ extern _HybridWaitUs
 %macro PerfStartNoInst 1
 	[segment .bss]
 	extern %1
-	%1 resb Timer.size
+	%1 resb Timer.size_of_timer
 
 	__SECT__
 	invoke_cdecl _InitTimer, %1

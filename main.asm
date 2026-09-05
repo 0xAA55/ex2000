@@ -16,6 +16,7 @@ extern _SceneInit
 extern _SceneUnload
 extern _Scene_OnKeyDown
 extern _Scene_OnKeyUp
+extern _VBlankData
 
 %define DESIRED_WIDTH 1920
 %define DESIRED_HEIGHT 1080
@@ -206,7 +207,7 @@ DefFunc _WndProc@16
 	invoke_dll_stdcall PostQuitMessage, 0
 	jmp .normal_end
 .on_WM_DISPLAYCHANGE:
-	invoke_cdecl _VBlankReInit
+	invoke_cdecl _VBlankReInit, _VBlankData
 	jmp .normal_end
 .on_WM_KEYDOWN:
 	invoke_cdecl _Scene_OnKeyDown, %$wParam

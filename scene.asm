@@ -165,6 +165,10 @@ _OGLFC resd 1
 extern _DayTime
 _DayTime resd 1
 
+extern _VBlankData
+_VBlankData:
+	InstVBlankData
+
 segment .bss
 alignb 16
 extern _ModelMatrix
@@ -292,7 +296,7 @@ DefFunc _SceneInit
 	FrameBegin ebx, esi
 
 	invoke_cdecl _InitTimer, _Timer
-	invoke_cdecl _VBlankInit
+	invoke_cdecl _VBlankInit, _VBlankData
 	invoke_cdecl _SceneLoadInitProgress
 
 	mov byte[_CurTextureQuality], 3
@@ -530,7 +534,7 @@ DefFunc _SceneLoadInitProgress
 DefFunc _SceneUnload
 	FrameBegin esi
 
-	invoke_cdecl _VBlankDeInit
+	invoke_cdecl _VBlankDeInit, _VBlankData
 
 	invoke_cdecl _DeInitBuffer, _BillboardVerticesBuffer
 	invoke_cdecl _DestroyBitMap, [_TerrainBitmap]
@@ -1053,8 +1057,8 @@ __SECT__
 
 	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %lld us\t渲染耗时：%lld us`, \
 		f2d %$FramesPerSec, \
-		qw [_VBlankWithDelayTimeUsedUs], \
-		qw [_LastFrameRenderTimeUs]
+		qw [_VBlankData.VBlankWithDelayTimeUsedUs], \
+		qw [_VBlankData.LastFrameRenderTimeUs]
 	mov eax, [_CurTextureQuality]
 	GLPrintfXY [_OGLFC], 0, 20, `质量：%s。按 Page Up 切换质量。`, [_PtrStrQualities + eax * 4]
 
@@ -1080,6 +1084,6 @@ DefFunc _SwapBuffersNoVSync
 DefFunc _SwapBuffers
 	FrameBegin
 	invoke_cdecl _SwapBuffersNoVSync
-	invoke_cdecl _WaitForVBlank
+	invoke_cdecl _WaitForVBlank, _VBlankData, [_hWnd]
 	FrameEnd
 	ret
