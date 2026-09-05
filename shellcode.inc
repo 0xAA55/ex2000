@@ -113,6 +113,11 @@
 	DefExp _DeleteProgram
 	DefExp _SceneLoadShaderProgram
 	DefExp _SceneOnDisposeShaders
+	DefExp _SceneLoadDrawTerrainProgram
+	DefExp _SceneLoadDrawWaterProgram
+	DefExp _SceneLoadDrawCompositeProgram
+	DefExp _SceneLoadDrawBlurProgram
+	DefExp _SceneLoadDrawHDR2LDRProgram
 	DefExp _SetupSSFBOOutputs
 	DefExp _SetupSSTextureMipmaps
 	DefExp _SetupSSTextureShaderInput

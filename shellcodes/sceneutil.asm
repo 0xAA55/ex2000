@@ -1,6 +1,7 @@
 %include "common.inc"
 %include "gl33.inc"
 %include "scene.inc"
+%include "shader.inc"
 
 DefFunc _InitTexRepeatLinear
 	FrameBegin ebx
@@ -201,5 +202,259 @@ DefFunc _SetupSSTextureShaderInput
 	cmp edi, SSTextures.NumTextures
 	jb .loop_setup
 
+	FrameEnd
+	ret
+
+DefFunc _SceneLoadDrawTerrainProgram
+	FrameBegin ebx, esi, edi
+	NameParams %$PtrToDrawTerrainProgram, %$DrawTerrainProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
+
+	mov ebx, %$PtrToDrawTerrainProgram
+	SceneLoadShaderProgram ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\ssample.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\terrain.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\terrain_out.fsh"
+	test eax, eax
+	jz .bad_end
+
+	mov ebx, [ebx]
+
+	invoke_stdcall glBindVertexArray, %$DrawBillboardVAO
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, %$DrawBillboardVBO
+	GetAttribLocation ebx, "position"
+	mov edi, eax
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindVertexArray, 0
+
+	mov esi, %$DrawTerrainProgramLocations
+
+	GetUniformLocation ebx, "camorient"
+	mov [esi + DrawTerrainProgramLocations.CameraMatrix], eax
+	GetUniformLocation ebx, "proj"
+	mov [esi + DrawTerrainProgramLocations.ProjMatrix], eax
+	GetUniformLocation ebx, "campos"
+	mov [esi + DrawTerrainProgramLocations.CameraPosition], eax
+	GetUniformLocation ebx, "render_distance"
+	mov [esi + DrawTerrainProgramLocations.RenderDistance], eax
+	GetUniformLocation ebx, "terrain_altmap"
+	mov [esi + DrawTerrainProgramLocations.TerrainAltitudeMap], eax
+	GetUniformLocation ebx, "terrain_conemap"
+	mov [esi + DrawTerrainProgramLocations.TerrainConeMap], eax
+	GetUniformLocation ebx, "terrain_height"
+	mov [esi + DrawTerrainProgramLocations.TerrainHeight], eax
+	GetUniformLocation ebx, "terrain_scaling"
+	mov [esi + DrawTerrainProgramLocations.TerrainScaling], eax
+	GetUniformLocation ebx, "texture_quality"
+	mov [esi + DrawTerrainProgramLocations.TextureQuality], eax
+
+	GetFragDataLocation ebx, "out_normal_dist"
+	mov [esi + DrawTerrainProgramLocations.OutNormalDist], eax
+	GetFragDataLocation ebx, "out_diffuse"
+	mov [esi + DrawTerrainProgramLocations.OutDiffuse], eax
+	GetFragDataLocation ebx, "out_specular"
+	mov [esi + DrawTerrainProgramLocations.OutSpecular], eax
+	GetFragDataLocation ebx, "out_emissive"
+	mov [esi + DrawTerrainProgramLocations.OutEmissive], eax
+	GetFragDataLocation ebx, "out_scatter"
+	mov [esi + DrawTerrainProgramLocations.OutScatter], eax
+
+	mov eax, ebx
+.bad_end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoadDrawWaterProgram
+	FrameBegin ebx, esi, edi
+	NameParams %$PtrToDrawWaterProgram, %$DrawWaterProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
+
+	mov ebx, %$PtrToDrawWaterProgram
+	SceneLoadShaderProgram ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\ssample.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\terrain.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\water.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\water_out.fsh"
+	test eax, eax
+	jz .bad_end
+
+	mov ebx, [ebx]
+
+	invoke_stdcall glBindVertexArray,  %$DrawBillboardVAO
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, %$DrawBillboardVBO
+	GetAttribLocation ebx, "position"
+	mov edi, eax
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindVertexArray, 0
+
+	mov esi, %$DrawWaterProgramLocations
+
+	GetUniformLocation ebx, "camorient"
+	mov [esi + DrawWaterProgramLocations.CameraMatrix], eax
+	GetUniformLocation ebx, "proj"
+	mov [esi + DrawWaterProgramLocations.ProjMatrix], eax
+	GetUniformLocation ebx, "campos"
+	mov [esi + DrawWaterProgramLocations.CameraPosition], eax
+	GetUniformLocation ebx, "time"
+	mov [esi + DrawWaterProgramLocations.Time], eax
+	GetUniformLocation ebx, "render_distance"
+	mov [esi + DrawWaterProgramLocations.RenderDistance], eax
+	GetUniformLocation ebx, "terrain_altmap"
+	mov [esi + DrawWaterProgramLocations.TerrainAltitudeMap], eax
+	GetUniformLocation ebx, "terrain_conemap"
+	mov [esi + DrawWaterProgramLocations.TerrainConeMap], eax
+	GetUniformLocation ebx, "terrain_height"
+	mov [esi + DrawWaterProgramLocations.TerrainHeight], eax
+	GetUniformLocation ebx, "terrain_scaling"
+	mov [esi + DrawWaterProgramLocations.TerrainScaling], eax
+	GetUniformLocation ebx, "texture_quality"
+	mov [esi + DrawWaterProgramLocations.TextureQuality], eax
+	GetUniformLocation ebx, "sea_level"
+	mov [esi + DrawWaterProgramLocations.SeaLevel], eax
+	GetUniformLocation ebx, "sea_wave_height"
+	mov [esi + DrawWaterProgramLocations.SeaWaveHeight], eax
+	GetUniformLocation ebx, "sea_wave_size"
+	mov [esi + DrawWaterProgramLocations.SeaWaveSize], eax
+	GetUniformLocation ebx, "terrain_normal_depth"
+	mov [esi + DrawWaterProgramLocations.SSTerrainNormalDepth], eax
+
+	GetFragDataLocation ebx, "out_normal_dist"
+	mov [esi + DrawWaterProgramLocations.OutNormalDist], eax
+	GetFragDataLocation ebx, "out_diffuse"
+	mov [esi + DrawWaterProgramLocations.OutDiffuse], eax
+	GetFragDataLocation ebx, "out_specular"
+	mov [esi + DrawWaterProgramLocations.OutSpecular], eax
+	GetFragDataLocation ebx, "out_emissive"
+	mov [esi + DrawWaterProgramLocations.OutEmissive], eax
+	GetFragDataLocation ebx, "out_scatter"
+	mov [esi + DrawWaterProgramLocations.OutScatter], eax
+
+	mov eax, ebx
+.bad_end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoadDrawCompositeProgram
+	FrameBegin ebx, esi, edi
+	NameParams %$PtrToDrawCompositeProgram, %$DrawCompositeProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
+
+	mov ebx, %$PtrToDrawCompositeProgram
+	SceneLoadShaderProgram ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\composite.fsh"
+	test eax, eax
+	jz .bad_end
+
+	mov ebx, [ebx]
+
+	invoke_stdcall glBindVertexArray, %$DrawBillboardVAO
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, %$DrawBillboardVBO
+	GetAttribLocation ebx, "position"
+	mov edi, eax
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindVertexArray, 0
+
+	mov esi, %$DrawCompositeProgramLocations
+
+	GetUniformLocation ebx, "camorient"
+	mov [esi + DrawCompositeProgramLocations.CameraMatrix], eax
+	GetUniformLocation ebx, "proj"
+	mov [esi + DrawCompositeProgramLocations.ProjMatrix], eax
+	GetUniformLocation ebx, "campos"
+	mov [esi + DrawCompositeProgramLocations.CameraPosition], eax
+	GetUniformLocation ebx, "sunpos"
+	mov [esi + DrawCompositeProgramLocations.SunPosition], eax
+	GetUniformLocation ebx, "normal_distance"
+	mov [esi + DrawCompositeProgramLocations.TexSSNormalDist], eax
+	GetUniformLocation ebx, "diffuse"
+	mov [esi + DrawCompositeProgramLocations.TexSSDiffuse], eax
+	GetUniformLocation ebx, "specular"
+	mov [esi + DrawCompositeProgramLocations.TexSSSpecular], eax
+	GetUniformLocation ebx, "emissive"
+	mov [esi + DrawCompositeProgramLocations.TexSSEmissive], eax
+	GetUniformLocation ebx, "scatter"
+	mov [esi + DrawCompositeProgramLocations.TexSSScatter], eax
+
+	GetFragDataLocation ebx, "color"
+	mov [esi + DrawCompositeProgramLocations.OutColor], eax
+
+	mov eax, ebx
+.bad_end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoadDrawBlurProgram
+	FrameBegin ebx, esi, edi
+	NameParams %$PtrToDrawBlurProgram, %$DrawBlurProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
+
+	mov ebx, %$PtrToDrawBlurProgram
+	SceneLoadShaderProgram ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\blur.fsh"
+	test eax, eax
+	jz .bad_end
+
+	mov ebx, [ebx]
+
+	invoke_stdcall glBindVertexArray, %$DrawBillboardVAO
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, %$DrawBillboardVBO
+	GetAttribLocation ebx, "position"
+	mov edi, eax
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindVertexArray, 0
+
+	mov esi, %$DrawBlurProgramLocations
+
+	GetUniformLocation ebx, "hdr_texture"
+	mov [esi + DrawBlurProgramLocations.HDRTexture], eax
+
+	GetFragDataLocation ebx, "color"
+	mov [esi + DrawBlurProgramLocations.OutColor], eax
+
+	mov eax, ebx
+.bad_end:
+	FrameEnd
+	ret
+
+DefFunc _SceneLoadDrawHDR2LDRProgram
+	FrameBegin ebx, esi, edi
+	NameParams %$PtrToDrawDR2LDRProgram, %$DrawDR2LDRProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
+
+	mov ebx, %$PtrToDrawDR2LDRProgram
+	SceneLoadShaderProgram ebx, \
+		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\hdr2ldr.fsh"
+	test eax, eax
+	jz .bad_end
+
+	mov ebx, [ebx]
+
+	invoke_stdcall glBindVertexArray, %$DrawBillboardVAO
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, %$DrawBillboardVBO
+	GetAttribLocation ebx, "position"
+	mov edi, eax
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindVertexArray, 0
+
+	mov esi, %$DrawDR2LDRProgramLocations
+
+	GetUniformLocation ebx, "blur_texture"
+	mov [esi + DrawHDR2LDRProgramLocations.BlurTexture], eax
+	GetUniformLocation ebx, "hdr_texture"
+	mov [esi + DrawHDR2LDRProgramLocations.HDRTexture], eax
+
+	GetFragDataLocation ebx, "color"
+	mov [esi + DrawHDR2LDRProgramLocations.OutColor], eax
+
+	mov eax, ebx
+.bad_end:
 	FrameEnd
 	ret

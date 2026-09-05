@@ -63,6 +63,11 @@ ProgramCreate
 DeleteProgram
 SceneLoadShaderProgram
 SceneOnDisposeShaders
+SceneLoadDrawTerrainProgram
+SceneLoadDrawWaterProgram
+SceneLoadDrawCompositeProgram
+SceneLoadDrawBlurProgram
+SceneLoadDrawHDR2LDRProgram
 SetupSSFBOOutputs
 SetupSSTextureMipmaps
 SetupSSTextureShaderInput
