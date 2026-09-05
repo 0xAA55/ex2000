@@ -568,6 +568,20 @@
 		%else
 			PushAbsAddr __Param
 		%endif
+	%elif %substr(__ParamStr, 1, 7) == "[label " ;address label
+		__FlushPassArgs
+		%if !%isidn(%substr(__ParamStr, %strlen(__ParamStr)), ']')
+			%error ']' expected.
+		%endif
+		%xdefine __ParamStr %substr(__ParamStr, 8, %strlen(__ParamStr) - 8)
+		%define __Param %tok(__ParamStr)
+		__RotatePassReg
+		%ifndef SHELLCODE
+			push [__Param]
+		%else
+			GetAbsAddr __PassReg, __Param
+			push [__PassReg]
+		%endif
 	%elif %substr(__ParamStr, 1, 4) == "str " ;string
 		__FlushPassArgs
 		%xdefine __ParamStr %substr(__ParamStr, 5)
