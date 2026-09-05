@@ -397,7 +397,19 @@ DefFunc _SceneLoad03
 
 DefFunc _SceneLoad04
 	FrameBegin
+	mov dword[_DayTime], __float32__(0.3333)
 	invoke_cdecl _SceneLoadDrawTerrainProgram, _DrawTerrainProgram, _DrawTerrainProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
+	test eax, eax
+	jz .bad_end
+	invoke_cdecl _SceneLoadDrawWaterProgram, _DrawWaterProgram, _DrawWaterProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
+	test eax, eax
+	jz .bad_end
+	invoke_cdecl _SceneLoadDrawCompositeProgram, _DrawCompositeProgram, _DrawCompositeProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
+	test eax, eax
+	jz .bad_end
+	invoke_cdecl _SceneLoadDrawBlurProgram, _DrawBlurProgram, _DrawBlurProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
+	test eax, eax
+	invoke_cdecl _SceneLoadDrawHDR2LDRProgram, _DrawHDR2LDRProgram, _DrawHDR2LDRProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
 	test eax, eax
 	jz .bad_end
 	jmp .end
@@ -410,54 +422,21 @@ DefFunc _SceneLoad04
 
 DefFunc _SceneLoad05
 	FrameBegin
-	invoke_cdecl _SceneLoadDrawWaterProgram, _DrawWaterProgram, _DrawWaterProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
-	test eax, eax
-	jz .bad_end
-	jmp .end
-.bad_end:
-	dec eax
-	mov [_SceneLoadingProgress], eax
-.end:
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad06
 	FrameBegin
-	mov dword[_DayTime], __float32__(0.3333)
-	invoke_cdecl _SceneLoadDrawCompositeProgram, _DrawCompositeProgram, _DrawCompositeProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
-	test eax, eax
-	jz .bad_end
-	jmp .end
-.bad_end:
-	dec eax
-	mov [_SceneLoadingProgress], eax
-.end:
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad07
 	FrameBegin
-	invoke_cdecl _SceneLoadDrawBlurProgram, _DrawBlurProgram, _DrawBlurProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
-	test eax, eax
-	jz .bad_end
-	jmp .end
-.bad_end:
-	dec eax
-	mov [_SceneLoadingProgress], eax
-.end:
 	FrameEnd
 	ret
 
 DefFunc _SceneLoad08
-	FrameBegin ebx, edi
-	invoke_cdecl _SceneLoadDrawHDR2LDRProgram, _DrawHDR2LDRProgram, _DrawHDR2LDRProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
-	test eax, eax
-	jz .bad_end
-	jmp .end
-.bad_end:
-	dec eax
-	mov [_SceneLoadingProgress], eax
-.end:
+	FrameBegin
 	FrameEnd
 	ret
 
