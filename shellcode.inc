@@ -58,8 +58,12 @@
 	DefExp _TlsInvokeCallbacks
 	DefExp _TlsDeInit
 	DefExp _CreateBitMap
-	DefExp _DuplicateBitMap
+	DefExp _DeleteProgram
+	DefExp _DeleteRenderbuffer
+	DefExp _DeleteTexture
+	DefExp _DeInitSSTextureSets
 	DefExp _DestroyBitMap
+	DefExp _DuplicateBitMap
 	DefExp _GetBitmapPixelAddress
 	DefExp _SampleFloatMap
 	DefExp _BatchAdd
@@ -113,7 +117,17 @@
 	DefExp _SceneLoadShaderProgram
 	DefExp _SceneLoadShaderProgramEx
 	DefExp _SceneOnDisposeShaders
+	DefExp _SetupSSFBOOutputs
+	DefExp _SetupSSTextureMipmaps
+	DefExp _SetupSSTextureShaderInput
 	DefExp _InitBuffer
+	DefExp _InitDepthBuffer
+	DefExp _InitRGBA32FBufferTexture
+	DefExp _InitRGBA8BufferTexture
+	DefExp _InitSSTextureSets
+	DefExp _InitTexRenderTarget
+	DefExp _InitTexRepeatLinear
+	DefExp _InitTexRepeatLinearMipmap
 	DefExp _DeInitBuffer
 	DefExp _BufferPushItem
 	DefExp _BufferPopItem

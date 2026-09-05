@@ -8,9 +8,15 @@
 %include "math.inc"
 %include "fontgl.inc"
 %include "hrsleep.inc"
+%include "shellcode.inc"
+%include "scene.inc"
 
 extern _hWnd
 extern _hDC
+
+%define DefExp extern
+InstExp
+%undef DefExp
 
 segment .bss
 extern _CurTextureQuality
@@ -54,36 +60,17 @@ _CompositeDepthBuffer resd 1
 extern _CompositeHalfSizeDepthBuffer
 _CompositeHalfSizeDepthBuffer resd 1
 
-extern _SSNormalDistTexture
-extern _SSDiffuseTexture
-extern _SSSpecularTexture
-extern _SSEmissiveTexture
-extern _SSScatterTexture
-
-extern _SSNormalDistHalfSizeTexture
-extern _SSDiffuseHalfSizeTexture
-extern _SSSpecularHalfSizeTexture
-extern _SSEmissiveHalfSizeTexture
-extern _SSScatterHalfSizeTexture
+extern _SSTextures
+extern _SSHalfSizeTextures
 
 _SSTextures:
-_SSNormalDistTexture resd 1
-_SSDiffuseTexture resd 1
-_SSSpecularTexture resd 1
-_SSEmissiveTexture resd 1
-_SSScatterTexture resd 1
-_NumSSTextures equ ($ - _SSTextures) / 4
+	InstSSTextures
+
+_SSHalfSizeTextures:
+	InstSSTextures
 
 extern _HDRLensTexture
 _HDRLensTexture resd 1
-
-_SSHalfSizeTextures:
-_SSNormalDistHalfSizeTexture resd 1
-_SSDiffuseHalfSizeTexture resd 1
-_SSSpecularHalfSizeTexture resd 1
-_SSEmissiveHalfSizeTexture resd 1
-_SSScatterHalfSizeTexture resd 1
-_NumSSHalfSizeTextures equ ($ - _SSHalfSizeTextures) / 4
 
 extern _HDRBlurTexture
 _HDRBlurTexture resd 1
@@ -344,43 +331,6 @@ _PtrStrQualities:
 	dd _StrLowQuality
 	dd _StrMidQuality
 	dd _StrBestQuality
-
-DefFunc _InitTexRepeatLinear
-	FrameBegin ebx
-	NameParams %$Target
-	mov ebx, %$Target
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, ebx, 0
-	FrameEnd
-	ret
-
-DefFunc _InitTexRepeatLinearMipmap
-	FrameBegin ebx
-	NameParams %$Target
-	mov ebx, %$Target
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_REPEAT
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glGenerateMipmap, ebx
-	invoke_dll_stdcall glBindTexture, ebx, 0
-	FrameEnd
-	ret
-
-DefFunc _InitTexRenderTarget
-	FrameBegin ebx
-	NameParams %$Target
-	mov ebx, %$Target
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
-	invoke_dll_stdcall glTexParameteri, ebx, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-	invoke_dll_stdcall glBindTexture, ebx, 0
-	FrameEnd
-	ret
 
 ;int SceneInit();
 DefFunc _SceneInit
@@ -813,36 +763,6 @@ DefFunc _SceneLoadInitProgress
 	FrameEnd
 	ret
 
-DefFunc _DeleteTexture
-	FrameBegin ebx
-	NameParams %$PtrToDel
-	mov ebx, %$PtrToDel
-	invoke_dll_stdcall glDeleteTextures, 1, ebx
-	xor eax, eax
-	mov [ebx], eax
-	FrameEnd
-	ret
-
-DefFunc _DeleteProgram
-	FrameBegin ebx
-	NameParams %$PtrToDel
-	mov ebx, %$PtrToDel
-	invoke_dll_stdcall glDeleteProgram, [ebx]
-	xor eax, eax
-	mov [ebx], eax
-	FrameEnd
-	ret
-
-DefFunc _DeleteRenderbuffer
-	FrameBegin ebx
-	NameParams %$PtrToDel
-	mov ebx, %$PtrToDel
-	invoke_dll_stdcall glDeleteRenderbuffers, 1, ebx
-	xor eax, eax
-	mov [ebx], eax
-	FrameEnd
-	ret
-
 DefFunc _SceneUnload
 	FrameBegin esi
 
@@ -862,16 +782,8 @@ DefFunc _SceneUnload
 	invoke_cdecl _DeleteTexture, _TerrainTexture
 	invoke_cdecl _DeleteTexture, _TerrainTextureMipLinear
 	invoke_cdecl _DeleteTexture, _TerrainConeTexture
-	invoke_cdecl _DeleteTexture, _SSNormalDistTexture
-	invoke_cdecl _DeleteTexture, _SSDiffuseTexture
-	invoke_cdecl _DeleteTexture, _SSSpecularTexture
-	invoke_cdecl _DeleteTexture, _SSEmissiveTexture
-	invoke_cdecl _DeleteTexture, _SSScatterTexture
-	invoke_cdecl _DeleteTexture, _SSNormalDistHalfSizeTexture
-	invoke_cdecl _DeleteTexture, _SSDiffuseHalfSizeTexture
-	invoke_cdecl _DeleteTexture, _SSSpecularHalfSizeTexture
-	invoke_cdecl _DeleteTexture, _SSEmissiveHalfSizeTexture
-	invoke_cdecl _DeleteTexture, _SSScatterHalfSizeTexture
+	invoke_cdecl _DeInitSSTextureSets, _SSTextures
+	invoke_cdecl _DeInitSSTextureSets, _SSHalfSizeTextures
 	invoke_cdecl _DeleteTexture, _HDRLensTexture
 	invoke_cdecl _DeleteTexture, _HDRBlurTexture
 
@@ -909,142 +821,6 @@ DefFunc _SceneUnload
 	dd _CompositeFBO
 	dd _DrawBillboardVAO
 .num_set_to_NULL equ ($ - .set_to_NULL) / 4
-
-DefFunc _InitRGBA32FBufferTexture
-	FrameBegin ebx
-	NameParams %$SaveTo, %$Width, %$Height
-
-	mov ebx, %$SaveTo
-	invoke_cdecl _DeleteTexture, ebx
-	invoke_dll_stdcall glGenTextures, 1, ebx
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA32F, %$Width, %$Height, 0, GL_RGBA, GL_FLOAT, NULL
-
-	FrameEnd
-	ret
-
-DefFunc _InitRGBA8BufferTexture
-	FrameBegin ebx
-	NameParams %$SaveTo, %$Width, %$Height
-
-	mov ebx, %$SaveTo
-	invoke_cdecl _DeleteTexture, ebx
-	invoke_dll_stdcall glGenTextures, 1, ebx
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
-	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA, %$Width, %$Height, 0, GL_RGBA, GL_UNSIGNED_INT, NULL
-
-	FrameEnd
-	ret
-
-DefFunc _InitSSTextureSets
-	FrameBegin ebx, esi, edi
-	NameParams %$Textures, %$VPWidth, %$VPHeight
-[segment .rdata]
-.function_list:
-	dd _InitRGBA32FBufferTexture
-	dd _InitRGBA8BufferTexture
-	dd _InitRGBA8BufferTexture
-	dd _InitRGBA32FBufferTexture
-	dd _InitRGBA32FBufferTexture
-__SECT__
-	mov ebx, %$Textures
-	mov esi, .function_list
-	xor edi, edi
-.loop_init:
-	invoke_cdecl [esi + edi * 4], & [ebx + edi * 4], %$VPWidth, %$VPHeight
-	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
-	inc edi
-	cmp edi, 5
-	jb .loop_init
-
-	FrameEnd
-	ret
-
-DefFunc _InitDepthBuffer
-	FrameBegin ebx
-	NameParams %$SaveTo, %$Width, %$Height
-
-	mov ebx, %$SaveTo
-	invoke_cdecl _DeleteRenderbuffer, ebx
-	invoke_dll_stdcall glGenRenderbuffers, 1, ebx
-	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, [ebx]
-	invoke_dll_stdcall glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, %$Width, %$Height
-	invoke_dll_stdcall glBindRenderbuffer, GL_RENDERBUFFER, 0
-
-	FrameEnd
-	ret
-
-DefFunc _SetupSSFBOOutputs
-	FrameBegin ebx, esi, edi
-	NameParams %$FirstOutput
-	DefSizedVar %$Attachments, 32 * 4
-
-	lea ebx, %$Attachments
-	mov esi, %$FirstOutput
-	xor edi, edi
-.loop_set_ss_outputs:
-	lodsd
-	add eax, GL_COLOR_ATTACHMENT0
-	mov [ebx + edi * 4], eax
-	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_SSTextures + edi * 4], 0
-	inc edi
-	cmp edi, _NumSSTextures
-	jb .loop_set_ss_outputs
-
-	invoke_dll_stdcall glDrawBuffers, edi, ebx
-
-	FrameEnd
-	ret
-
-DefFunc _SetupSSFBOHalfSizeOutputs
-	FrameBegin esi, edi
-	NameParams %$FirstOutput
-	DefSizedVar %$Attachments, 32 * 4
-
-	lea ebx, %$Attachments
-	mov esi, %$FirstOutput
-	xor edi, edi
-.loop_set_ss_half_outputs:
-	lodsd
-	add eax, GL_COLOR_ATTACHMENT0
-	mov [ebx + edi * 4], eax
-	invoke_dll_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [_SSHalfSizeTextures + edi * 4], 0
-	inc edi
-	cmp edi, _NumSSHalfSizeTextures
-	jb .loop_set_ss_half_outputs
-
-	invoke_dll_stdcall glDrawBuffers, edi, ebx
-
-	FrameEnd
-	ret
-
-DefFunc _SetupSSTextureMipmaps
-	FrameBegin esi, edi
-
-	mov esi, _SSTextures
-	xor edi, edi
-.loop_gen_mipmaps:
-	lodsd
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, eax
-	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
-	inc edi
-	cmp edi, _NumSSTextures
-	jb .loop_gen_mipmaps
-
-	mov esi, _SSHalfSizeTextures
-	xor edi, edi
-.loop_gen_halfsize_mipmaps:
-	lodsd
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, eax
-	invoke_dll_stdcall glGenerateMipmap, GL_TEXTURE_2D
-	inc edi
-	cmp edi, _NumSSHalfSizeTextures
-	jb .loop_gen_halfsize_mipmaps
-
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, 0
-
-	FrameEnd
-	ret
 
 DefFunc _Scene_OnKeyDown
 	FrameBegin
@@ -1230,8 +1006,8 @@ __SECT__
 	invoke_cdecl _DeleteRenderbuffer, _CompositeDepthBuffer
 	invoke_cdecl _DeleteRenderbuffer, _CompositeHalfSizeDepthBuffer
 
-	invoke_cdecl _InitSSTextureSets, _SSNormalDistTexture, %$VPWidth, %$VPHeight
-	invoke_cdecl _InitSSTextureSets, _SSNormalDistHalfSizeTexture, %$VPWidthHalf, %$VPHeightHalf
+	invoke_cdecl _InitSSTextureSets, _SSTextures, %$VPWidth, %$VPHeight
+	invoke_cdecl _InitSSTextureSets, _SSHalfSizeTextures, %$VPWidthHalf, %$VPHeightHalf
 
 	invoke_cdecl _InitRGBA32FBufferTexture, _HDRLensTexture, %$VPWidth, %$VPHeight
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
@@ -1242,28 +1018,28 @@ __SECT__
 	invoke_cdecl _InitDepthBuffer, _CompositeHalfSizeDepthBuffer, %$VPWidthHalf, %$VPHeightHalf
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
-	invoke_cdecl _SetupSSFBOOutputs, _DrawTerrainProgramLocations.first_output
+	invoke_cdecl _SetupSSFBOOutputs, _SSTextures, _DrawTerrainProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
 	invoke_cdecl Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterFBO]
-	invoke_cdecl _SetupSSFBOOutputs, _DrawWaterProgramLocations.first_output
+	invoke_cdecl _SetupSSFBOOutputs, _SSTextures, _DrawWaterProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeDepthBuffer]
 	invoke_cdecl Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainHalfSizeFBO]
-	invoke_cdecl _SetupSSFBOHalfSizeOutputs, _DrawTerrainProgramLocations.first_output
+	invoke_cdecl _SetupSSFBOOutputs, _SSHalfSizeTextures, _DrawTerrainProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeHalfSizeDepthBuffer]
 	invoke_cdecl Scene_check_fbo
 	test eax, eax
 	jz .quit
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterHalfSizeFBO]
-	invoke_cdecl _SetupSSFBOHalfSizeOutputs, _DrawWaterProgramLocations.first_output
+	invoke_cdecl _SetupSSFBOOutputs, _SSHalfSizeTextures, _DrawWaterProgramLocations.first_output
 	invoke_dll_stdcall glFramebufferRenderbuffer, GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, [_CompositeHalfSizeDepthBuffer]
 	invoke_cdecl Scene_check_fbo
 	test eax, eax
@@ -1432,7 +1208,7 @@ __SECT__
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
 	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSHalfSizeTextures.NormalDist]
 	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TerrainAltitudeMap], 0
 	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TerrainConeMap], 1
 	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.SSTerrainNormalDepth], 2
@@ -1444,7 +1220,8 @@ __SECT__
 	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
 	invoke_cdecl Scene_clear_color
 
-	invoke_cdecl _SetupSSTextureMipmaps
+	invoke_cdecl _SetupSSTextureMipmaps, _SSTextures
+	invoke_cdecl _SetupSSTextureMipmaps, _SSHalfSizeTextures
 
 	invoke_dll_stdcall glUseProgram, [_DrawCompositeProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
@@ -1452,16 +1229,7 @@ __SECT__
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.CameraPosition], 1, _CameraPos
 	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.SunPosition], 1, _SunPosition
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSNormalDistHalfSizeTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSDiffuseHalfSizeTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSSpecularHalfSizeTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 3
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSEmissiveHalfSizeTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 4
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSScatterHalfSizeTexture]
+	invoke_cdecl _SetupSSTextureShaderInput, _SSHalfSizeTextures, 0
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSNormalDist], 0
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSDiffuse], 1
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSSpecular], 2

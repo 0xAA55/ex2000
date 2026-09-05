@@ -28,6 +28,7 @@ fontgl.asm: common.inc ../avlbst.inc ../shader.inc ../buffer.inc ../fontgl.inc
 hrsleep.asm: common.inc ../hrsleep.inc
 shader.asm: common.inc ../shader.inc ../gl33.inc ../assets.inc
 timer.asm: common.inc ../timer.inc ../hrsleep.inc
+sceneutil.asm: common.inc ../gl33.inc ../scene.inc
 
 shellcode.dll: $(OBJS) exports.def
 	link /NOLOGO /NODEFAULTLIB /NOENTRY /BASE:0x70000000 /DYNAMICBASE:NO /DLL /DEF:exports.def /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /IGNORE:4254 /MERGE:.edata=.zzz /MERGE:.rdata=.data /MERGE:.data=.code /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /PDBALTPATH:%_PDB% $(OBJS)
