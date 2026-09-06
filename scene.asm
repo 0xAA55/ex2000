@@ -997,6 +997,7 @@ __SECT__
 	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
 	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.CameraPosition], 1, _CameraPos
 	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.SunPosition], 1, _SunPosition
+	invoke_dll_stdcall glUniform1f, [_DrawCompositeProgramLocations.RenderDistance], 3000.0f
 	invoke_cdecl _SetupSSTextureShaderInput, _SSHalfSizeTextures, 0
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSNormalDist], 0
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSDiffuse], 1

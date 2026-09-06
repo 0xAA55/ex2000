@@ -370,6 +370,8 @@ DefFunc _SceneLoadDrawCompositeProgram
 	mov [esi + DrawCompositeProgramLocations.CameraPosition], eax
 	GetUniformLocation ebx, "sunpos"
 	mov [esi + DrawCompositeProgramLocations.SunPosition], eax
+	GetUniformLocation ebx, "render_distance"
+	mov [esi + DrawCompositeProgramLocations.RenderDistance], eax
 	GetUniformLocation ebx, "normal_distance"
 	mov [esi + DrawCompositeProgramLocations.TexSSNormalDist], eax
 	GetUniformLocation ebx, "diffuse"

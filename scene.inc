@@ -69,6 +69,7 @@ endstruc
 	.CameraPosition resd 1
 	.ProjMatrix resd 1
 	.SunPosition resd 1
+	.RenderDistance resd 1
 	.TexSSNormalDist resd 1
 	.TexSSDiffuse resd 1
 	.TexSSSpecular resd 1
