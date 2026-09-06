@@ -1,7 +1,7 @@
 #version 330
 
 uniform vec3 campos;
-uniform float render_distance = 3000.0;
+uniform float render_distance;
 in vec2 texcoord;
 out vec4 out_normal_dist;
 out vec4 out_diffuse;

@@ -2,8 +2,8 @@
 
 uniform sampler2D terrain_altmap;
 uniform sampler2D terrain_conemap;
-uniform float terrain_height = 200.0;
-uniform float terrain_scaling = 1000.0;
+uniform float terrain_height;
+uniform float terrain_scaling;
 
 vec4 smooth_sample(sampler2D s, vec2 uv);
 float get_z(vec3 ray, float dist);

@@ -8,7 +8,7 @@ uniform sampler2D diffuse;
 uniform sampler2D specular;
 uniform sampler2D emissive;
 uniform sampler2D scatter;
-uniform float render_distance = 3000.0;
+uniform float render_distance;
 uniform vec3 sunpos;
 
 in vec2 texcoord;
