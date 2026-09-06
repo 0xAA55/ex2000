@@ -918,9 +918,7 @@ __SECT__
 
 	fld dword[_DayTime]
 	fsincos
-	fchs
 	fstp dword[_SunPosition.z]
-	fchs
 	fstp dword[_SunPosition.y]
 	mov dword[_SunPosition.x], __float32__(0.4)
 

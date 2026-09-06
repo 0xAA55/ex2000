@@ -31,5 +31,5 @@ void main()
 	vec3 position = campos + normal * ss_nd.w;
 	gl_FragDepth = get_z(fragdir, ss_nd.w);
 
-	color = vec4(normal, 1.0);
+	color = vec4(vec3(max(dot(normal, sunpos), 0.0)), 1.0);
 }
