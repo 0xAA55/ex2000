@@ -7,11 +7,18 @@ const float lowq_preci = 0.5;
 
 uniform float time;
 
+uniform sampler2D terrain_altmap;
+uniform sampler2D terrain_conemap;
+uniform float terrain_height;
+uniform float terrain_scaling;
+
 uniform float sea_level;
 uniform float sea_wave_height;
 uniform float sea_wave_size;
 
 uniform int texture_quality;
+
+vec4 smooth_sample(sampler2D s, vec2 uv);
 
 float get_water_height(vec2 pos, int num_waves, float phase_shift)
 {
@@ -22,11 +29,20 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	float sum_of_values = 0.0;
 	float sum_of_weights = 0.0;
 	float drag_mult = 0.2;
+	float depth_effect_shore = 5.0;
+	float depth_effect_offshore = 2.0;
+	float cur_terrain_height = smooth_sample(terrain_altmap, pos / terrain_scaling).r * terrain_height;
+	float shore_wave_x = max(0.0, sea_level - cur_terrain_height);
+	float shore_wave_weight = pow(2.0, -shore_wave_x / depth_effect_shore);
+	float offshore_wave_weight = 1.0 - pow(2.0, -shore_wave_x / depth_effect_offshore);
+	float shore_x = phase_shift * frequency + time * time_mod + shore_wave_x;
+	float shore_wave = (1.0 - exp(sin(shore_x) - 1.0));
 	if (texture_quality <= 0)
 	{
 		num_waves >>= 1;
 		if (num_waves == 0) num_waves = 1;
 	}
+	float shore_level = -shore_wave;
 	for(int i = 0; i < num_waves; i++)
 	{
 		vec2 p = vec2(sin(iter), cos(iter));
@@ -46,7 +62,8 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 		time_mod *= 1.08;
 		iter += 1.399;
 	}
-	return sea_level -abs(sum_of_values * sea_wave_height / sum_of_weights);
+	float wave_level = -abs(sum_of_values * sea_wave_height / sum_of_weights);
+	return sea_level + wave_level * offshore_wave_weight + shore_level * shore_wave_weight;
 }
 
 bool raymarch_water(vec3 start, vec3 dir, float max_dist, out float dist)

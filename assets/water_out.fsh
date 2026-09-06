@@ -19,20 +19,25 @@ out vec4 out_specular;
 out vec4 out_emissive;
 out vec4 out_scatter;
 
-bool is_underwater = false;
-
 float get_water_height(vec2 pos, int num_waves, float phase_shift);
 bool raymarch_water(vec3 start, vec3 dir, float max_dist, out float dist);
 bool raymarch_water_underwater(vec3 start, vec3 dir, float max_dist, out float dist);
 vec3 get_water_normal(vec3 pos, float e, int num_waves, float phase_shift);
+
+bool raymarch_terrain(vec3 start, vec3 dir, float max_dist, out float dist);
+vec3 get_terrain_normal(vec3 pos, float e);
+
 float get_z(vec3 ray, float dist);
 vec3 get_fragdir(vec2 uv);
 
 void main()
 {
+	bool is_underwater = false;
 	vec3 fragdir = get_fragdir(texcoord);
 
-	float terrain_ray_dist = texture2D(terrain_normal_depth, texcoord).w;
+	vec4 terrain_data = texture2D(terrain_normal_depth, texcoord);
+	vec3 terrain_normal = terrain_data.xyz;
+	float terrain_ray_dist = terrain_data.w;
 	vec3 terrain_pos = campos + fragdir * terrain_ray_dist;
 
 	if (campos.y <= get_water_height(campos.xz, num_waves_surface, 0.0))
