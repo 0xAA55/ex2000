@@ -116,6 +116,7 @@
 	DefExp _DeleteProgram
 	DefExp _SceneLoadShaderProgram
 	DefExp _SceneOnDisposeShaders
+	DefExp _SceneLoadDrawProgressProgram
 	DefExp _SceneLoadDrawTerrainProgram
 	DefExp _SceneLoadDrawWaterProgram
 	DefExp _SceneLoadDrawCompositeProgram

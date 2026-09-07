@@ -15,6 +15,14 @@ struc SSTextures
 	InstSSTextures
 endstruc
 
+%macro InstDrawProgressProgramLocations 0
+	.Progress resd 1
+%endmacro
+
+struc DrawProgressProgramLocations
+	InstDrawProgressProgramLocations
+endstruc
+
 %macro InstDrawTerrainProgramLocations 0
 	.CameraMatrix resd 1
 	.CameraPosition resd 1

@@ -102,9 +102,9 @@ _DrawHDR2LDRProgram resd 1
 extern _DrawBlurProgram
 _DrawBlurProgram resd 1
 
-extern _ProgressProgramLocations
-_ProgressProgramLocations:
-	.Progress resd 1
+extern _DrawProgressProgramLocations
+_DrawProgressProgramLocations:
+	InstDrawProgressProgramLocations
 
 extern _DrawTerrainProgramLocations
 _DrawTerrainProgramLocations:
@@ -317,27 +317,11 @@ DefFunc _SceneInit
 	fmul dword [_CurveToSeaLevel]
 	fstp dword [_SeaLevel]
 
-	mov ebx, _DrawProgressProgram
-	SceneLoadShaderProgram ebx, \
-		GL_VERTEX_SHADER, str "assets\loading.vsh", \
-		GL_FRAGMENT_SHADER, str "assets\loading.fsh"
-	test eax, eax
-	jz .end
-
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
-	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, [_BillboardVerticesBuffer.gl_buffer]
-	GetAttribLocation [ebx], "position"
-	mov edi, eax
-	invoke_dll_stdcall glEnableVertexAttribArray, edi
-	invoke_dll_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
-	invoke_dll_stdcall glBindBuffer, GL_ARRAY_BUFFER, 0
-	invoke_dll_stdcall glBindVertexArray, 0
 
-	GetUniformLocation [ebx], "progress"
-	mov [_ProgressProgramLocations.Progress], eax
+	invoke_cdecl _SceneLoadDrawProgressProgram, _DrawProgressProgram, _DrawProgressProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
 
 	invoke_dll_stdcall glGenFramebuffers, _NumFBOs, _FirstFBO
 
@@ -714,7 +698,7 @@ __SECT__
 	cvtsi2ss xmm0, [_SceneLoadingProgress]
 	cvtsi2ss xmm1, ebx
 	divss xmm0, xmm1
-	invoke_dll_stdcall glUniform1f, [_ProgressProgramLocations.Progress], xmm0.x
+	invoke_dll_stdcall glUniform1f, [_DrawProgressProgramLocations.Progress], xmm0.x
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
 
 	invoke_cdecl _SwapBuffersNoVSync

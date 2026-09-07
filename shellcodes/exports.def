@@ -63,6 +63,7 @@ ProgramCreate
 DeleteProgram
 SceneLoadShaderProgram
 SceneOnDisposeShaders
+SceneLoadDrawProgressProgram
 SceneLoadDrawTerrainProgram
 SceneLoadDrawWaterProgram
 SceneLoadDrawCompositeProgram

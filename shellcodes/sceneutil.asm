@@ -205,6 +205,37 @@ DefFunc _SetupSSTextureShaderInput
 	FrameEnd
 	ret
 
+DefFunc _SceneLoadDrawProgressProgram
+	FrameBegin ebx, esi, edi
+	NameParams %$PtrToDrawProgressProgram, %$DrawProgressProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
+
+	mov ebx, %$PtrToDrawProgressProgram
+	SceneLoadShaderProgram ebx, \
+		GL_VERTEX_SHADER, str "assets\loading.vsh", \
+		GL_FRAGMENT_SHADER, str "assets\loading.fsh"
+	test eax, eax
+	jz .bad_end
+
+	mov ebx, [ebx]
+
+	invoke_stdcall glBindVertexArray, %$DrawBillboardVAO
+	invoke_stdcall glBindBuffer, GL_ARRAY_BUFFER, %$DrawBillboardVBO
+	GetAttribLocation ebx, "position"
+	mov edi, eax
+	invoke_stdcall glEnableVertexAttribArray, edi
+	invoke_stdcall glVertexAttribPointer, edi, 2, GL_BYTE, 0, 2, 0
+	invoke_stdcall glBindVertexArray, 0
+
+	mov esi, %$DrawProgressProgramLocations
+
+	GetUniformLocation ebx, "progress"
+	mov [esi + DrawProgressProgramLocations.Progress], eax
+
+	mov eax, ebx
+.bad_end:
+	FrameEnd
+	ret
+
 DefFunc _SceneLoadDrawTerrainProgram
 	FrameBegin ebx, esi, edi
 	NameParams %$PtrToDrawTerrainProgram, %$DrawTerrainProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
