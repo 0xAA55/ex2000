@@ -27,6 +27,8 @@ vec3 get_water_normal(vec3 pos, float e, int num_waves, float phase_shift);
 bool raymarch_terrain(vec3 start, vec3 dir, float max_dist, out float dist);
 vec3 get_terrain_normal(vec3 pos, float e);
 
+vec3 get_sky_color(vec3 pos, vec3 ray);
+
 float get_z(vec3 ray, float dist);
 vec3 get_fragdir(vec2 uv);
 
@@ -34,6 +36,7 @@ void main()
 {
 	bool is_underwater = false;
 	vec3 fragdir = get_fragdir(texcoord);
+	vec3 sky_color = get_sky_color(campos, fragdir);
 
 	vec4 terrain_data = texture2D(terrain_normal_depth, texcoord);
 	vec3 terrain_normal = terrain_data.xyz;
@@ -64,5 +67,5 @@ void main()
 	out_diffuse = vec4(1.0);
 	out_specular = vec4(1.0, 1.0, 1.0, 10.0);
 	out_emissive = vec4(0.0);
-	out_scatter = vec4(1.0);
+	out_scatter = vec4(sky_color, min(ray_dist / render_distance, 1.0));
 }

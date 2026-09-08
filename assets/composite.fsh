@@ -9,7 +9,10 @@ uniform sampler2D specular;
 uniform sampler2D emissive;
 uniform sampler2D scatter;
 uniform float render_distance;
+
 uniform vec3 sunpos;
+uniform vec3 ambcolor;
+uniform vec3 suncolor;
 
 in vec2 texcoord;
 out vec4 color;
@@ -31,5 +34,12 @@ void main()
 	vec3 position = campos + normal * ss_nd.w;
 	gl_FragDepth = get_z(fragdir, ss_nd.w);
 
-	color = vec4(vec3(max(dot(normal, sunpos), 0.0)), 1.0);
+	vec3 refl = reflect(-sunpos, normal);
+	vec3 halfway = normalize(refl - fragdir);
+
+	vec3 diffuse = ss_diffuse.xyz * vec3(mix(ambcolor, suncolor, max(dot(normal, sunpos), 0.0)));
+	vec3 specular = ss_specular.xyz * pow(max(0.0, dot(halfway, normal)), ss_specular.w);
+	vec3 surface = diffuse + specular + ss_emissive.xyz;
+
+	color = vec4(mix(surface, ss_scatter.xyz, ss_scatter.w), 1.0);
 }
