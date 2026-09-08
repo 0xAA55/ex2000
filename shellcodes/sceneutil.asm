@@ -190,17 +190,16 @@ DefFunc _SetupSSTextureMipmaps
 
 DefFunc _SetupSSTextureShaderInput
 	FrameBegin ebx, esi, edi
-	NameParams %$SSTextureSet, %$Location
+	NameParams %$Locations, %$SSTextureSet, %$PtrToTextureIndex
 
 	mov ebx, %$SSTextureSet
-	mov esi, %$Location
+	mov esi, %$Locations
 	xor edi, edi
-.loop_setup:
-	invoke_stdcall glActiveTexture, &[GL_TEXTURE0 + esi + edi]
-	invoke_stdcall glBindTexture, GL_TEXTURE_2D, [ebx + edi * 4]
+.loop_set:
+	invoke_cdecl _SetUniformTexture, [esi + edi * 4], [ebx + edi * 4], %$PtrToTextureIndex
 	inc edi
 	cmp edi, SSTextures.NumTextures
-	jb .loop_setup
+	jb .loop_set
 
 	FrameEnd
 	ret
@@ -253,6 +252,40 @@ DefFunc _SceneGetSSOutputLocations
 	mov [esi + SSOutputLocations.OutEmissive], eax
 	GetFragDataLocation ebx, "out_scatter"
 	mov [esi + SSOutputLocations.OutScatter], eax
+
+	FrameEnd
+	ret
+
+DefFunc _SceneSetQualityControlUniformLocations
+	FrameBegin ebx, esi
+	NameParams %$Program, %$OutLocations
+
+	mov ebx, %$Program
+	mov esi, %$OutLocations
+
+	GetUniformLocation ebx, "texture_quality"
+	mov [esi + QualityControlLocations.TextureQuality], eax
+
+	FrameEnd
+	ret
+
+DefFunc _SceneSetSSTextureUniformLocations
+	FrameBegin ebx, esi
+	NameParams %$Program, %$OutLocations
+
+	mov ebx, %$Program
+	mov esi, %$OutLocations
+
+	GetUniformLocation ebx, "normal_distance"
+	mov [esi + SSTextureProgramLocations.TexSSNormalDist], eax
+	GetUniformLocation ebx, "diffuse"
+	mov [esi + SSTextureProgramLocations.TexSSDiffuse], eax
+	GetUniformLocation ebx, "specular"
+	mov [esi + SSTextureProgramLocations.TexSSSpecular], eax
+	GetUniformLocation ebx, "emissive"
+	mov [esi + SSTextureProgramLocations.TexSSEmissive], eax
+	GetUniformLocation ebx, "scatter"
+	mov [esi + SSTextureProgramLocations.TexSSScatter], eax
 
 	FrameEnd
 	ret
@@ -358,10 +391,11 @@ DefFunc _SceneLoadDrawTerrainProgram
 	GetUniformLocation ebx, "texture_quality"
 	mov [esi + DrawTerrainProgramLocations.TextureQuality], eax
 
-	invoke_cdecl _SceneSetRayUniformLocations, ebx, &[esi + DrawTerrainProgramLocations.first_ray]
-	invoke_cdecl _SceneSetTerrainUniformLocations, ebx, &[esi + DrawTerrainProgramLocations.first_terrain]
-	invoke_cdecl _SceneSetSkyUniformLocations, ebx, &[esi + DrawTerrainProgramLocations.first_sky]
-	invoke_cdecl _SceneGetSSOutputLocations, ebx, &[esi + DrawTerrainProgramLocations.first_output]
+	invoke_cdecl _SceneSetQualityControlUniformLocations, ebx, & [esi + DrawTerrainProgramLocations.first_qc]
+	invoke_cdecl _SceneSetRayUniformLocations, ebx, & [esi + DrawTerrainProgramLocations.first_ray]
+	invoke_cdecl _SceneSetTerrainUniformLocations, ebx, & [esi + DrawTerrainProgramLocations.first_terrain]
+	invoke_cdecl _SceneSetSkyUniformLocations, ebx, & [esi + DrawTerrainProgramLocations.first_sky]
+	invoke_cdecl _SceneGetSSOutputLocations, ebx, & [esi + DrawTerrainProgramLocations.first_output]
 
 	mov eax, ebx
 .bad_end:
@@ -396,8 +430,6 @@ DefFunc _SceneLoadDrawWaterProgram
 
 	mov esi, %$DrawWaterProgramLocations
 
-	GetUniformLocation ebx, "texture_quality"
-	mov [esi + DrawWaterProgramLocations.TextureQuality], eax
 	GetUniformLocation ebx, "sea_level"
 	mov [esi + DrawWaterProgramLocations.SeaLevel], eax
 	GetUniformLocation ebx, "sea_wave_height"
@@ -407,10 +439,11 @@ DefFunc _SceneLoadDrawWaterProgram
 	GetUniformLocation ebx, "terrain_normal_depth"
 	mov [esi + DrawWaterProgramLocations.SSTerrainNormalDepth], eax
 
-	invoke_cdecl _SceneSetRayUniformLocations, ebx, &[esi + DrawWaterProgramLocations.first_ray]
-	invoke_cdecl _SceneSetTerrainUniformLocations, ebx, &[esi + DrawWaterProgramLocations.first_terrain]
-	invoke_cdecl _SceneSetSkyUniformLocations, ebx, &[esi + DrawWaterProgramLocations.first_sky]
-	invoke_cdecl _SceneGetSSOutputLocations, ebx, &[esi + DrawWaterProgramLocations.first_output]
+	invoke_cdecl _SceneSetQualityControlUniformLocations, ebx, & [esi + DrawWaterProgramLocations.first_qc]
+	invoke_cdecl _SceneSetRayUniformLocations, ebx, & [esi + DrawWaterProgramLocations.first_ray]
+	invoke_cdecl _SceneSetTerrainUniformLocations, ebx, & [esi + DrawWaterProgramLocations.first_terrain]
+	invoke_cdecl _SceneSetSkyUniformLocations, ebx, & [esi + DrawWaterProgramLocations.first_sky]
+	invoke_cdecl _SceneGetSSOutputLocations, ebx, & [esi + DrawWaterProgramLocations.first_output]
 
 	mov eax, ebx
 .bad_end:
@@ -442,21 +475,8 @@ DefFunc _SceneLoadDrawCompositeProgram
 
 	mov esi, %$DrawCompositeProgramLocations
 
-	GetUniformLocation ebx, "sunpos"
-	mov [esi + DrawCompositeProgramLocations.SunPosition], eax
-	GetUniformLocation ebx, "render_distance"
-	mov [esi + DrawCompositeProgramLocations.RenderDistance], eax
-	GetUniformLocation ebx, "normal_distance"
-	mov [esi + DrawCompositeProgramLocations.TexSSNormalDist], eax
-	GetUniformLocation ebx, "diffuse"
-	mov [esi + DrawCompositeProgramLocations.TexSSDiffuse], eax
-	GetUniformLocation ebx, "specular"
-	mov [esi + DrawCompositeProgramLocations.TexSSSpecular], eax
-	GetUniformLocation ebx, "emissive"
-	mov [esi + DrawCompositeProgramLocations.TexSSEmissive], eax
-	GetUniformLocation ebx, "scatter"
-	mov [esi + DrawCompositeProgramLocations.TexSSScatter], eax
-
+	invoke_cdecl _SceneSetQualityControlUniformLocations, ebx, & [esi + DrawCompositeProgramLocations.first_qc]
+	invoke_cdecl _SceneSetSSTextureUniformLocations, ebx, & [esi + DrawCompositeProgramLocations.first_ss]
 	invoke_cdecl _SceneSetRayUniformLocations, ebx, &[esi + DrawCompositeProgramLocations.first_ray]
 	invoke_cdecl _SceneSetSkyUniformLocations, ebx, &[esi + DrawCompositeProgramLocations.first_sky]
 
@@ -576,7 +596,7 @@ DefFunc _Scene_clear_buffers
 [segment .data]
 	.clear_nd dd 0, 0, 0, FLT_MAX
 	.clear_zeroes dd 0, 0, 0, 0
-	.clear_ones dd __float32__(1.0), __float32__(1.0), __float32__(1.0), __float32__(1.0)
+	.clear_ones dd 1.0, 1.0, 1.0, 1.0
 
 DefFunc _SceneInitStatus
 	FrameBegin ebx
@@ -607,7 +627,7 @@ DefFunc _SceneInitStatus
 	.fog_color dd 0.8, 0.9, 1.0, 0.0
 	.sky_color dd 0.1, 0.2, 0.9, 0.0
 	.amb_color dd 0.1, 0.12, 0.15, 0.0
-	.sea_level dd 124.0
+	.sea_level dd 120.0
 	.init_daytime dd 0.3333
 	.cur_texture_quality dd 3
 .bytes_to_copy equ $ - .data_to_copy
@@ -647,6 +667,77 @@ DefFunc _SceneUpdateStatus
 	invoke_cdecl _MatrixViewEuler, & [ebx + SceneStatus.CameraViewMatrix], & [ebx + SceneStatus.CameraPos], [ebx + SceneStatus.CameraYaw], [ebx + SceneStatus.CameraPitch], [ebx + SceneStatus.CameraRoll]
 	invoke_cdecl _MatrixProjection, & [ebx + SceneStatus.ProjectionMatrix], [ebx + SceneStatus.FovY], [ebx + SceneStatus.Aspect], [ebx + SceneStatus.ZNear], [ebx + SceneStatus.ZFar]
 
+	FrameEnd
+	ret
+
+DefFunc _SetUniformTexture
+	FrameBegin ebx, esi
+	NameParams %$Location, %$TextureObject, %$PtrToTextureIndex
+
+	mov esi, %$Location
+	test esi, esi
+	js .end
+
+	mov ebx, %$PtrToTextureIndex
+	mov eax, [ebx]
+
+	invoke_stdcall glActiveTexture, & [GL_TEXTURE0 + eax]
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, %$TextureObject
+	invoke_stdcall glUniform1i, esi, [ebx]
+	inc dword [ebx]
+
+.end:
+	FrameEnd
+	ret
+
+DefFunc _SetRayUniforms
+	FrameBegin ebx, esi
+	NameParams %$Locations, %$SceneStatus, %$PtrToTextureIndex
+
+	mov ebx, %$Locations
+	mov esi, %$SceneStatus
+	
+	invoke_stdcall glUniformMatrix4fv, [ebx + RayUniformLocations.CameraMatrix], 1, 0, & [esi + SceneStatus.CameraMatrix]
+	invoke_stdcall glUniformMatrix4fv, [ebx + RayUniformLocations.ProjMatrix], 1, 0, & [esi + SceneStatus.ProjectionMatrix]
+	invoke_stdcall glUniform3fv, [ebx + RayUniformLocations.CameraPosition], 1, & [esi + SceneStatus.CameraPos]
+	invoke_stdcall glUniform1f, [ebx + RayUniformLocations.RenderDistance], [esi + SceneStatus.RenderDistance]
+
+	FrameEnd
+	ret
+
+DefFunc _SetTerrainUniforms
+	FrameBegin ebx, esi
+	NameParams %$Locations, %$SceneStatus, %$PtrToTextureIndex
+
+	mov ebx, %$Locations
+	mov esi, %$SceneStatus
+
+	invoke_stdcall glUniform1f, [ebx + TerrainUniformLocations.TerrainHeight], [esi + SceneStatus.TerrainMapHeight]
+	invoke_stdcall glUniform1f, [ebx + TerrainUniformLocations.TerrainScaling], [esi + SceneStatus.TerrainMapScaling]
+	invoke_cdecl _SetUniformTexture, [ebx + TerrainUniformLocations.TerrainAltitudeMap], [esi + SceneStatus.TerrainTexture], %$PtrToTextureIndex
+	invoke_cdecl _SetUniformTexture, [ebx + TerrainUniformLocations.TerrainConeMap], [esi + SceneStatus.TerrainConeTexture], %$PtrToTextureIndex
+
+	FrameEnd
+	ret
+
+DefFunc _SetSkyUniforms
+	FrameBegin ebx, esi
+	NameParams %$Locations, %$SceneStatus, %$PtrToTextureIndex
+
+	mov ebx, %$Locations
+	mov esi, %$SceneStatus
+
+	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.SunPosition], 1, & [esi + SceneStatus.SunPosition]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.Time], [esi + SceneStatus.TimeValueF]
+	invoke_cdecl _SetUniformTexture, [ebx + SkyUniformLocations.CloudTex], [esi + SceneStatus.NoiseTexture], %$PtrToTextureIndex
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.CloudHeight], [esi + SceneStatus.CloudHeight]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.CloudSize], [esi + SceneStatus.CloudSize]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.SunGlowExponent], [esi + SceneStatus.SunGlowExponent]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.SunCenterBrightness], [esi + SceneStatus.SunCenterBrightness]
+	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.SunColor], 1, & [esi + SceneStatus.SunColor]
+	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.FogColor], 1, & [esi + SceneStatus.FogColor]
+	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.SkyColor], 1, & [esi + SceneStatus.SkyColor]
+	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.AmbColor], 1, & [esi + SceneStatus.AmbColor]
 
 	FrameEnd
 	ret

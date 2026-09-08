@@ -75,8 +75,17 @@ struc TerrainUniformLocations
 	InstTerrainUniformLocations
 endstruc
 
-%macro InstDrawTerrainProgramLocations 0
+%macro InstQualityControlLocations 0
 	.TextureQuality resd 1
+%endmacro
+
+struc QualityControlLocations
+	InstQualityControlLocations
+endstruc
+
+%macro InstDrawTerrainProgramLocations 0
+.first_qc:
+	InstQualityControlLocations
 .first_ray:
 	InstRayUniformLocations
 .first_terrain:
@@ -92,11 +101,12 @@ struc DrawTerrainProgramLocations
 endstruc
 
 %macro InstDrawWaterProgramLocations 0
-	.TextureQuality resd 1
 	.SeaLevel resd 1
 	.SeaWaveHeight resd 1
 	.SeaWaveSize resd 1
 	.SSTerrainNormalDepth resd 1
+.first_qc:
+	InstQualityControlLocations
 .first_ray:
 	InstRayUniformLocations
 .first_terrain:
@@ -111,13 +121,23 @@ struc DrawWaterProgramLocations
 	InstDrawWaterProgramLocations
 endstruc
 
-%macro InstDrawCompositeProgramLocations 0
-	.TextureQuality resd 1
+%macro InstSSTextureProgramLocations 0
 	.TexSSNormalDist resd 1
 	.TexSSDiffuse resd 1
 	.TexSSSpecular resd 1
 	.TexSSEmissive resd 1
 	.TexSSScatter resd 1
+%endmacro
+
+struc SSTextureProgramLocations
+	InstSSTextureProgramLocations
+endstruc
+
+%macro InstDrawCompositeProgramLocations 0
+.first_ss:
+	InstSSTextureProgramLocations
+.first_qc:
+	InstQualityControlLocations
 .first_ray:
 	InstRayUniformLocations
 .first_sky:

@@ -127,6 +127,10 @@
 	DefExp _Scene_clear_buffers
 	DefExp _SceneInitStatus
 	DefExp _SceneUpdateStatus
+	DefExp _SetUniformTexture
+	DefExp _SetRayUniforms
+	DefExp _SetTerrainUniforms
+	DefExp _SetSkyUniforms
 	DefExp _SetupSSFBOOutputs
 	DefExp _SetupSSTextureMipmaps
 	DefExp _SetupSSTextureShaderInput

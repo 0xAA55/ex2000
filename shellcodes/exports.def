@@ -74,6 +74,10 @@ Scene_clear_color
 Scene_clear_buffers
 SceneInitStatus
 SceneUpdateStatus
+SetUniformTexture
+SetRayUniforms
+SetTerrainUniforms
+SetSkyUniforms
 SetupSSFBOOutputs
 SetupSSTextureMipmaps
 SetupSSTextureShaderInput
