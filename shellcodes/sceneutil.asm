@@ -156,10 +156,16 @@ DefFunc _SetupSSFBOOutputs
 	xor edi, edi
 .loop_set_ss_outputs:
 	lodsd
+	test eax, eax
+	js .skipped
 	add eax, GL_COLOR_ATTACHMENT0
-	mov [ebx + edi * 4], eax
 	mov edx, %$SSTextureSet
+	mov [ebx + edi * 4], eax
 	invoke_stdcall glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, eax, GL_TEXTURE_2D, [edx + edi * 4], 0
+	jmp .continue
+.skipped:
+	mov dword [ebx + edi * 4], GL_NONE
+.continue:
 	inc edi
 	cmp edi, SSTextures.NumTextures
 	jb .loop_set_ss_outputs
