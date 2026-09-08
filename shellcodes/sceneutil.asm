@@ -236,6 +236,96 @@ DefFunc _SceneLoadDrawProgressProgram
 	FrameEnd
 	ret
 
+DefFunc _SceneGetSSOutputLocations
+	FrameBegin ebx, esi
+	NameParams %$Program, %$OutLocations
+
+	mov ebx, %$Program
+	mov esi, %$OutLocations
+
+	GetFragDataLocation ebx, "out_normal_dist"
+	mov [esi + SSOutputLocations.OutNormalDist], eax
+	GetFragDataLocation ebx, "out_diffuse"
+	mov [esi + SSOutputLocations.OutDiffuse], eax
+	GetFragDataLocation ebx, "out_specular"
+	mov [esi + SSOutputLocations.OutSpecular], eax
+	GetFragDataLocation ebx, "out_emissive"
+	mov [esi + SSOutputLocations.OutEmissive], eax
+	GetFragDataLocation ebx, "out_scatter"
+	mov [esi + SSOutputLocations.OutScatter], eax
+
+	FrameEnd
+	ret
+
+DefFunc _SceneSetRayUniformLocations
+	FrameBegin ebx, esi
+	NameParams %$Program, %$OutLocations
+
+	mov ebx, %$Program
+	mov esi, %$OutLocations
+
+	GetUniformLocation ebx, "camorient"
+	mov [esi + RayUniformLocations.CameraMatrix], eax
+	GetUniformLocation ebx, "proj"
+	mov [esi + RayUniformLocations.ProjMatrix], eax
+	GetUniformLocation ebx, "campos"
+	mov [esi + RayUniformLocations.CameraPosition], eax
+	GetUniformLocation ebx, "render_distance"
+	mov [esi + RayUniformLocations.RenderDistance], eax
+
+	FrameEnd
+	ret
+
+DefFunc _SceneSetTerrainUniformLocations
+	FrameBegin ebx, esi
+	NameParams %$Program, %$OutLocations
+
+	mov ebx, %$Program
+	mov esi, %$OutLocations
+
+	GetUniformLocation ebx, "terrain_altmap"
+	mov [esi + TerrainUniformLocations.TerrainAltitudeMap], eax
+	GetUniformLocation ebx, "terrain_conemap"
+	mov [esi + TerrainUniformLocations.TerrainConeMap], eax
+	GetUniformLocation ebx, "terrain_height"
+	mov [esi + TerrainUniformLocations.TerrainHeight], eax
+	GetUniformLocation ebx, "terrain_scaling"
+	mov [esi + TerrainUniformLocations.TerrainScaling], eax
+
+	FrameEnd
+	ret
+
+DefFunc _SceneSetSkyUniformLocations
+	FrameBegin ebx, esi
+	NameParams %$Program, %$OutLocations
+
+	mov ebx, %$Program
+	mov esi, %$OutLocations
+
+	GetUniformLocation ebx, "sunpos"
+	mov [esi + SkyUniformLocations.SunPosition], eax
+	GetUniformLocation ebx, "time"
+	mov [esi + SkyUniformLocations.Time], eax
+	GetUniformLocation ebx, "cloud_texture"
+	mov [esi + SkyUniformLocations.CloudTex], eax
+	GetUniformLocation ebx, "cloud_height"
+	mov [esi + SkyUniformLocations.CloudHeight], eax
+	GetUniformLocation ebx, "cloud_size"
+	mov [esi + SkyUniformLocations.CloudSize], eax
+	GetUniformLocation ebx, "sun_glow_exponent"
+	mov [esi + SkyUniformLocations.SunGlowExponent], eax
+	GetUniformLocation ebx, "sun_center_brightness"
+	mov [esi + SkyUniformLocations.SunCenterBrightness], eax
+	GetUniformLocation ebx, "suncolor"
+	mov [esi + SkyUniformLocations.SunColor], eax
+	GetUniformLocation ebx, "fogcolor"
+	mov [esi + SkyUniformLocations.FogColor], eax
+	GetUniformLocation ebx, "skycolor"
+	mov [esi + SkyUniformLocations.SkyColor], eax
+
+	FrameEnd
+	ret
+
 DefFunc _SceneLoadDrawTerrainProgram
 	FrameBegin ebx, esi, edi
 	NameParams %$PtrToDrawTerrainProgram, %$DrawTerrainProgramLocations, %$DrawBillboardVAO, %$DrawBillboardVBO
@@ -244,6 +334,7 @@ DefFunc _SceneLoadDrawTerrainProgram
 	SceneLoadShaderProgram ebx, \
 		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
 		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\sky.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\ssample.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\terrain.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\terrain_out.fsh"
@@ -262,35 +353,13 @@ DefFunc _SceneLoadDrawTerrainProgram
 
 	mov esi, %$DrawTerrainProgramLocations
 
-	GetUniformLocation ebx, "camorient"
-	mov [esi + DrawTerrainProgramLocations.CameraMatrix], eax
-	GetUniformLocation ebx, "proj"
-	mov [esi + DrawTerrainProgramLocations.ProjMatrix], eax
-	GetUniformLocation ebx, "campos"
-	mov [esi + DrawTerrainProgramLocations.CameraPosition], eax
-	GetUniformLocation ebx, "render_distance"
-	mov [esi + DrawTerrainProgramLocations.RenderDistance], eax
-	GetUniformLocation ebx, "terrain_altmap"
-	mov [esi + DrawTerrainProgramLocations.TerrainAltitudeMap], eax
-	GetUniformLocation ebx, "terrain_conemap"
-	mov [esi + DrawTerrainProgramLocations.TerrainConeMap], eax
-	GetUniformLocation ebx, "terrain_height"
-	mov [esi + DrawTerrainProgramLocations.TerrainHeight], eax
-	GetUniformLocation ebx, "terrain_scaling"
-	mov [esi + DrawTerrainProgramLocations.TerrainScaling], eax
 	GetUniformLocation ebx, "texture_quality"
 	mov [esi + DrawTerrainProgramLocations.TextureQuality], eax
 
-	GetFragDataLocation ebx, "out_normal_dist"
-	mov [esi + DrawTerrainProgramLocations.OutNormalDist], eax
-	GetFragDataLocation ebx, "out_diffuse"
-	mov [esi + DrawTerrainProgramLocations.OutDiffuse], eax
-	GetFragDataLocation ebx, "out_specular"
-	mov [esi + DrawTerrainProgramLocations.OutSpecular], eax
-	GetFragDataLocation ebx, "out_emissive"
-	mov [esi + DrawTerrainProgramLocations.OutEmissive], eax
-	GetFragDataLocation ebx, "out_scatter"
-	mov [esi + DrawTerrainProgramLocations.OutScatter], eax
+	invoke_cdecl _SceneSetRayUniformLocations, ebx, &[esi + DrawTerrainProgramLocations.first_ray]
+	invoke_cdecl _SceneSetTerrainUniformLocations, ebx, &[esi + DrawTerrainProgramLocations.first_terrain]
+	invoke_cdecl _SceneSetSkyUniformLocations, ebx, &[esi + DrawTerrainProgramLocations.first_sky]
+	invoke_cdecl _SceneGetSSOutputLocations, ebx, &[esi + DrawTerrainProgramLocations.first_output]
 
 	mov eax, ebx
 .bad_end:
@@ -305,6 +374,7 @@ DefFunc _SceneLoadDrawWaterProgram
 	SceneLoadShaderProgram ebx, \
 		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
 		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\sky.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\ssample.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\terrain.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\water.fsh", \
@@ -324,24 +394,6 @@ DefFunc _SceneLoadDrawWaterProgram
 
 	mov esi, %$DrawWaterProgramLocations
 
-	GetUniformLocation ebx, "camorient"
-	mov [esi + DrawWaterProgramLocations.CameraMatrix], eax
-	GetUniformLocation ebx, "proj"
-	mov [esi + DrawWaterProgramLocations.ProjMatrix], eax
-	GetUniformLocation ebx, "campos"
-	mov [esi + DrawWaterProgramLocations.CameraPosition], eax
-	GetUniformLocation ebx, "time"
-	mov [esi + DrawWaterProgramLocations.Time], eax
-	GetUniformLocation ebx, "render_distance"
-	mov [esi + DrawWaterProgramLocations.RenderDistance], eax
-	GetUniformLocation ebx, "terrain_altmap"
-	mov [esi + DrawWaterProgramLocations.TerrainAltitudeMap], eax
-	GetUniformLocation ebx, "terrain_conemap"
-	mov [esi + DrawWaterProgramLocations.TerrainConeMap], eax
-	GetUniformLocation ebx, "terrain_height"
-	mov [esi + DrawWaterProgramLocations.TerrainHeight], eax
-	GetUniformLocation ebx, "terrain_scaling"
-	mov [esi + DrawWaterProgramLocations.TerrainScaling], eax
 	GetUniformLocation ebx, "texture_quality"
 	mov [esi + DrawWaterProgramLocations.TextureQuality], eax
 	GetUniformLocation ebx, "sea_level"
@@ -353,16 +405,10 @@ DefFunc _SceneLoadDrawWaterProgram
 	GetUniformLocation ebx, "terrain_normal_depth"
 	mov [esi + DrawWaterProgramLocations.SSTerrainNormalDepth], eax
 
-	GetFragDataLocation ebx, "out_normal_dist"
-	mov [esi + DrawWaterProgramLocations.OutNormalDist], eax
-	GetFragDataLocation ebx, "out_diffuse"
-	mov [esi + DrawWaterProgramLocations.OutDiffuse], eax
-	GetFragDataLocation ebx, "out_specular"
-	mov [esi + DrawWaterProgramLocations.OutSpecular], eax
-	GetFragDataLocation ebx, "out_emissive"
-	mov [esi + DrawWaterProgramLocations.OutEmissive], eax
-	GetFragDataLocation ebx, "out_scatter"
-	mov [esi + DrawWaterProgramLocations.OutScatter], eax
+	invoke_cdecl _SceneSetRayUniformLocations, ebx, &[esi + DrawWaterProgramLocations.first_ray]
+	invoke_cdecl _SceneSetTerrainUniformLocations, ebx, &[esi + DrawWaterProgramLocations.first_terrain]
+	invoke_cdecl _SceneSetSkyUniformLocations, ebx, &[esi + DrawWaterProgramLocations.first_sky]
+	invoke_cdecl _SceneGetSSOutputLocations, ebx, &[esi + DrawWaterProgramLocations.first_output]
 
 	mov eax, ebx
 .bad_end:
@@ -377,6 +423,7 @@ DefFunc _SceneLoadDrawCompositeProgram
 	SceneLoadShaderProgram ebx, \
 		GL_VERTEX_SHADER, str "assets\billboard.vsh", \
 		GL_FRAGMENT_SHADER, str "assets\ray.fsh", \
+		GL_FRAGMENT_SHADER, str "assets\sky.fsh", \
 		GL_FRAGMENT_SHADER, str "assets\composite.fsh"
 	test eax, eax
 	jz .bad_end
@@ -393,12 +440,6 @@ DefFunc _SceneLoadDrawCompositeProgram
 
 	mov esi, %$DrawCompositeProgramLocations
 
-	GetUniformLocation ebx, "camorient"
-	mov [esi + DrawCompositeProgramLocations.CameraMatrix], eax
-	GetUniformLocation ebx, "proj"
-	mov [esi + DrawCompositeProgramLocations.ProjMatrix], eax
-	GetUniformLocation ebx, "campos"
-	mov [esi + DrawCompositeProgramLocations.CameraPosition], eax
 	GetUniformLocation ebx, "sunpos"
 	mov [esi + DrawCompositeProgramLocations.SunPosition], eax
 	GetUniformLocation ebx, "render_distance"
@@ -413,6 +454,9 @@ DefFunc _SceneLoadDrawCompositeProgram
 	mov [esi + DrawCompositeProgramLocations.TexSSEmissive], eax
 	GetUniformLocation ebx, "scatter"
 	mov [esi + DrawCompositeProgramLocations.TexSSScatter], eax
+
+	invoke_cdecl _SceneSetRayUniformLocations, ebx, &[esi + DrawCompositeProgramLocations.first_ray]
+	invoke_cdecl _SceneSetSkyUniformLocations, ebx, &[esi + DrawCompositeProgramLocations.first_sky]
 
 	GetFragDataLocation ebx, "color"
 	mov [esi + DrawCompositeProgramLocations.OutColor], eax

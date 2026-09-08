@@ -32,8 +32,8 @@ _DrawBillboardVAO resd 1
 extern _TerrainTexture
 _TerrainTexture resd 1
 
-extern _TerrainTextureMipLinear
-_TerrainTextureMipLinear resd 1
+extern _NoiseTexture
+_NoiseTexture resd 1
 
 extern _TerrainConeTexture
 _TerrainConeTexture resd 1
@@ -191,16 +191,16 @@ extern _ProjectionMatrix
 _ProjectionMatrix:
 	InstMatrix
 
-extern _MovementSpeed
-_MovementSpeed:
-	InstVector
-
 extern _CameraPos
 _CameraPos:
 	InstVector
 
 extern _SunPosition
 _SunPosition:
+	InstVector
+
+extern _MovementSpeed
+_MovementSpeed:
 	InstVector
 
 extern _TerrainMapScalingVector
@@ -368,8 +368,8 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
 	invoke_cdecl _InitTexRepeatLinear, GL_TEXTURE_2D
 	mov ebx, [_NoiseBitmap]
-	invoke_dll_stdcall glGenTextures, 1, _TerrainTextureMipLinear
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTextureMipLinear]
+	invoke_dll_stdcall glGenTextures, 1, _NoiseTexture
+	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_NoiseTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
 	invoke_cdecl _InitTexRepeatLinearMipmap, GL_TEXTURE_2D
 	invoke_cdecl _DestroyBitMap, ebx
@@ -532,7 +532,7 @@ DefFunc _SceneUnload
 	invoke_cdecl _DeleteRenderbuffer, _CompositeHalfSizeDepthBuffer
 
 	invoke_cdecl _DeleteTexture, _TerrainTexture
-	invoke_cdecl _DeleteTexture, _TerrainTextureMipLinear
+	invoke_cdecl _DeleteTexture, _NoiseTexture
 	invoke_cdecl _DeleteTexture, _TerrainConeTexture
 	invoke_cdecl _DeInitSSTextureSets, _SSTextures
 	invoke_cdecl _DeInitSSTextureSets, _SSHalfSizeTextures
@@ -919,22 +919,51 @@ __SECT__
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
 	invoke_dll_stdcall glDepthFunc, GL_LEQUAL
 
+	%assign TextureIndex 0
+	%macro UniformTexture 2
+		invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + TextureIndex
+		invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, %2
+		invoke_dll_stdcall glUniform1i, %1, TextureIndex
+		%assign TextureIndex TextureIndex + 1
+	%endmacro
+
+	%macro SetRayUniforms 1
+		invoke_dll_stdcall glUniformMatrix4fv, [%1.CameraMatrix], 1, 0, _CameraMatrix
+		invoke_dll_stdcall glUniformMatrix4fv, [%1.ProjMatrix], 1, 0, _ProjectionMatrix
+		invoke_dll_stdcall glUniform3fv, [%1.CameraPosition], 1, _CameraPos
+		invoke_dll_stdcall glUniform1f, [%1.RenderDistance], 3000.0f
+	%endmacro
+
+	%macro SetTerrainUniforms 1
+		invoke_dll_stdcall glUniform1f, [%1.TerrainHeight], [_TerrainMapHeight]
+		invoke_dll_stdcall glUniform1f, [%1.TerrainScaling], [_TerrainMapScaling]
+		UniformTexture [%1.TerrainAltitudeMap], [_TerrainTexture]
+		UniformTexture [%1.TerrainConeMap], [_TerrainConeTexture]
+	%endmacro
+
+	%macro SetSkyUniforms 1
+		invoke_dll_stdcall glUniform3fv, [%1.SunPosition], 1, _SunPosition
+		invoke_dll_stdcall glUniform1f, [%1.Time], %$TimerValue32
+		UniformTexture [%1.CloudTex], [_NoiseTexture]
+		invoke_dll_stdcall glUniform1f, [%1.CloudHeight], 1000.0f
+		invoke_dll_stdcall glUniform1f, [%1.CloudSize], 5.0f
+		invoke_dll_stdcall glUniform1f, [%1.SunGlowExponent], 10000.0f
+		invoke_dll_stdcall glUniform1f, [%1.SunCenterBrightness], 10.0f
+		invoke_dll_stdcall glUniform3f, [%1.SunColor], 1.0f, 0.9f, 0.8f
+		invoke_dll_stdcall glUniform3f, [%1.FogColor], 0.8f, 0.9f, 1.0f
+		invoke_dll_stdcall glUniform3f, [%1.SkyColor], 0.1f, 0.2f, 0.9f
+	%endmacro
+
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawTerrainProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawTerrainProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
-	invoke_dll_stdcall glUniform3fv, [_DrawTerrainProgramLocations.CameraPosition], 1, _CameraPos
-	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.RenderDistance], 3000.0f
-	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.TerrainHeight], [_TerrainMapHeight]
-	invoke_dll_stdcall glUniform1f, [_DrawTerrainProgramLocations.TerrainScaling], [_TerrainMapScaling]
+
 	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TextureQuality], [_CurTextureQuality]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
-	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TerrainAltitudeMap], 0
-	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TerrainConeMap], 1
+	SetRayUniforms _DrawTerrainProgramLocations
+	SetTerrainUniforms _DrawTerrainProgramLocations
+	SetSkyUniforms _DrawTerrainProgramLocations
+
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	%assign TextureIndex 0
 	invoke_dll_stdcall glBindVertexArray, 0
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterHalfSizeFBO]
@@ -942,27 +971,19 @@ __SECT__
 
 	invoke_dll_stdcall glUseProgram, [_DrawWaterProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawWaterProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
-	invoke_dll_stdcall glUniform3fv, [_DrawWaterProgramLocations.CameraPosition], 1, _CameraPos
-	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.Time], %$TimerValue32
-	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.RenderDistance], 3000.0f
-	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.TerrainHeight], [_TerrainMapHeight]
-	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.TerrainScaling], [_TerrainMapScaling]
+
 	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TextureQuality], [_CurTextureQuality]
+	SetRayUniforms _DrawWaterProgramLocations
+	SetTerrainUniforms _DrawWaterProgramLocations
+	SetSkyUniforms _DrawWaterProgramLocations
+
 	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.SeaLevel], 120.0f
 	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.SeaWaveHeight], 1.0f
 	invoke_dll_stdcall glUniform1f, [_DrawWaterProgramLocations.SeaWaveSize], 1.0f
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 0
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 1
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
-	invoke_dll_stdcall glActiveTexture, GL_TEXTURE0 + 2
-	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_SSHalfSizeTextures.NormalDist]
-	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TerrainAltitudeMap], 0
-	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TerrainConeMap], 1
-	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.SSTerrainNormalDepth], 2
+	UniformTexture [_DrawWaterProgramLocations.SSTerrainNormalDepth], [_SSHalfSizeTextures.NormalDist]
+
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	%assign TextureIndex 0
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
@@ -975,18 +996,21 @@ __SECT__
 
 	invoke_dll_stdcall glUseProgram, [_DrawCompositeProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.CameraMatrix], 1, 0, _CameraMatrix
-	invoke_dll_stdcall glUniformMatrix4fv, [_DrawCompositeProgramLocations.ProjMatrix], 1, 0, _ProjectionMatrix
-	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.CameraPosition], 1, _CameraPos
-	invoke_dll_stdcall glUniform3fv, [_DrawCompositeProgramLocations.SunPosition], 1, _SunPosition
-	invoke_dll_stdcall glUniform1f, [_DrawCompositeProgramLocations.RenderDistance], 3000.0f
-	invoke_cdecl _SetupSSTextureShaderInput, _SSHalfSizeTextures, 0
-	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSNormalDist], 0
-	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSDiffuse], 1
-	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSSpecular], 2
-	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSEmissive], 3
-	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSScatter], 4
+
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TextureQuality], [_CurTextureQuality]
+	invoke_cdecl _SetupSSTextureShaderInput, _SSHalfSizeTextures, TextureIndex
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSNormalDist], 0 + TextureIndex
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSDiffuse], 1 + TextureIndex
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSSpecular], 2 + TextureIndex
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSEmissive], 3 + TextureIndex
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSScatter], 4 + TextureIndex
+	%assign TextureIndex TextureIndex + 5
+
+	SetRayUniforms _DrawCompositeProgramLocations
+	SetSkyUniforms _DrawCompositeProgramLocations
+
 	invoke_dll_stdcall glDrawArrays, GL_TRIANGLE_STRIP, 0, 4
+	%assign TextureIndex 0
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
@@ -1027,11 +1051,11 @@ __SECT__
 	invoke_dll_stdcall glBindVertexArray, 0
 	invoke_dll_stdcall glUseProgram, 0
 
-	invoke_dll_stdcall glGetError
-	test eax, eax
-	jz .no_error
-	debug_msg "glGetError() == %p", eax
-	jmp .quit
+	;invoke_dll_stdcall glGetError
+	;test eax, eax
+	;jz .no_error
+	;debug_msg "glGetError() == %p", eax
+	;jmp .quit
 .no_error:
 
 	fld1
