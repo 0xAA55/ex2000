@@ -549,6 +549,15 @@ DefFunc _Scene
 __SECT__
 	DefVars %$KeyW, %$KeyS, %$KeyA, %$KeyD, %$KeySpace, %$KeyCtrl, %$KeyEscape
 
+%macro ErrorCheck 1
+	invoke_dll_stdcall glGetError
+	test eax, eax
+	jz %%no_error
+	debug_msg "%s glGetError() == %p", str %1, eax
+	jmp .quit
+%%no_error:
+%endmacro
+
 	xor eax, eax
 	mov ecx, %$Frame_NumLocals
 	lea edi, Variable(0)
@@ -823,15 +832,6 @@ __SECT__
 	divss xmm0, xmm1
 	addss xmm0, [_SceneStatus.DayTime]
 	movss [_SceneStatus.DayTime], xmm0
-
-%macro ErrorCheck 1
-	invoke_dll_stdcall glGetError
-	test eax, eax
-	jz %%no_error
-	debug_msg "%s glGetError() == %p", str %1, eax
-	jmp .quit
-%%no_error:
-%endmacro
 
 	DefVars %$TextureIndex
 
