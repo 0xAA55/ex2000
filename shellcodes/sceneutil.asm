@@ -322,6 +322,8 @@ DefFunc _SceneSetSkyUniformLocations
 	mov [esi + SkyUniformLocations.FogColor], eax
 	GetUniformLocation ebx, "skycolor"
 	mov [esi + SkyUniformLocations.SkyColor], eax
+	GetUniformLocation ebx, "ambcolor"
+	mov [esi + SkyUniformLocations.AmbColor], eax
 
 	FrameEnd
 	ret
@@ -575,3 +577,76 @@ DefFunc _Scene_clear_buffers
 	.clear_nd dd 0, 0, 0, FLT_MAX
 	.clear_zeroes dd 0, 0, 0, 0
 	.clear_ones dd __float32__(1.0), __float32__(1.0), __float32__(1.0), __float32__(1.0)
+
+DefFunc _SceneInitStatus
+	FrameBegin ebx
+	NameParams %$Status
+
+	mov ebx, %$Status
+	invoke_cdecl memset, ebx, 0, SceneStatus.size
+	invoke_cdecl memcpy, & [ebx + SceneStatus.VPWidth], label .data_to_copy, .bytes_to_copy
+
+	FrameEnd
+	ret
+[segment .rdata]
+.data_to_copy:
+	.vpwidth dd 1920
+	.vpheight dd 1080
+	.znear dd 0.1
+	.zfar dd 2000.0
+	.fov_degree dd 60.0
+	.render_distance dd 2000.0
+	.terrain_map_height dd 200.0
+	.terrain_map_scaling dd 2000.0
+	.cloud_height dd 1000.0
+	.cloud_size dd 5.0
+	.sun_glow_exponent dd 10000.0
+	.sun_center_brightness dd 100.0
+	.camerapos dd 0.0, 200.0, 0.0, 0.0
+	.sun_color dd 1.0, 0.9, 0.8, 0.0
+	.fog_color dd 0.8, 0.9, 1.0, 0.0
+	.sky_color dd 0.1, 0.2, 0.9, 0.0
+	.amb_color dd 0.1, 0.12, 0.15, 0.0
+	.sea_level dd 124.0
+	.init_daytime dd 0.3333
+	.cur_texture_quality dd 3
+.bytes_to_copy equ $ - .data_to_copy
+
+DefFunc _SceneUpdateStatus
+	FrameBegin ebx
+	NameParams %$Status
+
+	mov ebx, %$Status
+
+	mov eax, __float32__(0.0174532924)
+	mov ecx, [ebx + SceneStatus.VPWidth]
+	mov edx, [ebx + SceneStatus.VPHeight]
+	movss xmm0, [ebx + SceneStatus.FovDegree]
+	movd xmm1, eax
+	mov eax, 1
+	test ecx, ecx
+	cmovz ecx, eax
+	test edx, edx
+	cmovz edx, eax
+	cvtsi2ss xmm2, ecx
+	cvtsi2ss xmm3, edx
+	mulss xmm0, xmm1
+	divss xmm2, xmm3
+	movss [ebx + SceneStatus.FovY], xmm0
+	movss [ebx + SceneStatus.Aspect], xmm2
+
+	fld dword[ebx + SceneStatus.DayTime]
+	fsincos
+	fstp dword[ebx + SceneStatus.SunPosition + Vector.z]
+	fstp dword[ebx + SceneStatus.SunPosition + Vector.y]
+	mov dword[ebx + SceneStatus.SunPosition + Vector.x], __float32__(0.4)
+
+	invoke_cdecl _VectorNormal, & [ebx + SceneStatus.SunPosition], & [ebx + SceneStatus.SunPosition], 3
+
+	invoke_cdecl _MatrixRotationEuler, & [ebx + SceneStatus.CameraMatrix], [ebx + SceneStatus.CameraYaw], [ebx + SceneStatus.CameraPitch], [ebx + SceneStatus.CameraRoll]
+	invoke_cdecl _MatrixViewEuler, & [ebx + SceneStatus.CameraViewMatrix], & [ebx + SceneStatus.CameraPos], [ebx + SceneStatus.CameraYaw], [ebx + SceneStatus.CameraPitch], [ebx + SceneStatus.CameraRoll]
+	invoke_cdecl _MatrixProjection, & [ebx + SceneStatus.ProjectionMatrix], [ebx + SceneStatus.FovY], [ebx + SceneStatus.Aspect], [ebx + SceneStatus.ZNear], [ebx + SceneStatus.ZFar]
+
+
+	FrameEnd
+	ret

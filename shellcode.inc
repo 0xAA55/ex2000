@@ -125,6 +125,8 @@
 	DefExp _Scene_check_fbo
 	DefExp _Scene_clear_color
 	DefExp _Scene_clear_buffers
+	DefExp _SceneInitStatus
+	DefExp _SceneUpdateStatus
 	DefExp _SetupSSFBOOutputs
 	DefExp _SetupSSTextureMipmaps
 	DefExp _SetupSSTextureShaderInput

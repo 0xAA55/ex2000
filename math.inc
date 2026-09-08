@@ -56,7 +56,7 @@ endstruc
 	.wy resd 1
 	.wz resd 1
 	.ww resd 1
-	.size equ $ - .x
+.size equ $ - .x
 %endmacro
 
 ;Must be 16-byte aligned

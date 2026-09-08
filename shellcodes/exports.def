@@ -72,6 +72,8 @@ SceneLoadDrawHDR2LDRProgram
 Scene_check_fbo
 Scene_clear_color
 Scene_clear_buffers
+SceneInitStatus
+SceneUpdateStatus
 SetupSSFBOOutputs
 SetupSSTextureMipmaps
 SetupSSTextureShaderInput

@@ -57,6 +57,7 @@ endstruc
 	.SunColor resd 1
 	.FogColor resd 1
 	.SkyColor resd 1
+	.AmbColor resd 1
 %endmacro
 
 struc SkyUniformLocations
@@ -145,6 +146,60 @@ endstruc
 
 struc DrawHDR2LDRProgramLocations
 	InstDrawHDR2LDRProgramLocations
+endstruc
+
+%macro InstSceneStatus 0
+.scene_status_start:
+	.CameraMatrix resd 16
+	.CameraViewMatrix resd 16
+	.ViewProjMatrix resd 16
+	.ProjectionMatrix resd 16
+	.SunPosition resd 4
+	.VPWidthHalf resd 1 ;integer
+	.VPHeightHalf resd 1 ;integer
+	.VPWidthLow resd 1 ;integer
+	.VPHeightLow resd 1 ;integer
+	.FovY resd 1 ;float
+	.Aspect resd 1 ;float
+	.hWnd resd 1 ;HWND
+	._pad1: alignb 16
+.scene_status_base:
+	.VPWidth resd 1 ;integer
+	.VPHeight resd 1 ;integer
+	.ZNear resd 1 ;float
+	.ZFar resd 1 ;float
+	.FovDegree resd 1 ;float
+	.RenderDistance resd 1 ;float
+	.TerrainMapHeight resd 1 ;float
+	.TerrainMapScaling resd 1 ;float
+	.CloudHeight resd 1
+	.CloudSize resd 1
+	.SunGlowExponent resd 1
+	.SunCenterBrightness resd 1
+	.CameraPos resd 4
+	.SunColor resd 4
+	.FogColor resd 4
+	.SkyColor resd 4
+	.AmbColor resd 4
+	.SeaLevel resd 1
+	.DayTime resd 1 ;float
+	.CurTextureQuality resd 1
+	.CameraYaw resd 1 ;float
+	.CameraPitch resd 1 ;float
+	.CameraRoll resd 1 ;float
+	.TimeValueF resq 1 ;float
+	.TimeValueD resd 1 ;double
+	.DeltaTimeF resd 1 ;float
+	.DeltaTimeD resq 1 ;double
+	.RefTerrainTexture resd 1
+	.RefTerrainConeTexture resd 1
+	.RefNoiseTexture resd 1
+	._pad2: alignb 16
+%endmacro
+
+struc SceneStatus
+	InstSceneStatus
+	.size equ $ - SceneStatus
 endstruc
 
 %endif

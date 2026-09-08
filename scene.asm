@@ -19,9 +19,6 @@ InstExp
 %undef DefExp
 
 segment .bss
-extern _CurTextureQuality
-_CurTextureQuality resd 1
-
 extern _BillboardVerticesBuffer
 _BillboardVerticesBuffer:
 	InstGlBuffer
@@ -126,12 +123,6 @@ extern _DrawHDR2LDRProgramLocations
 _DrawHDR2LDRProgramLocations:
 	InstDrawHDR2LDRProgramLocations
 
-extern _MinPitch
-_MinPitch resd 1
-
-extern _MaxPitch
-_MaxPitch resd 1
-
 extern _NoiseBitmap
 _NoiseBitmap resd 1
 
@@ -144,26 +135,8 @@ _TerrainConeBitmap resd 1
 extern _SceneLoadingProgress
 _SceneLoadingProgress resd 1
 
-extern _CameraYaw
-_CameraYaw resd 1
-
-extern _CameraPitch
-_CameraPitch resd 1
-
-extern _Aspect
-_Aspect resd 1
-
-extern _FovY
-_FovY resd 1
-
-extern _SeaLevel
-_SeaLevel resd 1
-
 extern _OGLFC
 _OGLFC resd 1
-
-extern _DayTime
-_DayTime resd 1
 
 extern _VBlankData
 _VBlankData:
@@ -171,40 +144,17 @@ _VBlankData:
 
 segment .bss
 alignb 16
-extern _ModelMatrix
-_ModelMatrix:
-	InstMatrix
 
-extern _ViewProjMatrix
-_ViewProjMatrix:
-	InstMatrix
-
-extern _CameraMatrix
-_CameraMatrix:
-	InstMatrix
-
-extern _CameraViewMatrix
-_CameraViewMatrix:
-	InstMatrix
-
-extern _ProjectionMatrix
-_ProjectionMatrix:
-	InstMatrix
-
-extern _CameraPos
-_CameraPos:
-	InstVector
-
-extern _SunPosition
-_SunPosition:
-	InstVector
+extern _SceneStatus
+_SceneStatus:
+	InstSceneStatus
 
 extern _MovementSpeed
 _MovementSpeed:
 	InstVector
 
-extern _TerrainMapScalingVector
-_TerrainMapScalingVector:
+extern _SceneStatus.TerrainMapScalingVector
+_SceneStatus.TerrainMapScalingVector:
 	InstVector
 
 extern _ClientRect
@@ -253,19 +203,11 @@ iend
 extern _DefaultMovementSpeed
 _DefaultMovementSpeed dd 100.0
 
-extern _TerrainMapScaling
-_TerrainMapScaling dd 2000.0
+extern _MinPitch
+_MinPitch dd -1.57079637
 
-extern _TerrainMapHeight
-_TerrainMapHeight dd 200.0
-
-extern _CurveToSeaLevel
-_CurveToSeaLevel dd 0.62
-
-extern _FovDegree
-_FovDegree dw 60
-extern _PiDegree
-_PiDegree dw 180
+extern _MaxPitch
+_MaxPitch dd 1.57079637
 
 extern _BillBoardVertices
 _BillBoardVertices:
@@ -299,24 +241,6 @@ DefFunc _SceneInit
 	invoke_cdecl _VBlankInit, _VBlankData
 	invoke_cdecl _SceneLoadInitProgress
 
-	mov byte[_CurTextureQuality], 3
-
-	fldpi
-	fdiv dword [_2.0f]
-	fst dword [_MaxPitch]
-	fchs
-	fstp dword [_MinPitch]
-
-	fild word [_FovDegree]
-	fidiv word [_PiDegree]
-	fldpi
-	fmul
-	fstp dword [_FovY]
-
-	fld dword [_TerrainMapHeight]
-	fmul dword [_CurveToSeaLevel]
-	fstp dword [_SeaLevel]
-
 	invoke_cdecl _InitBuffer, _BillboardVerticesBuffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, 2, _BillBoardVertices.num / 2, _BillBoardVertices
 
 	invoke_dll_stdcall glGenVertexArrays, 1, _DrawBillboardVAO
@@ -328,7 +252,12 @@ DefFunc _SceneInit
 	invoke_cdecl _OGLFC_Create, [_hDC], 12
 	mov [_OGLFC], eax
 
-	mov dword [_CameraPos + Vector.y], __float32__(200.0)
+	invoke_cdecl _SceneInitStatus, _SceneStatus
+	mov eax, [_hWnd]
+	mov [_SceneStatus.hWnd], eax
+	mov dword [_SceneStatus.RefTerrainTexture], _TerrainTexture
+	mov dword [_SceneStatus.RefTerrainConeTexture], _TerrainConeTexture
+	mov dword [_SceneStatus.RefNoiseTexture], _NoiseTexture
 
 	xor eax, eax
 	mov [_SceneLoadingProgress], eax
@@ -385,7 +314,6 @@ DefFunc _SceneLoad03
 
 DefFunc _SceneLoad04
 	FrameBegin
-	mov dword[_DayTime], __float32__(0.3333)
 	invoke_cdecl _SceneLoadDrawTerrainProgram, _DrawTerrainProgram, _DrawTerrainProgramLocations, [_DrawBillboardVAO], [_BillboardVerticesBuffer.gl_buffer]
 	test eax, eax
 	jz .bad_end
@@ -585,16 +513,16 @@ DefFunc _Scene_OnKeyDown
 	jz .pagedn
 	jmp .end
 .pageup:
-	mov eax, [_CurTextureQuality]
+	mov eax, [_SceneStatus.CurTextureQuality]
 	inc eax
 	and eax, 3
-	mov [_CurTextureQuality], eax
+	mov [_SceneStatus.CurTextureQuality], eax
 	jmp .end
 .pagedn:
-	mov eax, [_CurTextureQuality]
+	mov eax, [_SceneStatus.CurTextureQuality]
 	dec eax
 	and eax, 3
-	mov [_CurTextureQuality], eax
+	mov [_SceneStatus.CurTextureQuality], eax
 	jmp .end
 .end:
 	FrameEnd
@@ -609,11 +537,7 @@ DefFunc _Scene_OnKeyUp
 
 DefFunc _Scene
 	FrameBegin ebx, esi, edi
-	DefVars %$TimerValue32, %$DeltaTimeL, %$DeltaTimeH, %$DeltaTime32
 	DefVars %$VPSize
-	DefVars %$VPWidth, %$VPHeight
-	DefVars %$VPWidthHalf, %$VPHeightHalf
-	DefVars %$VPWidthLow, %$VPHeightLow
 	DefVars %$CurMovementSpeed, %$FramesPerSec
 
 [segment .rdata]
@@ -628,12 +552,13 @@ __SECT__
 	rep stosd
 
 	fld qword [_Timer.TimerVal]
-	fstp qword %$DeltaTimeL
+	fstp qword [_SceneStatus.DeltaTimeD]
 	invoke_cdecl _UpdateTimer, _Timer
-	fst dword %$TimerValue32
-	fsub qword %$DeltaTimeL
-	fst qword %$DeltaTimeL
-	fstp dword %$DeltaTime32
+	fst dword [_SceneStatus.TimeValueF]
+	fst qword [_SceneStatus.TimeValueD]
+	fsub qword [_SceneStatus.DeltaTimeD]
+	fst dword [_SceneStatus.DeltaTimeF]
+	fstp qword [_SceneStatus.DeltaTimeD]
 
 	invoke_dll_stdcall GetClientRect, [_hWnd], _ClientRect
 	movq xmm0, [_ClientRect.left]
@@ -654,33 +579,33 @@ __SECT__
 	sub ecx, [_ClientRect.top]
 	cvtsi2ss xmm0, eax
 	cvtsi2ss xmm1, ecx
-	mov %$VPWidth, eax
-	mov %$VPHeight, ecx
+	mov [_SceneStatus.VPWidth], eax
+	mov [_SceneStatus.VPHeight], ecx
 	divss xmm0, xmm1
-	movss [_Aspect], xmm0
+	movss [_SceneStatus.Aspect], xmm0
 	shl ecx, 16
 	or eax, ecx
 	mov %$VPSize, eax
 	xor edx, edx
 	inc edx
-	mov eax, %$VPWidth
-	mov ecx, %$VPHeight
+	mov eax, [_SceneStatus.VPWidth]
+	mov ecx, [_SceneStatus.VPHeight]
 	shr eax, 1
 	shr ecx, 1
 	cmp eax, edx
 	cmovb eax, edx
 	cmp ecx, edx
 	cmovb ecx, edx
-	mov %$VPWidthHalf, eax
-	mov %$VPHeightHalf, ecx
+	mov [_SceneStatus.VPWidthHalf], eax
+	mov [_SceneStatus.VPHeightHalf], ecx
 	shr eax, 1
 	shr ecx, 1
 	cmp eax, edx
 	cmovb eax, edx
 	cmp ecx, edx
 	cmovb ecx, edx
-	mov %$VPWidthLow, eax
-	mov %$VPHeightLow, ecx
+	mov [_SceneStatus.VPWidthLow], eax
+	mov [_SceneStatus.VPHeightLow], ecx
 
 	invoke_cdecl _SceneLoadProgressive
 	mov ebx, _NumItemsToLoad
@@ -690,7 +615,7 @@ __SECT__
 	cmp eax, 0
 	jl .quit
 
-	invoke_dll_stdcall glViewport, [_ClientRect.left], [_ClientRect.top], [_ClientRect.right], [_ClientRect.bottom]
+	invoke_dll_stdcall glViewport, 0, 0, [_SceneStatus.VPWidth], [_SceneStatus.VPHeight]
 	invoke_cdecl _Scene_clear_color
 
 	invoke_dll_stdcall glUseProgram, [_DrawProgressProgram]
@@ -725,7 +650,7 @@ __SECT__
 	movq xmm1, [_WindowRect.right]
 	movq xmm0, [_CursorPos]
 	paddd xmm1, [_WindowRect.left]
-	movq xmm2, [_CameraYaw]
+	movq xmm2, [_SceneStatus.CameraYaw]
 	psrad xmm1, 1
 	movq xmm3, [_point_001_vector]
 	movq [_WindowCenter.x], xmm1
@@ -742,11 +667,11 @@ __SECT__
 	jae .pi_n
 	addss xmm2, [_2Pi]
 .pi_n:
-	movq [_CameraYaw], xmm2
-	movss xmm0, [_CameraPitch]
+	movq [_SceneStatus.CameraYaw], xmm2
+	movss xmm0, [_SceneStatus.CameraPitch]
 	maxss xmm0, [_MinPitch]
 	minss xmm0, [_MaxPitch]
-	movss [_CameraPitch], xmm0
+	movss [_SceneStatus.CameraPitch], xmm0
 
 	invoke_dll_stdcall SetCursorPos, [_WindowCenter.x], [_WindowCenter.y]
 .after_check_input:
@@ -758,16 +683,16 @@ __SECT__
 	invoke_cdecl _DeleteRenderbuffer, _CompositeDepthBuffer
 	invoke_cdecl _DeleteRenderbuffer, _CompositeHalfSizeDepthBuffer
 
-	invoke_cdecl _InitSSTextureSets, _SSTextures, %$VPWidth, %$VPHeight
-	invoke_cdecl _InitSSTextureSets, _SSHalfSizeTextures, %$VPWidthHalf, %$VPHeightHalf
+	invoke_cdecl _InitSSTextureSets, _SSTextures, [_SceneStatus.VPWidth], [_SceneStatus.VPHeight]
+	invoke_cdecl _InitSSTextureSets, _SSHalfSizeTextures, [_SceneStatus.VPWidthHalf], [_SceneStatus.VPHeightHalf]
 
-	invoke_cdecl _InitRGBA32FBufferTexture, _HDRLensTexture, %$VPWidth, %$VPHeight
+	invoke_cdecl _InitRGBA32FBufferTexture, _HDRLensTexture, [_SceneStatus.VPWidth], [_SceneStatus.VPHeight]
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
-	invoke_cdecl _InitRGBA32FBufferTexture, _HDRBlurTexture, %$VPWidthLow, %$VPHeightLow
+	invoke_cdecl _InitRGBA32FBufferTexture, _HDRBlurTexture, [_SceneStatus.VPWidthLow], [_SceneStatus.VPHeightLow]
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
 
-	invoke_cdecl _InitDepthBuffer, _CompositeDepthBuffer, %$VPWidth, %$VPHeight
-	invoke_cdecl _InitDepthBuffer, _CompositeHalfSizeDepthBuffer, %$VPWidthHalf, %$VPHeightHalf
+	invoke_cdecl _InitDepthBuffer, _CompositeDepthBuffer, [_SceneStatus.VPWidth], [_SceneStatus.VPHeight]
+	invoke_cdecl _InitDepthBuffer, _CompositeHalfSizeDepthBuffer, [_SceneStatus.VPWidthHalf], [_SceneStatus.VPHeightHalf]
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
 	invoke_cdecl _SetupSSFBOOutputs, _SSTextures, _DrawTerrainProgramLocations.first_output
@@ -820,20 +745,16 @@ __SECT__
 	mov [_RTTBufferSize], eax
 .rtt_size_good:
 
-	invoke_cdecl _MatrixRotationEuler, _CameraMatrix, [_CameraYaw], [_CameraPitch], 0
-	invoke_cdecl _MatrixViewEuler, _CameraViewMatrix, _CameraPos, [_CameraYaw], [_CameraPitch], 0
-	invoke_cdecl _MatrixProjection, _ProjectionMatrix, [_FovY], [_Aspect], 0.1f, 2000.0f
-
 	xor eax, eax
 	mov edx, eax
 	dec eax
 	movaps xmm0, [_MovementSpeed]
-	movss xmm1, %$DeltaTime32
+	movss xmm1, [_SceneStatus.DeltaTimeF]
 	mulss xmm1, [_DefaultMovementSpeed]
 	addss xmm1, xmm1
 	shufps xmm1, xmm1, 0
-	movaps xmm2, [_CameraMatrix + Matrix.z]
-	movaps xmm3, [_CameraMatrix + Matrix.x]
+	movaps xmm2, [_SceneStatus.CameraMatrix + Matrix.z]
+	movaps xmm3, [_SceneStatus.CameraMatrix + Matrix.x]
 	movaps xmm4, [_F0100]
 	mulps xmm2, xmm1
 	mulps xmm3, xmm1
@@ -876,17 +797,17 @@ __SECT__
 	movss xmm1, %$CurMovementSpeed
 	xorps xmm2, xmm2
 	movss xmm3, [_DefaultMovementSpeed]
-	mulss xmm3, %$DeltaTime32
+	mulss xmm3, [_SceneStatus.DeltaTimeF]
 	subss xmm1, xmm3
 	maxps xmm1, xmm2
 	shufps xmm1, xmm1, 0 ;xmm1 = CurSpeed - DefSpeed * DeltaTime
 	mulps xmm0, xmm1 ;xmm0 = NormalizedSpeed * xmm1
 	movaps [_MovementSpeed], xmm0
-	movss xmm1, %$DeltaTime32
+	movss xmm1, [_SceneStatus.DeltaTimeF]
 	shufps xmm1, xmm1, 0
 	mulps xmm0, xmm1
-	addps xmm0, [_CameraPos]
-	movaps [_CameraPos], xmm0
+	addps xmm0, [_SceneStatus.CameraPos]
+	movaps [_SceneStatus.CameraPos], xmm0
 	jmp .finished_decel
 .no_decel:
 	xorps xmm0, xmm0
@@ -895,25 +816,19 @@ __SECT__
 
 	mov eax, __float32__(229.18311805) ; 12 * 60 / pi
 	movd xmm1, eax
-	movss xmm0, %$DeltaTime32
+	movss xmm0, [_SceneStatus.DeltaTimeF]
 	divss xmm0, xmm1
-	addss xmm0, [_DayTime]
-	movss [_DayTime], xmm0
+	addss xmm0, [_SceneStatus.DayTime]
+	movss [_SceneStatus.DayTime], xmm0
 
-	fld dword[_DayTime]
-	fsincos
-	fstp dword[_SunPosition.z]
-	fstp dword[_SunPosition.y]
-	mov dword[_SunPosition.x], __float32__(0.4)
-
-	invoke_cdecl _VectorNormal, _SunPosition, _SunPosition, 3
+	invoke_cdecl _SceneUpdateStatus, _SceneStatus
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainFBO]
-	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
+	invoke_dll_stdcall glViewport, 0, 0, [_SceneStatus.VPWidth], [_SceneStatus.VPHeight]
 	invoke_cdecl _Scene_clear_buffers
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawTerrainHalfSizeFBO]
-	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthHalf, %$VPHeightHalf
+	invoke_dll_stdcall glViewport, 0, 0, [_SceneStatus.VPWidthHalf], [_SceneStatus.VPHeightHalf]
 	invoke_cdecl _Scene_clear_buffers
 
 	invoke_dll_stdcall glEnable, GL_DEPTH_TEST
@@ -928,36 +843,37 @@ __SECT__
 	%endmacro
 
 	%macro SetRayUniforms 1
-		invoke_dll_stdcall glUniformMatrix4fv, [%1.CameraMatrix], 1, 0, _CameraMatrix
-		invoke_dll_stdcall glUniformMatrix4fv, [%1.ProjMatrix], 1, 0, _ProjectionMatrix
-		invoke_dll_stdcall glUniform3fv, [%1.CameraPosition], 1, _CameraPos
+		invoke_dll_stdcall glUniformMatrix4fv, [%1.CameraMatrix], 1, 0, _SceneStatus.CameraMatrix
+		invoke_dll_stdcall glUniformMatrix4fv, [%1.ProjMatrix], 1, 0, _SceneStatus.ProjectionMatrix
+		invoke_dll_stdcall glUniform3fv, [%1.CameraPosition], 1, _SceneStatus.CameraPos
 		invoke_dll_stdcall glUniform1f, [%1.RenderDistance], 3000.0f
 	%endmacro
 
 	%macro SetTerrainUniforms 1
-		invoke_dll_stdcall glUniform1f, [%1.TerrainHeight], [_TerrainMapHeight]
-		invoke_dll_stdcall glUniform1f, [%1.TerrainScaling], [_TerrainMapScaling]
+		invoke_dll_stdcall glUniform1f, [%1.TerrainHeight], [_SceneStatus.TerrainMapHeight]
+		invoke_dll_stdcall glUniform1f, [%1.TerrainScaling], [_SceneStatus.TerrainMapScaling]
 		UniformTexture [%1.TerrainAltitudeMap], [_TerrainTexture]
 		UniformTexture [%1.TerrainConeMap], [_TerrainConeTexture]
 	%endmacro
 
 	%macro SetSkyUniforms 1
-		invoke_dll_stdcall glUniform3fv, [%1.SunPosition], 1, _SunPosition
-		invoke_dll_stdcall glUniform1f, [%1.Time], %$TimerValue32
+		invoke_dll_stdcall glUniform3fv, [%1.SunPosition], 1, _SceneStatus.SunPosition
+		invoke_dll_stdcall glUniform1f, [%1.Time], [_SceneStatus.TimeValueF]
 		UniformTexture [%1.CloudTex], [_NoiseTexture]
 		invoke_dll_stdcall glUniform1f, [%1.CloudHeight], 1000.0f
 		invoke_dll_stdcall glUniform1f, [%1.CloudSize], 5.0f
-		invoke_dll_stdcall glUniform1f, [%1.SunGlowExponent], 10000.0f
-		invoke_dll_stdcall glUniform1f, [%1.SunCenterBrightness], 10.0f
-		invoke_dll_stdcall glUniform3f, [%1.SunColor], 1.0f, 0.9f, 0.8f
-		invoke_dll_stdcall glUniform3f, [%1.FogColor], 0.8f, 0.9f, 1.0f
-		invoke_dll_stdcall glUniform3f, [%1.SkyColor], 0.1f, 0.2f, 0.9f
+		invoke_dll_stdcall glUniform1f, [%1.SunGlowExponent], [_SceneStatus.SunGlowExponent]
+		invoke_dll_stdcall glUniform1f, [%1.SunCenterBrightness], [_SceneStatus.SunCenterBrightness]
+		invoke_dll_stdcall glUniform3fv, [%1.SunColor], 1, _SceneStatus.SunColor
+		invoke_dll_stdcall glUniform3fv, [%1.FogColor], 1, _SceneStatus.FogColor
+		invoke_dll_stdcall glUniform3fv, [%1.SkyColor], 1, _SceneStatus.SkyColor
+		invoke_dll_stdcall glUniform3fv, [%1.AmbColor], 1, _SceneStatus.AmbColor
 	%endmacro
 
 	invoke_dll_stdcall glUseProgram, [_DrawTerrainProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 
-	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TextureQuality], [_CurTextureQuality]
+	invoke_dll_stdcall glUniform1i, [_DrawTerrainProgramLocations.TextureQuality], [_SceneStatus.CurTextureQuality]
 	SetRayUniforms _DrawTerrainProgramLocations
 	SetTerrainUniforms _DrawTerrainProgramLocations
 	SetSkyUniforms _DrawTerrainProgramLocations
@@ -967,12 +883,12 @@ __SECT__
 	invoke_dll_stdcall glBindVertexArray, 0
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_DrawWaterHalfSizeFBO]
-	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthHalf, %$VPHeightHalf
+	invoke_dll_stdcall glViewport, 0, 0, [_SceneStatus.VPWidthHalf], [_SceneStatus.VPHeightHalf]
 
 	invoke_dll_stdcall glUseProgram, [_DrawWaterProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 
-	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TextureQuality], [_CurTextureQuality]
+	invoke_dll_stdcall glUniform1i, [_DrawWaterProgramLocations.TextureQuality], [_SceneStatus.CurTextureQuality]
 	SetRayUniforms _DrawWaterProgramLocations
 	SetTerrainUniforms _DrawWaterProgramLocations
 	SetSkyUniforms _DrawWaterProgramLocations
@@ -988,7 +904,7 @@ __SECT__
 	invoke_dll_stdcall glDisable, GL_DEPTH_TEST
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_CompositeFBO]
-	invoke_dll_stdcall glViewport, 0, 0, %$VPWidth, %$VPHeight
+	invoke_dll_stdcall glViewport, 0, 0, [_SceneStatus.VPWidth], [_SceneStatus.VPHeight]
 	invoke_cdecl _Scene_clear_color
 
 	invoke_cdecl _SetupSSTextureMipmaps, _SSTextures
@@ -997,7 +913,7 @@ __SECT__
 	invoke_dll_stdcall glUseProgram, [_DrawCompositeProgram]
 	invoke_dll_stdcall glBindVertexArray, [_DrawBillboardVAO]
 
-	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TextureQuality], [_CurTextureQuality]
+	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TextureQuality], [_SceneStatus.CurTextureQuality]
 	invoke_cdecl _SetupSSTextureShaderInput, _SSHalfSizeTextures, TextureIndex
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSNormalDist], 0 + TextureIndex
 	invoke_dll_stdcall glUniform1i, [_DrawCompositeProgramLocations.TexSSDiffuse], 1 + TextureIndex
@@ -1015,7 +931,7 @@ __SECT__
 	invoke_dll_stdcall glUseProgram, 0
 
 	invoke_dll_stdcall glBindFramebuffer, GL_DRAW_FRAMEBUFFER, [_HDRBlurFBO]
-	invoke_dll_stdcall glViewport, 0, 0, %$VPWidthLow, %$VPHeightLow
+	invoke_dll_stdcall glViewport, 0, 0, [_SceneStatus.VPWidthLow], [_SceneStatus.VPHeightLow]
 	invoke_cdecl _Scene_clear_color
 
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_HDRLensTexture]
@@ -1059,14 +975,14 @@ __SECT__
 .no_error:
 
 	fld1
-	fdiv qword %$DeltaTimeL
+	fdiv qword [_SceneStatus.DeltaTimeD]
 	fstp dword %$FramesPerSec
 
 	GLPrintfXY [_OGLFC], 0, 0, `FPS: %.1f, \tVSYNC: %lld us\t渲染耗时：%lld us`, \
 		f2d %$FramesPerSec, \
 		qw [_VBlankData.VBlankWithDelayTimeUsedUs], \
 		qw [_VBlankData.LastFrameRenderTimeUs]
-	mov eax, [_CurTextureQuality]
+	mov eax, [_SceneStatus.CurTextureQuality]
 	GLPrintfXY [_OGLFC], 0, 20, `质量：%s。按 Page Up 切换质量。`, [_PtrStrQualities + eax * 4]
 
 .end_of_frame:
