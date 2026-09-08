@@ -2,13 +2,14 @@
 uniform vec3 sunpos;
 uniform float time;
 uniform sampler2D cloud_texture;
-uniform float cloud_height; // 1000.0
-uniform float cloud_size; // 5.0
-uniform float sun_glow_exponent; // 10000.0;
-uniform float sun_center_brightness; // 1000.0;
-uniform vec3 suncolor; // vec3(1.0, 0.9, 0.8);
-uniform vec3 fogcolor; // vec3(0.8, 0.9, 1.0);
-uniform vec3 skycolor; // vec3(0.1, 0.2, 0.9);
+uniform float cloud_height;
+uniform float cloud_size;
+uniform float sun_glow_exponent;
+uniform float sun_center_brightness;
+uniform vec3 suncolor;
+uniform vec3 fogcolor;
+uniform vec3 skycolor;
+uniform vec3 ambcolor;
 
 vec2 cloud_movement = vec2(time * 0.005);
 float cloud_world_size = cloud_size * cloud_height;
