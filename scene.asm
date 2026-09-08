@@ -255,9 +255,6 @@ DefFunc _SceneInit
 	invoke_cdecl _SceneInitStatus, _SceneStatus
 	mov eax, [_hWnd]
 	mov [_SceneStatus.hWnd], eax
-	mov dword [_SceneStatus.RefTerrainTexture], _TerrainTexture
-	mov dword [_SceneStatus.RefTerrainConeTexture], _TerrainConeTexture
-	mov dword [_SceneStatus.RefNoiseTexture], _NoiseTexture
 
 	xor eax, eax
 	mov [_SceneLoadingProgress], eax
@@ -309,6 +306,12 @@ DefFunc _SceneLoad03
 	invoke_dll_stdcall glBindTexture, GL_TEXTURE_2D, [_TerrainConeTexture]
 	invoke_dll_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_R32F, [ebx + BitMap.border_len], [ebx + BitMap.border_len], 0, GL_RED, GL_FLOAT, [ebx + BitMap.data]
 	invoke_cdecl _InitTexRepeatLinear, GL_TEXTURE_2D
+	mov eax, [_TerrainTexture]
+	mov ecx, [_TerrainConeTexture]
+	mov edx, [_NoiseTexture]
+	mov [_SceneStatus.TerrainTexture], eax
+	mov [_SceneStatus.TerrainConeTexture], ecx
+	mov [_SceneStatus.NoiseTexture], edx
 	FrameEnd
 	ret
 

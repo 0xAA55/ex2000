@@ -191,9 +191,9 @@ endstruc
 	.TimeValueD resd 1 ;double
 	.DeltaTimeF resd 1 ;float
 	.DeltaTimeD resq 1 ;double
-	.RefTerrainTexture resd 1
-	.RefTerrainConeTexture resd 1
-	.RefNoiseTexture resd 1
+	.TerrainTexture resd 1
+	.TerrainConeTexture resd 1
+	.NoiseTexture resd 1
 	._pad2: alignb 16
 %endmacro
 
