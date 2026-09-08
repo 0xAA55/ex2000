@@ -78,6 +78,9 @@ SetUniformTexture
 SetRayUniforms
 SetTerrainUniforms
 SetSkyUniforms
+SetDrawTerrainUniforms
+SetDrawWaterUniforms
+SetDrawCompositeUniforms
 SetupSSFBOOutputs
 SetupSSTextureMipmaps
 SetupSSTextureShaderInput

@@ -131,6 +131,9 @@
 	DefExp _SetRayUniforms
 	DefExp _SetTerrainUniforms
 	DefExp _SetSkyUniforms
+	DefExp _SetDrawTerrainUniforms
+	DefExp _SetDrawWaterUniforms
+	DefExp _SetDrawCompositeUniforms
 	DefExp _SetupSSFBOOutputs
 	DefExp _SetupSSTextureMipmaps
 	DefExp _SetupSSTextureShaderInput

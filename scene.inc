@@ -7,6 +7,7 @@
 	.Specular resd 1
 	.Emissive resd 1
 	.Scatter resd 1
+	.Fog resd 1
 	.size equ $ - .NormalDist
 	.NumTextures equ .size / 4
 %endmacro
@@ -29,6 +30,7 @@ endstruc
 	.OutSpecular resd 1
 	.OutEmissive resd 1
 	.OutScatter resd 1
+	.OutFog resd 1
 %endmacro
 
 struc SSOutputLocations
@@ -105,6 +107,8 @@ endstruc
 	.SeaWaveHeight resd 1
 	.SeaWaveSize resd 1
 	.SSTerrainNormalDepth resd 1
+	.WaterScatterColor resd 1
+	.WaterFogColor resd 1
 .first_qc:
 	InstQualityControlLocations
 .first_ray:
@@ -127,6 +131,7 @@ endstruc
 	.TexSSSpecular resd 1
 	.TexSSEmissive resd 1
 	.TexSSScatter resd 1
+	.TexSSFog resd 1
 %endmacro
 
 struc SSTextureProgramLocations
@@ -197,13 +202,17 @@ endstruc
 	.SunGlowExponent resd 1
 	.SunCenterBrightness resd 1
 	.CameraPos resd 4
-	.SunColor resd 4
-	.FogColor resd 4
-	.SkyColor resd 4
-	.AmbColor resd 4
+	.SunColor resd 3
+	.FogColor resd 3
+	.SkyColor resd 3
+	.AmbColor resd 3
+	.WaterScatterColor resd 3
+	.WaterFogColor resd 3
 	.SeaLevel resd 1
+	.SeaWaveSize resd 1 ;float
+	.SeaWaveHeight resd 1 ;float
 	.DayTime resd 1 ;float
-	.CurTextureQuality resd 1
+	.CurTextureQuality resd 1 ;integer
 	.CameraYaw resd 1 ;float
 	.CameraPitch resd 1 ;float
 	.CameraRoll resd 1 ;float
@@ -214,6 +223,8 @@ endstruc
 	.TerrainTexture resd 1
 	.TerrainConeTexture resd 1
 	.NoiseTexture resd 1
+	.RefSSTextures resd 1
+	.RefSSHalfSizeTextures resd 1
 	._pad2: alignb 16
 %endmacro
 
