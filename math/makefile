@@ -1,26 +1,29 @@
-OUT_DIR:=../out
+OUT_DIR:=out
 SRCS=$(wildcard *.asm)
 OBJS=$(patsubst %.asm, $(OUT_DIR)/%.obj, $(SRCS))
+OBJS_D=$(patsubst %.asm, $(OUT_DIR)/%_d.obj, $(SRCS))
+DEPS=$(OBJS:.obj=.d)
+DEPS_D=$(OBJS_D:.obj=.d)
 DEFS:=
 ASMFLAGS=-i..
 
-../%.inc:
-	copy /b ..\\$(notdir $@)+ >nul 2>&1
-%.inc:
-	copy /b $@+ >nul 2>&1
-%.asm:
-	copy /b $@+ >nul 2>&1
-
-all: ../out/math.lib
-../frame.inc: ../strpool.inc
-../loaddll.inc: ../frame.inc ../expfuncs.tmp
-common.inc: ../math.inc ../pool.inc ../loaddll.inc
-bitmapblt.asm: common.inc
-math.asm: common.inc
-vfmap: common.inc
+all: $(OUT_DIR)/math.lib
+alld: $(OUT_DIR)/mathd.lib
 
 $(OUT_DIR)/%.obj: %.asm
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
-	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) -MD $(@:.obj=.d) $< -o $@
+$(OUT_DIR)/%_d.obj: %.asm
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) -MD $(@:.obj=.d) $< -o $@
+
+-include $(DEPS)
+-include $(DEPS_D)
+
 $(OUT_DIR)/math.lib: $(OBJS)
 	lib /NOLOGO /OUT:$@ /NODEFAULTLIB $^
+$(OUT_DIR)/mathd.lib: $(OBJS_D)
+	lib /NOLOGO /OUT:$@ /NODEFAULTLIB $^
+
+clean:
+	del /f /q $(OUT_DIR)\\*.obj $(OUT_DIR)\\*.lib $(OUT_DIR)\\*.d

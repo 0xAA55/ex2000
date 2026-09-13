@@ -2,17 +2,16 @@ OUT_DIR:=out
 SRCS=$(filter-out stub.asm, $(wildcard *.asm))
 OBJS=$(patsubst %.asm, $(OUT_DIR)/%.obj, $(SRCS))
 OBJS_D=$(patsubst %.asm, $(OUT_DIR)/%_d.obj, $(SRCS))
-LIBS=out/math.lib lib/kernel32.lib
+DEPS=$(OBJS:.obj=.d)
+DEPS_D=$(OBJS_D:.obj=.d)
+FUNCLIST=expfuncs.tmp scfuncs.tmp kfuncs.tmp ufuncs.tmp cfuncs.tmp gfuncs.tmp wfuncs.tmp wglfuncs.tmp gl33funcs.tmp glfuncs.tmp
+LIBPATH_FLAGS=/LIBPATH:lib /LIBPATH:math\\out /LIBPATH:shellcodes\\out
+LIBS=math/out/math.lib lib/kernel32.lib
 DEFS:=
 ASMFLAGS=
 
 all: ex2000.exe
 .PHONY: clean again
-
-%.inc:
-	copy /b $@+ >nul 2>&1
-%.asm:
-	copy /b $@+ >nul 2>&1
 
 expfuncs.tmp: assets/KFUNC assets/UFUNC assets/CFUNC assets/GFUNC assets/WFUNC
 	break>$@
@@ -53,68 +52,50 @@ glfuncs.tmp: assets/WGLFUNC assets/GL33FUNC
 	break>$@
 	addpre assets\\WGLFUNC DefImp $@
 	addpre assets\\GL33FUNC DefImp $@
-gl33.inc: glfuncs.tmp
-frame.inc: strpool.inc
-shellcode.inc: scfuncs.tmp glfuncs.tmp
-loaddll.inc: frame.inc expfuncs.tmp
-assets.inc: strpool.inc
-shader.inc: gl33.inc
-fontgl.inc: buffer.inc
-main.asm: loaddll.inc assets.inc math.inc tls.inc vblank.inc
-tls.asm: loaddll.inc tls.inc
-timer.asm: loaddll.inc timer.inc hrsleep.inc
-avlbst.asm: loaddll.inc avlbst.inc
-fontgl.asm: loaddll.inc fontgl.inc avlbst.inc lfu.inc math.inc gl33.inc shader.inc utf.inc
-loaddll.asm: loaddll.inc assets.inc kfuncs.tmp ufuncs.tmp cfuncs.tmp gfuncs.tmp wfuncs.tmp
-buffer.asm: loaddll.inc buffer.inc gl33.inc
-gl33.asm: loaddll.inc gl33.inc assets.inc wglfuncs.tmp gl33funcs.tmp
-pool.asm: loaddll.inc pool.inc
-scene.asm: loaddll.inc timer.inc vblank.inc gl33.inc buffer.inc assets.inc shader.inc math.inc fontgl.inc hrsleep.inc shellcode.inc scene.inc
-vblank.asm: loaddll.inc vblank.inc timer.inc
-shader.asm: loaddll.inc shader.inc gl33.inc assets.inc avlbst.inc
-utf.asm: loaddll.inc utf.inc
-hrsleep.asm: loaddll.inc hrsleep.inc
-scloader.asm: loaddll.inc shellcode.inc assets.inc
-assets.asm: loaddll.inc assets.inc avlbst.inc
-$(OUT_DIR)/assets.obj: assets.asm out/assets.cab
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
-	nasm -f win32 -g $(DEFS) $(ASMFLAGS) assets.asm -o $@
-$(OUT_DIR)/assets_d.obj: assets.asm out/assets_d.cab
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
-	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) assets.asm -o $@
-
 shellcode.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
 	make -C shellcodes
 	copy shellcodes\\shellcode.bin shellcode.bin
 shellcode_d.bin: loaddll.inc $(wildcard shellcodes/*) scfuncs.tmp shellcode.inc
 	make -C shellcodes alld
 	copy shellcodes\\shellcode_d.bin shellcode_d.bin
-out/stub.bin: stub.asm
+$(OUT_DIR)/stub.bin: stub.asm
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	nasm $^ -o $@
-out/%_d.obj: %.asm
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
-	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) $^ -o $@
-out/%.obj: %.asm
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
-	nasm -f win32 -g $(DEFS) $(ASMFLAGS) $^ -o $@
-out/assets.cab: $(wildcard assets/*) shellcode.bin
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+$(OUT_DIR)/assets.cab: $(wildcard assets/*) shellcode.bin
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\* shellcode.bin
-out/assets_d.cab: $(wildcard assets/*) shellcode_d.bin
-	if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+$(OUT_DIR)/assets_d.cab: $(wildcard assets/*) shellcode_d.bin
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	cabarc -r -p -m LZX:21 N $@ assets\\* shellcode_d.bin
-out/math.lib: $(wildcard math/*) loaddll.inc pool.inc math.inc
+math/out/math.lib: $(wildcard math/*) loaddll.inc math.inc
 	make -C math
+math/out/mathd.lib: $(wildcard math/*) loaddll.inc math.inc
+	make -C math alld
+$(OUT_DIR)/%.obj: %.asm $(FUNCLIST)
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) -MD $(@:.obj=.d) $< -o $@
+$(OUT_DIR)/%_d.obj: %.asm $(FUNCLIST)
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) -MD $(@:.obj=.d) $< -o $@
+$(OUT_DIR)/assets.obj: assets.asm $(OUT_DIR)/assets.cab
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g $(DEFS) $(ASMFLAGS) -MD $(@:.obj=.d) $< -o $@
+$(OUT_DIR)/assets_d.obj: assets.asm $(OUT_DIR)/assets_d.cab
+	@if not exist $(OUT_DIR) mkdir $(OUT_DIR)
+	nasm -f win32 -g -D_DEBUG $(DEFS) $(ASMFLAGS) -MD $(@:.obj=.d) $< -o $@
 
-ex2000.exe: $(OBJS) $(LIBS) out/stub.bin
-	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /PDBALTPATH:%_PDB% /STUB:out\\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(LIBS)
+-include $(DEPS)
+-include $(DEPS_D)
 
-ex2000d.exe: $(OBJS_D) $(LIBS) out/stub.bin
-	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG /PDBALTPATH:%_PDB% /STUB:out\\stub.bin /SUBSYSTEM:CONSOLE $(OBJS_D) $(LIBS)
+ex2000.exe: $(OBJS) $(LIBS) $(OUT_DIR)/stub.bin
+	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG $(LIBPATH_FLAGS) /PDBALTPATH:%_PDB% /STUB:out\\stub.bin /SUBSYSTEM:WINDOWS $(OBJS) $(notdir $(LIBS))
+
+ex2000d.exe: $(OBJS_D) $(LIBS) $(OUT_DIR)/stub.bin
+	link /NOLOGO /NODEFAULTLIB /ENTRY:entry /BASE:0x400000 /DYNAMICBASE:NO /INCREMENTAL:NO /NXCOMPAT:NO /SAFESEH:NO /MERGE:.rdata=.text /FILEALIGN:512 /LARGEADDRESSAWARE /MACHINE:X86 /OPT:REF /OPT:ICF /OUT:$@ /DEBUG $(LIBPATH_FLAGS) /PDBALTPATH:%_PDB% /STUB:out\\stub.bin /SUBSYSTEM:CONSOLE $(OBJS_D) $(notdir $(LIBS))
 
 clean:
 	make -C shellcodes clean
-	del /f /s /q *.tmp out\\*.obj out\\*.cab out\\*.a out\\*.lib out\\*.bin *.gdb *.pdb shellcode.bin shellcode_d.bin ex2000.exe ex2000d.exe
+	del /f /s /q *.tmp $(OUT_DIR)\\*.obj $(OUT_DIR)\\*.d $(OUT_DIR)\\*.cab $(OUT_DIR)\\*.a $(OUT_DIR)\\*.lib $(OUT_DIR)\\*.bin *.gdb *.pdb shellcode.bin shellcode_d.bin ex2000.exe ex2000d.exe
 
 again:
 	make clean
