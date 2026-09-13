@@ -1,8 +1,12 @@
 #version 330
 
+const float PI = 3.1415926535897932384626433832795;
 const int num_waves_surface = 12;
 const int num_waves_normal = num_waves_surface * 2;
 const int num_waves_caustic = num_waves_normal;
+const float water_refraction = 1.4;
+const float water_ETA = 1.0 / water_refraction;
+
 const float lowq_preci = 0.5;
 
 uniform float time;
@@ -15,10 +19,27 @@ uniform float terrain_scaling;
 uniform float sea_level;
 uniform float sea_wave_height;
 uniform float sea_wave_size;
+uniform vec3 water_scatter_color;
+uniform vec3 water_amb_color;
+uniform vec3 water_fog_color;
+uniform float water_fog_density;
+
+uniform vec3 sunpos;
+uniform float sun_brightness;
+uniform vec3 suncolor;
 
 uniform int texture_quality;
 
 vec4 smooth_sample(sampler2D s, vec2 uv);
+
+bool raymarch_terrain(vec3 start, vec3 dir, float max_dist, out float dist);
+bool raymarch_terrain_rough(vec3 start, vec3 dir, float max_dist, out float dist);
+float get_terrain_height(vec2 pos, bool rough);
+vec3 get_terrain_normal(vec3 pos, float e);
+vec3 get_terrain_basecolor(vec3 pos);
+vec4 get_terrain_specular(vec3 pos);
+
+vec3 do_blinn_lighting(vec3 eyedir, vec3 position, vec3 normal, vec3 diffuse, vec4 specular, vec3 light_dir, vec3 ambient_color, vec3 light_color);
 
 float get_water_height(vec2 pos, int num_waves, float phase_shift)
 {
@@ -33,8 +54,8 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 	float depth_effect_offshore = 2.0;
 	float cur_terrain_height = smooth_sample(terrain_altmap, pos / terrain_scaling).r * terrain_height;
 	float shore_wave_x = max(0.0, sea_level - cur_terrain_height);
-	float shore_wave_weight = pow(2.0, -shore_wave_x / depth_effect_shore);
-	float offshore_wave_weight = 1.0 - pow(2.0, -shore_wave_x / depth_effect_offshore);
+	float shore_wave_weight = pow(0.5, shore_wave_x / depth_effect_shore);
+	float offshore_wave_weight = 1.0 - pow(0.5, shore_wave_x / depth_effect_offshore);
 	float shore_x = phase_shift * frequency + time * time_mod + shore_wave_x;
 	float shore_wave = (1.0 - exp(sin(shore_x) - 1.0));
 	if (texture_quality <= 0)
@@ -62,8 +83,8 @@ float get_water_height(vec2 pos, int num_waves, float phase_shift)
 		time_mod *= 1.08;
 		iter += 1.399;
 	}
-	float wave_level = -abs(sum_of_values * sea_wave_height / sum_of_weights);
-	return sea_level + wave_level * offshore_wave_weight + shore_level * shore_wave_weight;
+	float wave_level = -abs(sum_of_values / sum_of_weights);
+	return sea_level + (wave_level * offshore_wave_weight + shore_level * shore_wave_weight) * sea_wave_height;
 }
 
 bool raymarch_water(vec3 start, vec3 dir, float max_dist, out float dist)
@@ -131,4 +152,54 @@ vec3 get_water_normal(vec3 pos, float e, int num_waves, float phase_shift)
 			a - vec3(pos.x, get_water_height(pos.xz + ex.yx, num_waves, phase_shift), pos.z + e)
 		)
 	);
+}
+
+vec3 scatter_light_in_water(vec3 light, float dist)
+{
+	float water_fog_thickness = min(1.0, dist * water_fog_density);
+	return mix(light * pow(water_scatter_color, vec3(dist)), water_fog_color, water_fog_thickness);
+}
+
+float laplacian_depth(vec2 pos, float depth, float eps)
+{
+	float depth_phase = depth * PI;
+
+	float h0 = get_water_height(pos, num_waves_caustic, depth_phase);
+
+	float hx1 = get_water_height(pos + vec2( eps, 0.0), num_waves_caustic, depth_phase);
+	float hx2 = get_water_height(pos + vec2(-eps, 0.0), num_waves_caustic, depth_phase);
+	float hz1 = get_water_height(pos + vec2(0.0,  eps), num_waves_caustic, depth_phase);
+	float hz2 = get_water_height(pos + vec2(0.0, -eps), num_waves_caustic, depth_phase);
+
+	return (hx1 + hx2 + hz1 + hz2 - 4.0 * h0) / (eps * eps);
+}
+
+float caustic_intensity(vec2 pos, float depth)
+{
+	float depth_mod = depth * abs(1.0 - water_ETA);
+	float lap = (laplacian_depth(pos, depth_mod, sea_wave_size));
+	float exponent = -lap;
+	return exp(exponent);
+}
+
+vec3 do_terrain_underwater_lighting(vec3 eyedir, vec3 position)
+{
+	float water_depth = get_water_height(position.xz, num_waves_surface, 0) - position.y;
+	float caustic = caustic_intensity(position.xz, water_depth);
+	vec3 lightdir = refract(-sunpos, vec3(0.0, 1.0, 0.0), water_ETA);
+	return do_blinn_lighting(eyedir, position,
+		get_terrain_normal(position, 1.0),
+		get_terrain_basecolor(position),
+		get_terrain_specular(position),
+		lightdir, water_amb_color * sun_brightness * caustic, suncolor * sun_brightness * caustic);
+}
+
+vec3 get_raymarch_underwater_terrain_color_rough(vec3 start, vec3 dir, float max_dist, bool do_scatter)
+{
+	float ray_dist;
+	raymarch_terrain_rough(start, dir, max_dist, ray_dist);
+	vec3 ground_pos = start + dir * ray_dist;
+	vec3 terrain_light = do_terrain_underwater_lighting(dir, ground_pos);
+	if (do_scatter) terrain_light = scatter_light_in_water(terrain_light, ray_dist);
+	return terrain_light;
 }

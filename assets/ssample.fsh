@@ -13,6 +13,23 @@ vec4 cubic_weights(float t) {
 	return w;
 }
 
+vec4 rough_sample(sampler2D s, vec2 uv)
+{
+	ivec2 tsize = textureSize(s, 0);
+	ivec2 bm = tsize - ivec2(1);
+
+	if (texture_quality >= 1)
+	{
+		return texture2D(s, uv);
+	}
+	else
+	{
+		vec2 texel_uv = uv * vec2(tsize);
+		ivec2 base = ivec2(floor(texel_uv));
+		return texelFetch(s, base & bm, 0);
+	}
+}
+
 vec4 smooth_sample(sampler2D s, vec2 uv)
 {
 	ivec2 tsize = textureSize(s, 0);
@@ -74,8 +91,8 @@ vec4 smooth_sample(sampler2D s, vec2 uv)
 	}
 	else
 	{
-		vec2 texel_uv = uv * vec2(tsize);
-		ivec2 base = ivec2(floor(texel_uv));
+		texel_uv = uv * vec2(tsize);
+		base = ivec2(floor(texel_uv));
 		return texelFetch(s, base & bm, 0);
 	}
 }

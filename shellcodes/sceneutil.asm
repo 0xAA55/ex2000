@@ -53,6 +53,32 @@ DefFunc _InitRGBA32FBufferTexture
 	FrameEnd
 	ret
 
+DefFunc _InitRGB32FBufferTexture
+	FrameBegin ebx
+	NameParams %$SaveTo, %$Width, %$Height
+
+	mov ebx, %$SaveTo
+	invoke_cdecl _DeleteTexture, ebx
+	invoke_stdcall glGenTextures, 1, ebx
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
+	invoke_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB32F, %$Width, %$Height, 0, GL_RGB, GL_FLOAT, NULL
+
+	FrameEnd
+	ret
+
+DefFunc _InitRGB8BufferTexture
+	FrameBegin ebx
+	NameParams %$SaveTo, %$Width, %$Height
+
+	mov ebx, %$SaveTo
+	invoke_cdecl _DeleteTexture, ebx
+	invoke_stdcall glGenTextures, 1, ebx
+	invoke_stdcall glBindTexture, GL_TEXTURE_2D, [ebx]
+	invoke_stdcall glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, %$Width, %$Height, 0, GL_RGB, GL_UNSIGNED_INT, NULL
+
+	FrameEnd
+	ret
+
 DefFunc _InitRGBA8BufferTexture
 	FrameBegin ebx
 	NameParams %$SaveTo, %$Width, %$Height
@@ -119,13 +145,11 @@ DefFunc _InitSSTextureSets
 	mov edi, %$VPHeight
 	invoke_cdecl _InitRGBA32FBufferTexture, &[ebx + SSTextures.NormalDist], esi, edi
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
-	invoke_cdecl _InitRGBA8BufferTexture, &[ebx + SSTextures.Diffuse], esi, edi
+	invoke_cdecl _InitRGB8BufferTexture, &[ebx + SSTextures.Diffuse], esi, edi
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
 	invoke_cdecl _InitRGBA8BufferTexture, &[ebx + SSTextures.Specular], esi, edi
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
-	invoke_cdecl _InitRGBA32FBufferTexture, &[ebx + SSTextures.Emissive], esi, edi
-	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
-	invoke_cdecl _InitRGBA32FBufferTexture, &[ebx + SSTextures.Scatter], esi, edi
+	invoke_cdecl _InitRGB32FBufferTexture, &[ebx + SSTextures.Emissive], esi, edi
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
 	invoke_cdecl _InitRGBA32FBufferTexture, &[ebx + SSTextures.Fog], esi, edi
 	invoke_cdecl _InitTexRenderTarget, GL_TEXTURE_2D
@@ -143,7 +167,6 @@ DefFunc _DeInitSSTextureSets
 	invoke_cdecl _DeleteTexture, & [ebx + SSTextures.Diffuse]
 	invoke_cdecl _DeleteTexture, & [ebx + SSTextures.Specular]
 	invoke_cdecl _DeleteTexture, & [ebx + SSTextures.Emissive]
-	invoke_cdecl _DeleteTexture, & [ebx + SSTextures.Scatter]
 	invoke_cdecl _DeleteTexture, & [ebx + SSTextures.Fog]
 
 	FrameEnd
@@ -259,8 +282,6 @@ DefFunc _SceneGetSSOutputLocations
 	mov [esi + SSOutputLocations.OutSpecular], eax
 	GetFragDataLocation ebx, "out_emissive"
 	mov [esi + SSOutputLocations.OutEmissive], eax
-	GetFragDataLocation ebx, "out_scatter"
-	mov [esi + SSOutputLocations.OutScatter], eax
 	GetFragDataLocation ebx, "out_fog"
 	mov [esi + SSOutputLocations.OutFog], eax
 
@@ -295,8 +316,6 @@ DefFunc _SceneSetSSTextureUniformLocations
 	mov [esi + SSTextureProgramLocations.TexSSSpecular], eax
 	GetUniformLocation ebx, "emissive"
 	mov [esi + SSTextureProgramLocations.TexSSEmissive], eax
-	GetUniformLocation ebx, "scatter"
-	mov [esi + SSTextureProgramLocations.TexSSScatter], eax
 	GetUniformLocation ebx, "fog"
 	mov [esi + SSTextureProgramLocations.TexSSFog], eax
 
@@ -362,6 +381,14 @@ DefFunc _SceneSetSkyUniformLocations
 	mov [esi + SkyUniformLocations.SunGlowExponent], eax
 	GetUniformLocation ebx, "sun_center_brightness"
 	mov [esi + SkyUniformLocations.SunCenterBrightness], eax
+	GetUniformLocation ebx, "sun_brightness"
+	mov [esi + SkyUniformLocations.SunBrightness], eax
+	GetUniformLocation ebx, "sky_brightness"
+	mov [esi + SkyUniformLocations.SkyBrightness], eax
+	GetUniformLocation ebx, "amb_brightness"
+	mov [esi + SkyUniformLocations.AmbBrightness], eax
+	GetUniformLocation ebx, "fog_density"
+	mov [esi + SkyUniformLocations.FogDensity], eax
 	GetUniformLocation ebx, "suncolor"
 	mov [esi + SkyUniformLocations.SunColor], eax
 	GetUniformLocation ebx, "fogcolor"
@@ -455,6 +482,10 @@ DefFunc _SceneLoadDrawWaterProgram
 	mov [esi + DrawWaterProgramLocations.WaterScatterColor], eax
 	GetUniformLocation ebx, "water_fog_color"
 	mov [esi + DrawWaterProgramLocations.WaterFogColor], eax
+	GetUniformLocation ebx, "water_fog_density"
+	mov [esi + DrawWaterProgramLocations.WaterFogDensity], eax
+	GetUniformLocation ebx, "water_amb_color"
+	mov [esi + DrawWaterProgramLocations.WaterAmbColor], eax
 
 	invoke_cdecl _SceneSetQualityControlUniformLocations, ebx, & [esi + DrawWaterProgramLocations.first_qc]
 	invoke_cdecl _SceneSetRayUniformLocations, ebx, & [esi + DrawWaterProgramLocations.first_ray]
@@ -644,8 +675,14 @@ DefFunc _SceneInitStatus
 	.fog_color dd 0.8, 0.9, 1.0
 	.sky_color dd 0.1, 0.2, 0.9
 	.amb_color dd 0.1, 0.12, 0.15
-	.water_scatter_color dd 0.01, 0.00890116, 0.00880949
+	.fog_density dd 0.0005
+	.water_fog_density dd 0.001
+	.sun_brightness dd 10.0
+	.sky_brightness dd 8.0
+	.amb_brightness dd 2.0
+	.water_scatter_color dd 0.96, 0.97, 0.97
 	.water_fog_color dd 0.3, 0.4, 0.5
+	.water_amb_color dd 0.05, 0.08, 0.1
 	.sea_level dd 120.0
 	.sea_wave_size dd 1.0
 	.sea_wave_height dd 1.0
@@ -755,6 +792,10 @@ DefFunc _SetSkyUniforms
 	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.CloudSize], [esi + SceneStatus.CloudSize]
 	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.SunGlowExponent], [esi + SceneStatus.SunGlowExponent]
 	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.SunCenterBrightness], [esi + SceneStatus.SunCenterBrightness]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.SunBrightness], [esi + SceneStatus.SunBrightness]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.SkyBrightness], [esi + SceneStatus.SkyBrightness]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.AmbBrightness], [esi + SceneStatus.AmbBrightness]
+	invoke_stdcall glUniform1f, [ebx + SkyUniformLocations.FogDensity], [esi + SceneStatus.FogDensity]
 	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.SunColor], 1, & [esi + SceneStatus.SunColor]
 	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.FogColor], 1, & [esi + SceneStatus.FogColor]
 	invoke_stdcall glUniform3fv, [ebx + SkyUniformLocations.SkyColor], 1, & [esi + SceneStatus.SkyColor]
@@ -797,12 +838,14 @@ DefFunc _SetDrawWaterUniforms
 	invoke_cdecl _SetSkyUniforms, & [ebx + DrawWaterProgramLocations.first_sky], esi, & %$TextureIndex
 
 	invoke_stdcall glUniform1f, [ebx + DrawWaterProgramLocations.SeaLevel], [esi + SceneStatus.SeaLevel]
-	invoke_stdcall glUniform1f, [ebx + DrawWaterProgramLocations.SeaWaveHeight], 1.0f
-	invoke_stdcall glUniform1f, [ebx + DrawWaterProgramLocations.SeaWaveSize], 1.0f
+	invoke_stdcall glUniform1f, [ebx + DrawWaterProgramLocations.SeaWaveHeight], [esi + SceneStatus.SeaWaveHeight]
+	invoke_stdcall glUniform1f, [ebx + DrawWaterProgramLocations.SeaWaveSize], [esi + SceneStatus.SeaWaveSize]
 	mov eax, [esi + SceneStatus.RefSSHalfSizeTextures]
 	invoke_cdecl _SetUniformTexture, [ebx + DrawWaterProgramLocations.SSTerrainNormalDepth], [eax + SSTextures.NormalDist], & %$TextureIndex
 	invoke_stdcall glUniform3fv, [ebx + DrawWaterProgramLocations.WaterScatterColor], 1, & [esi + SceneStatus.WaterScatterColor]
 	invoke_stdcall glUniform3fv, [ebx + DrawWaterProgramLocations.WaterFogColor], 1, & [esi + SceneStatus.WaterFogColor]
+	invoke_stdcall glUniform3fv, [ebx + DrawWaterProgramLocations.WaterAmbColor], 1, & [esi + SceneStatus.WaterAmbColor]
+	invoke_stdcall glUniform1f, [ebx + DrawWaterProgramLocations.WaterFogDensity], [esi + SceneStatus.WaterFogDensity]
 
 	FrameEnd
 	ret

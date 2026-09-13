@@ -6,7 +6,6 @@
 	.Diffuse resd 1
 	.Specular resd 1
 	.Emissive resd 1
-	.Scatter resd 1
 	.Fog resd 1
 	.size equ $ - .NormalDist
 	.NumTextures equ .size / 4
@@ -29,7 +28,6 @@ endstruc
 	.OutDiffuse resd 1
 	.OutSpecular resd 1
 	.OutEmissive resd 1
-	.OutScatter resd 1
 	.OutFog resd 1
 %endmacro
 
@@ -56,6 +54,10 @@ endstruc
 	.CloudSize resd 1
 	.SunGlowExponent resd 1
 	.SunCenterBrightness resd 1
+	.SunBrightness resd 1
+	.SkyBrightness resd 1
+	.AmbBrightness resd 1
+	.FogDensity resd 1
 	.SunColor resd 1
 	.FogColor resd 1
 	.SkyColor resd 1
@@ -109,6 +111,8 @@ endstruc
 	.SSTerrainNormalDepth resd 1
 	.WaterScatterColor resd 1
 	.WaterFogColor resd 1
+	.WaterFogDensity resd 1
+	.WaterAmbColor resd 1
 .first_qc:
 	InstQualityControlLocations
 .first_ray:
@@ -130,7 +134,6 @@ endstruc
 	.TexSSDiffuse resd 1
 	.TexSSSpecular resd 1
 	.TexSSEmissive resd 1
-	.TexSSScatter resd 1
 	.TexSSFog resd 1
 %endmacro
 
@@ -206,8 +209,14 @@ endstruc
 	.FogColor resd 3
 	.SkyColor resd 3
 	.AmbColor resd 3
+	.FogDensity resd 1
+	.WaterFogDensity resd 1
+	.SunBrightness resd 1
+	.SkyBrightness resd 1
+	.AmbBrightness resd 1
 	.WaterScatterColor resd 3
 	.WaterFogColor resd 3
+	.WaterAmbColor resd 3
 	.SeaLevel resd 1
 	.SeaWaveSize resd 1 ;float
 	.SeaWaveHeight resd 1 ;float
