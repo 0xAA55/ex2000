@@ -39,10 +39,10 @@ DefFunc _GetShaderTypeString
 	FrameEnd
 	ret
 
-; int ShaderCreate(int shader_type, char *shader_code)
+; int ShaderCreate(int shader_type, char *shader_code, const char *shader_name)
 DefFunc _ShaderCreate
 	FrameBegin ebx, esi
-	NameParams %$ShaderType, %$ShaderCode
+	NameParams %$ShaderType, %$ShaderCode, %$ShaderName
 	DefVars %$SourceLen, %$CompileStatus, %$InfoLogLen
 
 	invoke_stdcall glCreateShader, %$ShaderType
@@ -69,7 +69,7 @@ DefFunc _ShaderCreate
 
 	invoke_cdecl _GetShaderTypeString, %$ShaderType
 	GetAbsAddr ecx, _ShaderCompileError
-	debug_msg "%s: %s Shader: %s", ecx, eax, ebx
+	debug_msg "%s: %s: %s Shader: %s", %$ShaderName, ecx, eax, ebx
 	invoke_cdecl _free, ebx
 
 	xor eax, eax
@@ -167,7 +167,7 @@ DefFunc _SceneQueryShader
 	invoke_cdecl _AssetsQuery, %$ShaderAssetPath, 0
 	test eax, eax
 	jz .not_found
-	invoke_cdecl _ShaderCreate, %$ShaderType, eax
+	invoke_cdecl _ShaderCreate, %$ShaderType, eax, %$ShaderAssetPath
 	test eax, eax
 	jz .fail_exit
 	mov %$ShaderObj, eax
