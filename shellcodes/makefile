@@ -23,7 +23,7 @@ alld: shellcode_d.bin
 ../assets.inc: ../strpool.inc
 ../frame.inc: ../strpool.inc
 ../loaddll.inc: ../frame.inc ../expfuncs.tmp
-../shader.inc: ../gl33.inc ../strpool.inc
+../shader.inc: ../gl33.inc
 ../shellcode.inc: ../scfuncs.tmp ../glfuncs.tmp
 common.inc: ../loaddll.inc ../math.inc ../shellcode.inc
 tls.asm: common.inc ../tls.inc
