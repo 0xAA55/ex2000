@@ -47,8 +47,8 @@ vec3 get_terrain_normal(vec3 pos, float e);
 vec3 get_terrain_basecolor(vec3 pos);
 vec4 get_terrain_specular(vec3 pos);
 vec3 do_terrain_lighting(vec3 eyedir, vec3 position);
-vec3 get_raymarch_terrain_color_rough(vec3 start, vec3 dir, float max_dist, bool do_fog = false);
-vec3 get_raymarch_underwater_terrain_color_rough(vec3 start, vec3 dir, float max_dist, bool do_scatter = false);
+vec3 get_raymarch_terrain_color_rough(vec3 start, vec3 dir, float max_dist, bool do_fog);
+vec3 get_raymarch_underwater_terrain_color_rough(vec3 start, vec3 dir, float max_dist, bool do_scatter);
 
 vec3 get_fog_color();
 vec3 get_sky_color(vec3 pos, vec3 ray);
